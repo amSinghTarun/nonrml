@@ -1,0 +1,1 @@
+export { cacheServices as cache } from "./cache.service";

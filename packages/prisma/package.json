@@ -1,0 +1,27 @@
+{
+  "name": "@nonorml/prisma",
+  "version": "1.0.0",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "npx prisma generate",
+    "format": "npx prisma ",
+    "migrate": "npx prisma migrate dev --name"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "prisma": "^5.13.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.13.0",
+    "@prisma/generator-helper": "^5.13.0",
+    "prisma-zod-generator": "^0.8.13",
+    "ts-node": "^10.9.2"
+  }
+}

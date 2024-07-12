@@ -1,0 +1,26 @@
+{
+  "name": "@nonorml/trpc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports":{
+    ".": "./index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@nonorml/common": "*",
+    "@nonorml/prisma": "*",
+    "@nonorml/rbac":"*",
+    "@trpc/client": "^10.45.2",
+    "@trpc/next": "^10.45.2",
+    "@trpc/server": "^10.45.2",
+    "next-auth": "^4.24.7",
+    "zod": "^3.23.4",
+    "@nonorml/configs": "*"
+  }
+}
