@@ -9,19 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@nonorml/trpc": "*",
-    "@next/font": "^14.2.2",
-    "@repo/ui": "*",
-    "next": "14.2.2",
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/serialize": "^1.1.4",
+    "@emotion/styled": "^11.11.5",
+    "@emotion/utils": "^1.2.1",
+    "@mui/icons-material": "^5.16.2",
+    "@mui/material-nextjs": "^5.16.2",
+    "@types/recoil": "^0.0.9",
+    "next": "14.2.5",
+    "next-auth": "^5.0.0-beta.19",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "recoil": "^0.7.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.2",
+    "eslint-config-next": "14.2.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
