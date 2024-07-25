@@ -14,8 +14,8 @@ export const Sidebar = () => {
         return (<></>);
 
     return (
-            <div  className=" fixed h-screen w-screen backdrop-blur-sm z-40  bg-white/25 left-0 ">
-            <div className="bg-black flex h-full flex-col w-80 sm:w-[40%] lg:w-[25%] pt-20 lg:pt-24 md:pt-24 min-h-screen justify-between">
+            <div  className=" fixed h-screen w-screen bg-black/15 backdrop-blur-lg z-40  left-0 ">
+            <div className=" bg-gradient-to-br from-white/45 shadow-2xl shadow-black flex h-full flex-col w-80 sm:w-[40%] lg:w-[25%] pt-20 lg:pt-24 md:pt-24 min-h-screen justify-between">
                 <div className="flex-col flex w-[100%] items-center gap-y-5">
                     <Searchbar ></Searchbar> 
                     {/* <div className="text-white">SHOP</div> */}

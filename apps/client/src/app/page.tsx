@@ -3,10 +3,9 @@ import { HomeDisplayText } from "@/components/home/DisplayText";
 
 export default function Home() {
   return (
-    <main className="bg-red-400 static flex min-h-screen flex-col items-center p-24  overflow-y-scroll">
+    <main className="bg-red-400 static flex min-h-screen flex-col items-center pl-24 pr-24 overflow-y-scroll">
       <HomeDisplayText />
-      <HomeDisplayText />
-      <HomeDisplayText />
+
     </main>
   );
 }
