@@ -1,26 +1,35 @@
 {
-  "name": "@nonorml/trpc",
+  "name": "@nonrml/trpc",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "exports":{
-    ".": "./index.ts"
+  "exports": {
+    ".": "./src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "compilerOptions": {
+    "module": "ESNext"
+  },
   "description": "",
   "dependencies": {
-    "@nonorml/common": "*",
-    "@nonorml/prisma": "*",
-    "@nonorml/rbac":"*",
+    "@nonrml/cache": "workspace:*",
+    "@nonrml/common": "workspace:*",
+    "@nonrml/configs": "workspace:*",
+    "@nonrml/otp": "workspace:*",
+    "@nonrml/payment": "workspace:*",
+    "@nonrml/prisma": "workspace:*",
+    "@nonrml/storage": "workspace:*",
     "@trpc/client": "^10.45.2",
     "@trpc/next": "^10.45.2",
     "@trpc/server": "^10.45.2",
+    "express-rate-limit": "^7.4.1",
     "next-auth": "^4.24.7",
-    "zod": "^3.23.4",
-    "@nonorml/configs": "*"
+    "super-json": "^2.2.0",
+    "superjson": "^2.2.1",
+    "zod": "^3.23.4"
   }
 }

@@ -1,0 +1,7 @@
+{
+    "extends": "@nonrml/typescript-config/base.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "./src"
+    }
+}

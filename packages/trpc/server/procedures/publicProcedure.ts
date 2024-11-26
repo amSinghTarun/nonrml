@@ -1,1 +1,0 @@
-export { procedure as publicProcedure} from "../trpc";

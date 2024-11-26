@@ -1,0 +1,19 @@
+{
+  "name": "@nonrml/otp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@nonrml/prisma": "workspace:*"
+  }
+}

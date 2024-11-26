@@ -1,20 +1,414 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["views"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-enum UserPermissionRole {
+model User {
+  id            Int                 @id @default(autoincrement())
+  fullName      String?
+  countryCode   String              @default("+91")
+  contactNumber String              @unique
+  email         String?             @unique
+  emailVerified Boolean             @default(false)
+  role          UserPermissionRoles
+  cartId        Int?                @unique
+  otp           Int
+  otpExpire     BigInt
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  addressId     Address[]
+  order         Orders[]
+  cart          Cart?               @relation(fields: [cartId], references: [id])
+  creditNotes   CreditNotes[]
+  discounts     UserDiscounts[]
+
+  @@index([contactNumber])
+}
+
+model CreditNotes {
+  id                                Int                     @id @default(autoincrement())
+  userId                            Int
+  creditCode                        String                   // GWGEIR-76253 || <6_string_long_alpha>-<5_digits>
+  value                             Decimal
+  returnOrderId                     Int                     // the orderId it's generated from
+  orderRtoType                      OrderRtoType
+  redeemed                          Boolean                 @default(false)
+  expiryDate                        DateTime
+  createdAt                         DateTime                @default(now())
+  updatedAt                         DateTime                @updatedAt
+  user                              User                    @relation(fields: [userId], references: [id])
+  returnOrder                       Returns                  @relation(fields: [returnOrderId], references: [id])
+  creditNotesPartialUseTransactions CreditNotesPartialUseTransactions[]
+  orders                            Orders[]
+}
+
+enum OrderRtoType {
+  RETURN
+  REPLACEMENT
+}
+
+model CreditNotesPartialUseTransactions {
+  id                Int                       @id @default(autoincrement())
+  creditNoteId      Int
+  valueUtilised     Decimal
+  orderId           Int                       @unique// the orderId it is used on
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  order             Orders                    @relation(fields: [orderId], references: [id])
+  creditNotes       CreditNotes               @relation(fields: [creditNoteId], references: [id])
+}
+
+model Cart {
+  id        Int         @id @default(autoincrement())
+  cartTotal Decimal
+  quantity  Int
+  cartItems CartItems[]
+  user      User?
+}
+
+model CartItems {
+  id               Int             @id @default(autoincrement())
+  cartId           Int
+  productVariantId Int
+  quantity         Int
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  cart             Cart            @relation(fields: [cartId], references: [id])
+  productVariant   ProductVariants @relation(fields: [productVariantId], references: [id])
+}
+
+model Address {
+  id            Int         @id @default(autoincrement())
+  type          AddressType @default(CUSTOMER)
+  contactName   String
+  location      String
+  pincode       String
+  city          String
+  state         String
+  email         String
+  countryCode   String      @default("+91")
+  contactNumber String
+  userId        Int
+  createAt      DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: NoAction)
+  order         Orders[]
+}
+
+model Discounts {
+  id                  Int                 @id @default(autoincrement())
+  code                String
+  description         String
+  discount            Int
+  type                DiscountType
+  expiry              String
+  status              DiscountStatus      @default(ACTIVE)
+  useCount            BigInt?             @default(0)
+  discountConditionId Int?
+  discountCondition   DiscountConditions? @relation(fields: [discountConditionId], references: [id])
+  order               Orders[]
+  users               UserDiscounts[]
+  product             Products[]          @relation("DiscountsToProducts")
+}
+
+model UserDiscounts {
+  userId     Int
+  discountId Int
+  discount   Discounts @relation(fields: [discountId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@id([userId, discountId])
+}
+
+model DiscountConditions {
+  id                Int                            @id @default(autoincrement())
+  conditionForUser  DiscountConditionsTypeForUser?
+  minValue          Int?
+  maxValue          Int?
+  paymentMode       PaymentType?
+  productCategoryId Int?
+  productCategory   ProductCategory?               @relation(fields: [productCategoryId], references: [id])
+  discounts         Discounts[]
+}
+
+model ProductCategorySizes {
+  id            Int              @id @default(autoincrement())
+  sizeChartName String
+  sizeChart     Json
+  categoryId    Int?             @unique
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  category      ProductCategory? @relation(fields: [categoryId], references: [id])
+}
+
+model ProductCategory {
+  id                  Int                   @id @default(autoincrement())
+  categoryName        String                @unique
+  parentId            Int?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  displayName         String?
+  discountCondition   DiscountConditions[]
+  parent              ProductCategory?      @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children            ProductCategory[]     @relation("CategoryHierarchy")
+  productCategorySize ProductCategorySizes?
+  products            Products[]
+}
+
+model ProductImage {
+  id            Int      @id @default(autoincrement())
+  image         String
+  productId     Int
+  priorityIndex Int
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  product       Products @relation(fields: [productId], references: [id])
+}
+
+model Products {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  description     String
+  price           Decimal
+  tags            String[]
+  categoryId      Int
+  soldOut         Boolean           @default(false)
+  care            String[]
+  details         String[]
+  sku             String            @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  productImages   ProductImage[]
+  ProductVariants ProductVariants[]
+  category        ProductCategory   @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discounts       Discounts[]       @relation("DiscountsToProducts")
+}
+
+model ProductVariants {
+  id              Int               @id @default(autoincrement())
+  productId       Int
+  subSku          String            @unique @default(cuid())
+  size            String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  CartItems       CartItems[]
+  inventory       Inventory?
+  OrderProducts   OrderProducts[]
+  product         Products          @relation(fields: [productId], references: [id])
+  ReplacementItem ReplacementItem[]
+
+  @@unique([productId, size])
+}
+
+model Inventory {
+  id                  Int               @id @default(autoincrement())
+  productVariantId    Int               @unique
+  quantity            Int
+  baseSkuInventoryId  Int?
+  lastRestockDate     DateTime?
+  lastRestockQuantity Int?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  baseSkuInventory    baseSkuInventory? @relation(fields: [baseSkuInventoryId], references: [id])
+  productVariant      ProductVariants   @relation(fields: [productVariantId], references: [id])
+}
+
+model baseSkuInventory {
+  id                    Int         @id @default(autoincrement())
+  baseSku               String
+  quantity              Int
+  size                  String
+  lastRestockDate       DateTime?
+  lastRestockedQuantity Int?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  color                 String
+  Inventory             Inventory[]
+}
+
+model vendorOrder {
+  id                        Int       @id @default(autoincrement())
+  vendorName                String
+  vendorAddress             String
+  totalPrice                Decimal
+  advPayment                Decimal
+  advPaymentMode            String
+  advPaymentDate            DateTime
+  advPaymentTransactionId   String
+  finalPayment              Decimal?
+  finalPaymentMode          String?
+  finalPaymentDate          DateTime?
+  finalPaymentTransactionId String?
+  orderDate                 DateTime
+  receivingDate             DateTime?
+  orderDetails              String[]
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+}
+
+model Payments {
+  id                  Int           @id @default(autoincrement())
+  rzpOrderId          String
+  rzpPaymentId        String?
+  rzpPaymentSignature String?
+  paymentStatus       PaymentStatus @default(PENDING)
+  paymentService      String        @default("Razorpay")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  order               Orders[]
+}
+
+model Shipment {
+  id                   Int               @id @default(autoincrement())
+  shipmentOrderId      String            @unique
+  shipmentServiceName  String
+  shipmentTrackingLink String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  order                Orders?
+  ReplacementOrder     ReplacementOrder?
+  return               Returns?
+}
+
+model Orders {
+  id                      Int                     @id @default(autoincrement())
+  type                    OrderType               @default(NEW)
+  creditUtilised          Int?                    @default(0)
+  totalAmount             Decimal
+  userId                  Int
+  productCount            Int
+  addressId               Int
+  creditNoteId            Int?
+  discountId              Int?
+  paymentId               Int?
+  shipmentId              Int?                    @unique
+  deliveryDate            BigInt?
+  orderStatus             OrderStatus             @default(PENDING)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  orderProducts           OrderProducts[]
+  address                 Address                 @relation(fields: [addressId], references: [id])
+  creditNote              CreditNotes?            @relation(fields: [creditNoteId], references: [id])
+  discount                Discounts?              @relation(fields: [discountId], references: [id])
+  payment                 Payments?               @relation(fields: [paymentId], references: [id])
+  shipment                Shipment?               @relation(fields: [shipmentId], references: [id])
+  user                    User                    @relation(fields: [userId], references: [id])
+  replacementOrder        ReplacementOrder[]
+  return                  Returns[]
+  creditNoteTransaction   CreditNotesPartialUseTransactions?
+}
+
+model OrderProducts {
+  id                  Int             @id @default(autoincrement())
+  productVariantId    Int
+  productStatus       ProductStatus   @default(PENDING)
+  price               Decimal
+  quantity            Int
+  returnQuantity      Int?
+  replacementQuantity Int?
+  orderId             Int
+  rejectedQuantity    Int?            @default(0)
+  order               Orders          @relation(fields: [orderId], references: [id])
+  productVariant      ProductVariants @relation(fields: [productVariantId], references: [id])
+  returnItem          ReturnItem[]
+  
+  @@unique([orderId, productVariantId])
+}
+
+model Returns {
+  id                      Int                     @id @default(autoincrement())
+  returnReceiveDate       DateTime?
+  orderId                 Int
+  returnShipmentId        Int?                    @unique
+  returnStatus            ReturnStatus            @default(PENDING)
+  refundAmount            Decimal?                @default(0)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  refundMode              ReturnRefundMode        @default(CREDIT)
+  returnType              ReturnType              @default(RETURN)
+  ReplacementOrder        ReplacementOrder?
+  returnItems             ReturnItem[]
+  order                   Orders                  @relation(fields: [orderId], references: [id])
+  shipment                Shipment?               @relation(fields: [returnShipmentId], references: [id])
+  creditNote              CreditNotes[] // in case user made two seperate returns so multiple credit notes will be generated
+}
+
+model ReturnItem {
+  id               Int               @id @default(autoincrement())
+  status           ReturnItemStatus  @default(PENDING)
+  returnId         Int
+  orderProductId   Int
+  quantity         Int
+  rejectReason     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  referenceImage   String
+  returnReason     String
+  acceptedQuantity Int?              @default(0)
+  ReplacementItem  ReplacementItem[]
+  orderProduct     OrderProducts     @relation(fields: [orderProductId], references: [id])
+  return           Returns           @relation(fields: [returnId], references: [id])
+}
+
+// model ReplacementReason {
+//   id                       Int                @id @default(autoincrement())
+//   description              String
+//   photoProofRequired       Boolean            @default(false)
+//   videoProofRequired       Boolean            @default(false)
+//   userCustomReasonRequired Boolean            @default(false)
+//   ReplacementOrder         ReplacementOrder[]
+// }
+
+model ReplacementOrder {
+  id                  Int                    @id @default(autoincrement())
+  orderId             Int
+
+  status              ReplacementOrderStatus @default(PENDING)
+  returnOrderId       Int                    @unique
+  shipmentId          Int?                   @unique
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  replacementItems    ReplacementItem[]
+  order               Orders                 @relation(fields: [orderId], references: [id])
+  return              Returns                @relation(fields: [returnOrderId], references: [id])
+  shipment            Shipment?              @relation(fields: [shipmentId], references: [id])
+}
+
+model ReplacementItem {
+  id                    Int                       @id @default(autoincrement())
+  replacementOrderId    Int
+  returnItemId          Int
+  productVariantId      Int
+  replacementQuantity   Int                       @default(0)//how many quantities we can replace from accepted quantity(return item field)
+  nonReplaceAction      NonReplaceQantityAction   @default(CREDIT)
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  productVariant        ProductVariants           @relation(fields: [productVariantId], references: [id])
+  replacementOrder      ReplacementOrder          @relation(fields: [replacementOrderId], references: [id])
+  returnOrderItem       ReturnItem                @relation(fields: [returnItemId], references: [id])
+}
+
+enum NonReplaceQantityAction {
+  CREDIT
+}
+
+enum UserCreditTransactionType {
+  ADD
+  DEBIT
+}
+
+enum ReturnRefundMode {
+  CREDIT
+  REFUND
+}
+
+enum UserPermissionRoles {
   USER
   ADMIN
   ADMIN_APPROVER
@@ -41,7 +435,6 @@ enum UserAccountStatus {
   PENDING
 }
 
-
 enum DiscountStatus {
   ACTIVE
   NOT_ACTIVE
@@ -49,122 +442,53 @@ enum DiscountStatus {
 
 enum ReturnStatus {
   PENDING
-  ACCEPTED
-  REJECTED
+  CONFIRMED
+  PICKED
+  PROCESSING
+  PROCESSED
+}
 
-  RETURN_ACCEPTED
-  RETURN_REJECTED
-  RETURN_INITIATED
-  RETURN_PICKED
+enum ReturnItemStatus {
+  PENDING
+  REJECTED
+  CONFIRMED
 }
 
 enum PaymentStatus {
   PENDING
   CONFIRMED
+  FAILED
+  created
+  attempted
+  paid
+  failed
 }
 
 enum ReplacementOrderStatus {
-   RECEIVED
-   REJECTED
-   INITIATED
-   ACCEPTED
-   PICKED
+  PENDING
+  PROCESSED
+  SHIPPED
+  DELIVERED
 }
 
 enum ProductStatus {
   CANCELED
-  PACKING
-  SHIPPED
-  IN_TRANSIT
-  DELIVERED
-  RETURN_INITIATED
-  RETURN_ACCEPTED
-  RETURN_REJECTED
-  REPLACEMENT_INITIATED
-  REPLACEMENT_ACCEPTED
-  REPLACEMENT_REJECTED
-  PENDING
-}
-
-// Modify the status later
-enum OrderStatus {
   CONFIRMED
-  CANCELED
-  PACKING
-  SHIPPED
-  DELIVERED
-  RETURNED
-  REPLACED
   PENDING
-  PACKED
 }
 
-model User {
-  id            Int                @id @default(autoincrement())
-  email         String             @unique
-  firstName     String
-  lastName      String
-  dob           String?
-  countryCode   String             @default("+91")
-  contactNumber String             @unique
-  password      String
-  role          Int
-  roles         Roles @relation(fields: [role], references: [id])
-  addressId     Address[]
-  discounts     UserDiscounts[]
-  status        UserAccountStatus
-  permissions   String[]
-  
-  cartId        Int @unique
-  cart          Cart @relation(fields: [cartId], references: [id])
-
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  order         Orders[]
-  otp           Int 
-  otpExpire     BigInt
-  reviewRating  ReviewRating[]
-
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  ACCEPTED
+  SHIPPED
+  DELIVERED
+  PAYMENT_FAILED
+  CANCELED
 }
 
 enum UserPermissionType {
   API
-}
-
-//permissions.handler.ts
-model Roles {
-  id              Int                @id @default(autoincrement())
-  roleName        UserPermissionRole @unique
-  permissionType  UserPermissionType
-  active          Boolean
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-
-  rolePermissions RolePermissions[]
-  users           User[]
-}
-
-model Permissions {
-  id                          Int @id @default(autoincrement()) 
-  permissionName              String @unique
-  active                      Boolean
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
-
-  rolePermissionsIdRelation   RolePermissions[] @relation("permissionIdRelation")
-  rolePermissionsNameRelation RolePermissions[] @relation("permissionNameRelation")
-}
-
-model RolePermissions {
-  id                      Int @id @default(autoincrement())
-  permissionId            Int 
-  permissionsIdRelation   Permissions @relation("permissionIdRelation", fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  permissionName          String 
-  permissionsNameRelation Permissions @relation("permissionNameRelation", fields: [permissionName], references: [permissionName], onDelete: Cascade, onUpdate: Cascade)
-  roleId                  Int
-  role                    Roles @relation(fields: [roleId], references: [id])
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
 }
 
 enum AddressType {
@@ -172,424 +496,12 @@ enum AddressType {
   COMPANY_WAREHOURSE
 }
 
-// addressName stays optional coz when user is placing 
-// a order and want to input the address directly
-// instead of using a old address, then we don't
-// expect the user to input the address name.
-model Address {
-  id            Int         @id @default(autoincrement())
-  type          AddressType @default(CUSTOMER)
-  addressName   String?
-  contactName   String
-  countryCode   String      @default("+91")
-  contactNumber String
-  location      String
-  landmark      String?
-  pincode       String
-  city          String
-  state         String
-  userId        Int
-  user          User        @relation(fields: [userId], references: [id], onDelete: NoAction)
-  createAt      DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  order         Orders[]
-
-  @@unique([addressName, userId])
-}
-
-//model Mobile {
-//id            Int       @id @default(autoincrement())
-//countryCode   String    @default("+91")
-//contactNumber String    @unique
-//address       Address[]
-//user          User?
-//createdAt     DateTime  @default(now())
-//updatedAt     DateTime  @updatedAt
-
-//order Orders[]
-//}
-
-model Cart {
-  id        Int @id @default(autoincrement())
-  cartTotal Int
-  quantity  Int
-  cartItems CartItems[]
-  user      User?
-}
-
-model CartItems {
-  id          Int @id @default(autoincrement())
-
-  cartId      Int
-  cart        Cart @relation(fields: [cartId], references: [id])
-
-  productId   Int
-  product     Products @relation(fields: [productId], references: [id])
-
-  productSKU  String @unique
-  inventory   Inventory @relation(fields: [productSKU], references: [SKU])
-
-  size        String
-  quantity    Int
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt()
-}
-
-model Discounts {
-  id                  Int                 @id @default(autoincrement())
-  code                String
-  description         String
-  discount            Int
-  type                DiscountType
-  expiry              String
-  status              DiscountStatus      @default(ACTIVE)
-  useCount            BigInt?             @default(0)
-  discountConditionId Int?
-  discountCondition   DiscountConditions? @relation(fields: [discountConditionId], references: [id])
-
-  users               UserDiscounts[]
-  product             Products[]
-  order               Orders[]
-}
-
-model UserDiscounts {
-  userId      Int
-  discountId  Int
-
-  user        User      @relation(fields: [userId], references: [id])
-  discount    Discounts @relation(fields: [discountId], references: [id])
-
-  @@id([userId, discountId])
-}
-
-// most probably no discount as for the payment mode
-// both min and max value can't be set together
-model DiscountConditions {
-  id                Int                            @id @default(autoincrement())
-  conditionForUser  DiscountConditionsTypeForUser?
-  minValue          Int?
-  maxValue          Int?
-  paymentMode       PaymentType?
-  productCategoryId Int?
-  ProductCategory   ProductCategories?             @relation(fields: [productCategoryId], references: [id])
-
-  discounts         Discounts[]
-}
-
-model ProductCategorySizes {
-  id             Int      @id @default(autoincrement())
-  sizesAvailable String[]
-  sizeChart      Json
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt()
-
-  ProductCategoryLink ProductCategories[]
-}
-
-model ProductCategories {
-  id                Int                  @id @default(autoincrement())
-  categoryName      String //example: tshirt
-  subCategoryName   String // example: oversize | colar | regular 
-  categorySizesId   Int
-  categorySizes     ProductCategorySizes @relation(references: [id], fields: [categorySizesId])
-  createAt          DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-
-  products          Products[]
-  discountCondition DiscountConditions[]
-}
-
-model ProductImage {
-  id            Int      @id @default(autoincrement())
-  image         String //probably s3 link
-  productId     Int
-  product       Products @relation(fields: [productId], references: [id])
-  priorityIndex Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt()
-}
-
-model Products {
-  id                            Int @id @default(autoincrement())
-
-  categoryId                    Int
-  category                      ProductCategories @relation(fields: [categoryId], references: [id])
-  name                          String
-  description                   String
-  // the above field should be like [skuId1, skuId2, skuId3]
-  customisable                  Boolean?   @default(false)
-  //the below is the id of the product not the sku, likewise for the sibling 
-  //product, cuz the size vise sku are different, so i can't just use 1 sku
-  customisationOptionProductId  Int?       @unique
-  customisationOptionProduct    Products?  @relation("customProduct", fields: [customisationOptionProductId], references: [id])
-  customisationOptionProducts   Products[] @relation("customProduct")
-  siblingProductId              Int? //https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/self-relations
-  siblingProduct                Products?  @relation("siblingProductRelation", fields: [siblingProductId], references: [id]) //The quantity will decrease alongside
-  siblingProducts               Products[] @relation("siblingProductRelation")
-  discountId                    Int?
-  discount                      Discounts? @relation(fields: [discountId], references: [id])
-  finalPrice                    Int //price after discount and all
-  returnAvl                     Boolean @default(true)
-  tags                          String[]
-  createdAt                     DateTime @default(now())
-  updatedAt                     DateTime @updatedAt()
-
-  ProductImages                 ProductImage[]
-  orderProducts                 OrderProducts[]
-  reviewRating                  ReviewRating[]
-  cartItem                      CartItems[]
-  productSKUs                   Inventory[]
-}
-
-// product id is stored in the inventory so link it to 
-// SKU and it make the size quantity search thing very easy
-// way easy then using a join table
-model Inventory {
-  id                Int               @id @default(autoincrement())
-  SKU               String            @unique @default(cuid()) @db.VarChar(8)
-  description       String
-  color             String
-  skuPrice          String
-  size              String
-  basePrice         Int
-  quantity          Int
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt()
-  productId         Int?
-  Product           Products?  @relation(fields: [productId], references: [id])
-  cartItem          CartItems?
-  orderProducts     OrderProducts[]
-
-  @@unique([SKU, size])
-  @@index([productId])
-}
-
-// Same productId will have multiple SKU, as productId is of product
-// but in a product has different sizes, so many sizes can be in
-// a product id, and that's what this table is for, 1 productId
-// having multiple SKU, but SKU will be unique
-// model ProductSku {
-//   SKU       String @unique
-
-//   Inventory Inventory @relation(fields: [SKU], references: [SKU])
-
-//   @@id([SKU, productId])
-// }
-
-// Now the logic is like SKU is fixed, it's like item skeleton, inventory will refer the sku 
-// id and all the quantity and  
-//model Inventory {
-//  // Inventory connects the vendorOrders and SkU details, we can't do it directly
-//  // cuz then you need a array in SKUDetails table to keep record of all the vendor orders
-//  // for that item, which can be ugly. So using inventory table can save us that headache and 
-//  // we can easily keep track of the orders and when items are added to sku
-//  id            Int         @id @default(autoincrement())
-//  skuId         String
-//  sku           SKUDetails  @relation(fields: [skuId], references: [SKU])
-// 
-//  createAt  DateTime @default(now())
-//  updatedAt DateTime @updatedAt()
-//}
-
-model vendorOrder {
-  id                      Int    @id @default(autoincrement())
-  vendorName              String
-  vendorAddress           String
-  totalPrice              String
-
-  advPayment              String
-  advPaymentMode          String
-  advPaymentDate          DateTime
-  advPaymentTransactionId String
-
-  finalPayment              String?
-  finalPaymentMode          String?
-  finalPaymentDate          DateTime?
-  finalPaymentTransactionId String?
-
-  orderDate     DateTime
-  receivingDate DateTime?
-
-  orderDetails String[] // ["tshirt:black:M:40", "tshirt:red:L:15"]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-}
-
-model Payments {
-  id             Int      @id @default(autoincrement())
-  paymentId      String
-  paymentService String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt()
-
-  order  Orders[]
-  returnPayment Returns? @relation("ReturnPaymentToUser")
-  returnCharge Returns? @relation("ReturnChargesByUser")
-}
-
-model Returns {
-  id     Int          @id @default(autoincrement())
-  status ReturnStatus @default(PENDING)
-
-  returnReason      String
-  returnReceiveDate DateTime?
-
-  paymentId Int?      @unique
-  returnPayment   Payments? @relation("ReturnPaymentToUser", fields: [paymentId], references: [id])
-
-  returnChargeId Int @unique
-  returnCharge   Payments? @relation("ReturnChargesByUser", fields: [returnChargeId], references: [id])
-
-  orderId Int    @unique
-  order   Orders @relation(fields: [orderId], references: [id])
-
-  returnShipmentId Int?      @unique
-  shipment         Shipment? @relation(fields: [returnShipmentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-}
-
-model ReplacementReason {
-  id                       Int     @id @default(autoincrement())
-  description              String
-  photoProofRequired       Boolean @default(false)
-  videoProofRequired       Boolean @default(false)
-  userCustomReasonRequired Boolean @default(false)
-
-  replacementOrder ReplacementOrder[]
-}
-
-model ReplacementOrder {
-  id Int @id @default(autoincrement())
-
-  replacementReasonId      Int
-  replacementReason        ReplacementReason @relation(fields: [replacementReasonId], references: [id])
-  replacementRequiredPhoto String?
-  replacementRequiredVideo String?
-
-  quantity Int // if someone has ordered 2 t-shirt of L size but want to replace only 1, so for such cases we need the quantity
-  replacementSize String
-  replacementOrderStatus ReplacementOrderStatus
-
-  //originalOrderId Int?    @unique
-  //originalOrder   Orders? @relation("oldOrderRelation", fields: [originalOrderId], references: [id])
-
-  productOrderId Int           @unique
-  productOrder   OrderProducts @relation(references: [id], fields: [productOrderId])
-
-  // addressId Int
-  // Address   Address @relation(fields: [addressId], references: [id])
-
-  // shipment id with which product came back not the id with which new product is dispatched
-  returnShipmentId Int?      @unique
-  shipment         Shipment? @relation(fields: [returnShipmentId], references: [id])
-
-  //newOrderId Int?    @unique
-  //newOrder   Orders? @relation("newOrderRelation", fields: [newOrderId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-}
-
-model Shipment {
-  id                   Int    @id @default(autoincrement())
-  shipmentOrderId      String @unique
-  shipmentServiceName  String
-  shipmentTrackingLink String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-
-  order            Orders?
-  return           Returns?
-  replacementOrder ReplacementOrder?
-}
-
 enum OrderType {
   NEW
   REPLACEMENT
 }
 
-model OrderProducts {
-  id            Int           @id @default(autoincrement())
-  orderId       Int
-  order         Orders        @relation(fields: [orderId], references: [id])
-  productId     Int
-  product       Products      @relation(fields: [productId], references: [id])
-  productStatus ProductStatus @default(PENDING)
-  size          String
-  productSKU    String
-  productSku    Inventory @relation(fields: [productSKU], references: [SKU])
-  quantity      Int
-  price         String 
-  // show how many time a product has been replaced
-  replacementCount Int? @default(0)
-  return ReplacementOrder?
-}
-
-model Orders {
-  id Int @id @default(autoincrement())
-
-  type       OrderType? @default(NEW)
-  finalPrice String
-
-  originalOrderId Int?
-  originalOrders  Orders?  @relation("orgOrder", fields: [originalOrderId], references: [id])
-  relatedOrders   Orders[] @relation("orgOrder") //needed for the self-relation
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  productCount Int
-  addressId    Int
-  address      Address @relation(fields: [addressId], references: [id])
-
-  discountId Int?
-  discount   Discounts? @relation(fields: [discountId], references: [id])
-
-  paymentStatus PaymentStatus?
-  paymentId     Int? //payment will be same for replacement orders
-  payment       Payments?      @relation(fields: [paymentId], references: [id])
-
-  shipmentId Int?      @unique
-  shipment   Shipment? @relation(fields: [shipmentId], references: [id])
-
-  deliveryDate Int?
-
-  orderStatus OrderStatus @default(PENDING)
-
-  //invoice | NOTE : should be optional 
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-
-  return        Returns?
-  reviewRating  ReviewRating[]
-  orderProducts OrderProducts[]
-  //oldOrderOfReplacement ReplacementOrder? @relation("oldOrderRelation")
-  //newOrderOfReplacement ReplacementOrder? @relation("newOrderRelation")
-}
-
-model ReviewRating {
-  id Int @id @default(autoincrement())
-
-  orderId Int
-  order   Orders @relation(fields: [orderId], references: [id])
-
-  productId Int
-  product   Products @relation(fields: [productId], references: [id])
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  rating       Int
-  review       String?
-  reviewImages String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+enum ReturnType {
+  RETURN
+  REPLACEMENT
 }

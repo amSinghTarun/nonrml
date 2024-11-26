@@ -1,5 +1,5 @@
 {
-  "name": "@nonorml/prisma",
+  "name": "@nonrml/prisma",
   "version": "1.0.0",
   "main": "index.js",
   "exports": {
@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "npx prisma generate",
     "format": "npx prisma ",
-    "migrate": "npx prisma migrate dev --name"
+    "migrate": "npx prisma migrate dev"
   },
   "keywords": [],
   "author": "",

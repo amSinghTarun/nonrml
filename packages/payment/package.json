@@ -1,15 +1,19 @@
 {
-  "name": "payments",
+  "name": "@nonrml/payment",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "exports":{
+  "exports": {
     ".": "./src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "razorpay": "^2.9.4"
+  }
 }

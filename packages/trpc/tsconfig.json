@@ -1,10 +1,14 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "@nonrml/typescript-config/react-library.json",
   "include": [
-    "server", "react"
+    "src/server", "_trpc"
   ],
   "exclude": [
     "node_modules",
     "dist"
-  ]
+  ],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  } 
 }

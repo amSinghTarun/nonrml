@@ -1,1 +1,1 @@
-export { cache } from "./services";
+export { redis } from "./services";

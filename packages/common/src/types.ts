@@ -1,3 +1,3 @@
-export interface nonormlError extends Error {
+export interface nonrmlError extends Error {
     code?: number
 }
