@@ -4,14 +4,16 @@ import { Checkout } from "@/components/Checkout"
 import React from "react";
 import { useRecoilState } from "recoil";
 import { useSession } from "next-auth/react"
-import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { useSetAppbarUtilStore } from "@/store/atoms";
 
 const CheckoutPage = ({params}: {params: {buyOption: string}}) => {
-    const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
+    // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
+    const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore()
     useSession({
         required: true,
         onUnauthenticated() {
-            setSelectedUtil("USER_ACCESSIBILITY");
+            setAppbarUtil("USER_ACCESSIBILITY");
         },
     })
     return (

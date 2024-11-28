@@ -7,12 +7,14 @@ import CallIcon from '@mui/icons-material/Call';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { SidebarButton } from "./ui/buttons";
-import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { useSetAppbarUtilStore } from "@/store/atoms";
 
 export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
-  const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+  // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+  const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     
-    if(selectedUtil != "SIDEBAR")
+    if(appbarUtil != "SIDEBAR")
         return (<></>);
     
     return (

@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { deleteAddress } from "@/app/actions/address.action";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
-import { cartItems as cartItemsAtom, buyNowItems as buyNowItemsAtom } from "@/store/atoms";
+// import { cartItems as cartItemsAtom, buyNowItems as buyNowItemsAtom } from "@/store/atoms";
+import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
 import { useRecoilState } from "recoil";
 import { redirect, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -35,8 +36,10 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
     const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
-    const [buyNowItems, setBuyNowItems] = useRecoilState(buyNowItemsAtom);
+    // const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
+    // const [buyNowItems, setBuyNowItems] = useRecoilState(buyNowItemsAtom);
+    const { cartItems } = useCartItemStore.getState();
+    const { buyNowItems } = useBuyNowItemsStore()
     const router = useRouter();
     const couponCode = useRef("");
     const totalAmount = useRef(0);
@@ -153,7 +156,7 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
                                     <div className="flex flex-col">
                                         <div className="flex flex-row">{orderProducts[+variantId].productName}</div>
                                         <div className="flex flex-row">{convertStringToINR(orderProducts[+variantId].price)}</div>
-                                        <div className="flex flex-row">Size: {orderProducts[+variantId].size }</div>
+                                        <div className="flex flex-row">Size: {orderProducts[+variantId].size}</div>
                                         <div className="flex flex-row">Quantity: {orderProducts[+variantId].quantity}</div>
                                     </div>
                                 </div>

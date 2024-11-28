@@ -1,12 +1,14 @@
 "use client"
 
 import { useRecoilState } from "recoil";
-import { cartItems as cartItemsAtom } from "@/store/atoms";
+// import { cartItems as cartItemsAtom } from "@/store/atoms";
+import { useCartItemStore } from "@/store/atoms"
 import { Button3D, QuantitySelectButton } from "./ui/buttons";
 import Image from "next/image";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useRef } from "react";
-import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { useSetAppbarUtilStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -16,19 +18,20 @@ const convertStringToINR = (currencyString: number) => {
 }
 
 export const CartMenu = () => {
-  const [ cartItems, setCartItems ] = useRecoilState(cartItemsAtom);
-  const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+  // const [ cartItems, setCartItems ] = useRecoilState(cartItemsAtom);
+  const { cartItems, setCartItems } = useCartItemStore.getState()
+  // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+  const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
   const router = useRouter()
   let cartTotal = useRef(0);
   
-  if(selectedUtil != "CART") return (<></>);
+  if(appbarUtil != "CART") return (<></>);
   
   const handleOnQuantityChange = (quantity: number, variantId:number) => {
     if(variantId in cartItems){
       //console.log(quantity);
       const selectedItem = cartItems[variantId];
       setCartItems({
-        ...cartItems,
         [variantId]: {
           productName: selectedItem.productName,
           productId: selectedItem.productId,
@@ -61,7 +64,7 @@ export const CartMenu = () => {
           <div className="flex flex-col p-3 overflow-x-scroll justify-between w-full h-full pt-20">
             <div className="flex flex-col justify-center items-center space-y-5 w-full">
               <div className="font-medium text-sm ">YOUR CART IS EMPTY</div>
-              <Button3D display="CONTINUE SHOPPING" className3dBody="w-auto" className="flex bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-normal" translateZ="50" onClick={() => setSelectedUtil("")} />
+              <Button3D display="CONTINUE SHOPPING" className3dBody="w-auto" className="flex bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-normal" translateZ="50" onClick={() => setAppbarUtil("")} />
             </div> 
           </div>
           :

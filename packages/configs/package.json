@@ -11,5 +11,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@nonrml/prisma": "workspace:^",
+    "jose": "^5.9.6",
+    "next-auth": "^4.24.10"
+  }
 }

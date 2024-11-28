@@ -2,12 +2,14 @@ import { signOut } from "next-auth/react";
 import React from "react";
 import { useRecoilState } from "recoil";
 import { DropdownButton, DropdownMenu } from "../ui/dropdown";
-import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { useSetAppbarUtilStore } from "@/store/atoms";
 
 export const UserAccessibilityDropdown = () => {
-    const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
+    // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
+    const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
 
-    if(selectedUtil != "USER_ACCESSIBILITY")
+    if(appbarUtil != "USER_ACCESSIBILITY")
         return (<></>)
 
     const dropdownMenuContent : {href?: string, display: string, onClickFnc?: ()=> void }[] = [

@@ -7,9 +7,10 @@ import { useState, useRef } from "react";
 import { RouterOutput } from "@/app/_trpc/client";
 import { useToast } from "@/hooks/use-toast"
 import { useRecoilState } from "recoil";
-import { cartItems as cartItemsAtom, buyNowItems as buyNowItemsAtom } from "@/store/atoms";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+// import { cartItems as cartItemsAtom, buyNowItems as buyNowItemsAtom } from "@/store/atoms";
+// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { useSetAppbarUtilStore, useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
 import {
     Carousel,
     CarouselContent,
@@ -28,15 +29,18 @@ const convertStringToINR = (currencyString: number) => {
 // if we use only 1 generic type T instead of multiple generic types like <T,U>, so that must be declared like 
 // <T,>, with a ",". coz other then that it becomes difficult for typescript to differentiate between JSX tag and generic type
 // const Product = <T,U>({product, productInventory, categorySizeChart}: fasdas) => {
-const Product: React.FC<ProductProps> = ({ product, productInventory, categorySizeChart }) => {
-    const { toast } = useToast()
-    const [buyNow, setBuyNow] = useState(false);
-    const [selectedQuantity, setSelectedQuantity] = useState(1);
-    const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, quantity: number, productImage: string, productName: string, price: number } }>({});
-    const [infoSectionfocus, setInfoSectionFocus] = useState<"Description" | "Details" | "Care">("Description");
-    const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
-    const [buyNowItems, setBuyNowItems] = useRecoilState(buyNowItemsAtom);
-    const [selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+    const Product: React.FC<ProductProps> = ({ product, productInventory, categorySizeChart }) => {
+        const { toast } = useToast()
+        const [buyNow, setBuyNow] = useState(false);
+        const [selectedQuantity, setSelectedQuantity] = useState(1);
+        const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, quantity: number, productImage: string, productName: string, price: number } }>({});
+        const [infoSectionfocus, setInfoSectionFocus] = useState<"Description" | "Details" | "Care">("Description");
+        // const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
+        // const [buyNowItems, setBuyNowItems] = useRecoilState(buyNowItemsAtom);
+        const { setBuyNowItems } = useBuyNowItemsStore();
+        const { cartItems, setCartItems } = useCartItemStore.getState();
+        // const [selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
+        const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     const router = useRouter();
     const sizeSKU = useRef<number>();
 
@@ -45,11 +49,8 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
         let variantId: number = sizeSKU.current!;
         if (variantId) {
             itemQuantity += (cartItems[variantId]?.quantity ?? 0);
-            setCartItems((prevCartItems) => ({
-                ...prevCartItems,
-                [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId }
-            }));
-            setSelectedUtil("CART");
+            setCartItems({ [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } });
+            setAppbarUtil("CART");
         }
     }
     return (
