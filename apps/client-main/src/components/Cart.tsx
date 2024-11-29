@@ -1,16 +1,12 @@
 "use client"
 
-import { useRecoilState } from "recoil";
-// import { cartItems as cartItemsAtom } from "@/store/atoms";
-import { useCartItemStore } from "@/store/atoms"
+import React from "react";
 import { Button3D, QuantitySelectButton } from "./ui/buttons";
 import Image from "next/image";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useRef } from "react";
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
-import { useSetAppbarUtilStore } from "@/store/atoms";
+import { useSetAppbarUtilStore, useCartItemStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
-import React from "react";
 
 const convertStringToINR = (currencyString: number) => {
   let INR = new Intl.NumberFormat();
@@ -18,9 +14,7 @@ const convertStringToINR = (currencyString: number) => {
 }
 
 export const CartMenu = () => {
-  // const [ cartItems, setCartItems ] = useRecoilState(cartItemsAtom);
   const { cartItems, setCartItems } = useCartItemStore.getState()
-  // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
   const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
   const router = useRouter()
   let cartTotal = useRef(0);
@@ -29,7 +23,6 @@ export const CartMenu = () => {
   
   const handleOnQuantityChange = (quantity: number, variantId:number) => {
     if(variantId in cartItems){
-      //console.log(quantity);
       const selectedItem = cartItems[variantId];
       setCartItems({
         [variantId]: {
@@ -47,12 +40,11 @@ export const CartMenu = () => {
 
   const handleOnDelete = (variantId: number) => {
     if(variantId in cartItems){
-      const newCartItems = {...cartItems} //creating a shallow copy to delete the property, otherwise it throws the can'nt delete error
+      const newCartItems = {...cartItems}
       delete newCartItems[variantId]
       setCartItems(newCartItems);
     }
   }
-
 
   return (
     <>
@@ -78,13 +70,13 @@ export const CartMenu = () => {
                 if(index==0)cartTotal.current = 0;
                 cartTotal.current += (cartItems[+variantId].price * cartItems[+variantId].quantity)
                 return (
-                <div className="flex flex-row space-x-2 p-2 rounded-xl bg-white/5">
+                <div key={index} className="flex flex-row space-x-2 p-2 rounded-xl bg-white/5">
                   <Image 
                     src={String(cartItems[+variantId].productImage)} 
                     alt="image" 
                     width={80} 
                     height={20}
-                    className="rounded-xl "
+                    className="rounded-xl"
                   ></Image>
                   {/* details part - column */}
                   <div className="flex flex-col flex-1 space-y-1">

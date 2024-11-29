@@ -35,7 +35,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
 
     useEffect( () => {
         getExchangeProductSizes(products)
-            .then(products => { //console.log(products);setProductExchangeSizes(products)})
+            .then(products => { setProductExchangeSizes(products)} )
             .catch(error => { throw error})
     }, []);
 

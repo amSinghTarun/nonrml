@@ -11,7 +11,13 @@ No pagination required for now, as the result quantity is gonna stay small
 */
 export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
     const prisma = ctx.prisma;
-    let userId = +ctx.session.user.id;
+    if (!ctx.session) {
+        throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You must be logged in to view orders'
+        });
+    }
+    const userId = +ctx.session.user.id;
     //console.log(userId);
     try{
         const orders = await prisma.orders.findMany({
@@ -49,7 +55,7 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
         })
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: orders};
     } catch(error){
-        //console.log("\n\n Error in getUserOrders ----------------");
+        // console.log("\n\n Error in getUserOrders ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error) 
@@ -61,12 +67,12 @@ Get a particular order of a user
 search in the orderProducts as all the products are stored there and include the order details and product details
 in that only
 */
-export const getUserOrder = async ({ctx, input }: TRPCRequestOptions<TGetUserOrderSchema | TTrackOrderSchema>)  => {
+export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrderSchema | TTrackOrderSchema>)  => {
     const prisma = ctx.prisma;
     input = input!;
     try{
         let userIdsArray = ctx.user ? [ctx.user.id] : [];
-        if(Object.keys(input).findIndex((value) => value == "mobile") != -1){
+        if('mobile' in input){
             // findMany because multiple related people can use same number to order in their address
             const userIds = await prisma.address.findMany({
                 where: {

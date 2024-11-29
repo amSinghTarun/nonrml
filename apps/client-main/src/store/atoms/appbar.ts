@@ -1,11 +1,3 @@
-import { atom } from 'recoil';
-
-export const appbarOpenUtil = atom<"SIDEBAR" | "CART" | "USER_ACCESSIBILITY" | "">({
-    key: 'cartOpen',
-    default: "",
-  });
-  
-  
 import { create } from 'zustand';
 
 type appbarUtilOptns = "SIDEBAR" | "CART" | "USER_ACCESSIBILITY" | ""

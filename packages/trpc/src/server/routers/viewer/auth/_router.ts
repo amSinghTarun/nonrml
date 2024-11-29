@@ -1,10 +1,10 @@
 import { router } from "../../../trpc";
 import { ZSendOTPSchema, ZVerifyOTPSchema } from "./sign.schema";
 import {sendLoginOTP, verifyOTP } from "./sign.handler";
-import { loginRestrictedProcedure, publicProcedure } from "../../../procedures/publicProcedure";
+import {  publicProcedure } from "../../../procedures/publicProcedure";
 
 export const authRouter = router({
-    sendOTP: loginRestrictedProcedure
+    sendOTP: publicProcedure
         .input(ZSendOTPSchema)
         .mutation( async ({ctx, input}) => {
             return await sendLoginOTP({ctx, input})

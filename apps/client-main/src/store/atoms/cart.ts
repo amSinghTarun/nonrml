@@ -1,27 +1,4 @@
-// import { atom } from 'recoil';
-// import { localStorageEffect } from '../helpers';
-// import { getSession } from '@nonrml/configs';
-
-// export const cartItems = atom<{
-//   [produtcVariantId: number] : {
-//     productName: string, 
-//     productId: number, 
-//     productImage: string, 
-//     quantity: number, 
-//     size: string, 
-//     price: number,
-//     variantId: number
-//   }
-// }>({
-//     key: 'cartItems',
-//     default: {},
-//     effects: [
-//       localStorageEffect("cartItems")
-//     ]
-// });
-
-
-import { createStore } from 'zustand';
+import { create } from 'zustand';
 import { persist } from "zustand/middleware"
 
 type cartItem = {
@@ -41,13 +18,16 @@ interface CartItemState {
   setCartItems : (cartItem: cartItem) => void 
 }
 
-export const useCartItemStore = createStore<CartItemState>()(
+export const useCartItemStore = create<CartItemState>()(
   persist(
-    (set) => ({
+    ( set ) => ({
       cartItems: {},
-      setCartItems: (cartItem) =>  set((state) => ({...state.cartItems, cartItems: cartItem}))
+      setCartItems: (cartItem) =>  {
+        set((state) => {
+          return { cartItems: {...state.cartItems, ...cartItem} }
+        })
+      }
     }),
-    {name: `cart-nonrml`},
+    {name: `cart-nonrml`}
   )
 )
-// useCartItemStore.getState().setCartItems({})

@@ -6,9 +6,9 @@ import { useSetAppbarUtilStore } from "@/store/atoms";
 
 export const NavbarStateControlProvider = ({ children }: { children: React.ReactNode }) => {
     // const resetRecoilOnReload = useResetRecoilState(appbarOpenUtilAtom);
-    const { appbarUtil, setAppbarUtil , reset} = useSetAppbarUtilStore();
+    // const { reset } = useSetAppbarUtilStore();
     //console.log("THE RECOIL STATE ");
-    reset();
+    // reset();
     return (
         <>
             {children}

@@ -49,7 +49,8 @@ const convertStringToINR = (currencyString: number) => {
         let variantId: number = sizeSKU.current!;
         if (variantId) {
             itemQuantity += (cartItems[variantId]?.quantity ?? 0);
-            setCartItems({ [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } });
+            const cartItem = { [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } }
+            setCartItems(cartItem);
             setAppbarUtil("CART");
         }
     }

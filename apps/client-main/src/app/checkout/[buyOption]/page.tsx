@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react"
 import { useSetAppbarUtilStore } from "@/store/atoms";
 
 const CheckoutPage = ({params}: {params: {buyOption: string}}) => {
-    // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
+    const { buyOption } = params;
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore()
     useSession({
         required: true,
