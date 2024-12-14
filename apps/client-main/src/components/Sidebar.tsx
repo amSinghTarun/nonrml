@@ -1,21 +1,17 @@
 "use client"
 
 import React from 'react';
-import { useRecoilState } from "recoil";
-import Link, { LinkProps } from 'next/link';
+import Link from 'next/link';
 import CallIcon from '@mui/icons-material/Call';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { SidebarButton } from "./ui/buttons";
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
 import { useSetAppbarUtilStore } from "@/store/atoms";
 
 export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
-  // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
-  const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
+  const { appbarUtil } = useSetAppbarUtilStore();
     
-    if(appbarUtil != "SIDEBAR")
-        return (<></>);
+    if(appbarUtil != "SIDEBAR") return (<></>);
     
     return (
     <>
@@ -58,7 +54,6 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
             <text className="flex pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</text >
           </footer>
         </aside>
-        {/* <div className="flex flex-row flex-1 backdrop-blur-[2px]"></div> */}
       </nav>
       </>
     );

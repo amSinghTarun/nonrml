@@ -7,6 +7,9 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useRef } from "react";
 import { useSetAppbarUtilStore, useCartItemStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
+import { useStore } from "zustand";
+import { stepButtonClasses } from "@mui/material";
+import { useSession } from "next-auth/react";
 
 const convertStringToINR = (currencyString: number) => {
   let INR = new Intl.NumberFormat();
@@ -14,37 +17,21 @@ const convertStringToINR = (currencyString: number) => {
 }
 
 export const CartMenu = () => {
-  const { cartItems, setCartItems } = useCartItemStore.getState()
+  const cartItems = useStore(useCartItemStore, (state) => state.cartItems);
+  const alterQuantity = useStore(useCartItemStore, (state) => state.alterQuantity);
+  const removeProduct = useStore(useCartItemStore, (state) => state.removeProduct);
   const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
-  const router = useRouter()
+  const router = useRouter();
   let cartTotal = useRef(0);
   
   if(appbarUtil != "CART") return (<></>);
   
-  const handleOnQuantityChange = (quantity: number, variantId:number) => {
-    if(variantId in cartItems){
-      const selectedItem = cartItems[variantId];
-      setCartItems({
-        [variantId]: {
-          productName: selectedItem.productName,
-          productId: selectedItem.productId,
-          variantId: variantId,
-          productImage: selectedItem.productImage,
-          quantity: quantity,
-          size: selectedItem.size, 
-          price: selectedItem.price
-        }
-      })
-    }
-  }
+  const handleOnQuantityChange = (quantity: number, variantId:number) => (variantId in cartItems) && alterQuantity(variantId, quantity)
 
-  const handleOnDelete = (variantId: number) => {
-    if(variantId in cartItems){
-      const newCartItems = {...cartItems}
-      delete newCartItems[variantId]
-      setCartItems(newCartItems);
-    }
-  }
+  const handleOnDelete = (variantId: number) => (variantId in cartItems) && removeProduct(variantId)
+
+
+  const handleCheckoutRedirect = () => router.push("/checkout/2")
 
   return (
     <>
@@ -67,7 +54,7 @@ export const CartMenu = () => {
             { 
               // cartItems map iteration
               Object.keys(cartItems).map( (variantId, index) => {
-                if(index==0)cartTotal.current = 0;
+                if(index==0) cartTotal.current = 0;
                 cartTotal.current += (cartItems[+variantId].price * cartItems[+variantId].quantity)
                 return (
                 <div key={index} className="flex flex-row space-x-2 p-2 rounded-xl bg-white/5">
@@ -84,7 +71,7 @@ export const CartMenu = () => {
                       <div className="text-xs font-medium">SIZE: {cartItems[+variantId].size}</div>
                       <div className="text-sm font-medium">{convertStringToINR(cartItems[+variantId].price)}</div>
                     <div className="flex flex-1 flex-row justify-between text-xs pr-3">
-                      <QuantitySelectButton className="p-1 bg-white/10 text-black" selectedQuantity={cartItems[+variantId].quantity} minQuantity={1} maxQuantity={20} onQuantityChange={handleOnQuantityChange} variantId={+variantId}/>
+                      <QuantitySelectButton className="p-1 bg-white/10 text-black" selectedQuantity={useCartItemStore.getState().cartItems[+variantId].quantity} minQuantity={1} maxQuantity={20} onQuantityChange={handleOnQuantityChange} variantId={+variantId}/>
                       <div className="flex items-center hover:cursor-pointer" onClick={()=> handleOnDelete(+variantId)}>
                         <DeleteOutlineIcon className="text-stone-800 text-sm"/>
                       </div>
@@ -101,7 +88,7 @@ export const CartMenu = () => {
               <text className="text-xl">{convertStringToINR(cartTotal.current)}</text>
             </div>
             <div className="basis-1/2">
-              <Button3D className=" h-full w-full backdrop-blur-3xl bg-black text-white shadow-0 font-normal" className3d="px-5" translateZ="40" display="Checkout" onClick={()=> router.push("/checkout/2")}/>
+              <Button3D className=" h-full w-full backdrop-blur-3xl bg-black text-white shadow-0 font-normal" className3d="px-5" translateZ="40" display="Checkout" onClick={ handleCheckoutRedirect }/>
             </div>
           </div>
         </div>

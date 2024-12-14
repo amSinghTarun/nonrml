@@ -3,12 +3,20 @@
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { useRecoilState } from 'recoil';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
+import { usePathname } from 'next/navigation';
 import { useSetAppbarUtilStore } from "@/store/atoms";
+import { useStore } from 'zustand';
 
 const CartButton = () => {
-    // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
-    const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
+    const appbarUtil = useStore(useSetAppbarUtilStore, (state) => state.appbarUtil);
+    const setAppbarUtil = useStore(useSetAppbarUtilStore, (state) => state.setAppbarUtil);
+    
+    const pathname = usePathname();
+
+    // to hide the cart at the checkout page so that the user can't edit it there.
+    if(pathname.includes("checkout"))
+        return (<></>)
+
     const handleOnClick = () => {
         appbarUtil != "CART" ? setAppbarUtil("CART") : setAppbarUtil("")
     }

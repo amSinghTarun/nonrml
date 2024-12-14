@@ -90,7 +90,7 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: number) => {
 }
 
 export const TRPCCustomError = (error: any) => {
-    //console.log(error, "\n --------------------------------------------------")
+    console.log("\n\n ---------- ", error, "\n\n --------------------------------------------------")
     //console.log(error.code)
     const errorCode = error.code ? convertTRPCErrorCodeToStatusCode(error.code) : 500;
     const finalError = new Error(errorCode != 500 ? error.message : "Having some issue rn, Try after sometime");

@@ -3,15 +3,14 @@ import { ProductCard, ProductContainer } from "@/components/cards/ProductCard";
 
 
 const StorePage = async ({ params }: { params: { category: string } }) => {
-    const { data: products } = await (await serverClient()).viewer.product.getProducts({categoryName: params.category});
-    //console.log(products)
+    const category = (await params).category;
+    const { data: products } = await (await serverClient()).viewer.product.getProducts({categoryName: category});
     return (
                 <section className="pt-14 flex-col  flex ">
                         <h1 className="flex mt-4 text-black text-2xl lg:text-4xl font-extrabold pl-4 pb-4">
-                            {(params.category).replace("_", " ").toUpperCase()}
+                            {category.replace("_", " ").toUpperCase()}
                         </h1>
-                        {/* <main className="ml-2"> */}
-                        <ProductContainer>
+                        <ProductContainer> 
                             {
                                 products.map(products => {
                                     return (
@@ -27,7 +26,6 @@ const StorePage = async ({ params }: { params: { category: string } }) => {
                                 })
                             }
                         </ProductContainer> 
-                        {/* </main> */}
                 </section>
     )
 }

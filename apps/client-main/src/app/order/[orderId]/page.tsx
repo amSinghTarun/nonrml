@@ -15,5 +15,4 @@ const OrdersPage = async ({params}: {params: {orderId: string}}) => {
     )
 }
 
-export default OrdersPage;
-
+export default OrdersPage; 

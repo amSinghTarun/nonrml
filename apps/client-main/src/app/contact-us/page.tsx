@@ -1,5 +1,3 @@
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
-
 const mail = "testMail231@gmail.com";
 
 const ContactUsPage = () => {

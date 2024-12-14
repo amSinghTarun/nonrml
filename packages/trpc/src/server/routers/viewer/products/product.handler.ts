@@ -136,19 +136,20 @@ export const getProducts = async ({
     // let queryJSON: typeof paginationQuery & { where?: any; select?: any } =
     //   paginationQuery;
 
-      const products = await prisma.products.findMany({
-        where: input.categoryName ? {
-          category: {
-            displayName: input.categoryName.replace("_", " "),
-          },
-        } : {},
-        select: {
-            id: true,
-            name: true,
-            price: true,
-            soldOut: true,
-            _count:{
-                select: {
+    console.log("PRODUCT 1 --------------------------------- ");
+    const products = await prisma.products.findMany({
+      where: input.categoryName ? {
+        category: {
+          displayName: input.categoryName.replace("_", " "),
+        },
+      } : {},
+      select: {
+          id: true,
+          name: true,
+          price: true,
+          soldOut: true,
+          _count:{
+              select: {
                 ProductVariants: {
                     where: {
                         inventory: {
@@ -159,26 +160,26 @@ export const getProducts = async ({
                         }
                     }
                 }
-                }
-            },
-            productImages: {
-                where: { active: true, priorityIndex:0 },
-                select: {
-                    image: true,
-                }
-            }
-        },
-        ...paginationQuery
-      });
+              }
+          },
+          productImages: {
+              where: { active: true, priorityIndex:0 },
+              select: {
+                  image: true,
+              }
+          }
+      },
+      ...paginationQuery
+    });
+    console.log("PRODUCT 2 --------------------------------- ");
 
 
     // const product = await prisma.products.findMany(queryJSON);
 
-    //console.log("PRODUCT --------------------------------- ", products);
 
     return { status: TRPCResponseStatus.SUCCESS, message: "", data: products };
   } catch (error) {
-    //console.log("\n\n Error in getProducts ----------------");
+    console.log("\n\n ----------------------------- :: Error in getProducts");
     if (error instanceof Prisma.PrismaClientKnownRequestError)
       error = {
         code: "BAD_REQUEST",

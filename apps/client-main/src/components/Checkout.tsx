@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useEffect, useRef, useState } from "react";
 import CanclePurchaseDialog from "@/components/CancelPurchaseDialog";
 import { Button3D, GeneralButton} from "@/components/ui/buttons";
@@ -7,10 +8,8 @@ import { cn } from "@/lib/utils";
 import { deleteAddress } from "@/app/actions/address.action";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
-// import { cartItems as cartItemsAtom, buyNowItems as buyNowItemsAtom } from "@/store/atoms";
 import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
-import { useRecoilState } from "recoil";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
@@ -30,28 +29,27 @@ const convertStringToINR = (currencyString: number) => {
 
 export const Checkout = ({className, buyOption}: AddressProps) => {
     
-    const { toast } = useToast() 
+    const { toast } = useToast();
     const [ selectedAddress, setSelectedAddress ] = useState<AddressesTRPCOutput[number]>();
     const [ applyCoupon, setApplyCoupn ] = useState(false);
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
     const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    // const [cartItems, setCartItems] = useRecoilState(cartItemsAtom);
-    // const [buyNowItems, setBuyNowItems] = useRecoilState(buyNowItemsAtom);
     const { cartItems } = useCartItemStore.getState();
     const { buyNowItems } = useBuyNowItemsStore()
+
     const router = useRouter();
     const couponCode = useRef("");
     const totalAmount = useRef(0);
+
     const handleAddressEdit = (address: AddressesTRPCOutput[number]) => {
         setSelectedAddress(address);
         setAction("EDITADDRESS");
     }
 
     const orderProducts = buyOption == '1' ? buyNowItems : buyOption == '2' ? cartItems : {}
-    if(Object.keys(orderProducts).length == 0){
+    if(Object.keys(orderProducts).length == 0)
         router.push("/")
-    }
     
     useEffect( () => {
         totalAmount.current = 0;

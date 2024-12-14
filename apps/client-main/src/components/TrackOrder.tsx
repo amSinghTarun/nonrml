@@ -21,18 +21,18 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
         let {name, value} = e.target;
         let setNewFormData = true;
         if(name == "mobile"){
-            value = e.target.value.replace(/[\D\s]/g, "")
-            setNewFormData = value.length <= 10 
+            value = e.target.value.replace(/[\D\s]/g, "");
+            setNewFormData = value.length <= 10;
         }
         setNewFormData && setFormData({...formData, [name]:value});
-    }
+    };
 
     const handleSubmit = () => {
         if(formData.mobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.mobile)){
             submitForm = false;
             setFormError("Please enter a valid 10 digit mobile number");
         }
-    }
+    };
 
     return (
         <div className={cn("rounded-xl h-[80%] bg-white/10 w-[90%] flex flex-col backdrop-blur-3xl p-4 text-center", trackOrderProps.className)}>

@@ -21,5 +21,5 @@ export const useBuyNowItemsStore = create<BuyNowItemsState>()(
     (set) => ({
       buyNowItems: {},
       setBuyNowItems: (item) =>  set((state) => ({buyNowItems: {...state.buyNowItems, item}}))
-  })
+    })
 );

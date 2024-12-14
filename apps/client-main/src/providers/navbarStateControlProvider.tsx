@@ -1,17 +1,19 @@
 "use client"
 
-import { useResetRecoilState } from 'recoil';
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "../store/atoms";
 import { useSetAppbarUtilStore } from "@/store/atoms";
+import { useStore } from "zustand";
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
-export const NavbarStateControlProvider = ({ children }: { children: React.ReactNode }) => {
-    // const resetRecoilOnReload = useResetRecoilState(appbarOpenUtilAtom);
-    // const { reset } = useSetAppbarUtilStore();
-    //console.log("THE RECOIL STATE ");
-    // reset();
-    return (
-        <>
-            {children}
-        </>
-    )
-};
+export function NavbarStateControlProvider() {
+    const pathname = usePathname();
+    const reset = useStore(useSetAppbarUtilStore, (state) => state.reset);
+    const appbarUtil = useStore(useSetAppbarUtilStore, (state) => state.appbarUtil);
+
+    useEffect(() => {
+        console.log(`Route changed to: ${pathname}`);
+        appbarUtil !=  "" && reset()
+    }, [pathname]);
+
+    return <></>;
+}

@@ -88,8 +88,6 @@ export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, pric
     if(quantity <= 0){
         return (    
             <GeneralButton display={display} onClick={()=>{}}/>
-            // <button className="bg-white text-black basis-1/6 justify-center flex rounded-xl py-3 read-only:line-through">
-            // </button>
         )
     }
     return (
@@ -109,7 +107,7 @@ interface productPageActionButtonProps {
 }
 export const ProductPageActionButton : React.FC<productPageActionButtonProps> = ({ display, onClick, className}) => (
     <div 
-        className={cn("bg-white text-black hover:bg-black hover:text-white basis-1/2 flex justify-center p-3 font-medium  hover:cursor-pointer rounded-xl  hover:font-semibold bg-opacity-50 shadow shadow-black/15 backdrop-blur-3xl", className)}
+        className={cn("bg-white text-black hover:bg-black hover:text-white basis-1/2 flex justify-center p-3 font-semibold hover:cursor-pointer rounded-xl  hover:font-semibold bg-opacity-50 shadow shadow-black/15 backdrop-blur-3xl", className)}
         onClick={onClick}
     >{display}</div> 
 )

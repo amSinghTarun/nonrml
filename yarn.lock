@@ -3734,6 +3734,7 @@ __metadata:
     class-variance-authority: "npm:^0.7.0"
     clsx: "npm:^2.1.1"
     embla-carousel-react: "npm:^8.2.1"
+    embla-carousel-wheel-gestures: "npm:^8.0.1"
     eslint: "npm:^8"
     eslint-config-next: "npm:14.2.5"
     framer-motion: "npm:^11.5.4"
@@ -4274,6 +4275,17 @@ __metadata:
   peerDependencies:
     embla-carousel: 8.5.1
   checksum: 10c0/f9f99f05014eb36902fb5a852c26e38afe3827a357bdcb8f744afe2af7786548369cbd8948022b635c85324f9b195c31af5f16934354690073e400829af7359d
+  languageName: node
+  linkType: hard
+
+"embla-carousel-wheel-gestures@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "embla-carousel-wheel-gestures@npm:8.0.1"
+  dependencies:
+    wheel-gestures: "npm:^2.2.5"
+  peerDependencies:
+    embla-carousel: ^8.0.0 || ~8.0.0-rc03
+  checksum: 10c0/ce687d1d63177812eebdd1436dbeb6d5f79cbe5a880e102bf4222ecbcffa2d9b89c9e7454c3485e112825f7dac7ad6c73022ac8f5c4166607e0d3de8946af89b
   languageName: node
   linkType: hard
 
@@ -9579,6 +9591,13 @@ __metadata:
     tr46: "npm:~0.0.3"
     webidl-conversions: "npm:^3.0.0"
   checksum: 10c0/1588bed84d10b72d5eec1d0faa0722ba1962f1821e7539c535558fb5398d223b0c50d8acab950b8c488b4ba69043fd833cc2697056b167d8ad46fac3995a55d5
+  languageName: node
+  linkType: hard
+
+"wheel-gestures@npm:^2.2.5":
+  version: 2.2.48
+  resolution: "wheel-gestures@npm:2.2.48"
+  checksum: 10c0/03dcd4aa3df8a4cbfdee51a44fe7899a1e6019f0b43adf5ab21bbade1d5a9560dd5deb402dfcac8bf31f7bf64c663e36f08fdd8476c9712defc7e9aa0821327a
   languageName: node
   linkType: hard
 

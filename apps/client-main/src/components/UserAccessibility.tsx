@@ -1,16 +1,15 @@
 "use client"
 
-import { useRecoilState } from 'recoil';
 import { UserAccessibilityDropdown } from './dropdowns/UserAccessibilityButton'
 import { useSession} from 'next-auth/react';
 import React from 'react';
 import Signin from './Signin';
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
 import { useSetAppbarUtilStore } from "@/store/atoms";
+import { useStore } from 'zustand';
 
 export const UserAccessibility = () => {
-    // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom)
-    const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
+    const appbarUtil = useStore(useSetAppbarUtilStore, (state) => state.appbarUtil);
+
     const { data: session } = useSession();
 
     return (

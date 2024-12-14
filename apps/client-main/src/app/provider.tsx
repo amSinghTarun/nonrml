@@ -9,9 +9,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     <TRPCProvider>
       <SessionProvider>
           <RecoilRoot>
-              {children}
+            {children}
           </RecoilRoot>
       </SessionProvider>
     </TRPCProvider>
-  );
-};
+  )
+}

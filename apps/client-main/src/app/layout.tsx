@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, Yeseva_One, Vidaloka, Ubuntu_Mono, Ultra, Kenia, Ubuntu, Ubuntu_Condensed } from "next/font/google";
+import { Ubuntu } from "next/font/google";
 import "./globals.css";
 import { Appbar } from "@/components/Appbar";
 import { Providers } from "./provider";
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/Footer";
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
-import { PropsWithChildren } from "react";
 import { BackgroundProvider } from "@/providers/backgroundProvider";
-import { NavbarStateControlProvider } from "@/providers/navbarStateControlProvider"
+import { NavbarStateControlProvider } from "@/providers/navbarStateControlProvider";
 
-const appFont = Ubuntu({subsets: ["latin"], weight:["400", "500", "700"]})
+const appFont = Ubuntu({subsets: ["latin"], weight:["400", "500", "700"]});
  
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,9 +26,8 @@ export default function RootLayout({
         <Providers>
           <Appbar/>
             <BackgroundProvider>
-              <NavbarStateControlProvider>
+              <NavbarStateControlProvider />
                 {children}
-              </NavbarStateControlProvider>
               <Footer />
             </BackgroundProvider>
           <Toaster />
@@ -38,4 +35,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
