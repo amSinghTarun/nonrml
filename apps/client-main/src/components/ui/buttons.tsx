@@ -10,7 +10,7 @@ interface decisionButtonProps {
 
 export const DecisionButton : React.FC<decisionButtonProps> = ({display, onClickFnc}) => {
     return (
-        <button className='p-2 text-xs rounded-xl text-red-500 border-2 border-red-500 bg-red-200 hover:text-green-500 hover:bg-green-200 hover:border-green-500' onClick={onClickFnc}>
+        <button className='p-3 text-xs rounded-r-xl text-white bg-black hover:text-red-500 hover:bg-red-200' onClick={onClickFnc}>
             {display}
         </button>
     )

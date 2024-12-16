@@ -2,7 +2,6 @@ import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { Prisma, prisma } from "@nonrml/prisma";
 import { jsonArrayFieldsToStringArray, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TAddProductCategorySchema, TDeleteProductCategorySchema, TEditProductCategorySchema } from "./productCategory.schema";
-import { TRPCError } from "@trpc/server";
 import { redis } from "@nonrml/cache";
 
 /*

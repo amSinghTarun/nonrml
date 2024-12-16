@@ -16,7 +16,5 @@ export const creditNotesRouter = router({
     createCreditNote: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Create a discount coupon"}})
         .input(ZAddDiscountSchema)
-        .mutation( async ({ctx, input}) => {
-        return await addDiscount({ctx, input});
-    }),
+        .mutation( async ({ctx, input}) => await addDiscount({ctx, input})),
 })

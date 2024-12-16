@@ -1072,6 +1072,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@nonrml/rate-limit@workspace:*, @nonrml/rate-limit@workspace:packages/rate-limit":
+  version: 0.0.0-use.local
+  resolution: "@nonrml/rate-limit@workspace:packages/rate-limit"
+  dependencies:
+    "@upstash/ratelimit": "npm:^2.0.5"
+  languageName: unknown
+  linkType: soft
+
 "@nonrml/storage@workspace:*, @nonrml/storage@workspace:packages/storage":
   version: 0.0.0-use.local
   resolution: "@nonrml/storage@workspace:packages/storage"
@@ -1091,6 +1099,7 @@ __metadata:
     "@nonrml/otp": "workspace:*"
     "@nonrml/payment": "workspace:*"
     "@nonrml/prisma": "workspace:*"
+    "@nonrml/rate-limit": "workspace:*"
     "@nonrml/storage": "workspace:*"
     "@trpc/client": "npm:^10.45.2"
     "@trpc/next": "npm:^10.45.2"
@@ -2921,7 +2930,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@upstash/redis@npm:^1.34.0":
+"@upstash/core-analytics@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "@upstash/core-analytics@npm:0.0.10"
+  dependencies:
+    "@upstash/redis": "npm:^1.28.3"
+  checksum: 10c0/c90b1bfaf1f54eed8a48f2aa679f8e082083f49931cf08bd90a0a0035b010f65b6e7420268677f15df1d04687f7e5a9093320c591ef4dbd45d804ea83d890f3f
+  languageName: node
+  linkType: hard
+
+"@upstash/ratelimit@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "@upstash/ratelimit@npm:2.0.5"
+  dependencies:
+    "@upstash/core-analytics": "npm:^0.0.10"
+  peerDependencies:
+    "@upstash/redis": ^1.34.3
+  checksum: 10c0/9bc3c7d498557d5f896a0ce5b24bafe112cda9000f063e2e21c8e8e6a4d37b29858b48a186552f172066755e4ad536478637f9ac96270f2c0abbf4ecb6a3d897
+  languageName: node
+  linkType: hard
+
+"@upstash/redis@npm:^1.28.3, @upstash/redis@npm:^1.34.0":
   version: 1.34.3
   resolution: "@upstash/redis@npm:1.34.3"
   dependencies:

@@ -25,19 +25,31 @@ const Signin = () => {
     const onMobileSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setError(null) // Clear previous errors when a new request starts
-        let lengthError = false;
         try {
             if(mobileNumber.length != 10){
-                lengthError = true;
-                throw new Error("Mobile number should be 10 digit long")
+                setError("Mobile number should be 10 digit long");
+                return;
             }
-            await sendOTP.mutateAsync({contactNumber: mobileNumber});
             setSendOtp(true);
-        } catch (error) {
-            // if(error instanceof TRPCError && isNaN(+error.code) && error.code != "500")
-            //console.log("Error in sending otp", error)
-            lengthError ? setError("Mobile number should be 10 digit long")  : setError("Having some trouble, try after sometime")
+            !otpSent && await sendOTP.mutateAsync({contactNumber: mobileNumber});
+        } catch (error:any) {
+            setError(error.message ? error.message : "Having some trouble, try after sometime")
       };
+    };
+
+    const onOtpResend = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setError(null) // Clear previous errors when a new request starts
+        try {
+            if(mobileNumber.length != 10){
+                setError("Mobile number should be 10 digit long");
+                return;
+            }
+            setOtp("");
+            await sendOTP.mutateAsync({contactNumber: mobileNumber});
+        } catch (error:any) {
+            setError(error.message ? error.message : "Having some trouble, try after sometime")
+        };
     };
 
     const otpOnChange = (e: any) => {
@@ -69,44 +81,36 @@ const Signin = () => {
         <>
         <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none "></div>
         <div className="fixed flex flex-col w-screen justify-center items-center z-40 h-full">
-            <div className=" backdrop-blur-3xl rounded-xl shadow-sm divide-y divide-white/30 p-4 divide-dotted shadow-black/80 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
-                <div className = " flex flex-1 flex-col pb-4 rounded-t-xl ">
-                    <div className='text-left text-3xl text-black font-medium mb-2 '>
+            <div className=" backdrop-blur-3xl rounded-xl shadow-sm p-4 shadow-black/80 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
+                <div className = " flex flex-1 flex-col pb-2 rounded-t-xl ">
+                    <div className='text-left text-3xl text-black font-medium mb-1 '>
                         WELCOME BACK!
                     </div>
                     <div className='text-left text-xs text-black font-normal'>
                         Login for a better personalised experience
                     </div>
                 </div>
-                <div className='p-2 pt-4'> {
+                <div className='p-2 pb-3'> {
                     <Form onSubmit={otpSent ? onOTPSubmit : onMobileSubmit} >
                         {error && <div className='text-white text-xs bg-red-600 text-center p-2 rounded-xl'>{error}</div>}
-                        <div className='flex flex-row space-x-3'>
+                        <div className='flex flex-row'>
                             <FormInputField
-                                className='w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl'
+                                className={`w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl ${otpSent && "rounded-r-none"}`}
                                 required 
                                 value = {mobileNumber} 
                                 type = "string" 
                                 onChange = {otpSent ? ()=>{} : mobileNumberOnChange} placeholder='Enter Mobile Number . . .'
                             />
-                                {
-                                    otpSent && 
-                                    <div className='flex'>
-                                        <DecisionButton 
-                                            display='EDIT' 
-                                            onClickFnc={() => {setSendOtp(false), setOtp(""), setError(null)}}
-                                        />
-                                    </div>
-                                }
+                            { otpSent && <DecisionButton display='CHANGE' onClickFnc={() => {setSendOtp(false), setOtp(""), setError(null)}} /> }
                         </div>
                         { otpSent && 
-                            <FormInputField 
-                                className='w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl'
+                            < FormInputField 
+                                className={`w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl`}
                                 type="string" 
                                 value={otp} 
-                                required 
-                                onChange={otpOnChange} placeholder={'ENTER OTP . . .'} 
-                            /> 
+                                required
+                                onChange={otpOnChange} placeholder={'ENTER OTP . . .'}
+                            />
                         }
                         <FormSubmitButton 
                             type='submit'
@@ -115,6 +119,7 @@ const Signin = () => {
                         />
                     </Form>
                 }</div>
+                { otpSent && < span className='pl-3 text-xs text-left hover:cursor-pointer' onClick={ () => onOtpResend } > RESEND OTP ... </span> }
             </div>
         </div>
         </>

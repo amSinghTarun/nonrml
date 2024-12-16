@@ -22,6 +22,6 @@ export const cacheServices = {
     },
     addSets: async (name: string, set:string[] | string) => {
         const redisConnection = await cacheServices.initializeRedisConnection();
-        await redisConnection.sadd(name, ...set); 
+        await redisConnection.sadd(name, ...set);
     }, 
-}
+};

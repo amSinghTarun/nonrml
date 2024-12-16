@@ -1,5 +1,5 @@
+import { Redis } from "@upstash/redis";
 import dotenv from "dotenv"
-import { Redis } from "@upstash/redis"
 import path from "path";
 
 dotenv.config({path: path.resolve("../../packages/cache/.env")})

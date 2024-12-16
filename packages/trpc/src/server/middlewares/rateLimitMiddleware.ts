@@ -1,19 +1,13 @@
-// import { rateLimit } from 'express-rate-limit'
-// import { TRPCError } from "@trpc/server";
-// import { middleware } from "../trpc";
-// import { TRPCContext } from "../contexts";
+import { TRPCError } from "@trpc/server";
+import { middleware } from "../trpc";
+import { ratelimit } from "@nonrml/rate-limit"
 
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000,
-// 	limit: 100,
-// 	standardHeaders: true,
-// 	legacyHeaders: false,
-// });
-
-// export const rateLimitLoginMiddleware = middleware( async ({ctx, next}) => {
-//     if( !ctx.req || !ctx.res )
-//         throw new TRPCError({code: "UNAUTHORIZED", message: "Try after sometime"});
-// 	const rateLimited = await limiter(ctx.req, ctx.res);
-// 	console.log(rateLimited)
-// 	return next();
-// });
+export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) => {
+    if( !ctx.req )
+        throw new TRPCError({code: "UNAUTHORIZED", message: "Try after sometime"})
+	const rateLimitedIP = await ratelimit.ip.limit(`${ctx.req.headers.get("x-forwarded-for")}`);
+	const rateLimitedMobileNumber = await ratelimit.mobileNumber.limit(`${input.contactNumber}`);
+    if( !rateLimitedIP.success || !rateLimitedMobileNumber.success)
+        throw new Error("Too many request, try after sometime")
+	return next();
+});

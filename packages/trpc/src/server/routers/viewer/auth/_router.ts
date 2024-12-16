@@ -1,13 +1,15 @@
 import { router } from "../../../trpc";
 import { ZSendOTPSchema, ZVerifyOTPSchema } from "./sign.schema";
 import {sendLoginOTP, verifyOTP } from "./sign.handler";
-import {  publicProcedure } from "../../../procedures/publicProcedure";
+import { publicProcedure } from "../../../procedures/publicProcedure";
+import { rateLimitLoginMiddleware } from "../../../middlewares/rateLimitMiddleware";
 
 export const authRouter = router({
     sendOTP: publicProcedure
         .input(ZSendOTPSchema)
+        .use(rateLimitLoginMiddleware)
         .mutation( async ({ctx, input}) => {
-            return await sendLoginOTP({ctx, input})
+            return await sendLoginOTP({ctx, input})
         }),
     verifyOTP: publicProcedure
         .input(ZVerifyOTPSchema)

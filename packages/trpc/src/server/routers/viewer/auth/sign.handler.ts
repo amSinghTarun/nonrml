@@ -4,6 +4,7 @@ import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TRPCResponseStatus } from "@nonrml/common";
 import { sendOTP } from "@nonrml/otp";
 import { TRPCError } from "@trpc/server";
+import { ratelimit } from "@nonrml/rate-limit";
 
 const createOTP = (len: number) : number => Number(Math.floor(100000 + Math.random() * 899999))
 
@@ -11,11 +12,13 @@ export const sendLoginOTP = async ({ctx, input}: TRPCRequestOptions<TSendOTPSche
     const prisma = ctx.prisma;
     input = input!;
     try{
+        // ratelimit.mobileNumber.limit(input.contactNumber);
+        // add some error into here
         const otp = createOTP(6);
         const otpExpiry = Date.now() + 900000 //15 mins
         
         console.log(otp)
-        sendOTP(otp, input.contactNumber); 
+        // sendOTP(otp, input.contactNumber); 
         
         await prisma.user.upsert({
             where: {
@@ -36,7 +39,7 @@ export const sendLoginOTP = async ({ctx, input}: TRPCRequestOptions<TSendOTPSche
         return { status: TRPCResponseStatus.SUCCESS, message: "OTP send", data: {}};
     } catch(error:any) {
         //console.log("Error in sending OTP from SignIn", error);
-        throw TRPCCustomError({code: 500, message: "Some error occured, Please try after sometime"});
+        throw TRPCCustomError(error);
     }
 }
 

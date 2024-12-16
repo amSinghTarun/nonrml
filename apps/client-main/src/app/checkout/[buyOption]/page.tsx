@@ -8,7 +8,6 @@ import { useSession } from "next-auth/react";
 let reloads = 1;
 
 const CheckoutPage = ({params}: {params: {buyOption: string}}) => {
-    console.log(++reloads);
     const buyOption = params.buyOption;
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     const { data: session } = useSession();
