@@ -8,14 +8,6 @@ interface decisionButtonProps {
     onClickFnc: () => void
 }
 
-export const DecisionButton : React.FC<decisionButtonProps> = ({display, onClickFnc}) => {
-    return (
-        <button className='p-3 text-xs rounded-r-xl text-white bg-black hover:text-red-500 hover:bg-red-200' onClick={onClickFnc}>
-            {display}
-        </button>
-    )
-};
-
 interface button3D {
     display: string,
     onClick: () => void,

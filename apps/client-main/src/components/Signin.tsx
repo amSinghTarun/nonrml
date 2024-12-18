@@ -2,52 +2,62 @@
 
 import { FormEvent, useRef, useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { TRPCClientError } from "@trpc/client";
 import { trpc } from '@/app/_trpc/client';
 import { Form, FormInputField, FormSubmitButton } from './ui/form';
-import { DecisionButton } from './ui/buttons';
 
 const Signin = () => {
     const [otpSent, setSendOtp] = useState(false)
     const [mobileNumber, setMobileNumber] = useState("");
     const [error, setError] = useState<string | null>(null)
     const [otp, setOtp] = useState("");
+    const sendingOTP = useRef(false);
+    const verifyingOTP = useRef(false);
 
     const sendOTP = trpc.viewer.auth.sendOTP.useMutation();
     const verifyOTP = trpc.viewer.auth.verifyOTP.useMutation();
 
     const mobileNumberOnChange = (e:any) => {
-        setError(null)
+        setError(null);
+        setSendOtp(false)
         const value = e.target.value.replace(/\D/g, "");
         value.length <= 10 && setMobileNumber(value)
     };
 
     const onMobileSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setError(null) // Clear previous errors when a new request starts
         try {
+            e.preventDefault()
+            setError(null) // Clear previous errors when a new request starts
+            if(sendingOTP.current)
+                return
+            sendingOTP.current = true;
             if(mobileNumber.length != 10){
                 setError("Mobile number should be 10 digit long");
                 return;
             }
-            setSendOtp(true);
             !otpSent && await sendOTP.mutateAsync({contactNumber: mobileNumber});
+            setSendOtp(true);
+            sendingOTP.current = false
         } catch (error:any) {
+            sendingOTP.current = false;
             setError(error.message ? error.message : "Having some trouble, try after sometime")
       };
     };
 
-    const onOtpResend = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setError(null) // Clear previous errors when a new request starts
+    const onOtpResend = async () => {
         try {
+            setError(null) // Clear previous errors when a new request starts
+            setOtp("");
+            if(sendingOTP.current)
+                return
+            sendingOTP.current = true;
             if(mobileNumber.length != 10){
                 setError("Mobile number should be 10 digit long");
                 return;
             }
-            setOtp("");
             await sendOTP.mutateAsync({contactNumber: mobileNumber});
+            sendingOTP.current = false
         } catch (error:any) {
+            sendingOTP.current = false
             setError(error.message ? error.message : "Having some trouble, try after sometime")
         };
     };
@@ -63,6 +73,9 @@ const Signin = () => {
         setError(null)
         let lengthError = false;
         try{
+            if(verifyingOTP.current)
+                return;
+            verifyingOTP.current = true;
             if(otp.length != 6){
                 lengthError = true;
                 throw new Error("OTP should be 6 digit long");
@@ -70,9 +83,11 @@ const Signin = () => {
             const userVerified = await verifyOTP.mutateAsync({contactNumber: mobileNumber, otp: Number(otp)});
             if(userVerified.data.id)
                 signIn("credentials", {id: userVerified.data.id});
+            verifyingOTP.current = false
         } catch(error:any) {
             // for type validation we need to check for array.
             //console.log(error)
+            verifyingOTP.current = false
             lengthError ?  setError("OTP should be 6 digit long") : setError(typeof error.message == "object" ? JSON.parse(error.message)[0].message : error.message);
         };
     };
@@ -95,31 +110,33 @@ const Signin = () => {
                         {error && <div className='text-white text-xs bg-red-600 text-center p-2 rounded-xl'>{error}</div>}
                         <div className='flex flex-row'>
                             <FormInputField
-                                className={`w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl ${otpSent && "rounded-r-none"}`}
+                                className={` text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl ${otpSent ? "rounded-r-none basis-4/5 w-full" : "w-full"}`}
                                 required 
                                 value = {mobileNumber} 
                                 type = "string" 
                                 onChange = {otpSent ? ()=>{} : mobileNumberOnChange} placeholder='Enter Mobile Number . . .'
                             />
-                            { otpSent && <DecisionButton display='CHANGE' onClickFnc={() => {setSendOtp(false), setOtp(""), setError(null)}} /> }
+                            { otpSent && <button type="button" className=' p-2 basis-1/5 text-xs rounded-r-xl text-white bg-black hover:text-red-500 hover:bg-red-200' onClick={mobileNumberOnChange}> CHANGE</button> }
                         </div>
                         { otpSent && 
+                            <div className='flex flex-row'>
                             < FormInputField 
-                                className={`w-full text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl`}
+                                className={`w-full basis-4/5 text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl rounded-r-none`}
                                 type="string" 
                                 value={otp} 
                                 required
                                 onChange={otpOnChange} placeholder={'ENTER OTP . . .'}
                             />
+                            <button type='button' className='basis-1/5 rounded-r-xl text-white bg-black text-center hover:cursor-pointer hover:bg-white hover:text-black text-xs p-2' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
+                        </div>
                         }
                         <FormSubmitButton 
                             type='submit'
-                            label={otpSent ? "VERIFY OTP" : "SEND OTP"}
-                            className='p-3'
+                            label={otpSent ? (verifyingOTP.current ? "VERIFYING..." : "VERIFY OTP") : (sendingOTP.current ? "SENDING..." : "SEND OTP")}
+                            className={`p-3 `}
                         />
                     </Form>
                 }</div>
-                { otpSent && < span className='pl-3 text-xs text-left hover:cursor-pointer' onClick={ () => onOtpResend } > RESEND OTP ... </span> }
             </div>
         </div>
         </>

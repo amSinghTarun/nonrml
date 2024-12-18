@@ -8,8 +8,7 @@ let redisConnection : any = null;
 
 export const connectToRedis = () => {
     try {
-        if(redisConnection)
-            return redisConnection;
+        if(redisConnection) return redisConnection;
         
         redisConnection = new Redis({
             url:process.env.UPSTASH_REDIS_REST_URL,

@@ -35,7 +35,7 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
     const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    const { cartItems } = useCartItemStore.getState();
+    const { cartItems } = useCartItemStore();
     const { buyNowItems } = useBuyNowItemsStore()
 
     const router = useRouter();

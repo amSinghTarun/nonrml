@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "client-main": "./apps/client-main",
     "ts-loader": "^9.5.1"
   },
   "packageManager": "yarn@4.5.0"

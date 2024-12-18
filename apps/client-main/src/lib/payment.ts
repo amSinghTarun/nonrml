@@ -22,7 +22,6 @@ function loadScript(src) {
 }
     
 export const displayRazorpay = async ({rzpOrder}: {rzpOrder: rzpOrder}) => {
-
     const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
     if (!res){
         alert('Razropay failed to load!!')
