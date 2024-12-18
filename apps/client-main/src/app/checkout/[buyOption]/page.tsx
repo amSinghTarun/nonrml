@@ -10,11 +10,13 @@ let reloads = 1;
 const CheckoutPage = ({params}: {params: {buyOption: string}}) => {
     const buyOption = params.buyOption;
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
-    const { data: session } = useSession();
-    console.log("SESSION -------- ", !session) 
-    if(!session) 
-        if(appbarUtil === "CART" || appbarUtil == "") 
-            setAppbarUtil("USER_ACCESSIBILITY")
+    const { data: session } = useSession({
+        required: true,
+        onUnauthenticated: () => {
+            if(appbarUtil === "CART" || appbarUtil == "") 
+                setAppbarUtil("USER_ACCESSIBILITY") 
+        }
+    });
 
     return (
         <>
