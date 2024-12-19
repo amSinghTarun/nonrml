@@ -17,31 +17,32 @@ interface CartItemState {
   cartItems : cartItem,
   setCartItems : (cartItem: cartItem) => void,
   alterQuantity: (productId: number, quantity: number) => void,
-  removeProduct: (productId: number) => void
+  removeProduct: (productId: number) => void,
+  reset: () => void
 }
 
 export const useCartItemStore = create<CartItemState>()(
   persist(
-    ( set, get ) => ({
+    ( set ) => ({
       cartItems: {},
       setCartItems: (cartItem) =>  {
-        set((state) => {
-          return { cartItems: {...state.cartItems, ...cartItem} }
-        })
+        set((state) => ({ cartItems: {...state.cartItems, ...cartItem} }) )
       },
       alterQuantity : (productId: number, quantity: number) => {
-        set( (state) => {
-          return { cartItems: { ...state.cartItems, [productId]: { ...state.cartItems[productId], quantity: quantity}}}
-        })
+        set( (state) => ({ cartItems: { ...state.cartItems, [productId]: { ...state.cartItems[productId], quantity: quantity}}}))
       },
       removeProduct: (productId: number) => {
         set( (state) => {
           const cartItems = {...state.cartItems};
           delete cartItems[productId]
-          return { cartItems: cartItems};
-        })
-      }
+          return { cartItems: cartItems };
+        });
+      },
+      reset: () => set((state) => ({ cartItems: {} })),
     }),
-    {name: `cart-nonrml`}
+    { 
+      name: `cart-nonrml`,
+      onRehydrateStorage: (state) => (state.reset)
+    }
   )
 )

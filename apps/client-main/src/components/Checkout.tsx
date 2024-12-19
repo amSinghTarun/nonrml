@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { deleteAddress } from "@/app/actions/address.action";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
-import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
+import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
@@ -19,7 +19,7 @@ import { applyCreditNote } from "@/app/actions/creditNotes.action";
 type AddressesTRPCOutput = RouterOutput["viewer"]["address"]["getAddresses"]["data"]
 interface AddressProps {
     className?: string,
-    buyOption: string
+    buyOption: string|null
 }
 
 const convertStringToINR = (currencyString: number) => {
@@ -47,10 +47,10 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
         setAction("EDITADDRESS");
     }
 
-    const orderProducts = buyOption == '1' ? buyNowItems : buyOption == '2' ? cartItems : {}
+    const orderProducts = !buyOption ? cartItems : buyNowItems;
     if(Object.keys(orderProducts).length == 0)
-        router.push("/")
-    
+        router.back();
+
     useEffect( () => {
         totalAmount.current = 0;
         Object.values(orderProducts).map((orderProduct) => {
@@ -61,7 +61,8 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
     const userAddresses = trpc.viewer.address.getAddresses.useQuery()
     useEffect( () => {
         userAddresses.refetch()
-    }, [action == "SHOWADDRESS", userAddresses])
+    }, [])
+    // resolve this, it cause many rerenders
 
     const handlePayment = async () => {
         if(!selectedAddress) {
@@ -72,7 +73,7 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
             return
         }
         const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
-        displayRazorpay({rzpOrder: data});
+        displayRazorpay({rzpOrder: data, cartOrder: !buyOption ? true : false});
     }
 
     const handleApplyCreditNote = async () => {

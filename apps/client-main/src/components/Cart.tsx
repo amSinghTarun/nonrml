@@ -30,8 +30,7 @@ export const CartMenu = () => {
 
   const handleOnDelete = (variantId: number) => (variantId in cartItems) && removeProduct(variantId)
 
-
-  const handleCheckoutRedirect = () => router.push("/checkout/2")
+  const handleCheckoutRedirect = () => router.push("/checkout")
 
   return (
     <>

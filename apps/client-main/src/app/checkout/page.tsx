@@ -4,11 +4,11 @@ import { Checkout } from "@/components/Checkout"
 import React from "react";
 import { useSetAppbarUtilStore } from "@/store/atoms";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
-let reloads = 1;
-
-const CheckoutPage = ({params}: {params: {buyOption: string}}) => {
-    const buyOption = params.buyOption;
+const CheckoutPage = () => {
+    const searchParams = useSearchParams();
+    const buyOption = searchParams.get('purchase');
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     const { data: session } = useSession({
         required: true,

@@ -18,7 +18,6 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     const [error, setError] = useState<string|null>(null);
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
-    let submitForm = true;
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault();
@@ -42,7 +41,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
             setError(error.message)
         }
     }
-
+    
     return (
         <div className={cn("rounded-xl h-[80%] bg-white/10 w-[90%] flex flex-col backdrop-blur-3xl p-4 text-center", creditNoteProps.className)}>
             <h1 className={`flex text-black justify-center ${!creditNoteDetails && "place-items-end basis-1/3"}  text-4xl mb-1`}>

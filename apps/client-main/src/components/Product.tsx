@@ -115,7 +115,7 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                                     setBuyNowItems({
                                         [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
                                     })
-                                    router.push(`/checkout/1`)
+                                    router.push(`/checkout?purchase=1`)
                                 }} />
                             </div>
                             {

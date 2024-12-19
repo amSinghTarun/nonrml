@@ -1,10 +1,10 @@
 "use client"
 
 import { RouterOutput, trpc } from "@/app/_trpc/client"
-import { serverClient } from "@/app/_trpc/serverClient"
 import { changePaymentStatus, verifyRzpOrder } from "@/app/actions/payment.action"
 import { createRzpConfig } from "@nonrml/payment"
-import { redirect } from "next/navigation"
+import { useCartItemStore } from "@/store/atoms"
+
 type rzpOrder = RouterOutput["viewer"]["orders"]["initiateOrder"]["data"]
 
 function loadScript(src) {
@@ -21,14 +21,20 @@ function loadScript(src) {
   })
 }
     
-export const displayRazorpay = async ({rzpOrder}: {rzpOrder: rzpOrder}) => {
+export const displayRazorpay = async ({rzpOrder, cartOrder}: {rzpOrder: rzpOrder, cartOrder: boolean}) => {
     const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
     if (!res){
         alert('Razropay failed to load!!')
         return 
     }
-    //console.log(rzpOrder)
+
     const options = createRzpConfig(rzpOrder, async (response) => {
+
+      if(cartOrder){
+        useCartItemStore.persist.clearStorage();
+        useCartItemStore.persist.rehydrate();
+      }
+      
       const raizorpayPaymentIad = response.razorpay_payment_id;
       const raizorpayOrderId = response.razorpay_order_id;
       const raizorpaySignature = response.razorpay_signature;
