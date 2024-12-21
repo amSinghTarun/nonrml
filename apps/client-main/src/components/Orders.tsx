@@ -2,7 +2,7 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client";
-import { Button3D } from "@/components/ui/buttons";
+import { GeneralButton } from "@/components/ui/buttons";
 import Link from "next/link";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
@@ -27,9 +27,13 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
         {
             userOrders.isSuccess && userOrders.data.data.length == 0 ? 
             <article className="flex flex-col p-3 overflow-x-scroll justify-center w-full h-full">
-                <div className="flex flex-col  space-y-5 w-full h-auto">
+                <div className="flex flex-col space-y-5 items-center w-full h-auto">
                     <div className="flex justify-center items-center font-medium text-sm ">You Haven't Placed Any Orders Yet :(</div>
-                    <Button3D display="ENTER STORE" className3dBody="w-auto" className="flex bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-normal" translateZ="120" onClick={() => {}} />
+                    <GeneralButton 
+                        display="ENTER STORE" 
+                        className="flex w-[60%] bg-black hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black items-center justify-center rounded-xl p-10 text-white text-md font-medium" 
+                        onClick={() => {}} 
+                    />
                 </div> 
             </article>
             :

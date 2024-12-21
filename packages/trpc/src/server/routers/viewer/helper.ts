@@ -67,7 +67,7 @@ export const calculateDiscountedValue = (discountValue: number, discountType : p
     return price - discountAmount;
 }
 
-export const convertTRPCErrorCodeToStatusCode = (statusCode: number) => {
+export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY) => {
     const errorStatusToTRPCErrorCodeMap : { [ x: string ] : number } = {
        "BAD_REQUEST" : 400,
        "INTERNAL_SERVER_ERROR" : 500,
@@ -82,19 +82,19 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: number) => {
        "PAYLOAD_TOO_LARGE" : 413,
        "UNPROCESSABLE_CONTENT" : 422,
        "TOO_MANY_REQUESTS" : 429,
-       "CLIENT_CLOSED_REQUEST" : 499 
+       "CLIENT_CLOSED_REQUEST" : 499
     };
     if(!(statusCode in errorStatusToTRPCErrorCodeMap))
-        statusCode = 500;
+        statusCode = "INTERNAL_SERVER_ERROR";
     return errorStatusToTRPCErrorCodeMap[statusCode]!;
 }
 
 export const TRPCCustomError = (error: any) => {
-    console.log("\n\n ---------- ", error, "\n\n --------------------------------------------------")
-    //console.log(error.code)
-    const errorCode = error.code ? convertTRPCErrorCodeToStatusCode(error.code) : 500;
-    const finalError = new Error(errorCode != 500 ? error.message : "Having some issue rn, Try after sometime");
-    finalError.code = errorCode;
-    finalError.cause = error.cause ?? null;
+    console.log("\n\n\n ------------------ ", error, "\n\n -----------------------------------------------")
+    const errorCode = error.code as TRPC_ERROR_CODE_KEY ?? "INTERNAL_SERVER_ERROR";
+    const finalError = new TRPCError({
+        message: errorCode !== "INTERNAL_SERVER_ERROR" ? error.message : "Having some issue rn, Try after sometime",
+        code: errorCode
+    });
     throw finalError;
 }

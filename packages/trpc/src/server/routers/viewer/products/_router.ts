@@ -1,8 +1,8 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { addProduct, getProduct, getProducts, getProductsSizes } from "./product.handler";
-import { ZAddProductSchema, ZGetProductSchema, ZGetProductsSchema, ZGetProductsSizes } from "./product.schema";
+import { addProduct, getProduct, getProducts, getProductsSizes, verifyCheckoutProducts } from "./product.handler";
+import { ZAddProductSchema, ZGetProductSchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema } from "./product.schema";
 
 export const productRouter = router({
     getProduct: publicProcedure
@@ -21,6 +21,9 @@ export const productRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Add new product"}})
         .input(ZGetProductsSizes)
         .query( async ({ctx, input}) => await getProductsSizes({ctx, input}) ),
+    verifyCheckoutProducts: publicProtectedProcedure
+        .input(ZVerifyCheckoutProductsSchema)
+        .query( async ({ctx, input}) => await verifyCheckoutProducts({ctx, input}))
     // editProduct : adminProcedure
     //     .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
     //     .input(ZEditProductSchema)

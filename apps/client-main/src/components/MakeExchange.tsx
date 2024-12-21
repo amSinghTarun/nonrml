@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { RouterOutput } from "@/app/_trpc/client";
-import { Button3D, QuantitySelectButton } from "./ui/buttons";
+import { QuantitySelectButton, GeneralButton } from "./ui/buttons";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Textarea } from "@/components/ui/textarea"
 import { InitiateReturnOrder } from "@/app/actions/order.actions";
@@ -182,12 +182,9 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
                     <div className="text-xl">{Object.values(selectedProducts).reduce((total, product) => total + product.quantity, 0)} Item(s)</div>
                 </div>
                 <div className="basis-2/3">
-                    <Button3D 
+                    <GeneralButton 
+                        className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" 
                         display="PROCEED" 
-                        className3d="justify-end" 
-                        className3dBody="w-[100%] h-[100%]" 
-                        className="flex bg-black items-center justify-center rounded-xl h-full w-full text-white text-sm font-normal"
-                        translateZ="50" 
                         onClick={handleSubmit}
                     />
                 </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import { Button3D, QuantitySelectButton } from "./ui/buttons";
+import { GeneralButton, QuantitySelectButton } from "./ui/buttons";
 import Image from "next/image";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useRef } from "react";
@@ -39,10 +39,14 @@ export const CartMenu = () => {
       <article className="backdrop-blur-3xl shadow-sm shadow-black flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-tr-xl rounded-tl-xl">
       {
         Object.keys(cartItems).length == 0 ?
-          <div className="flex flex-col p-3 overflow-x-scroll justify-between w-full h-full pt-20">
+          <div className="flex flex-col p-3 overflow-x-scroll justify-center w-full h-full">
             <div className="flex flex-col justify-center items-center space-y-5 w-full">
-              <div className="font-medium text-sm ">YOUR CART IS EMPTY</div>
-              <Button3D display="CONTINUE SHOPPING" className3dBody="w-auto" className="flex bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-normal" translateZ="50" onClick={() => setAppbarUtil("")} />
+              <div className="font-medium animate-bounce text-sm ">YOUR CART IS EMPTY</div>
+              <GeneralButton 
+                className="flex animate-bounce hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-medium" 
+                display="CONTINUE SHOPPING" 
+                onClick={() => setAppbarUtil("")} 
+              />
             </div> 
           </div>
           :
@@ -63,6 +67,7 @@ export const CartMenu = () => {
                     width={80} 
                     height={20}
                     className="rounded-xl"
+                    onClick={() => router.push(`/products/${cartItems[+variantId].productName.toLowerCase().replaceAll(" ", "-")}_${cartItems[+variantId].productId}`)}
                   ></Image>
                   {/* details part - column */}
                   <div className="flex flex-col flex-1 space-y-1">
@@ -87,7 +92,7 @@ export const CartMenu = () => {
               <text className="text-xl">{convertStringToINR(cartTotal.current)}</text>
             </div>
             <div className="basis-1/2">
-              <Button3D className=" h-full w-full backdrop-blur-3xl bg-black text-white shadow-0 font-normal" className3d="px-5" translateZ="40" display="Checkout" onClick={ handleCheckoutRedirect }/>
+              <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={ handleCheckoutRedirect }/>
             </div>
           </div>
         </div>

@@ -25,8 +25,17 @@ export const useCartItemStore = create<CartItemState>()(
   persist(
     ( set ) => ({
       cartItems: {},
-      setCartItems: (cartItem) =>  {
-        set((state) => ({ cartItems: {...state.cartItems, ...cartItem} }) )
+      setCartItems: (cartItemsToAdd) =>  {
+        console.log(cartItemsToAdd);
+        set((state) => { 
+          let finalCartItem ={ ...state.cartItems, ...cartItemsToAdd};
+          for(let cartItemId of Object.keys(cartItemsToAdd)) {
+            if( cartItemsToAdd[+cartItemId].quantity <= 0 ) {
+              delete finalCartItem[+cartItemId];
+            }
+          }
+          return { cartItems: finalCartItem };
+        })
       },
       alterQuantity : (productId: number, quantity: number) => {
         set( (state) => ({ cartItems: { ...state.cartItems, [productId]: { ...state.cartItems[productId], quantity: quantity}}}))
@@ -41,8 +50,7 @@ export const useCartItemStore = create<CartItemState>()(
       reset: () => set((state) => ({ cartItems: {} })),
     }),
     { 
-      name: `cart-nonrml`,
-      onRehydrateStorage: (state) => (state.reset)
+      name: `cart-nonrml`
     }
   )
 )

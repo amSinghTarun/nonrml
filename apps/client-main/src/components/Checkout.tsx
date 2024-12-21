@@ -1,22 +1,24 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react";
-import CanclePurchaseDialog from "@/components/CancelPurchaseDialog";
-import { Button3D, GeneralButton} from "@/components/ui/buttons";
+import CanclePurchaseDialog from "@/components/dialog/CancelPurchaseDialog";
 import { AddressCard } from "@/components/cards/AddressCard"
 import { cn } from "@/lib/utils";
 import { deleteAddress } from "@/app/actions/address.action";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { initiateOrder } from "@/app/actions/order.actions";
 import { applyCreditNote } from "@/app/actions/creditNotes.action";
+import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
+import { GeneralButton } from "./ui/buttons";
 
 type AddressesTRPCOutput = RouterOutput["viewer"]["address"]["getAddresses"]["data"]
+
 interface AddressProps {
     className?: string,
     buyOption: string|null
@@ -35,10 +37,12 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
     const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    const { cartItems } = useCartItemStore();
-    const { buyNowItems } = useBuyNowItemsStore()
+    const { cartItems, setCartItems } = useCartItemStore();
+    const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
+    const [ quantityChange, setQuantityChange ] = useState(false);
 
     const router = useRouter();
+    const orderInProcess = useRef(false);
     const couponCode = useRef("");
     const totalAmount = useRef(0);
 
@@ -48,7 +52,8 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
     }
 
     const orderProducts = !buyOption ? cartItems : buyNowItems;
-    if(Object.keys(orderProducts).length == 0)
+    console.log("ORDER_IN_PROCESS", orderInProcess.current);
+    if(Object.keys(orderProducts).length == 0 && !orderInProcess.current)
         router.back();
 
     useEffect( () => {
@@ -56,30 +61,56 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
         Object.values(orderProducts).map((orderProduct) => {
             totalAmount.current += orderProduct.price * orderProduct.quantity;
         })
-    })
+    });
 
     const userAddresses = trpc.viewer.address.getAddresses.useQuery()
     useEffect( () => {
         userAddresses.refetch()
-    }, [])
-    // resolve this, it cause many rerenders
+    }, []) // resolve this, it cause many rerenders
+
+    // to end the page session after 10 mins
+    useEffect(() => {
+        const timer = setTimeout(() => {
+          router.back();
+        }, 600000);
+        return () => clearTimeout(timer);
+    }, [router]);
 
     const handlePayment = async () => {
-        if(!selectedAddress) {
-            toast({
-                duration: 1500,
-                title: "Please Select An Address"
-            });
-            return
+        try{
+            if(!selectedAddress) {
+                toast({
+                    duration: 1500,
+                    title: "Please Select An Address"
+                });
+                return
+            }
+            orderInProcess.current = true;
+            const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
+            if(data.updateQuantity){
+                setQuantityChange(true);
+                !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
+                return ;
+            }
+            displayRazorpay({rzpOrder: data, cartOrder: !buyOption ? true : false});
+            return;
+        } catch(error: any) {
+            // toast({
+            //     duration: 3000,
+            //     title: error.message,
+            //     variant: "destructive"
+            // });
+            // console.log("ERROR CODE IN INITIATE ORDER", error.code)
+            // if(error.code == "BAD_REQUEST"){
+            //     reset();
+            //     router.back();
+            // }
         }
-        const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
-        displayRazorpay({rzpOrder: data, cartOrder: !buyOption ? true : false});
     }
 
     const handleApplyCreditNote = async () => {
         try{
             const creditNoteApplied = await applyCreditNote(couponCode.current, totalAmount.current);
-            //console.log(creditNoteApplied)
             setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
         } catch(error:any){
             toast({
@@ -92,7 +123,8 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
 
     return (
             <div className={cn("rounded-xl  bg-white/10 backdrop-blur-3xl h-full w-full p-2", className)}>
-                <CanclePurchaseDialog />
+                < CanclePurchaseDialog />
+                { quantityChange ? <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false); setAction("ORDER") }}></QuantityChangeDialog> : <></> }
                 <div className="divide-white/40 divide-y w-[100%] h-[100%] flex flex-col">
                     {action == "ADDADDRESS" && <AddAddress onCancelClick={()=>{setAction("SHOWADDRESS")}}/>}
                     {action =="EDITADDRESS" && selectedAddress && <EditAddress address={selectedAddress} onCancelClick={()=>{setAction("SHOWADDRESS")}}/>}
@@ -150,10 +182,18 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
                             Object.keys(orderProducts).map((variantId, index) => (
                                 <div 
                                     className=" space-x-3 backdrop-blur-3xl flex flex-row text-sm shadow-sm shadow-black/15 p-2 rounded-xl"
+                                    key={index}
                                 >
-                                    <Image src={`${orderProducts[+variantId].productImage}`} alt="product image" width={70} height={50} sizes="100vw"/>
+                                    <Image 
+                                        src={`${orderProducts[+variantId].productImage}`} 
+                                        alt="product image" 
+                                        width={70} 
+                                        height={50} 
+                                        sizes="100vw"
+                                        className="rounded-xl"
+                                    />
                                     <div className="flex flex-col">
-                                        <div className="flex flex-row">{orderProducts[+variantId].productName}</div>
+                                        <div className="flex flex-row">{orderProducts[+variantId].productName.toUpperCase()}</div>
                                         <div className="flex flex-row">{convertStringToINR(orderProducts[+variantId].price)}</div>
                                         <div className="flex flex-row">Size: {orderProducts[+variantId].size}</div>
                                         <div className="flex flex-row">Quantity: {orderProducts[+variantId].quantity}</div>
@@ -224,7 +264,7 @@ export const Checkout = ({className, buyOption}: AddressProps) => {
                             <text className="text-xl">{convertStringToINR(couponValue?.orderValue ?? totalAmount.current)}</text>
                         </div>
                         <div className="basis-1/2 w-[100%] h-full">
-                            <Button3D display="PAY NOW" className=" w-full h-full bg-black text-white hover:bg-white hover:text-black" onClick={handlePayment} />
+                            <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="PAY NOW" onClick={handlePayment} />
                         </div>
                     </article>
                 </div>

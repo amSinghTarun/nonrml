@@ -19,7 +19,14 @@ interface BuyNowItemsState {
 
 export const useBuyNowItemsStore = create<BuyNowItemsState>()(
     (set) => ({
-      buyNowItems: {},
-      setBuyNowItems: (item) =>  set((state) => ({buyNowItems: {...state.buyNowItems, ...item}}))
+        buyNowItems: {},
+        setBuyNowItems: (item) =>  set( (state) => { 
+            // buynow will only have 1 at max all time, coz 1 can only buy 1 item from buy it now
+            for(let itemId of Object.keys(item)){
+                if(item[+itemId].quantity <= 0)
+                    return { buyNowItems: {} }
+            }
+            return { buyNowItems: item } 
+        })
     })
 );

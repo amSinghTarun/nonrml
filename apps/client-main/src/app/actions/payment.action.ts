@@ -8,10 +8,14 @@ export const verifyRzpOrder = async ({razorpayPaymentId, razorpayOrderId, razorp
     // if (!session?.user.id) throw new Error("UNAUTHORISED ACTION, you must first login");
     const response = await (await serverClient()).viewer.orders.verifyOrder({razorpayPaymentId, razorpayOrderId, razorpaySignature})
     if(response.status == "SUCCESS" && response.data.orderId) {
-        redirect(`/order/${response.data.orderId}`)
-        //Should add a param to this route so that if the param is present then clean the cart;
+        console.log("SUCCESSFULL")
+        // redirect(`/order/${response.data.orderId}`)
+        // redirect(`/contact-us`)
+        //     //Should add a param to this route so that if the param is present then clean the cart;
     }
+    console.log("FAILED")
     return response;
+
 };
 
 export const changePaymentStatus = async ({orderId, paymentStatus}: {orderId: string, paymentStatus: 'failed'|'paid'}) => {

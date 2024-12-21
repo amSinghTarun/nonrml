@@ -7,6 +7,7 @@ import {
   TGetProductSchema,
   TGetProductsSchema,
   TGetProductsSizes,
+  TVerifyCheckoutProductsSchema
 } from "./product.schema";
 import { Prisma, prisma } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";;
@@ -279,6 +280,62 @@ export const addProduct = async ({
     throw TRPCCustomError(error);
   }
 };
+
+export const verifyCheckoutProducts = async ({ctx, input} : TRPCRequestOptions<TVerifyCheckoutProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!;
+  try{ 
+    const productVariantIds = Object.keys(input.orderProducts).map(Number);
+        const productValidation = await prisma.productVariants.findMany({
+            where: {
+                id: {
+                    in: productVariantIds
+                }
+            },
+            select: {
+                id: true,
+                product:{
+                    select:{
+                        price: true,
+                        name: true
+                    }
+                },
+                inventory: {
+                    select: {
+                        quantity: true,
+                        baseSkuInventory: {
+                            select: {
+                                quantity: true
+                            }
+                        }
+                    },
+                },
+            }
+        });
+
+        // Verify product variants and quantities and price
+        if(productValidation.length !== Object.keys(input.orderProducts).length)
+            throw new TRPCError({code: "BAD_REQUEST", message: "Invalid product variant ID"});
+        for (const variant of productValidation) {
+            const orderProduct = input.orderProducts[variant.id];
+            if ( 1 < orderProduct!.quantity ) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: `Insufficient quantity for ${variant.product.name}`
+                });
+            }
+            if (+variant.product.price !== orderProduct!.price) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: `Price mismatch for ${variant.product.name}`
+                });
+            }
+            // orderTotal += (+variant.product.price * orderProduct!.quantity);
+        }
+  } catch(error) {
+    throw TRPCCustomError(error);
+  }
+}
 
 export const editProduct = async ({
   ctx,

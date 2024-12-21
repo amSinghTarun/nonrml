@@ -1,31 +1,10 @@
 import Link, { LinkProps } from "next/link";
 import { cn } from "@/lib/utils";
-import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import { useFormStatus } from "react-dom";
 
 interface decisionButtonProps {
     display: string,
     onClickFnc: () => void
 }
-
-interface button3D {
-    display: string,
-    onClick: () => void,
-    className?: string
-    className3d?: string,
-    className3dBody?: string,
-    translateZ?: string
-}
-export const Button3D : React.FC<button3D> = ({display, className, onClick, className3d, className3dBody, translateZ = "70"}) => (
-    <CardContainer className={cn("h-full flex items-center justify-center", className3d)}>
-        <CardBody className={cn("absolute rounded-xl h-full w-full", className3dBody)}>
-            <CardItem translateZ={translateZ}  >
-            <GeneralButton 
-                display={display} className={className} onClick={onClick} />
-            </CardItem>
-        </CardBody>
-    </CardContainer>
-)
 
 interface generalButtonProps {
     display: string,
@@ -95,7 +74,7 @@ export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, pric
 interface productPageActionButtonProps {
     display: string,
     onClick?: () => void,
-    className?: boolean
+    className?: string
 }
 export const ProductPageActionButton : React.FC<productPageActionButtonProps> = ({ display, onClick, className}) => (
     <div 

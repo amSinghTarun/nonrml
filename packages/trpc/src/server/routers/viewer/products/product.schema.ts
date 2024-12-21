@@ -9,9 +9,6 @@ export const ZGetProductsSizes = z.array(z.number()).min(1);
 export type TGetProductsSizes = z.infer<typeof ZGetProductsSizes>;
 
 export const ZGetProductsSchema = z.object({
-    // color: z.string().optional(),
-    // priceBetween: z.array(number()).length(2).optional(),
-    // rating: z.number().max(5).optional(),
     size: z.number().optional(),
     availability: z.boolean().optional(),
     categoryName: z.string().optional(),
@@ -55,3 +52,18 @@ export const ZDeleteProductSchema = z.object({
     productId: z.number()    
 });
 export type TDeleteProductSchema = z.infer<typeof ZDeleteProductSchema>;
+
+export const ZVerifyCheckoutProductsSchema = z.object({
+    orderProducts: z.record( z.object({
+        variantId: z.number().min(1),
+        productId: z.number().min(1),
+        quantity: z.number().min(1),
+        price: z.number().min(1),
+        productName: z.string(),
+        productImage: z.string(),
+        size: z.string(),
+    })),
+    addressId: z.number().min(1),
+    creditNoteCode: z.string().optional(),
+})
+export type TVerifyCheckoutProductsSchema = z.infer<typeof ZVerifyCheckoutProductsSchema>;

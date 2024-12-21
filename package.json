@@ -22,6 +22,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.1.4",
     "bcrypt": "^5.1.1",
     "client-main": "./apps/client-main",
     "ts-loader": "^9.5.1"

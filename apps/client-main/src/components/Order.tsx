@@ -7,6 +7,7 @@ import { useState } from "react";
 import { MakeReturn } from "./MakeReturn";
 import { MakeExchange } from "./MakeExchange";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
@@ -22,6 +23,7 @@ interface OrderProps {
 
 export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
     const [showReturnReplace, setShowReturnReplace] = useState<"RETURN"|"EXCHANGE"|"ORIGINAL">("ORIGINAL");
+    const router = useRouter();
     return (
         <div className={cn("rounded-xl overflow-y-scroll bg-white/10 backdrop-blur-3xl h-full w-full p-2 ", className)}>
         { showReturnReplace == "RETURN" &&  <MakeReturn makeNewReturn={orderDetails?.return.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
@@ -90,12 +92,21 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                         </div>
                     </div>
                     { orderDetails?.orderProducts.map((product, index) => {
+                        console.log(product.productVariant.product)
                         return (
                             <div key={index}
                                 className="relative justify-between backdrop-blur-3xl flex flex-col text-xs shadow-sm shadow-black/15 p-2 rounded-xl"
                             >
                             <div className="flex flex-row space-x-3">
-                                <Image src={`${product.productVariant?.product.productImages[0].image}`} alt="product image" width={60} height={40} sizes="100vw"/>
+                                <Image 
+                                    src={`${product.productVariant.product.productImages[0].image}`} 
+                                    alt="product image" 
+                                    width={60} 
+                                    height={40} 
+                                    sizes="100vw"
+                                    className="rounded-xl"
+                                    onClick={ () => router.push(`/products/${product.productVariant.product.name.toLowerCase().replaceAll(" ", "-")}_${product.productVariant.product.id}`)}
+                                />
                                 <div className="flex flex-col flex-1 justify-between space-y-1">
                                     <p>{product.productVariant?.product.name.toUpperCase()}</p>
                                     <p>{convertStringToINR(+product.price)}</p>

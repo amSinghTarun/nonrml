@@ -29,12 +29,11 @@ export const displayRazorpay = async ({rzpOrder, cartOrder}: {rzpOrder: rzpOrder
     }
 
     const options = createRzpConfig(rzpOrder, async (response) => {
-
-      if(cartOrder){
-        useCartItemStore.persist.clearStorage();
-        useCartItemStore.persist.rehydrate();
-      }
       
+      if(cartOrder){
+        useCartItemStore.getState().reset();
+      }
+
       const raizorpayPaymentIad = response.razorpay_payment_id;
       const raizorpayOrderId = response.razorpay_order_id;
       const raizorpaySignature = response.razorpay_signature;

@@ -141,6 +141,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                                 product: {
                                     select: {
                                         name: true,
+                                        id: true, 
                                         productImages:{
                                             where:{
                                                 priorityIndex: 0
@@ -286,8 +287,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     cnUseableValue -= Number(earlierTransactions.valueUtilised);
                 }
             } 
-            // else {
-            // }
         }
 
         //product variant id/quantity/price verification
@@ -302,7 +301,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 id: true,
                 product:{
                     select:{
-                        price: true
+                        price: true,
+                        name: true
                     }
                 },
                 inventory: {
@@ -321,21 +321,32 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         // Verify product variants and quantities and price
         if(productValidation.length !== Object.keys(input.orderProducts).length)
             throw new TRPCError({code: "BAD_REQUEST", message: "Invalid product variant ID"});
+
+        let insufficientProductQuantities: typeof input.orderProducts = {};
+        
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
-            if ((variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity) {
-                throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message: `Insufficient quantity for product variant ID: ${variant.id}`
-                });
+            if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
+                insufficientProductQuantities = {...insufficientProductQuantities, [variant.id] : { ...input.orderProducts[variant.id], quantity: 0}};
             }
             if (+variant.product.price !== orderProduct!.price) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
-                    message: `Price mismatch for product variant ID: ${variant.id}`
+                    message: `Price mismatch for ${variant.product.name}`
                 });
             }
             orderTotal += (+variant.product.price * orderProduct!.quantity);
+        }
+
+        if(Object.keys(insufficientProductQuantities).length != 0){
+            return {
+                status: TRPCResponseStatus.SUCCESS,
+                message:"", 
+                data: {
+                    "updateQuantity": true,
+                    insufficientProductQuantities
+                }
+            }
         }
 
         const paymentCreated = await createRZPOrder({ctx, input: {orderTotal: ( (orderTotal <= cnUseableValue) ? 10 : (orderTotal - cnUseableValue) ), addressId: input.addressId}});

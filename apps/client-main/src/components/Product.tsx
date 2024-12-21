@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React from 'react';
-import { Button3D, ProductPageActionButton, QuantitySelectButton, SizeButton } from "./ui/buttons";
+import { GeneralButton, ProductPageActionButton, QuantitySelectButton, SizeButton } from "./ui/buttons";
 import { useState, useRef } from "react";
 import { RouterOutput } from "@/app/_trpc/client";
 import { useToast } from "@/hooks/use-toast";
@@ -111,7 +111,7 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                             <div className="flex flex-row w-full space-x-2">
                             
                                 <QuantitySelectButton selectedQuantity={selectedQuantity} minQuantity={1} maxQuantity={selectedSize[sizeSKU.current!]?.quantity} onQuantityChange={setSelectedQuantity} />
-                                <Button3D className3d="p-5" className="basis-1/2 h-full w-full bg-black text-white shadow-0 font-semibold" translateZ="40" display="Checkout" onClick={() => {
+                                <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={() => {
                                     setBuyNowItems({
                                         [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
                                     })
@@ -138,7 +138,7 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                                         title: "Please Select An Available Size"
                                     })
                             }} />
-                            <Button3D className3d="p-5" className=" h-full w-full bg-black text-white font-semibold" translateZ="40" display="Buy it now" onClick={() => {
+                            <GeneralButton className=" h-full w-full p-3 backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium"  display="Buy it now" onClick={() => {
                                 selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                     setBuyNow(true) : toast({
                                         duration: 1500,
