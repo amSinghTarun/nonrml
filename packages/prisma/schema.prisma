@@ -56,7 +56,7 @@ model CreditNotesPartialUseTransactions {
   id                Int                       @id @default(autoincrement())
   creditNoteId      Int
   valueUtilised     Decimal
-  orderId           Int                       @unique// the orderId it is used on
+  orderId           String                       @unique// the orderId it is used on
   createdAt         DateTime                  @default(now())
   updatedAt         DateTime                  @updatedAt
   order             Orders                    @relation(fields: [orderId], references: [id])
@@ -182,8 +182,10 @@ model Products {
   care            String[]
   details         String[]
   sku             String            @unique
+  visitedCount    Int               @default(0)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  exclusive       Boolean           @default(false)
   productImages   ProductImage[]
   ProductVariants ProductVariants[]
   category        ProductCategory   @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -277,7 +279,7 @@ model Shipment {
 }
 
 model Orders {
-  id                      Int                     @id @default(autoincrement())
+  id                      String                  @id @unique
   type                    OrderType               @default(NEW)
   creditUtilised          Int?                    @default(0)
   totalAmount             Decimal
@@ -312,7 +314,7 @@ model OrderProducts {
   quantity            Int
   returnQuantity      Int?
   replacementQuantity Int?
-  orderId             Int
+  orderId             String
   rejectedQuantity    Int?            @default(0)
   order               Orders          @relation(fields: [orderId], references: [id])
   productVariant      ProductVariants @relation(fields: [productVariantId], references: [id])
@@ -324,7 +326,7 @@ model OrderProducts {
 model Returns {
   id                      Int                     @id @default(autoincrement())
   returnReceiveDate       DateTime?
-  orderId                 Int
+  orderId                 String
   returnShipmentId        Int?                    @unique
   returnStatus            ReturnStatus            @default(PENDING)
   refundAmount            Decimal?                @default(0)
@@ -367,8 +369,7 @@ model ReturnItem {
 
 model ReplacementOrder {
   id                  Int                    @id @default(autoincrement())
-  orderId             Int
-
+  orderId             String
   status              ReplacementOrderStatus @default(PENDING)
   returnOrderId       Int                    @unique
   shipmentId          Int?                   @unique

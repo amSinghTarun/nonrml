@@ -1,20 +1,30 @@
+import { prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { number, string, z } from "zod";
 
 export const ZGetProductSchema = z.object({
-    productId: z.number()
+    productSku: z.string()
 });
 export type TGetProductSchema = z.infer<typeof ZGetProductSchema>;
 
 export const ZGetProductsSizes = z.array(z.number()).min(1);
 export type TGetProductsSizes = z.infer<typeof ZGetProductsSizes>;
 
+export const ZGetHomeProductsSchema = z.object({
+    latest: z.boolean(),
+    exclusive: z.boolean(),
+    popular: z.boolean()
+});
+export type TGetHomeProductsSchema = z.infer<typeof ZGetHomeProductsSchema>;
+
 export const ZGetProductsSchema = z.object({
     size: z.number().optional(),
     availability: z.boolean().optional(),
     categoryName: z.string().optional(),
+    sortBy: z.enum(["visitedCount", "price"]).optional(),
+    take: z.number().optional(),
     tags: z.array(string()).optional(), // the custom user input, like red oversize tshirt, black polo, hound design thsirt
     back: z.boolean().optional(),
-    lastId: z.number().optional()
+    cursor: z.number().optional(),
 });
 export type TGetProductsSchema = z.infer<typeof ZGetProductsSchema>;
 
@@ -29,6 +39,11 @@ export const ZAddProductSchema = z.array(z.object({
     details: z.array(z.string())
 }));
 export type TAddProductSchema = z.infer<typeof ZAddProductSchema>;
+
+export const ZGetProductVariantQuantitySchema = z.object({
+    productId: z.number()
+})
+export type TGetProductVariantQuantitySchema = z.infer<typeof ZGetProductVariantQuantitySchema>;
 
 export const ZEditProductSchema = z.object({
     productId: z.number(),

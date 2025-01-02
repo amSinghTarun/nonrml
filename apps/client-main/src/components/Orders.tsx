@@ -1,18 +1,21 @@
 "use client"
+
 import React from "react"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client";
 import { GeneralButton } from "@/components/ui/buttons";
 import Link from "next/link";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CancelOrderDialog from "./dialog/CancelOrderDialog";
+import { cancelOrder } from "@/app/actions/order.actions";
 
 interface OrdersProps {
     className?: string
 }
+
 export const Orders : React.FC<OrdersProps> = ({className})  => {
         
     const userOrders = trpc.viewer.orders.getUserOrders.useQuery();
-    //console.log(userOrders.data)
 
     return (
         <div className={cn("rounded-xl overflow-y-scroll bg-white/10 backdrop-blur-3xl h-full w-full p-2 pb-6", className)}>
@@ -40,8 +43,8 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                 <div className="flex flex-row rounded-xl flex-wrap w-full space-y-7 ">
                     { userOrders.data?.data.map((order, index) => {
                         return(
-                        <article key={index} className="relative h-auto w-full p-2 pb-6 rounded-xl text-sm bg-white/15">
-                            <Link className="font-medium flex flex-col hover:cursor-pointer flex-1" href={`/order/${order.id}`}>
+                        <article key={index} className="relative h-auto w-full p-2 pb-6 rounded-xl text-sm bg-white/25">
+                            <Link className="font-normal flex flex-col hover:cursor-pointer flex-1" href={`/order/${order.id}`}>
                                     <div className="flex justify-between">
                                         <p> Order Id : </p>
                                         <p> {order.id} </p>
@@ -72,10 +75,8 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                     } </div>
                                     <div className="text-center">
                                         {
-                                            order.orderStatus == "CONFIRMED" && <Link
-                                                href={`/order/cancel/${order.id}`}
-                                                className="rounded-full px-2 py-2 bg-white  text-black"
-                                            >{`CANCEL`}</Link>
+                                            order.orderStatus == "CONFIRMED" && 
+                                            <CancelOrderDialog cancelPurchase={async () => {await cancelOrder({orderId: order.id}); userOrders.refetch()}}></CancelOrderDialog>
                                         }
                                         { 
                                             order.orderStatus == "ACCEPTED" && <Link
@@ -100,7 +101,7 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                         order.replacementOrder.length > 0 && <Link
                                         href={`/exchanges/${order.id}`}
                                         className="rounded-full px-2 sm:px-4 bg-black py-2  text-white hover:bg-white hover:text-black"
-                                        >EXHANGE(s)</Link>
+                                        >EXCHANGE(s)</Link>
                                     } </div>
                                 </div>
                         </article>)

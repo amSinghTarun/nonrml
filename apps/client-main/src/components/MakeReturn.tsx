@@ -15,7 +15,7 @@ type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 interface ReturnReplaceProps {
     makeNewReturn: boolean,
     products: NonNullable<OrderProduct>["orderProducts"],
-    orderId: number,
+    orderId: string,
     backToOrderDetails: () => void
 }
 
@@ -63,7 +63,7 @@ export const MakeReturn : React.FC<ReturnReplaceProps> = ({makeNewReturn, produc
         setError({});
         let errors : { [productId: number]: string } = {};
         let productDetails : {
-            orderId: number,
+            orderId: string,
             products: { 
                 orderProductId: number, 
                 quantity:number, 

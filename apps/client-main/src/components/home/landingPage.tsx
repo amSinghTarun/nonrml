@@ -9,14 +9,16 @@ import Link from "next/link";
 import logo from "@/images/logo.jpg";
 const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"];
 import { getHomepageProducts } from "@/app/actions/product.action";
+import { ProductCardHome } from "@/components/cards/ProductCard";
 
 export async function LandingPage() {
   let products = await getHomepageProducts();
 
   return (
     <div  className="w-screen h-full">
-    <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
 
+
+      <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
       <MaskContainer
         revealText={
           <p className="max-w-4xl mx-auto bg-white/60 p-5 text-center">
@@ -24,7 +26,7 @@ export async function LandingPage() {
                 src={logo}
                 alt="No NRML logo"
                 priority
-                width={0} height={0} 
+                width={0} height={0}
                 sizes="100vw" 
                 style={{ color:"white",width: 'auto', height: "40px"}}
             ></Image>
@@ -43,39 +45,70 @@ export async function LandingPage() {
       </MaskContainer>
       <div className="h-screen overscroll-auto bg-transparent w-full ">
       </div>
-      <HeroParallax products={[...products, ...products, ...products, ...products]} />
-      <div className=" w-full h-auto overflow-hidden">
-        <Vortex
-          backgroundColor="white"
-          className="flex items-center border-t border-black flex-col justify-center px-4 md:px-10 py-4 w-full h-full"
+
+
+      <HeroParallax products={[...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts]} />
+
+
+      <div
+        className="flex z-30 relative py-7 md:py-10 bg-white flex-col justify-center px-2 md:px-3 w-full h-full"
+      >
+        <h2 className="text-black bg-transparent text-sm md:text-3xl font-bold text-center">
+          <span>{`ALL IT TAKES IS A `} </span>
+          <span className="text-rose-500">NO</span>
+          <span>{` TO REDEFINE WHAT IS`}</span>
+          <FlipWords className="text-rose-500" words={words} /> <br />
+        </h2>
+      </div>
+
+
+      <div className="w-[100%] h-[500px] sm:h-[600px] relative">
+        <Image 
+          src={products.exculsiveProducts.productImages[0].image} 
+          alt={"imageAlt"} 
+          className={`object-cover absolute w-[100%] h-[100%]`} 
+          width={1000} 
+          height={1000}
+        />
+        <Vortex 
+          backgroundColor="transparent"
+          className="absolute w-full flex h-full justify-center items-center content-center text-center"
         >
-          <h2 className="text-black bg-transparent text-2xl md:text-6xl font-bold text-center">
-            {`ALL IT TAKES IS A NO TO REDEFINE WHAT IS `}
-            <FlipWords className="text-rose-500" words={words} /> <br />
-          </h2>
+          <Link href={`/products/${products.exculsiveProducts.sku.toLowerCase()}`} className="rounded-lg bg-white/20 backdrop-blur-sm hover:bg-white text-black flex flex-col px-14 py-7 space-y-5">
+            <div className="items-center flex justify-center basis-1/3 text-xl sm:text-2xl font-bold" >
+              <span>EXCLUSIVE DROP <span className={`text-rose-500`}>{` :)`}</span> </span>
+            </div>
+            <div className="justify-center text-sm font-medium items-center flex flex-col basis-2/3">
+              <span >A Brand New Exclusive Product Is Live! </span>
+              <span >{`Hurry Up!  BUY NOW!`}</span>
+            </div>
+          </Link>
         </Vortex>
       </div>
-      <div className="h-[600px] relative backdrop-blur-xl w-full flex justify-center items-center ">
-        <Link href="/" className="relative rounded-lg bg-white shadow-0 shadow-black text-black flex flex-col w-[90%] lg:w-[50%] h-auto p-2 py-7 space-y-5">
-          <div className="items-center flex justify-center basis-1/3 text-3xl font-bold" >Exclusive Drop :)</div>
-          <div className="justify-center text-md font-medium items-center flex flex-col basis-2/3">
-            <span >A Brand New Exclusive Product Is Live! </span>
-            <span >{`Hurry Up!  BUY NOW!`}</span>
-          </div>
-        </Link>
-      </div>
-      <div className="h-[500px] z-30 relative w-full flex flex-1 flex-col bg-white px-3 py-5 space-y-5 pb-16">
-        <h1 className="font-medium text-md">MORE FROM NoNRML</h1>
-        <div className="flex flex-row flex-wrap w-full h-full gap-2">
-          <button className="p-10 bg-red-100 text-black flex-grow">Exclusive drop</button>
-          <button className="p-10 bg-red-100 text-black flex-grow">Exclusive drop</button>
-          <button className="p-10 bg-red-100 text-black flex-grow">Exclusive drop</button>
-          <button className="p-10 bg-red-100 text-black flex-grow">Exclusive drop</button>
+
+
+      <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
+        <div className="flex flex-row w-full align-baseline">
+          <h1 className=" font-medium text-md sm:text-md flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
+          <Link href="/store" className=" text-xs content-center sm:text-sm font-normal bg-black/10 text-black hover:bg-black hover:text-white rounded-sm px-2">DISCOVER MORE</Link>
         </div>
-        <div className="flex justify-center items-center w-full pt-7">
-          <Link href="/" className=" p-10 text-black hover:bg-black hover:text-white shadow-md shadow-black rounded-xl justify-center items-center">DISCOVER MORE</Link>
+        <div className="flex flex-row flex-wrap w-full h-full">
+          {
+            products.popularProducts.map( product => ( 
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+            ))
+          }
         </div>
       </div>
+
 
     </div> 
   )

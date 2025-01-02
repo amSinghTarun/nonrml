@@ -4,7 +4,7 @@ import path from "path";
 
 dotenv.config({path: path.resolve("../../packages/cache/.env")})
 
-let redisConnection : any = null;
+let redisConnection : Redis | null = null;
 
 export const connectToRedis = () => {
     try {

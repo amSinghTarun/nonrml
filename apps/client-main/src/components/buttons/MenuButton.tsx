@@ -17,7 +17,9 @@ export const MenuButton = () => {
                 appbarUtil != "SIDEBAR" ? setAppbarUtil("SIDEBAR") : setAppbarUtil("")
             }}
         >
-            { appbarUtil != "SIDEBAR" ? <BlurOnIcon sx={{ width: 'auto', height: '100%', color:"black" }} /> : <BlurOffIcon sx={{width:"auto", height:"100%", color:"black"}}/>}
+            { appbarUtil != "SIDEBAR" ? 
+            <BlurOnIcon sx={{ width: 'auto', height: '100%', color:"black" }} /> : 
+            <BlurOffIcon sx={{width:"auto", height:"100%", color:"black"}}/>}
         </div>
     )
 };

@@ -13,9 +13,7 @@ import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
-type ProductsTRPCFncOutput = RouterOutput["viewer"]["product"]["getProduct"]["data"];
-
-interface ProductProps extends ProductsTRPCFncOutput { }
+type ProductProps = RouterOutput["viewer"]["product"]["getProduct"]["data"];
 
 const convertStringToINR = (currencyString: number) => {
     let INR = new Intl.NumberFormat();
@@ -24,12 +22,12 @@ const convertStringToINR = (currencyString: number) => {
 
 // if we use only 1 generic type T instead of multiple generic types like <T,U>, so that must be declared like 
 // <T,>, with a ",". coz other then that it becomes difficult for typescript to differentiate between JSX tag and generic type
-// const Product = <T,U>({product, productInventory, categorySizeChart}: fasdas) => {
-const Product: React.FC<ProductProps> = ({ product, productInventory, categorySizeChart }) => {
+// const Product = <T,U>({product, productSizeQuantities, categorySizeChart}: fasdas) => {
+const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categorySizeChart }) => {
     const { toast } = useToast();
     const [buyNow, setBuyNow] = useState(false);
     const [selectedQuantity, setSelectedQuantity] = useState(1);
-    const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, quantity: number, productImage: string, productName: string, price: number } }>({});
+    const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, productSku: string, quantity: number, productImage: string, productName: string, price: number } }>({});
     const { setBuyNowItems } = useBuyNowItemsStore();
     const { cartItems, setCartItems } = useCartItemStore.getState();
     const { setAppbarUtil } = useSetAppbarUtilStore();
@@ -37,13 +35,16 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
     const router = useRouter();
     const sizeSKU = useRef<number>();
     const handleAddToCart = () => {
-        let itemQuantity = 1;
         let variantId: number = sizeSKU.current!;
-        if (variantId) {
-            itemQuantity += (cartItems[variantId]?.quantity ?? 0);
-            const cartItem = { [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } }
-            setCartItems(cartItem);
-            setAppbarUtil("CART");
+        if ( variantId && productSizeQuantities[variantId] ) {
+            let itemQuantity = cartItems[variantId] ? ++cartItems[variantId].quantity : 1 ;
+            if(itemQuantity > productSizeQuantities[variantId].quantity){
+                toast({duration: 1500, title: "Can't add more for this size"})
+            } else {
+                const cartItem = { [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } }
+                setCartItems(cartItem);
+                setAppbarUtil("CART");
+            }
         }
     };
     
@@ -90,34 +91,23 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
             </div>
             <div className=" lg:basis-2/4 space-y-3 flex flex-col lg:h-screen lg:justify-end py-3">
                 <div className="flex flex-col pl-1 ">
-                    <span className="text-black flex flex-col text-lg lg:text-2xl font-bold">
+                    <span  className="text-black flex flex-col text-lg lg:text-2xl font-bold">
                         {product.name.toUpperCase()}
                     </span>
-                    <span className="text-black text-base lg:text-xl font-medium flex flex-col">
+                    <span  className="text-black text-base lg:text-xl font-medium flex flex-col">
                         {convertStringToINR(Number(product.price))}
                     </span>
                 </div>
-                <div className="flex flex-row gap-2 text-xs">{
-                    productInventory.map(({ size, id, inventory }, index) => {
-                        let quantity = (!inventory?.baseSkuInventory || !inventory?.quantity) ? 0 : inventory.quantity + inventory.baseSkuInventory.quantity;
+                <div className="flex flex-row text-xs gap-2">{
+                    Object.values(productSizeQuantities).map(({ size, variantId, quantity }, index) => {
                         return(
-                            <SizeButton sizeCount={productInventory.length} productId={product.id} display={size} price={+product.price} quantity={quantity} variantId={id} name={product.name} image={product.productImages[0].image} selectedSize={sizeSKU} setSelectedSize={setSelectedSize} setQuantity={setSelectedQuantity} key={index}></SizeButton>
+                            <SizeButton sizeCount={Object.keys(productSizeQuantities).length} sku={product.sku} productId={product.id} display={size} price={+product.price} quantity={quantity} variantId={variantId} name={product.name} image={product.productImages[0].image} selectedSize={sizeSKU} setSelectedSize={setSelectedSize} setQuantity={setSelectedQuantity} key={index}></SizeButton>
                         )
                     })
                 }</div>
                 <div className="flex flex-row text-sm w-full gap-2">{
                     buyNow ?
                         <div className="flex flex-col w-full space-y-2">
-                            <div className="flex flex-row w-full space-x-2">
-                            
-                                <QuantitySelectButton selectedQuantity={selectedQuantity} minQuantity={1} maxQuantity={selectedSize[sizeSKU.current!]?.quantity} onQuantityChange={setSelectedQuantity} />
-                                <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={() => {
-                                    setBuyNowItems({
-                                        [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
-                                    })
-                                    router.push(`/checkout?purchase=1`)
-                                }} />
-                            </div>
                             {
                                 isScreenLg ? 
                                 <ProductPageActionButton display="Add to cart" onClick={() => {
@@ -128,6 +118,16 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                                         })
                                 }} /> : <></>
                             }
+                            <div className="flex flex-row w-full space-x-2">
+                            
+                                <QuantitySelectButton selectedQuantity={selectedQuantity} minQuantity={1} maxQuantity={selectedSize[sizeSKU.current!]?.quantity} onQuantityChange={setSelectedQuantity} />
+                                <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={() => {
+                                    setBuyNowItems({
+                                        [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
+                                    })
+                                    router.push(`/checkout?purchase=1`)
+                                }} />
+                            </div>
                         </div>
                         :
                         <>
@@ -151,14 +151,14 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                 <div className="flex-col flex font-normal bg-white bg-opacity-45 rounded-xl text-sm divide-y divide-black/25 space-y-2 px-3 py-2 shadow-black/15 shadow">
 
                     <div className="flex">
-                        <span className="font-semibold text-start text-md basis-1/3">
+                        <span  className="font-semibold text-start text-md basis-1/3">
                             Description
                         </span>
                         <div className="basis-2/3"> {product.description} </div>
                     </div>
 
                     <div className="flex pt-2">
-                        <span className="font-semibold text-start text-md basis-1/3 ">
+                        <span  className="font-semibold text-start text-md basis-1/3 ">
                             Details
                         </span>
                         <ul className="basis-2/3"> { product.details.map((detail, index) => <li key={index} >{detail}</li>)} </ul>
@@ -166,14 +166,14 @@ const Product: React.FC<ProductProps> = ({ product, productInventory, categorySi
                         
                         
                     <div className="flex pt-2">
-                        <span className="font-semibold text-md basis-1/3 text-start">
+                        <span  className="font-semibold text-md basis-1/3 text-start">
                             Care
                         </span>
                         <ul className="basis-2/3"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>
                     </div>
 
                     <div className="flex pt-2">
-                        <span className="font-semibold text-start text-md basis-1/3">
+                        <span  className="font-semibold text-start text-md basis-1/3">
                             Shipping
                         </span>
                         <ul className="basis-2/3"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>

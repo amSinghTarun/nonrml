@@ -4,6 +4,7 @@ type buyNowObj = {
     [productVariantId: number] : {
         productName: string, 
         productId: number, 
+        productSku: string,
         productImage: string, 
         quantity: number, 
         size: string, 

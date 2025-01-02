@@ -25,7 +25,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
     const [showReturnReplace, setShowReturnReplace] = useState<"RETURN"|"EXCHANGE"|"ORIGINAL">("ORIGINAL");
     const router = useRouter();
     return (
-        <div className={cn("rounded-xl overflow-y-scroll bg-white/10 backdrop-blur-3xl h-full w-full p-2 ", className)}>
+        <div className={cn("rounded-xl overflow-y-scroll bg-white/10  h-full w-full p-2 ", className)}>
         { showReturnReplace == "RETURN" &&  <MakeReturn makeNewReturn={orderDetails?.return.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
         { showReturnReplace == "EXCHANGE" &&  <MakeExchange makeNewExchange={orderDetails?.replacementOrder.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
         { showReturnReplace == "ORIGINAL" && <div className="space-y-8 h-full">
@@ -104,8 +104,8 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                     width={60} 
                                     height={40} 
                                     sizes="100vw"
-                                    className="rounded-xl"
-                                    onClick={ () => router.push(`/products/${product.productVariant.product.name.toLowerCase().replaceAll(" ", "-")}_${product.productVariant.product.id}`)}
+                                    className="rounded-xl hover:cursor-pointer hover:shadow-sm hover:shadow-black"
+                                    onClick={ () => router.push(`/products/${product.productVariant.product.sku.toLowerCase()}`)}
                                 />
                                 <div className="flex flex-col flex-1 justify-between space-y-1">
                                     <p>{product.productVariant?.product.name.toUpperCase()}</p>

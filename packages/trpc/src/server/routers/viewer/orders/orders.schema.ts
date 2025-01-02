@@ -2,9 +2,14 @@ import { prismaEnums } from "@nonrml/prisma";
 import { number, object, string, z } from "zod";
 
 export const ZGetUserOrderSchema = z.object({
-    orderId: z.number(),   
+    orderId: z.string(),   
 })
 export type TGetUserOrderSchema = z.infer<typeof ZGetUserOrderSchema>;
+
+export const ZCancelOrderSchema = z.object({
+    orderId: z.string(),   
+})
+export type TCancelOrderSchema = z.infer<typeof ZCancelOrderSchema>;
 
 export const ZTrackOrderSchema = z.object({
     orderId: z.string(),
@@ -30,6 +35,7 @@ export const ZInitiateOrderSchema = z.object({
     orderProducts: z.record( z.object({
         variantId: z.number().min(1),
         productId: z.number().min(1),
+        productSku: z.string().min(1),
         quantity: z.number().min(1),
         price: z.number().min(1),
         productName: z.string(),
@@ -73,8 +79,8 @@ export const ZOrderOutputSchema = z.object({
 });
 export type TOrderOutputSchema = z.infer<typeof ZOrderOutputSchema>;
 
-export const ZChangeOrderStatus = z.object({
-    status: z.enum([prismaEnums.OrderStatus.PACKING, prismaEnums.OrderStatus.SHIPPED, prismaEnums.OrderStatus.CONFIRMED, prismaEnums.OrderStatus.DELIVERED, prismaEnums.OrderStatus.PACKED]),
-    orderId: z.number()
-});
-export type TChangeOrderStatus = z.infer<typeof ZChangeOrderStatus>;
+// export const ZChangeOrderStatus = z.object({
+//     status: z.enum([prismaEnums.OrderStatus.PACKING, prismaEnums.OrderStatus.SHIPPED, prismaEnums.OrderStatus.CONFIRMED, prismaEnums.OrderStatus.DELIVERED, prismaEnums.OrderStatus.PACKED]),
+//     orderId: z.number()
+// });
+// export type TChangeOrderStatus = z.infer<typeof ZChangeOrderStatus>;

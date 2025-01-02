@@ -8,12 +8,17 @@ type TOrderProducts = RouterInput["viewer"]["orders"]["initiateOrder"];
 type TInitiateReturn = RouterInput["viewer"]["return"]["initiateReturn"];
 
 export const initiateOrder = async ({orderProducts, addressId, creditNoteCode}: TOrderProducts) => {
-        const { data } = await (await serverClient()).viewer.orders.initiateOrder({
-            orderProducts: orderProducts,
-            addressId: addressId,
-            creditNoteCode: creditNoteCode
-        });
-        return data;
+    const { data } = await (await serverClient()).viewer.orders.initiateOrder({
+        orderProducts: orderProducts,
+        addressId: addressId,
+        creditNoteCode: creditNoteCode
+    });
+    return data;
+}
+
+export const cancelOrder = async ({orderId}: {orderId: string}) => {
+    const { data } = await (await serverClient()).viewer.orders.cancelOrder({orderId: orderId});
+    return;
 }
 
 export const InitiateReturnOrder = async (returnOrder: TInitiateReturn) => {

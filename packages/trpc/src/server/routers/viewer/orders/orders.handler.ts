@@ -1,23 +1,17 @@
 import { TRPCResponseStatus, TRPCAPIResponse, createError } from "@nonrml/common"
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TcancelOrderProductSchema, TChangeOrderStatus, TEditOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
+import { TcancelOrderProductSchema, TCancelOrderSchema, TEditOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
 import { Prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
-
+import { getPaymentDetials } from "@nonrml/payment";
 /*
 Get all the orders of a user
 No pagination required for now, as the result quantity is gonna stay small
 */
 export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
     const prisma = ctx.prisma;
-    if (!ctx.session) {
-        throw new TRPCError({
-            code: 'UNAUTHORIZED',
-            message: 'You must be logged in to view orders'
-        });
-    }
-    const userId = +ctx.session.user.id;
+    const userId = ctx.user?.id;
     //console.log(userId);
     try{
         const orders = await prisma.orders.findMany({
@@ -51,9 +45,41 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
                         paymentStatus: true
                     }
                 }
-            }
+            },
+            orderBy: [{
+                "createdAt" : "desc"
+            }]
         })
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: orders};
+    } catch(error){
+        // console.log("\n\n Error in getUserOrders ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error) 
+    }
+};
+
+/*
+Get all the orders of a user
+No pagination required for now, as the result quantity is gonna stay small
+*/
+export const cancelOrder = async ({ ctx, input } : TRPCRequestOptions<TCancelOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+
+        const cancelledOrder = await prisma.orders.update({
+            where: {
+                id: input.orderId,
+                orderStatus: "CONFIRMED"
+            },
+            data: {
+                orderStatus: "CANCELED"
+            }
+        })
+        console.log(cancelledOrder);
+        return {status: TRPCResponseStatus.SUCCESS, message: "", data: cancelledOrder};
+
     } catch(error){
         // console.log("\n\n Error in getUserOrders ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -97,7 +123,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
         }
         const orderDetails = await prisma.orders.findUnique({
             where: {
-                id: +input.orderId!,
+                id: input.orderId!,
                 userId: {
                     in: userIdsArray
                 } 
@@ -142,6 +168,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                                     select: {
                                         name: true,
                                         id: true, 
+                                        sku: true,
                                         productImages:{
                                             where:{
                                                 priorityIndex: 0
@@ -169,6 +196,9 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
     }
 };
 
+/*
+Verify razorpay signature after sucessful payment
+*/
 export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
@@ -198,6 +228,8 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         if (generated_signature != input.razorpaySignature) 
             throw new TRPCError({code: "BAD_REQUEST", message: "Payment signature verification failed"});
 
+        const {method: paymentMethod} = await getPaymentDetials({rzpPaymentId: input.razorpayPaymentId})
+
         await prisma.payments.update({
             where: {
                 id: orderDetails.payment.id,
@@ -214,7 +246,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
                 id: orderDetails.id
             },
             data: {
-                orderStatus: prismaEnums.OrderStatus.CONFIRMED
+                orderStatus: paymentMethod == "Cash on Delivery" ? prismaEnums.OrderStatus.CONFIRMED : prismaEnums.OrderStatus.ACCEPTED
             }
         });
         //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
@@ -263,7 +295,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
     const userId = ctx.user?.id!;
     const prisma = ctx.prisma;
     try{
-        //console.log(input)
         let cnUseableValue = 0;
         let creditNoteId = null;
         let orderTotal = 0;
@@ -350,10 +381,19 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         }
 
         const paymentCreated = await createRZPOrder({ctx, input: {orderTotal: ( (orderTotal <= cnUseableValue) ? 10 : (orderTotal - cnUseableValue) ), addressId: input.addressId}});
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
+        let orderId = `ORD-${date}-${userId}-${randomPart}`;
+
+        `
         
+            125JAN1
+        
+        `
         const orderCreated = await prisma.$transaction(async (prisma) => {
             const order = await prisma.orders.create({
                 data: {
+                    id: orderId,
                     userId: userId,
                     totalAmount: orderTotal,
                     addressId: input.addressId,

@@ -51,7 +51,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
                 <div>Track order</div>
               </Link>
             </div>
-            <text className="flex pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</text >
+            <span className="flex pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</span >
           </footer>
         </aside>
       </nav>

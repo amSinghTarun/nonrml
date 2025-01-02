@@ -12,8 +12,8 @@ import logo from "@/images/logo.jpg";
 import Image from "next/image";
 
 export const Appbar = async () => {
-    let categoryList = await redis.getSetsMembers("productCategory")
-    if(categoryList.length == 0){
+    let categoryList = await redis.redisClient.get<string[]|null>("productCategory")
+    if(!categoryList || !categoryList.length){
         const { categoryNameArray } = (await (await serverClient()).viewer.productCategories.getProductCategories()).data;
         categoryList = categoryNameArray
     }

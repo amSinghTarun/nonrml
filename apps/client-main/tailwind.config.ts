@@ -19,14 +19,27 @@ const config: Config = {
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
   		},
   		animation: {
+			'spin-slow': 'spin 3s linear infinite',
+			'spin-fast': 'spin 1s linear infinite',
+			fade: 'fade 3s ease-out forwards',
   			linear: 'backgroundLinear 5s linear infinite',
 			first: "moveVertical 30s ease infinite",
 			second: "moveInCircle 20s reverse infinite",
 			third: "moveInCircle 40s linear infinite",
 			fourth: "moveHorizontal 40s ease infinite",
 			fifth: "moveInCircle 20s ease infinite",
+			"slow-fade": "fade 20s ease-out forwards"
   		},
   		keyframes: {
+			slideText: {
+				'0%': { transform: 'translateY(0%)', opacity: '1' },
+				'50%': { transform: 'translateY(-20%)', opacity: '0.6' },
+				'100%': { transform: 'translateY(0%)', opacity: '1' },
+			},
+			fade: {
+				'0%': { opacity: '1' },
+				'100%': { opacity: '0' },
+			},
 			moveHorizontal: {
 				"0%": {
 				  transform: "translateX(-50%) translateY(-10%)",

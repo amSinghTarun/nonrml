@@ -4,6 +4,8 @@ import { httpLink } from "@trpc/client";
 import React, { useState } from "react";
 import { trpc } from "./client";
 import SuperJSON from "superjson";
+import { createTRPCProxyClient } from '@trpc/client';
+import { createServerSideHelpers } from '@trpc/react-query/server';
 
 export default function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({}));

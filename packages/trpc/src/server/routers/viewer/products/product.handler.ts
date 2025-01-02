@@ -7,63 +7,97 @@ import {
   TGetProductSchema,
   TGetProductsSchema,
   TGetProductsSizes,
-  TVerifyCheckoutProductsSchema
+  TVerifyCheckoutProductsSchema,
+  TGetProductVariantQuantitySchema,
+  TGetHomeProductsSchema
 } from "./product.schema";
-import { Prisma, prisma } from "@nonrml/prisma";
-import { TRPCError } from "@trpc/server";;
-const take = 20;
+import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
+import { TRPCError } from "@trpc/server";
+import { redis } from "@nonrml/cache";
+const take = 10;
 
+/*
+ Get the product details and also sizes for all the variants available
+*/
 export const getProduct = async ({
   ctx,
   input,
 }: TRPCRequestOptions<TGetProductSchema>) => {
+  const prisma = ctx.prisma
+  input = input!
   try {
-    // check in redis if we have this. If yes don't fetch with product, if not then we do
-    let categorySizeChart = null;
-
+    console.log("\n\n\n\n\n GET PRODUCTS");
+    
+    //cache tpo track number of visit on a product
+    redis.customJSONIncr({ key: "VISITED", path: input.productSku });
+    
+    type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"> & {
+      productImages: {
+        image: string;
+        priorityIndex: number;
+      }[];
+    } | null
+    
+    
     //cache for less time
-    let product = await prisma.products.findUniqueOrThrow({
-      where: {
-        id: input!.productId,
-      },
-      select: {
-        name: true,
-        description: true,
-        price: true,
-        id: true,
-        care: true,
-        details: true,
-        soldOut: true,
-        productImages: {
+    let product : ProductType = await redis.redisClient.get(`product_${input!.productSku}`);
+    if(!product){
+      product = await prisma.products.findUniqueOrThrow({
+        where: {
+          sku: input!.productSku.toUpperCase(),
+        },
+        select: {
+          visitedCount: true,
+          name: true,
+          description: true,
+          price: true,
+          id: true,
+          sku: true,
+          care: true,
+          details: true,
+          soldOut: true,
+          categoryId: true,
+          productImages: {
             select: {
-                image: true,
-                priorityIndex: true,
+              image: true,
+              priorityIndex: true,
             },
             orderBy: {
-                priorityIndex: "asc",
+              priorityIndex: "asc",
             },
-        }, 
-        category: categorySizeChart ? false
-        : {
-            select: {
-                productCategorySize: {
-                    select: {
-                        sizeChart: true,
-                    },
-                },
-            },
+          }
         },
-      },
-    });
+      });
+      redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
+    };
 
-    // set category sizechart cache
-    if (!categorySizeChart)
-      categorySizeChart = JSON.stringify(
-        product.category?.productCategorySize!.sizeChart
-      );
-
+    let categorySizeChart = await redis.redisClient.get(`categorySizeChart_${product.categoryId}`);
+    if (!categorySizeChart) {
+      const categorySizes = await prisma.productCategory.findFirst({
+        where: {
+          id: product.categoryId
+        },
+        select: {
+          productCategorySize: {
+            select: {
+                sizeChart: true,
+            },
+          },
+        }
+      });
+      // set category sizechart cache
+      if (categorySizes){
+        categorySizeChart = JSON.stringify( categorySizes.productCategorySize!.sizeChart )
+        redis.redisClient.set(`categorySizeChart_${product.categoryId}`, categorySizeChart, {ex: 60*60*5});
+      }
+    }
+    
     //cache it and get from cache, delete at the time of order
-    const productInventory = await prisma.productVariants.findMany({
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${product.id}`);
+    console.log(productSizeQuantities);
+    if(!productSizeQuantities) {
+      productSizeQuantities = {};
+      const productInventory = await prisma.productVariants.findMany({
         where: {
             productId: product.id,
         },
@@ -71,26 +105,41 @@ export const getProduct = async ({
             id: true,
             size: true,
             inventory: {
-                select: {
-                    quantity: true,
-                    baseSkuInventory:{
-                        select: {
-                            quantity: true
-                        }
-                    }
-                }
+              select: {
+                quantity: true,
+                baseSkuInventory:{
+                  select: {
+                    quantity: true
+                  }
+              }
             }
-        },
-    });
-    if (productInventory.length == 0)
-      throw new Error(
-        "The Product you are lookng for is not available for sale"
-      );
+          }
+        }
+      });
 
+      if (productInventory.length == 0)
+        throw new TRPCError({code:"BAD_REQUEST", message: "The Product you are lookng for is not available"});
+
+      for(let productVariant of productInventory){
+        let quantity = (productVariant.inventory?.quantity || 0) + (productVariant.inventory?.baseSkuInventory?.quantity || 0)
+        productSizeQuantities = {
+          ...productSizeQuantities,
+          [productVariant.id] : {
+            size: productVariant.size,
+            quantity: quantity,
+            variantId: productVariant.id
+          }
+        };
+      }
+      console.log(productSizeQuantities);
+      // see how to expire this
+      await redis.redisClient.set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
+    }
+    console.log("\n\n\n\n\n -----END");
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product, productInventory, categorySizeChart },
+      data: { product: product!, productSizeQuantities: productSizeQuantities!, categorySizeChart: categorySizeChart! },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");
@@ -107,6 +156,77 @@ export const getProduct = async ({
   }
 };
 
+/*
+- get the quantity for a products variant
+*/
+export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions<TGetProductVariantQuantitySchema>) => {
+  const prisma = ctx.prisma;
+  input = input!;
+  try{
+    
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${input.productId}`);
+    console.log(productSizeQuantities);
+    if(!productSizeQuantities) {
+      productSizeQuantities = {};
+      const productInventory = await prisma.productVariants.findMany({
+        where: {
+          productId: input.productId,
+        },
+        select: {
+            id: true,
+            size: true,
+            inventory: {
+              select: {
+                quantity: true,
+                baseSkuInventory:{
+                  select: {
+                    quantity: true
+                  }
+              }
+            }
+          }
+        }
+      });
+
+      if (productInventory.length == 0)
+        throw new TRPCError({code:"BAD_REQUEST", message: "The Product you are lookng for is not available"});
+
+      for(let productVariant of productInventory){
+        let quantity = (productVariant.inventory?.quantity || 0) + (productVariant.inventory?.baseSkuInventory?.quantity || 0)
+        productSizeQuantities = {
+          ...productSizeQuantities,
+          [productVariant.id] : {
+            size: productVariant.size,
+            quantity: quantity,
+            variantId: productVariant.id
+          }
+        };
+      }
+      console.log(productSizeQuantities);
+      // see how to expire this
+      redis.redisClient.set(`productVariantQuantity_${input.productId}`, productSizeQuantities, {ex: 60*60*5})
+    }
+
+    return {
+      status: TRPCResponseStatus.SUCCESS,
+      message: "",
+      data: {productSizeQuantities},
+    };
+
+  } catch ( error ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+}
+
 /* 
 Get all the products
 Cursor besed pagination
@@ -121,64 +241,74 @@ export const getProducts = async ({
   const prisma = ctx.prisma;
   input = input!;
   try {
-    let paginationQuery:
-      | { take: number; skip: 1; cursor: { id: number } }
-      | { take: number } = { take: input.back ? -1 * take : take };
-    if (input.lastId) {
-      paginationQuery = {
-        ...paginationQuery,
-        skip: 1,
-        cursor: {
-          id: input.lastId,
-        },
+    console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT 1 --------------------------------- ", input);
+    
+    type LatestProducts = {
+      price: Prisma.Decimal;
+      sku: string;
+      name: string;
+      id: number;
+      soldOut: boolean;
+      productImages: {
+          image: string;
+      }[];
+      _count: {
+          ProductVariants: number;
       };
-    }
+    }[] | null
 
-    // let queryJSON: typeof paginationQuery & { where?: any; select?: any } =
-    //   paginationQuery;
+    let latestProducts : LatestProducts = input.cursor == 1 ? await redis.redisClient.get("latestProducts") : null;
 
-    console.log("PRODUCT 1 --------------------------------- ");
-    const products = await prisma.products.findMany({
-      where: input.categoryName ? {
-        category: {
-          displayName: input.categoryName.replace("_", " "),
-        },
-      } : {},
-      select: {
-          id: true,
+    if(!latestProducts || !latestProducts.length){
+      latestProducts = await prisma.products.findMany({
+        take: ( input.take ?? take) + 1,
+        cursor: {id: input.cursor},
+        where: input.categoryName ? {
+          category: {
+            displayName: input.categoryName.replace("_", " "),
+          },
+        } : {},
+        select: {
           name: true,
           price: true,
+          id: true,
           soldOut: true,
+          sku: true,
           _count:{
-              select: {
-                ProductVariants: {
-                    where: {
-                        inventory: {
-                            baseSkuInventory: {
-                              quantity: { gt:0 }
-                            },
-                            quantity: { gt:0 }
-                        }
-                    }
+            select: {
+              ProductVariants: {
+                where: {
+                  inventory: {
+                    baseSkuInventory: {
+                      quantity: { gt:0 }
+                    },
+                    quantity: { gt:0 }
+                  }
                 }
               }
+            }
           },
           productImages: {
-              where: { active: true, priorityIndex:0 },
-              select: {
-                  image: true,
-              }
+            where: { active: true, priorityIndex: 0 },
+            select: {
+              image: true,
+            }
           }
-      },
-      ...paginationQuery
-    });
-    console.log("PRODUCT 2 --------------------------------- ");
+        },
+        orderBy: [
+          { createdAt: "desc" }
+        ]
+      });
+      redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+    }
+    console.log(latestProducts,  "PRODUCT 2 ---------------------------------", "\n\n\n\n\n");
+    let nextCursor: number | undefined = undefined;
+    if (latestProducts && latestProducts.length >= take) {
+      const nextItem = latestProducts.pop();
+      nextCursor = nextItem?.id;
+    }
 
-
-    // const product = await prisma.products.findMany(queryJSON);
-
-
-    return { status: TRPCResponseStatus.SUCCESS, message: "", data: products };
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
   } catch (error) {
     console.log("\n\n ----------------------------- :: Error in getProducts");
     if (error instanceof Prisma.PrismaClientKnownRequestError)
@@ -194,6 +324,141 @@ export const getProducts = async ({
   }
 };
 
+/* 
+Get the products for homepage
+Cursor besed pagination
+Can apply filters
+Don't check availability when only size filter is applied
+The available/out of stock, can be checked through redis SKU cache
+*/
+export const getHomeProducts = async ({
+  ctx,
+  input,
+}: TRPCRequestOptions<TGetHomeProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!;
+  try {
+    console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT IN --------------------------------- ", input);
+    let latestProducts, exclusiveProducts, popularProducts;
+    if(input.latest){
+      ///cache here as ALL no FILTER products, it can be used in the all products page, for an hour or so
+      latestProducts = await prisma.products.findMany({
+        // skip: input.cursor == 1 ? 0 : 1,
+        take: take + 1,
+        select: {
+          name: true,
+          soldOut: true,
+          sku: true,
+          price: true,
+          _count:{
+            select: {
+              ProductVariants: {
+                where: {
+                  inventory: {
+                    baseSkuInventory: {
+                      quantity: { gt:0 }
+                    },
+                    quantity: { gt:0 }
+                  }
+                }
+              }
+            }
+          },
+          productImages: {
+            where: { active: true, priorityIndex: 0 },
+            select: {
+              image: true,
+            }
+          }
+        },
+        orderBy: [
+          { createdAt: "desc" }
+        ]
+      });
+      redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+    }
+
+    if(input.exclusive){
+      // Cache this as exclusive page, it can be cached for a long time as no quantity and shit, 1 day
+      exclusiveProducts = await prisma.products.findFirst({
+        where: {
+          exclusive: true
+        },
+        select: {
+          name: true,
+          sku: true,
+          productImages: {
+            where: { active: true, priorityIndex: 0 },
+            select: {
+              image: true,
+            }
+          }
+        }
+      });
+      redis.redisClient.set("exclusiveProducts", exclusiveProducts, {ex: 60*60*60*24});
+    }
+
+    if(input.popular){
+      // cache this as popular products, can be cached for 1 hour or so, the popular products don't change but the product quantity can
+      popularProducts = await prisma.products.findMany({
+        take: 4,
+        select: {
+          name: true,
+          price: true,
+          sku: true,
+          soldOut: true,
+          _count:{
+            select: {
+              ProductVariants: {
+                where: {
+                  inventory: {
+                    baseSkuInventory: {
+                      quantity: { gt:0 }
+                    },
+                    quantity: { gt:0 }
+                  }
+                }
+              }
+            }
+          },
+          productImages: {
+            where: { active: true, priorityIndex: 0 },
+            select: {
+              image: true,
+            }
+          }
+        },
+        orderBy: [
+          { createdAt: "desc" },
+          { visitedCount: "desc" }
+        ]
+      });
+      redis.redisClient.set("popularProducts", popularProducts, {ex: 60*60*60});
+    }
+
+    console.log("PRODUCT OUT ---------------------------------\n\n\n\n\n");
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: { latestProducts, popularProducts, exclusiveProducts } };
+
+  } catch (error) {
+    console.log("\n\n ----------------------------- :: Error in getProducts");
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+};
+
+/*
+- Get the size of all the products user requested to exchange;
+- For now in exhange we don't show what are available quantity, we accept the exchange order irrespective of the quantity 
+  and later if the quantity is not apt we issue credit note.
+*/
 export const getProductsSizes = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSizes>) => {
   const prisma = ctx.prisma;
   input = input!;
@@ -466,43 +731,3 @@ export const deleteProduct = async ({
     throw TRPCCustomError(error);
   }
 };
-    // include: { product: { include: { ProductImages : true } } }
-
-    // let includeSearchString: { productInventoryMap?: any; productImages: any } =
-    //   { productImages: { where: { priorityIndex: 0 } } };
-    // if (input.size)
-    //   includeSearchString.productInventoryMap = {
-    //     inventory: { size: input.size },
-    //   };
-
-    // let searchRequest: { [key: string]: any } = {};
-    // if (input.tags) searchRequest = { tags: { hasSome: input.tags } };
-    // if (input.categoryName)
-    //   searchRequest = {
-    //     ...searchRequest,
-    //     category: { displayName: input.categoryName.replace("_", " ") },
-    //   };
-
-    // // this might give performance issues
-    // // productInventoryMap: true is added to ensure that only those products are included that are mapped
-    // // to inventory
-    // const outOfStockCountQuery = {
-    //   productInventoryMap: true,
-    //   _count: {
-    //     select: {
-    //       productInventoryMap: {
-    //         where: { inventory: { quantity: { gt: 0 } } },
-    //       },
-    //     },
-    //   },
-    // };
-
-    // queryJSON = Object.keys(searchRequest).length
-    //   ? { ...queryJSON, where: searchRequest }
-    //   : queryJSON;
-    // queryJSON = Object.keys(includeSearchString).length
-    //   ? {
-    //       ...queryJSON,
-    //       include: { ...includeSearchString, ...outOfStockCountQuery },
-    //     }
-    //   : { ...queryJSON, include: { ...outOfStockCountQuery } };

@@ -1,8 +1,8 @@
 import { publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { cancelOrderProduct, editOrder, getUserOrder, getUserOrders, initiateOrder, verifyOrder } from "./orders.handler";
-import { ZcancelOrderProductSchema, ZEditOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema } from "./orders.schema";
+import { getUserOrder, cancelOrder, getUserOrders, initiateOrder, verifyOrder } from "./orders.handler";
+import { ZCancelOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema } from "./orders.schema";
 
 export const orderRouter = router({
     getUserOrders: publicProtectedProcedure
@@ -24,6 +24,10 @@ export const orderRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Verify the order"}})
         .input(ZVerifyOrderSchema)
         .mutation( async ({ctx, input}) => await verifyOrder({ctx, input})),
+    cancelOrder: publicProtectedProcedure 
+            .meta({ openAPI: {method: "POST", descrription: "Initiate a new order"}})
+            .input(ZCancelOrderSchema)
+            .mutation( async ({ctx, input}) => await cancelOrder({ctx, input}) ),
     // editOrder: orderProcedure
     //     .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
     //     .input(ZEditOrderSchema)

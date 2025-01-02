@@ -7,7 +7,7 @@ const OrdersPage = async ({params}: {params: {orderId: string}}) => {
     const { orderId } = await params;
     await redirectToHomeIfNotLoggedIn();
 
-    const {data: orderDetals} = await ( await serverClient()).viewer.orders.getUserOrder({orderId: +orderId});
+    const {data: orderDetals} = await ( await serverClient()).viewer.orders.getUserOrder({orderId: orderId});
     return (
         <section className="z-30 pt-24 flex flex-row w-screen h-screen text-black justify-center">
             <Order className="h-[95%] w-[90%] lg:w-[50%]" orderDetails={orderDetals} /> 

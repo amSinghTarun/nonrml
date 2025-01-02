@@ -1,4 +1,4 @@
-import { ProductCard, ProductContainer } from "../cards/ProductCard"
+import { ProductCard } from "../cards/ProductCard"
 import { RouterOutput } from "@/app/_trpc/client";
 
 type productsTRPCFncOutput = RouterOutput["viewer"]["product"]["getProducts"]["data"][number] // [number] is added to extract type of particular json
@@ -14,7 +14,7 @@ interface CategoryProductsProps {
 
 const CategoryProducts : React.FC<CategoryProductsProps> = async ({products}) => {
     return (
-        <ProductContainer>
+      <div className="flex flex-row flex-wrap bg-transparent pl-2">
         {
             products.map(products => {
                 return (
@@ -29,7 +29,7 @@ const CategoryProducts : React.FC<CategoryProductsProps> = async ({products}) =>
                 )
             })
         }
-      </ProductContainer> 
+      </div> 
     )
 }
 

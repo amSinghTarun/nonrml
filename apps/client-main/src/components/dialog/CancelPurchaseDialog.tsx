@@ -24,9 +24,9 @@ const CanclePurchaseDialog = () => {
                     <AlertDialogTitle className="text-xl">Have you thought it through?</AlertDialogTitle>
                     <AlertDialogDescription className="font-lg font-medium pb-3 text-black">
                         {`The product is in high demand. `}
-                        <text className=" text-red-600">
+                        <span className=" text-red-600">
                             Buy before it goes OUT OF STOCK.
-                        </text>
+                        </span>
                     </AlertDialogDescription>
                     <AlertDialogCancel>CONTINUE PURCHASE</AlertDialogCancel> 
                     <AlertDialogAction onClick={() => router.back()}>CANCEL PURCHASE</AlertDialogAction> 

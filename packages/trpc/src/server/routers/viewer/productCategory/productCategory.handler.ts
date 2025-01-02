@@ -18,8 +18,10 @@ export const getProductCategories = async ({ctx, input}: TRPCRequestOptions<any>
             }
         });
         const categoryNameArray = jsonArrayFieldsToStringArray(productCategories, "displayName");
+        
         //sets the cache async 
-        redis.addSets("productCategory", categoryNameArray);
+        redis.redisClient.set("productCategory", categoryNameArray, {ex: 60*60*24});
+        
         return {status: TRPCResponseStatus.SUCCESS, message:"", data:{categoryNameArray}};
     } catch(error) {
         //console.log("\n\n Error in getProductCategories ----------------");

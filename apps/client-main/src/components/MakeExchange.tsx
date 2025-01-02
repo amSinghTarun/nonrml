@@ -17,7 +17,7 @@ type exchangeProduct = RouterOutput["viewer"]["product"]["getProductSizes"]["dat
 interface ExchangeProps {
     makeNewExchange: boolean,
     products: NonNullable<OrderProduct>["orderProducts"],
-    orderId: number,
+    orderId: string,
     backToOrderDetails: () => void
 }
 
@@ -78,7 +78,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
         setError({});
         let errors : { [productId: number]: string } = {};
         let productDetails : {
-            orderId: number,
+            orderId: string,
             products: { 
                 orderProductId: number, 
                 quantity:number, 
