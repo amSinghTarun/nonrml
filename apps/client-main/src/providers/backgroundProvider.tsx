@@ -8,11 +8,11 @@ export const BackgroundProvider = ({ children }: { children: React.ReactNode }) 
         <>
             {
                 pathname !== "/" ?  
-                <div>
+                // <div>
+                    <BackgroundGradientAnimation>
                     {children}
-                </div>
-                    // <BackgroundGradientAnimation>
-                    // </BackgroundGradientAnimation>
+                    </BackgroundGradientAnimation>
+                // </div>
                 :
                 <div className='h-screen'>
                     {children}
