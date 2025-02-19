@@ -14,7 +14,7 @@ export const UserAccessibilityDropdown = () => {
 
     const dropdownMenuContent : {href?: string, display: string, onClickFnc?: ()=> void }[] = [
         {
-            href: "/order/all",
+            href: "/order",
             display: "Orders"
         }, 
         {

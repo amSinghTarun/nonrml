@@ -152,6 +152,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
                                 : (
                                     productExchangeSizes && <button 
                                         className="rounded-xl flex hover:cursor-default"
+                                        disabled={product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0)) ? false : true}
                                     ><Checkbox color="warning" onClick={()=>setSelectedProducts({...selectedProducts, [product.id]: {quantity: product.quantity}})} /></button>
                                 )
                             }
@@ -160,7 +161,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
                             <div className="flex flex-col w-full space-y-2 text-xs">
                                 <div className="flex flex-row pt-3 gap-3">
                                     {productExchangeSizes![product.productVariant.productId].map( productVariants => (
-                                        <div className={`${(selectedProducts[product.id].exchangeVariant == productVariants.variantId) ? "text-white bg-black" : "text-black bg-white bg-opacity-50" } text-xs basis-1/${productExchangeSizes![product.productVariant.productId].length} py-2 text-center shadow-black/15 shadow-sm rounded-xl hover:cursor-pointer hover:bg-black hover:text-white)`}
+                                        <div className={`${(selectedProducts[product.id].exchangeVariant == productVariants.variantId) ? "text-white bg-black" : "text-black bg-white bg-opacity-50" } text-xs basis-1/${productExchangeSizes![product.productVariant.productId].length} py-2 text-center shadow-black/15 shadow-sm rounded-xl cursor-pointer hover:bg-black hover:text-white)`}
                                         onClick={()=>{ handleSizeChange(productVariants.variantId, product.id) }}
                                         >{productVariants.size}</div>
                                     ))} 

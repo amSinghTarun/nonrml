@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
 import { checkProductVariantQuantityAvl } from "@/app/actions/product.action";
 
-
 const convertStringToINR = (currencyString: number) => {
   let INR = new Intl.NumberFormat();
   return `INR ${INR.format(currencyString)}.00`;
@@ -81,7 +80,7 @@ export const CartMenu = () => {
                     alt="image" 
                     width={80} 
                     height={20}
-                    className="rounded-xl hover:cursor-pointer hover:shadow-sm hover:shadow-black"
+                    className="rounded-xl cursor-pointer hover:shadow-sm hover:shadow-black"
                     onClick={() => router.push(`/products/${cartItems[+variantId].productSku.toLowerCase()}`)}
                   ></Image>
                   {/* details part - column */}
@@ -99,7 +98,7 @@ export const CartMenu = () => {
                         onQuantityChange={handleOnQuantityChange} 
                         variantId={+variantId}
                       />
-                      <div className="flex items-center hover:cursor-pointer" onClick={()=> handleOnDelete(+variantId)}>
+                      <div className="flex items-center cursor-pointer" onClick={()=> handleOnDelete(+variantId)}>
                         <DeleteOutlineIcon className="text-stone-800 text-sm"/>
                       </div>
                     </div>

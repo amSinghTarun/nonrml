@@ -12,7 +12,7 @@ export const MenuButton = () => {
 
     return (
         <div 
-            className=' hover:cursor-pointer w-auto h-full' 
+            className=' cursor-pointer w-auto h-full' 
             onClick={()=>{
                 appbarUtil != "SIDEBAR" ? setAppbarUtil("SIDEBAR") : setAppbarUtil("")
             }}

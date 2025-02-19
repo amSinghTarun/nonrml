@@ -14,7 +14,7 @@ interface generalButtonProps {
 
 export const GeneralButton : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('rounded-xl hover:bg-black hover:text-white shadow-black bg-white/20 shadow-sm ', className)} onClick={onClick}>
+        <button className={cn('rounded-md hover:bg-neutral-800 hover:text-white bg-white/20', className)} onClick={onClick}>
             {display}
         </button>
     )
@@ -26,7 +26,7 @@ interface SidebarButtonProps extends LinkProps {
 
 export const SidebarButton: React.FC<SidebarButtonProps> = ({ display, ...props}) => {
     return (
-        <Link {...props} className="hover:cursor-pointer flex justify-center flex-1 rounded-xl p-3 black-white hover:bg-black hover:text-white hover:items-start">
+        <Link {...props} className="cursor-pointer flex justify-center flex-1 rounded-md p-3 black-white hover:bg-black hover:text-white hover:items-start">
             {display}
         </Link>
     )
@@ -60,15 +60,13 @@ interface sizeButtonProps {
 export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, price, sku, quantity, variantId, selectedSize, name, image, setSelectedSize, setQuantity, productId}) => {
     if(quantity <= 0){
         return (    
-            <GeneralButton display={display} onClick={()=>{}} className={`basis-1/${sizeCount} bg-white bg-opacity-50 justify-center flex rounded-xl pt-3 pb-3 font-medium shadow-black/15 backdrop-blur-3xl text-black line-through`}/>
+            <GeneralButton display={display} onClick={()=>{}} className={`basis-1/${sizeCount} bg-white justify-center flex rounded-md cursor-no-drop py-3 font-normal hover:bg-white hover:text-neutral-800 text-neutral-800 line-through`}/>
         )
     }
     return (
         variantId == selectedSize.current 
-        ? <button onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`basis-1/${sizeCount-1} justify-center flex rounded-xl pt-3 pb-3 bg-black text-white`}>
-                {display}
-            </button>
-    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={` basis-1/${sizeCount} bg-white bg-opacity-50 justify-center flex rounded-xl py-3 font-medium shadow-black/15 backdrop-blur-3xl text-black`}/>
+        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`basis-1/${sizeCount} justify-center flex font-extrabold rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md`} />         
+    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={` basis-1/${sizeCount} bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:text-neutral-800`}/>
     )
 }
 
@@ -79,7 +77,7 @@ interface productPageActionButtonProps {
 }
 export const ProductPageActionButton : React.FC<productPageActionButtonProps> = ({ display, onClick, className}) => (
     <div 
-        className={cn("bg-white text-black hover:bg-black hover:text-white basis-1/2 flex justify-center p-3 font-semibold hover:cursor-pointer rounded-xl  hover:font-semibold bg-opacity-50 shadow shadow-black/15 backdrop-blur-3xl", className)}
+        className={cn("bg-white text-neutral-800 hover:bg-neutral-800 hover:text-white basis-1/2 flex justify-center p-3 font-medium cursor-pointer rounded-md shadow-none shadow-black/15", className)}
         onClick={onClick}
     >{display}</div> 
 )
@@ -111,17 +109,17 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
     };
 
     return (
-        <div className={cn(`flex basis-1/2 ${onQuantityChange.length == 2 ? "bg-black text-white" : "bg-white bg-opacity-50 shadow-sm shadow-black/10 text-black" } p-3 rounded-xl`, className)}>
-            <div className="flex flex-row flex-1 justify-evenly rounded-xl">
+        <div className={cn(`flex basis-1/2 ${"bg-white bg-opacity-50 shadow-sm shadow-black/10 text-neutral-800" } p-3 rounded-md`, className)}>
+            <div className="flex flex-row flex-1 justify-evenly rounded-md">
             {   
                 updatingQuantity 
                 ? 
                     <div className="flex items-center justify-center flex-grow font-medium"> ...</div>
                 :
                 <>
-                    <button onClick={handleDecrease} className="flex items-center basis-1/6 justify-center  hover:cursor-pointer rounded-l-xl pl-4 pr-3"> - </button>
+                    <button onClick={handleDecrease} className="flex items-center basis-1/6 justify-center  cursor-pointer rounded-l-xl pl-4 pr-3"> - </button>
                     <div className="flex items-center justify-center flex-grow font-medium"> {selectedQuantity} </div>
-                    <button onClick={handleIncrease} className="flex items-center basis-1/6 justify-center hover:cursor-pointer rounded-r-xl pr-4 pl-3"> + </button>
+                    <button onClick={handleIncrease} className="flex items-center basis-1/6 justify-center cursor-pointer rounded-r-xl pr-4 pl-3"> + </button>
                 </>
             }
             </div>

@@ -24,7 +24,7 @@ interface DropdownButtonProps {
 const DropdownButton: React.FC<DropdownButtonProps> = ( inputs => {
     if (inputs.href) {
         return (
-          <Link href={inputs.href} className="hover:cursor-pointer z-40 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black">
+          <Link href={inputs.href} className="cursor-pointer z-40 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black">
             {inputs.display}
           </Link>
         );
@@ -33,7 +33,7 @@ const DropdownButton: React.FC<DropdownButtonProps> = ( inputs => {
     return (
         <div
             onClick={inputs.onClick}
-            className="hover:cursor-pointer z-30 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black"
+            className="cursor-pointer z-30 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black"
         >
             {inputs.display}
         </div>

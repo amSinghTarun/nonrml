@@ -1,28 +1,24 @@
 import { adminProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { procedure, router } from "../../../trpc";
-import { addProductCategorySizes, deleteProductCategorySizes, editProductCategorySizes, getProductCategorySizes } from "./productCategorySizes.handler";
-import { ZAddProductCategorySizeSchema, ZDeleteProductCategorySizeSchema, ZEditProductCategorySizeSchema, ZGetProductCategorySizeSchema } from "./productCategorySizes.schema";
+import { addSizeChart, deleteSizeChart, editSizeChart, getSizeChart } from "./productCategorySizes.handler";
+import { ZGetSizeChartSchema, ZDeleteSizeChartSchema, ZEditSizeChartSchema, ZAddSizeChartSchema } from "./productCategorySizes.schema";
 
-export const productCategorySizeRouter = router({
-    addProductCategoriesSize: adminProcedure
+export const sizeChartRouter = router({
+    addSizeChart: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Add new product category sizes"}})
-        .input(ZAddProductCategorySizeSchema)
-        .mutation( async ({ctx, input}) =>  await addProductCategorySizes({ctx, input})),
-    getProductCategoriesSize: publicProcedure
+        .input(ZAddSizeChartSchema)
+        .mutation( async ({ctx, input}) =>  await addSizeChart({ctx, input})),
+    getSizeChart: publicProcedure
         .meta({ openAPI: {method: "POST", descrription: "Add new product category sizes"}})
-        .input(ZGetProductCategorySizeSchema)
-        .query( async ({ctx, input}) => await getProductCategorySizes({ctx, input})),
-    editProductCategoriesSize: adminProcedure
+        .input(ZGetSizeChartSchema)
+        .query( async ({ctx, input}) => await getSizeChart({ctx, input})),
+    editSizeChart: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit product category size"}})
-        .input(ZEditProductCategorySizeSchema)
-        .mutation( async ({ctx, input}) => {
-        return await editProductCategorySizes({ctx, input});
-    }),
-    deleteProductCategoriesSize: adminProcedure
-        .meta({ openAPI: {method: "POST", descrription: "Delete product category size"}})
-        .input(ZDeleteProductCategorySizeSchema)
-        .mutation( async ({ctx, input}) => {
-        return await deleteProductCategorySizes({ctx, input});
-    }),
+        .input(ZEditSizeChartSchema)
+        .mutation( async ({ctx, input}) => await editSizeChart({ctx, input}) ),
+    deleteSizeChart: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Delete size"}})
+        .input(ZDeleteSizeChartSchema)
+        .mutation( async ({ctx, input}) => await deleteSizeChart({ctx, input})),
 });

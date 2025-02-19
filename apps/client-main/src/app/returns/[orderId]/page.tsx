@@ -4,7 +4,7 @@ import { Returns } from "@/components/Returns";
 
 const ReturnOrders = async ({params}: {params: {orderId: string}}) => {
     await redirectToHomeIfNotLoggedIn();
-    const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: +(await params).orderId}) ;
+    const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: (await params).orderId}) ;
 
     return (
         <section className="z-30 pt-24 flex flex-row w-screen h-screen text-black justify-center">

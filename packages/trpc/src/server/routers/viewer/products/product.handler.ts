@@ -14,6 +14,7 @@ import {
 import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { redis } from "@nonrml/cache";
+import { late } from "zod";
 const take = 10;
 
 /*
@@ -31,7 +32,7 @@ export const getProduct = async ({
     //cache tpo track number of visit on a product
     redis.customJSONIncr({ key: "VISITED", path: input.productSku });
     
-    type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"> & {
+    type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"|"colour"> & {
       productImages: {
         image: string;
         priorityIndex: number;
@@ -157,6 +158,97 @@ export const getProduct = async ({
 };
 
 /*
+ Get the product details and also sizes for all the variants available
+*/
+export const getAdminProduct = async ({
+  ctx,
+  input,
+}: TRPCRequestOptions<TGetProductSchema>) => {
+  const prisma = ctx.prisma
+  input = input!
+  try {
+    console.log("\n\n\n\n\n GET PRODUCTS");
+    
+    const product = await prisma.products.findUniqueOrThrow({
+      where: {
+        sku: input!.productSku.toUpperCase(),
+      },
+      select: {
+        visitedCount: true,
+        name: true,
+        description: true,
+        price: true,
+        id: true,
+        colour: true,
+        sku: true,
+        care: true,
+        details: true,
+        soldOut: true,
+        categoryId: true,
+        tags: true,
+        discounts: true,
+        exclusive: true,
+        category: {
+          select: {
+            categoryName: true, 
+            id: true,
+            productCategorySize: {
+              select: {
+                sizeChart: true
+              }
+            }
+          }
+        },
+        productImages: true,
+        ProductVariants: {
+          select: {
+            id: true,
+            size: true,
+            subSku: true,
+            createdAt: true,
+            inventory: {
+              select: {
+                quantity: true,
+                baseSkuInventory: {
+                  select: {
+                    id: true
+                  }
+                },
+                id: true
+              }
+            }
+          }
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const categories = await prisma.productCategory.findMany();
+
+    console.log("\n\n\n\n\n -----END");
+
+    return {
+      status: TRPCResponseStatus.SUCCESS,
+      message: "",
+      data: { product: product!, categories: categories },
+    };
+  } catch (error) {
+    //console.log("\n\n Error in getProduct ----------------");
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+};
+
+/*
 - get the quantity for a products variant
 */
 export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions<TGetProductVariantQuantitySchema>) => {
@@ -234,14 +326,11 @@ Can apply filters
 Don't check availability when only size filter is applied
 The available/out of stock, can be checked through redis SKU cache
 */
-export const getProducts = async ({
-  ctx,
-  input,
-}: TRPCRequestOptions<TGetProductsSchema>) => {
+export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSchema>) => {
   const prisma = ctx.prisma;
   input = input!;
   try {
-    console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT 1 --------------------------------- ", input);
+    console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT start --------------------------------- ", input);
     
     type LatestProducts = {
       price: Prisma.Decimal;
@@ -249,6 +338,10 @@ export const getProducts = async ({
       name: string;
       id: number;
       soldOut: boolean;
+      public?: boolean,
+      sizeChartId: number | null,
+      visitedCount: number,
+      exclusive: boolean,
       productImages: {
           image: string;
       }[];
@@ -257,23 +350,26 @@ export const getProducts = async ({
       };
     }[] | null
 
-    let latestProducts : LatestProducts = input.cursor == 1 ? await redis.redisClient.get("latestProducts") : null;
+    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await redis.redisClient.get("latestProducts") : null;
 
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
         take: ( input.take ?? take) + 1,
-        cursor: {id: input.cursor},
-        where: input.categoryName ? {
-          category: {
-            displayName: input.categoryName.replace("_", " "),
-          },
-        } : {},
+        ...(input.cursor && {cursor: {id: input.cursor}}),
+        where: {
+          ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
+          ...( !input.admin && {public: true} )
+        },
         select: {
           name: true,
           price: true,
           id: true,
           soldOut: true,
+          public: input.admin && true,
+          exclusive: true,
           sku: true,
+          visitedCount: true,
+          sizeChartId: true,
           _count:{
             select: {
               ProductVariants: {
@@ -301,7 +397,7 @@ export const getProducts = async ({
       });
       redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
     }
-    console.log(latestProducts,  "PRODUCT 2 ---------------------------------", "\n\n\n\n\n");
+    console.log(latestProducts,  "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
     if (latestProducts && latestProducts.length >= take) {
       const nextItem = latestProducts.pop();
@@ -310,7 +406,6 @@ export const getProducts = async ({
 
     return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
   } catch (error) {
-    console.log("\n\n ----------------------------- :: Error in getProducts");
     if (error instanceof Prisma.PrismaClientKnownRequestError)
       error = {
         code: "BAD_REQUEST",
@@ -345,6 +440,9 @@ export const getHomeProducts = async ({
       latestProducts = await prisma.products.findMany({
         // skip: input.cursor == 1 ? 0 : 1,
         take: take + 1,
+        where: {
+          public: true
+        },
         select: {
           name: true,
           soldOut: true,
@@ -382,7 +480,8 @@ export const getHomeProducts = async ({
       // Cache this as exclusive page, it can be cached for a long time as no quantity and shit, 1 day
       exclusiveProducts = await prisma.products.findFirst({
         where: {
-          exclusive: true
+          exclusive: true,
+          public: true
         },
         select: {
           name: true,
@@ -402,6 +501,9 @@ export const getHomeProducts = async ({
       // cache this as popular products, can be cached for 1 hour or so, the popular products don't change but the product quantity can
       popularProducts = await prisma.products.findMany({
         take: 4,
+        where: {
+          public: true
+        },
         select: {
           name: true,
           price: true,
@@ -509,23 +611,14 @@ export const addProduct = async ({
   ctx,
   input,
 }: TRPCRequestOptions<TAddProductSchema>) => {
+  const prisma = ctx?.prisma!;
+  input = input!;
   try {
-    const prisma = ctx?.prisma!;
-    //console.log("INPUT ---------------- ", input);
-    // If will auto check at the time of creating record, so no need to check manually
-    // if(input.discountId){
-    //     const discount = await prisma.discounts.findUnique({
-    //         where: {
-    //             id: input.discountId
-    //         }
-    //     })
-    //     if(!discount)
-    //         throw new TRPCError({code: "NOT_FOUND", message: "No discount for the given Id"});
-    // }
-
-    const product = await prisma.products.createMany({
-      data: input!,
+    
+    const product = await prisma.products.create({
+      data: input,
     });
+
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "New product added",
@@ -606,82 +699,61 @@ export const editProduct = async ({
   ctx,
   input,
 }: TRPCRequestOptions<TEditProductSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!
   try {
-    if (input.categoryId) {
-      const category = await prisma.productCategories.findUnique({
-        where: {
-          id: input.categoryId,
-        },
-      });
-      if (!category)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No category for the selected category id",
-        });
+    console.log(input)
+
+    const updateData = {
+      ...(input.name && {name: input.name}),
+      ...(input.description && {description: input.description}),
+      ...(!isNaN(Number(input.price)) && {price: input.price}),
+      ...(!isNaN(Number(input.categoryId)) && {categoryId: input.categoryId}),
+      ...(input.colour && {colour: input.colour}),
+      ...(input.care && {care: input.care}),
+      ...(input.details && {details: input.details}),
+      ...(input.tags && {tags: input.tags}),
+      ...(input.soldOut !== undefined && {soldOut: input.soldOut}),
+      ...(input.exclusive !== undefined && {exclusive: input.exclusive}),
+      ...(input.public !== undefined && {public: input.public}),
+      ...(isNaN(Number(input.sizeChartId)) !== undefined && {sizeChartId: input.sizeChartId! < 0 ? null : input.sizeChartId })
     }
 
-    if (input.skuIds) {
-      const sku = await prisma.inventory.findMany({
+    if(!Object.keys(updateData).length) // i think this can be removed
+      throw { code:"BAD_REQUEST", message: "ATLEAST NEED 1 FIELD TO UPDATED"}
+
+    if ("categoryId" in updateData) {
+      const category = await prisma.productCategory.findUnique({
         where: {
-          SKU: {
-            in: [...input.skuIds],
-          },
+          id: updateData.categoryId,
         },
       });
-      if (sku.length != input.skuIds.length)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No device found for the sku id given",
-        });
+      if(!category) 
+        throw { code: "NOT_FOUND", message: "No category for the selected category id" };
     }
 
-    if (input.customisationOptionProductId) {
-      const customisationOption = await prisma.products.findUnique({
+    if(updateData.exclusive) {
+      const exclusive = await prisma.products.findFirst({
         where: {
-          id: input.customisationOptionProductId,
+          exclusive: true
         },
+        select: {
+          id: true,
+          sku: true
+        }
       });
-      if (customisationOption)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No product for the custom option opted",
-        });
+      if( exclusive && exclusive.id != input.productId ){
+        throw { code: "BAD_REQUEST", message: `${exclusive.sku} is already marked as exclusive` };}
     }
 
-    if (input.siblingProductId) {
-      const siblingProduct = await prisma.products.findUnique({
-        where: {
-          id: input.siblingProductId,
-        },
-      });
-      if (!siblingProduct)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No product for the sibling option opted",
-        });
-    }
-
-    if (input.discountId) {
-      const discount = await prisma.discounts.findUnique({
-        where: {
-          id: input.discountId,
-        },
-      });
-      if (!discount)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No discount for the given Id",
-        });
-    }
-
-    const product = await prisma.products.update({
+    await prisma.products.update({
       where: {
         id: input.productId,
       },
-      data: input,
+      data: updateData,
     });
 
-    return { status: TRPCResponseStatus.SUCCESS, message: "", data: product };
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: {} };
   } catch (error) {
     //console.log("\n\n Error in deleteProductImage ----------------");
     if (error instanceof Prisma.PrismaClientKnownRequestError)

@@ -1,10 +1,13 @@
-import { TRPCResponseStatus, TRPCAPIResponse, createError } from "@nonrml/common"
-import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TcancelOrderProductSchema, TCancelOrderSchema, TEditOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
+import { TRPCResponseStatus } from "@nonrml/common"
+import { acceptOrder, calculateRejectedQuantityRefundAmounts, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TInitiateUavailibiltyRefundSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
 import { Prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
+import { datetimeRegex } from "zod";
+import { paymentRouter } from "../payments/_router";
+const returnExchangeTime = 604800000; // 7 days
 /*
 Get all the orders of a user
 No pagination required for now, as the result quantity is gonna stay small
@@ -31,13 +34,16 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
                 productCount: true,
                 shipmentId: true,
                 return: {
+                    where: {
+                        returnType: "RETURN"
+                    },
                     select:{
                         id: true
                     }
                 },
                 replacementOrder: {
                     select:{
-                        id: true
+                        id: true,
                     }
                 },
                 payment:{
@@ -135,7 +141,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                         paymentStatus: true
                     }
                 },
-                return: {
+                return: { //so that I can show that you can make another return once the prev one is accept to ship
                     where:{
                         returnStatus: "PENDING"
                     },
@@ -143,7 +149,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                         id: true
                     }
                 },
-                replacementOrder: {
+                replacementOrder: { //so that I can show that you can make another return once the prev one is accept to ship
                     where: {
                         status: "PENDING"
                     },
@@ -159,7 +165,6 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                         replacementQuantity: true,
                         rejectedQuantity: true,
                         returnQuantity: true,
-                        productStatus: true,
                         productVariant: {
                             select: {
                                 size: true,
@@ -381,15 +386,10 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         }
 
         const paymentCreated = await createRZPOrder({ctx, input: {orderTotal: ( (orderTotal <= cnUseableValue) ? 10 : (orderTotal - cnUseableValue) ), addressId: input.addressId}});
-        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
         const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
-        let orderId = `ORD-${date}-${userId}-${randomPart}`;
+        let orderId = `ORD-${date}${userId}${randomPart}`;
 
-        `
-        
-            125JAN1
-        
-        `
         const orderCreated = await prisma.$transaction(async (prisma) => {
             const order = await prisma.orders.create({
                 data: {
@@ -400,7 +400,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     creditNoteId: creditNoteId,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
                     paymentId: paymentCreated.data.id,
-                    productCount: Object.values(input.orderProducts).length
+                    productCount: Object.values(input.orderProducts).length,
                 },
                 select:{
                     id: true,
@@ -412,7 +412,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     }
                 }
             })
-            const orderProducts = await prisma.orderProducts.createMany({
+            const orderProducts = prisma.orderProducts.createMany({
                 data: Object.values(input.orderProducts).map((product) => ({
                     orderId: order.id,
                     productVariantId: product.variantId,
@@ -443,124 +443,185 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error)
     }
-};        
-    
-// not so sure about it.
-// maybe a route to confirm the payment.
-export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchema>) => {
+};   
+
+export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrdersSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
-    } catch(error) {
-        //console.log("\n\n Error in editOrder ----------------");
+        let whereCondition : any = {}
+
+        if(input.orderStatus )
+            whereCondition = {orderStatus : input.orderStatus};
+        if(input.ordersDate )
+            whereCondition = { ...whereCondition, createdAt: getDateRangeForQuery(input.ordersDate)};
+        if(input.userId)
+            whereCondition = { ...whereCondition, userId: input.userId};
+        if(input.orderId)
+            whereCondition = { ...whereCondition, id: input.orderId};
+            
+        console.log(whereCondition)
+        const take = 30;
+        const orders = await prisma.orders.findMany({
+            take: input.page && take,
+            skip: input.page && ( take * (input.page - 1) ),
+            where: whereCondition,
+            select: {
+                id: true,
+                type: true,
+                totalAmount: true,
+                creditUtilised: true,
+                userId: true,
+                shipmentId: true,
+                deliveryDate: true,
+                orderStatus: true,
+                productCount: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+        console.log(orders)
+        return { 
+            status: TRPCResponseStatus.SUCCESS, 
+            message:"", 
+            data: orders
+        };
+    }catch(error) {
+        //console.log("\n\n Error in initiateOrder ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error)
     }
-};
+}
 
-/*
-User can cancel a single product or entire order based on their choice but only before the order is shipped.
-Process:
-    get the product|order detail and check for pending status
-    cancel the shipment
-    Calculate and initiaite the refund
-    Update the status to cancelled
-*/ 
-export const cancelOrderProduct = async ({ctx, input}: TRPCRequestOptions<TcancelOrderProductSchema>)=> {
+export const getOrderReturnDetails = async( {ctx, input}: TRPCRequestOptions<TGetUserOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
-        let userId = ctx?.user?.id;        
-        let updatedOrder = {};
-        let grossRefundAmount = 0;
-
-        if(input.productOrderId){
-            let orderedProduct = await prisma.orderProducts.findUniqueOrThrow({
-                where: {
-                    id: input.productOrderId,
-                    productStatus: prismaEnums.ProductStatus.PENDING
-                },
-                include: {
-                    order: {
-                        include: {
-                            discount: true
+        const returnOrder = await prisma.returns.findMany({
+            where: {
+                orderId: input.orderId
+            },
+            select: {
+                id: true,
+                returnStatus: true,
+                returnShipmentId: true,
+                createdAt: true,
+                returnType: true,
+                returnItems: {
+                    include: {
+                        ReplacementItem: {
+                            select: {
+                                id: true,
+                                nonReplaceAction: true,
+                                nonReplacableQuantity: true,
+                                productVariant: {
+                                    select: {
+                                        size: true
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            });
-
-            // cancel the shipment order
-
-            grossRefundAmount = orderedProduct.price;
-            if(orderedProduct?.order.discount?.type == prismaEnums.DiscountType.PERCENTAGE){
-                grossRefundAmount -= ( grossRefundAmount * orderedProduct.order.discount.discount ) / 100 ;
-            } else {
-                grossRefundAmount -= orderedProduct.order.discount?.discount! / orderedProduct.order.productCount;
-            }
-
-            updatedOrder = await prisma.orderProducts.update({
-                where: {
-                    id: input.productOrderId
-                }, 
-                data: {
-                    productStatus: prismaEnums.ProductStatus.CANCELED
-                }
-            });
-
-
-    
-        } else {    
-            const order = await prisma.orders.findUniqueOrThrow({
-                where: {
-                    userId: userId, 
-                    id: input.orderId
                 },
-                select: {
-                    productCount: true,
-                    finalPrice: true
-                }
-            });
-            
-            const products = await prisma.orderProducts.count({
-                where: {
-                    orderId: input.orderId,
-                    OR: [
-                        {
-                            productStatus: prismaEnums.ProductStatus.PENDING,
-                        },
-                        {
-                            productStatus: prismaEnums.ProductStatus.CANCELED,
-                        }
-                    ]
-                }
-            });
-            
-            
-            if(order.productCount == products){
-                // cancel the shipment order
-                grossRefundAmount = <number><unknown>order.finalPrice;
-                updatedOrder = await prisma.orderProducts.updateMany({
-                    where: {
-                        orderId: input.orderId
-                    }, 
-                    data :{
-                        productStatus: prismaEnums.ProductStatus.CANCELED
+                creditNote: true,
+                ReplacementOrder: {
+                    select: {
+                        id: true,
+                        status: true,
+                        shipmentId: true
                     }
-                })
-            } else {
-                throw new TRPCError({code: "UNAUTHORIZED", message: "Can't cancel the order once it's Confirmed"});
+                }
             }
-        }
-
-        // return the payment  : grossRefundAmount
-
-        return { status: TRPCResponseStatus.SUCCESS, message:"Order canceled", data: updatedOrder};
-
+        });
+        return { 
+            status: TRPCResponseStatus.SUCCESS, 
+            message:"", 
+            data: returnOrder
+        };
     } catch(error) {
-        //console.log("\n\n Error in cancelOrderProduct ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error)
     }
-} 
+}
+    
+export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        console.log(input.orderId)
+        const orders = await prisma.orders.findUnique({
+            where: {
+                id: input.orderId
+            },
+            select: {
+                id: true,
+                totalAmount: true,
+                productCount: true,
+                creditUtilised: true,
+                creditNoteId: true,
+                deliveryDate: true,
+                orderStatus: true,
+                createdAt: true,
+                returnAcceptanceDate: true,
+                _count: {
+                    select: {
+                        return: true
+                    }
+                },
+                Payments: {
+                    include: {
+                        RefundTransactions : {
+                            include: {
+                                CreditNotes: true
+                            }
+                        }
+                    }
+                },
+                // shipment: true,
+                user: { 
+                    select : {
+                        contactNumber: true
+                    }
+                },
+                address: true,
+                orderProducts: {
+                    include: {
+                        productVariant: {
+                            select: {
+                                size: true,
+                                product: {
+                                    select: {
+                                        sku: true,
+                                        productImages: {
+                                            select: {
+                                                image: true
+                                            }
+                                        }   
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        })
+        console.log(orders)
+        return { 
+            status: TRPCResponseStatus.SUCCESS, 
+            message:"", 
+            data: orders
+        };
+    }catch(error) {
+        //console.log("\n\n Error in initiateOrder ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+}
 
 /*
 Change the status of an order
@@ -636,6 +697,69 @@ export const ChangeOrderStatus = async ({ctx, input}: TRPCRequestOptions<TChange
 
     } catch(error) {
         //console.log("\n\n Error in changeOrderStatus ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+};
+
+// not so sure about it.
+// maybe a route to confirm the payment.
+export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        let editOrderQueries = []
+        switch(input.status){
+            case "ACCEPTED":
+                await acceptOrder(input.orderId);
+                break;
+            case "DELIVERED":
+                editOrderQueries.push(prisma.orders.update({where: {id: input.orderId}, data: {orderStatus: "DELIVERED", deliveryDate: Date.now(), returnAcceptanceDate: ( Date.now() + returnExchangeTime ) }}))
+                break;
+            case "CANCELED": // this is for pending order, coz at pending state the quantities are not deducted
+                editOrderQueries.push(prisma.orders.update({where: {id: input.orderId}, data: {orderStatus:"CANCELED"}}));
+            default:
+                break;
+        }
+
+        if(input.productRejectStatus){
+            for(let orderProductId of Object.keys(input.productRejectStatus)){
+                editOrderQueries.push(
+                    prisma.orderProducts.update({
+                        where: {
+                            id: +orderProductId
+                        },
+                        data: {
+                            rejectedQuantity: input.productRejectStatus[orderProductId]?.rejectedQuantity,
+                            // if payment mode is COD then update the imbursed qantity as rejectedQuantity
+                            // reimbursedQuantity: input.productStatus[orderProductId]?.rejectedQuantity
+                        }
+                    })
+                )
+            }
+
+            prisma.$transaction(editOrderQueries);
+
+        }
+
+        if( !isNaN(Number(input.returnDateExtend)) && input.returnDateExtend && input.initialReturnDate){
+            editOrderQueries.push(prisma.orders.update({
+                where: {
+                    id: input.orderId
+                },
+                data: {
+                    returnAcceptanceDate: input.initialReturnDate + ( input.returnDateExtend * 86400000)
+                }
+            }))
+        }
+
+        prisma.$transaction(editOrderQueries)
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
+
+    } catch(error) {
+        //console.log("\n\n Error in editOrder ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error)

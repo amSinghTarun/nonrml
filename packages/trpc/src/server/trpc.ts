@@ -1,7 +1,7 @@
 import { initTRPC } from "@trpc/server";
 import { createContext, TRPCContext } from "./contexts/context";
 import { appRouter } from "./routers";
-import SuperJSON from "superjson";
+import SuperJSON from "superjson"
 import { session } from "@nonrml/configs";
 // import SuperJSON from "superjson";
 

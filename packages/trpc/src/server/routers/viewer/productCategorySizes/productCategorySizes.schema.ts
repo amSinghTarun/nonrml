@@ -1,26 +1,29 @@
+import { prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
 
-export const ZGetProductCategorySizeSchema = z.object({
-    id: z.number(),
+export const ZGetSizeChartSchema = z.object({
+    id: z.number().optional(),
+    type: z.enum(Object.keys(prismaEnums.SizeType) as [keyof typeof prismaEnums.SizeType]).optional()
 });
-export type TGetProductCategorySizeSchema = z.infer<typeof ZGetProductCategorySizeSchema>;
+export type TGetSizeChartSchema = z.infer<typeof ZGetSizeChartSchema>;
 
-export const ZAddProductCategorySizeSchema = z.object({
-    sizeChartName: z.string(),
-    sizeChart: z.record(z.any()),
-    categoryId: z.number()
-})
-export type TAddProductCategorySizeSchema = z.infer<typeof ZAddProductCategorySizeSchema>;
+export const ZAddSizeChartSchema = z.array(z.object({
+    name: z.string(),
+    value: z.string().optional(),
+    type: z.enum(Object.keys(prismaEnums.SizeType) as [keyof typeof prismaEnums.SizeType]),
+    parentId: z.number().optional(),
+    sortOrder: z.number() 
+}))
+export type TAddSizeChartSchema = z.infer<typeof ZAddSizeChartSchema>;
 
-export const ZEditProductCategorySizeSchema = z.object({
-    categorySizeId: z.number(),
-    sizeAvailable: z.array(z.string()),
-    sizeChart: z.string(),
+export const ZEditSizeChartSchema = z.object({
+    chartId: z.number(),
+    value: z.number(),
 });
-export type TEditProductCategorySizeSchema = z.infer<typeof ZEditProductCategorySizeSchema>;
+export type TEditSizeChartSchema = z.infer<typeof ZEditSizeChartSchema>;
 
-export const ZDeleteProductCategorySizeSchema = z.object({
+export const ZDeleteSizeChartSchema = z.object({
     id: z.number()    
 });
-export type TDeleteProductCategorySizeSchema = z.infer<typeof ZDeleteProductCategorySizeSchema>;
+export type TDeleteSizeChartSchema = z.infer<typeof ZDeleteSizeChartSchema>;

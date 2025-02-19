@@ -1,14 +1,18 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { addProduct, getProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts } from "./product.handler";
-import { ZAddProductSchema, ZGetProductSchema, ZGetProductVariantQuantitySchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema, ZGetHomeProductsSchema } from "./product.schema";
+import { addProduct, getProduct, getAdminProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts, editProduct } from "./product.handler";
+import { ZAddProductSchema, ZGetProductSchema, ZGetProductVariantQuantitySchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema, ZGetHomeProductsSchema, ZEditProductSchema } from "./product.schema";
 
 export const productRouter = router({
     getProduct: publicProcedure
         .meta({ openAPI: {method: "GET", description: "Get a particular product"}})
         .input(ZGetProductSchema)
         .query(async ({ctx, input}) => await getProduct({ctx, input})),
+    getAdminProduct: adminProcedure
+        .meta({ openAPI: {method: "GET", description: "Get a particular product"}})
+        .input(ZGetProductSchema)
+        .query(async ({ctx, input}) => await getAdminProduct({ctx, input})),
     getProducts : publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get all the products"}})
         .input(ZGetProductsSchema)
@@ -30,13 +34,11 @@ export const productRouter = router({
         .query( async ({ctx, input}) => await verifyCheckoutProducts({ctx, input})),
     getProductVariantQuantity: publicProcedure
         .input(ZGetProductVariantQuantitySchema)
-        .query( async ({ctx, input}) => await getProductVariantQuantity({ctx, input}))
-    // editProduct : adminProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
-    //     .input(ZEditProductSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await editProduct({ctx, input});
-    // }),
+        .query( async ({ctx, input}) => await getProductVariantQuantity({ctx, input})),
+    editProduct : adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
+        .input(ZEditProductSchema)
+        .mutation( async ({ctx, input}) => await editProduct({ctx, input}) ),
     // deleteProduct : adminProcedure
     //     .meta({ openAPI: {method: "POST", descrription: "Delete a product"}})
     //     .input(ZDeleteProductSchema)

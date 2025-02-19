@@ -1,15 +1,14 @@
 
 import { adminProcedure } from "../../../procedures/authedProcedure";
-import { procedure, router } from "../../../trpc";
-import { addInventoryItems, deleteInventoryItem, editInventoryItem, getInventory, getInventoryItem, getSKUDetails } from "./inventory.handler";
-import { ZAddInventoryItemsSchema, ZDeleteInventoryItemSchema, ZEditInventoryItemSchema, ZGetInventoryItemSchema, ZGetSKUDetailsSchema } from "./inventory.schema";
+import { router } from "../../../trpc";
+import { addInventoryItems, getInventory, deleteInventoryItem, editInventoryItem } from "./inventory.handler";
+import { ZAddInventoryItemsSchema, ZGetSKUDetailsSchema, ZEditInventoryItemSchema, ZDeleteInventoryItemSchema } from "./inventory.schema";
 
 export const InventoryRouter = router({
-    // getInventory: adminProcedure
-    //     .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
-    //     .query( async ({ctx}) => {
-    //     return await getInventory({ctx});
-    // }),
+    getInventory: adminProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
+        .input(ZGetSKUDetailsSchema)
+        .query( async ({ctx, input}) => await getInventory({ctx, input})),
     // getInventoryItem: adminProcedure
     //     .meta({ openAPI: {method: "GET", descrription: "Get a particular inventory item"}})
     //     .input(ZGetInventoryItemSchema)
@@ -25,19 +24,13 @@ export const InventoryRouter = router({
     createInventory: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Create a new item in inventory"}})
         .input(ZAddInventoryItemsSchema)
-        .mutation( async ({ctx, input}) => {
-        return await addInventoryItems({ctx, input});
-    }),
-    // editInventory: adminProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Edit item from the inventory"}})
-    //     .input(ZEditInventoryItemSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await editInventoryItem({ctx, input});
-    // }),
-    // deleteInventory: adminProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Delete a item from the inventory"}})
-    //     .input(ZDeleteInventoryItemSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await deleteInventoryItem({ctx, input});
-    // })
+        .mutation( async ({ctx, input}) => await addInventoryItems({ctx, input})),
+    editInventory: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Edit item from the inventory"}})
+        .input(ZEditInventoryItemSchema)
+        .mutation( async ({ctx, input}) => await editInventoryItem({ctx, input})),
+    deleteInventory: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Delete a item from the inventory"}})
+        .input(ZDeleteInventoryItemSchema)
+        .mutation( async ({ctx, input}) => await deleteInventoryItem({ctx, input}))
 })

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from "zustand/middleware"
-import dotenv from "dotenv/config"
 
 type cartItem = {
   [produtcVariantId: number] : {

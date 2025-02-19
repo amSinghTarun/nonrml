@@ -22,7 +22,7 @@ const CartButton = () => {
     }
     return (
         <div 
-            className=' hover:cursor-pointer w-auto h-full' 
+            className=' cursor-pointer w-auto h-full' 
             onClick={handleOnClick}>
             {
                 appbarUtil == "CART" ?

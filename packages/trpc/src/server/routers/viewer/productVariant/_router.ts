@@ -1,13 +1,13 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { router } from "../../../trpc";
-import { addProductVariants } from "./productVariant.handler";
-import { ZAddProductVariantsSchema, ZDeleteProductSchema, ZEditProductSchema, ZGetProductSchema, ZGetProductsSchema, ZGetProductsSizes } from "./productVariant.schema";
+import { addProductVariants, deleteProductVariant } from "./productVariant.handler";
+import { ZAddProductVariantsSchema, ZDeleteProductVariantSchema } from "./productVariant.schema";
 
 export const productVariantRouter = router({
     addProductVariants : adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Add new product"}})
         .input(ZAddProductVariantsSchema)
-        .mutation( async ({ctx, input}) => await addProductVariants({ctx, input}) )
+        .mutation( async ({ctx, input}) => await addProductVariants({ctx, input}) ),
     // getProduct: publicProcedure
     //     .meta({ openAPI: {method: "GET", descrription: "Get a particular product"}})
     //     .input(ZGetProductSchema)
@@ -26,10 +26,8 @@ export const productVariantRouter = router({
     //     .mutation( async ({ctx, input}) => {
     //     return await editProduct({ctx, input});
     // }),
-    // deleteProduct : adminProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Delete a product"}})
-    //     .input(ZDeleteProductSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await deleteProduct({ctx, input});
-    // })
+    deleteProductVariant : adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Delete a product"}})
+        .input(ZDeleteProductVariantSchema)
+        .mutation( async ({ctx, input}) => await deleteProductVariant({ctx, input}) )
 });

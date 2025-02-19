@@ -1,8 +1,8 @@
-import { publicProtectedProcedure } from "../../../procedures/authedProcedure";
+import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { getUserOrder, cancelOrder, getUserOrders, initiateOrder, verifyOrder } from "./orders.handler";
-import { ZCancelOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema } from "./orders.schema";
+import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder } from "./orders.handler";
+import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema } from "./orders.schema";
 
 export const orderRouter = router({
     getUserOrders: publicProtectedProcedure
@@ -12,6 +12,10 @@ export const orderRouter = router({
         .meta({ openAPI: {method: "GET", descrription: "Get a particular order from the user"}})
         .input(ZGetUserOrderSchema)
         .query( async ({ctx, input}) => await getUserOrder({ctx, input})),
+    getOrderReturnDetails: publicProtectedProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get a particular order from the user"}})
+        .input(ZGetUserOrderSchema)  // keeping it same as only orderId is needed
+        .query( async ({ctx, input}) => await getOrderReturnDetails({ctx, input})),
     trackOrder: publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get the trackign detail of an order"}})
         .input(ZTrackOrderSchema)
@@ -25,19 +29,19 @@ export const orderRouter = router({
         .input(ZVerifyOrderSchema)
         .mutation( async ({ctx, input}) => await verifyOrder({ctx, input})),
     cancelOrder: publicProtectedProcedure 
-            .meta({ openAPI: {method: "POST", descrription: "Initiate a new order"}})
-            .input(ZCancelOrderSchema)
-            .mutation( async ({ctx, input}) => await cancelOrder({ctx, input}) ),
-    // editOrder: orderProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
-    //     .input(ZEditOrderSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await editOrder({ctx, input});
-    // }),
-    // cancelOrderProduct: orderProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "cancel order"}})
-    //     .input(ZcancelOrderProductSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await cancelOrderProduct({ctx, input});
-    // }),
+        .meta({ openAPI: {method: "POST", descrription: "Cancel an order"}})
+        .input(ZCancelOrderSchema)
+        .mutation( async ({ctx, input}) => await cancelOrder({ctx, input}) ),
+    getAllOrders: adminProcedure
+        .meta({openAPI: {method: "GET", description: "Get all the orders for admin"}})
+        .input(ZGetAllOrdersSchema)
+        .query(async ({ctx, input}) => await getAllOrders({ctx, input})),
+    getOrder: adminProcedure
+        .meta({openAPI: {method: "GET", description: "Get all the orders for admin"}})
+        .input(ZGetOrderSchema)
+        .query(async ({ctx, input}) => await getOrder({ctx, input})),
+    editOrder: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
+        .input(ZEditOrderSchema)
+        .mutation( async ({ctx, input}) => await editOrder({ctx, input}) ),
 })

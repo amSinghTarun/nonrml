@@ -93,7 +93,8 @@ export const MakeReturn : React.FC<ReturnReplaceProps> = ({makeNewReturn, produc
             return;
         }
         // //console.log(productDetails);
-        InitiateReturnOrder(productDetails);
+        await InitiateReturnOrder(productDetails);
+        backToOrderDetails()
     }
 
     return(
@@ -135,6 +136,7 @@ export const MakeReturn : React.FC<ReturnReplaceProps> = ({makeNewReturn, produc
                                 ) : (
                                     <button 
                                         className="rounded-xl flex hover:cursor-default"
+                                        disabled={product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0)) ? false : true}
                                     ><Checkbox color="warning" onClick={()=>setSelectedProducts({...selectedProducts, [product.id]: {quantity: product.quantity}})} /></button>
                                 )
                             }

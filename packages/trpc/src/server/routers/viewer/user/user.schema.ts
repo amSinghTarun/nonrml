@@ -1,21 +1,13 @@
+import { prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
-export const ZEditUserPersonalInfoSchema = z.object({
-    email: z.string().includes("@").includes(".com").optional(),
-    contactNumber: z.string().max(10).optional(),
-    password: z.string().optional(),
-    firstName: z.string(),
-    lastName: z.string()
+export const ZGetUsersSchema = z.object({
+    mobile: z.number().optional()
 });
-export type TEditUserPersonalInfoSchema = z.infer<typeof ZEditUserPersonalInfoSchema>;
+export type TGetUsersSchema = z.infer<typeof ZGetUsersSchema>;
 
-export const ZSendActivationLinkSchema = z.object({
-    email: z.string().includes("@"),
-    id: z.number()
+export const ZChangeRoleSchema = z.object({
+    userId: z.number(),
+    role: z.enum(Object.keys(prismaEnums.UserPermissionRoles) as [keyof typeof prismaEnums.UserPermissionRoles])
 });
-export type TSendActivationLinkSchema = z.infer<typeof ZSendActivationLinkSchema>;
-
-export const ZActivateUserAccountSchema = z.object({
-    token: z.string()
-});
-export type TActivateUserAccountSchema = z.infer<typeof ZActivateUserAccountSchema>;
+export type TChangeRoleSchema = z.infer<typeof ZChangeRoleSchema>;

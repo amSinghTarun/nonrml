@@ -1,10 +1,10 @@
 import { prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
-export const ZGetAddressSchema = z.object({
-    addressId: z.number()
+export const ZGetUserAddressSchema = z.object({
+    userId: z.number()
 });
-export type TGetAddressSchema = z.infer<typeof ZGetAddressSchema>;
+export type TGetUserAddressSchema = z.infer<typeof ZGetUserAddressSchema>;
 
 export const ZGetAddressesSchema = z.object({
     userId: z.number()
@@ -18,9 +18,22 @@ export const ZEditAddressSchema = z.object({
     pincode: z.string().length(6).optional(),
     city: z.string().optional(),
     state: z.string().optional(),
-    email: z.string().email().optional()
+    email: z.string().email().optional(),
+    addressId: z.number()
 });
 export type TEditAddressSchema = z.infer<typeof ZEditAddressSchema>;
+
+export const ZEditAddressByAdmin = z.object({
+    contactName: z.string().optional(),
+    contactNumber: z.string().regex(/^[6-9]\d{9}$/g).length(10).optional(),
+    location: z.string().optional(),
+    pincode: z.string().length(6).optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    email: z.string().email().optional(),
+    id: z.number() //id of address that is being changed
+});
+export type TEditAddressByAdmin = z.infer<typeof ZEditAddressByAdmin>;
 
 export const ZAddAddressSchema = z.object({
     contactName: z.string(),

@@ -47,7 +47,7 @@ export async function LandingPage() {
       </div>
 
 
-      <HeroParallax products={[...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts]} />
+      {/* <HeroParallax products={[...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts]} /> */}
 
 
       <div
@@ -95,6 +95,7 @@ export async function LandingPage() {
         <div className="flex flex-row flex-wrap w-full h-full">
           {
             products.popularProducts.map( product => ( 
+              <>
               <ProductCardHome  
                 key={product.sku}
                 image={product.productImages[0]?.image}
@@ -104,6 +105,70 @@ export async function LandingPage() {
                 imageAlt={product.name}
                 price={+product.price}
               />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+              </>
             ))
           }
         </div>

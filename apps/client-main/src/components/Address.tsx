@@ -159,7 +159,7 @@ export const EditAddress : React.FC<EditAddressProps> = (editdAddressProps) => {
         <div className={cn("w-full pb-2 flex h-full", editdAddressProps.className)}> 
             <Form 
                 action={async() => {
-                    await editAddress(formData)
+                    await editAddress({...formData, addressId: editdAddressProps.address.id!})
                     editdAddressProps.onCancelClick()
                 }} 
                 className="space-y-0"

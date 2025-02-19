@@ -48,10 +48,29 @@ export const ZInitiateOrderSchema = z.object({
 export type TInitiateOrderSchema = z.infer<typeof ZInitiateOrderSchema>;
 
 export const ZEditOrderSchema = z.object({
-    orderId: z.number(),
-    paymentStatus: z.enum([prismaEnums.PaymentStatus.PENDING, prismaEnums.PaymentStatus.CONFIRMED])
+    orderId: z.string(),
+    status: z.enum(Object.keys(prismaEnums.OrderStatus) as [keyof typeof prismaEnums.OrderStatus]).optional(),
+    productRejectStatus: z.record(z.string(), z.object({
+        rejectedQuantity: z.number()
+    })).optional(),
+    returnDateExtend: z.number().optional(),
+    initialReturnDate: z.number().optional()
 });
 export type TEditOrderSchema = z.infer<typeof ZEditOrderSchema>;
+
+export const ZGetAllOrdersSchema = z.object({
+    orderId: z.string().optional(),
+    ordersDate: z.date().optional(),
+    page: z.number().optional(),
+    userId: z.number().optional(),
+    orderStatus: z.enum(Object.keys(prismaEnums.OrderStatus) as [keyof typeof prismaEnums.OrderStatus]).optional()
+});
+export type TGetAllOrdersSchema = z.infer<typeof ZGetAllOrdersSchema>;
+
+export const ZGetOrderSchema = z.object({
+    orderId: z.string()
+});
+export type TGetOrderSchema = z.infer<typeof ZGetOrderSchema>;
 
 export const ZcancelOrderProductSchema = z.object({
     orderId: z.number(),

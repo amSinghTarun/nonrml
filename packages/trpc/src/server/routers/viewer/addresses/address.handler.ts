@@ -1,5 +1,5 @@
 import { Prisma, prisma } from "@nonrml/prisma";
-import { TAddAddressSchema, TDeleteAddressSchema, TEditAddressSchema, TGetAddressSchema } from "./address.schema";
+import { TAddAddressSchema, TDeleteAddressSchema, TEditAddressByAdmin, TEditAddressSchema, TGetUserAddressSchema } from "./address.schema";
 import { TRPCError } from "@trpc/server";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TRPCResponseStatus } from "@nonrml/common";
@@ -8,12 +8,11 @@ import { TRPCResponseStatus } from "@nonrml/common";
 Get the a particular user address
 userId is taken form the ctx to ensure no other user can see address of anyone else
 */
-export const getAddress = async ({ctx, input}: TRPCRequestOptions<TGetAddressSchema>)  => {
+export const getUserAddress = async ({ctx, input}: TRPCRequestOptions<TGetUserAddressSchema>)  => {
     try{
-        const userId = ctx.session.user.id
-        const address = await prisma.address.findUnique({
+        const userId = input?.userId
+        const address = await prisma.address.findMany({
             where: {
-                id: input!.addressId,
                 userId: userId
             }
         })
@@ -94,12 +93,35 @@ Edit address of an user
 */
 export const editAddress = async ({ctx, input}: TRPCRequestOptions<TEditAddressSchema>) => {
     const prisma = ctx.prisma;
-    const userId = +ctx.session.user.id
+    const userId = +ctx.user?.id!
     try{
         const editedAddress = {...input};
         const newAddress = await prisma.address.update({
             where: {
                 id: userId
+            }, 
+            data : editedAddress
+        });
+        return {status: TRPCResponseStatus.SUCCESS, message:"Address edited Successfully", data: newAddress};
+    } catch(error) {
+        //console.log("\n\n Error in editAddress ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw error;
+    };
+}
+
+/*
+Edit address of an user
+*/
+export const editAddressByAdmin = async ({ctx, input}: TRPCRequestOptions<TEditAddressByAdmin>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        const editedAddress = {...input};
+        const newAddress = await prisma.address.update({
+            where: {
+                id: input.id
             }, 
             data : editedAddress
         });

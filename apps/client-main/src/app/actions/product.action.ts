@@ -11,10 +11,9 @@ type HomeProductsType = RouterOutput["viewer"]["product"]["getHomeProducts"]["da
 
 export const getHomepageProducts = async () => {
 
-    // fetch the cache(s) here 
-    let latestProducts : HomeProductsType["latestProducts"] | null = await redis.redisClient.get("latestProducts");
-    let popularProducts : HomeProductsType["popularProducts"] | null = await redis.redisClient.get("popularProducts");
-    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await redis.redisClient.get("exclusiveProducts");
+    let latestProducts : HomeProductsType["latestProducts"] | null =        null;//await redis.redisClient.get("latestProducts");
+    let popularProducts : HomeProductsType["popularProducts"] | null =      null;//await redis.redisClient.get("popularProducts");
+    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null =  null;//await redis.redisClient.get("exclusiveProducts");
 
     if( !latestProducts || !popularProducts || !exculsiveProducts ){
 
@@ -33,10 +32,10 @@ export const getHomepageProducts = async () => {
         return {
             title: product.name,
             link: `/products/${product.sku.toLowerCase()}`,
-            thumbnail: product.productImages![0].image
+            thumbnail: product?.productImages[0].image
         }
     });
-    
+
     return { homePageNewProducts: homePageNewProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
 }
 

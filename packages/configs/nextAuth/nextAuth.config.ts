@@ -16,7 +16,7 @@ export interface session extends Session {
   
 interface token extends JWT {
     userId: string;
-    jwtToken: string;
+    role: string;
 }
   
 interface user {
@@ -49,31 +49,28 @@ export const NEXT_AUTH_CONFIG = {
         // The id should be present and it must be a string object
         // return user object with their profile data
         const user = await prisma.user.findUnique({where: { id: Number(credentials?.id)}});
-        const jwt = await generateJWT({
-          id: user?.id,
-          role: user?.role
-        });
-        return {id: `${user?.id}`, token: jwt, role: user?.role}
+        return {id: `${user?.id}`, role: user?.role}
       },
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user }): Promise<JWT> => {
+    jwt: async ({ token, user, trigger }): Promise<JWT> => {
       const newToken: token = token as token;
-      if (user) {
+      if (user && String(trigger) == "signIn") {
+        newToken.role = user?.role;
         newToken.userId = user.id;
-        newToken.jwtToken = (user as unknown as user).token;
       }
-      //console.log("jwt callback called");
+      // console.log("jwt callback called", trigger);
       return newToken;
     },
     session: async ({ session, token } ) => {
+      // console.log(session, token) 
       const newSession: session = session as unknown as session;
-      if (newSession.user && token.userId) {
+      if (newSession.user && token.userId && token.role) {
         newSession.user.id = token.userId as unknown as string;
-        newSession.user.token = token.jwtToken as string;
+        newSession.user.role = token.role as string;
       }
-      //console.log("session callback called");
+      // console.log("session callback called");
       return newSession!;
     },
   },

@@ -19,28 +19,32 @@ interface ReturnProps {
 export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => {
     return (
         <div className={cn("rounded-xl overflow-y-scroll bg-white/10 backdrop-blur-3xl h-full w-full p-2 ", className)}>
-            <h1 className="flex flex-grow text-2xl font-bold p-1 k">Return(s)</h1>
+            <h1 className="flex flex-grow text-2xl font-bold p-1 ">Return(s)</h1>
             <div className="space-y-3">
             {
                 returnOrders.map( (order, index) => {
                     return ( <div className="space-y-3 backdrop-blur-3xl shadow-sm shadow-black rounded-xl p-2">
                         <div className="flex flex-col justify-between space-y-1 text-sm relative">
                             <div className="flex justify-between">
-                                <p className="font-medium"> Return Status : </p>
-                                <p> {order.returnStatus} </p>
-                            </div>
-                            <div className="flex justify-between">
-                                <p className="font-medium"> Return Payment Type : </p>
-                                <p> {order.refundMode} </p>
-                            </div>
-                            <div className="flex justify-between">
                                 <p className="font-medium"> Return Date : </p>
                                 <p> {order.createdAt.toDateString()}</p>
                             </div>
-                            { order.returnStatus == "PROCESSED" && <div className="flex justify-between">
-                                <p className="font-medium"> Return Amount : </p>
-                                <p> {Number(order.refundAmount)} </p>
-                            </div>}
+                            <div className="flex justify-between">
+                                <p className="font-medium"> Return Status : </p>
+                                <p> {order.returnStatus == "CANCELLED_ADMIN" ? "CANCELLED BY ADMIN" : order.returnStatus.replaceAll("_", " ")} </p>
+                            </div>
+                            { Number(order.refundAmount) != 0 && 
+                                <>
+                                    <div className="flex justify-between">
+                                        <p className="font-medium"> Return Payment Mode : </p>
+                                        <p> {order.refundMode} </p>
+                                    </div> 
+                                    <div className="flex justify-between">
+                                        <p className="font-medium"> Return Amount : </p>
+                                        <p> {convertStringToINR(Number(order.refundAmount))} </p>
+                                    </div> 
+                                </>
+                            }
                         </div>
                         <div className="flex flex-col space-y-2">
                             <div className="text-xl font-medium">Products</div>
@@ -49,14 +53,11 @@ export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => 
                                     className="relative justify-between backdrop-blur-3xl flex flex-col text-xs shadow-sm shadow-black/15 p-2 rounded-xl"
                                 >
                                     <div className="flex flex-row space-x-3">
-                                        <Image src={`${product.orderProduct.productVariant.product.productImages[0].image}`} alt="product image" width={70} height={40} sizes="100vw"/>
-                                        <div className="flex flex-col flex-1 justify-between space-y-1">
-                                            <p>{product.orderProduct.productVariant.product.name.toUpperCase()}</p>
-                                            <p>Quantity: {product.quantity}</p>
-                                            <p>Status: {product.status}</p>
-                                            <p>Price: {Number(product.orderProduct.price)}</p>
-                                            <p>Size: {product.orderProduct.productVariant.size}</p>
-                                            { product.acceptedQuantity ? <p>Rejected Quantity: {product.quantity - product.acceptedQuantity}</p> :  <></>}
+                                        <Image className="rounded-sm" src={`${product.orderProduct.productVariant.product.productImages[0].image}`} alt="product image" width={70} height={40} sizes="100vw"/>
+                                        <div className="flex flex-col flex-1 justify-center space-y-1">
+                                            <p className="font-semibold">{product.orderProduct.productVariant.product.name.toUpperCase()} ( {product.orderProduct.productVariant.size} )</p>
+                                            <p>Return Quantity: {product.quantity}</p>
+                                            { product.rejectedQuantity ? <p>Rejected Quantity: {product.rejectedQuantity}</p> :  <></>}
                                         </div>
                                     </div>
                                 </div>

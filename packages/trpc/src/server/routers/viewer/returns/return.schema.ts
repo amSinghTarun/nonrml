@@ -15,14 +15,19 @@ export const ZInitiateReturnSchema = z.object({
 export type TInitiateReturnSchema = z.infer<typeof ZInitiateReturnSchema>;
 
 export const ZGetReturnOrdersSchema = z.object({
-    orderId: z.number(),
+    orderId: z.string(),
 });
 export type TGetReturnOrdersSchema = z.infer<typeof ZGetReturnOrdersSchema>;
 
-export const ZDeleteReturnSchema  = z.object({
-    returnId: z.number()
+export const ZEditReturnSchema  = z.object({
+    returnId: z.number(),
+    returnStatus: z.enum(Object.keys(prismaEnums.ReturnStatus) as [keyof typeof prismaEnums.ReturnStatus]),
+    reviewData: z.record(z.string(), z.object({
+        rejectedQuantity: z.number(),
+        rejectReason: z.string()
+    })).optional()
 });
-export type TDeleteReturnSchema = z.infer<typeof ZDeleteReturnSchema>;
+export type TEditReturnSchema = z.infer<typeof ZEditReturnSchema>;
 
 export const ZCancelReturnOrderSchema =  z.object({
     returnOrderId : z.number()
@@ -33,6 +38,5 @@ export const ZFinaliseReturnOrderStatus = z.object({
     returnOrderId: z.number(),
     productIds: z.array(z.number()),
     orderId : z.number(),
-    status: z.enum([prismaEnums.ProductStatus.RETURN_ACCEPTED, prismaEnums.ProductStatus.RETURN_REJECTED])
 });
 export type TFinaliseReturnOrderSchema = z.infer<typeof ZFinaliseReturnOrderStatus>;

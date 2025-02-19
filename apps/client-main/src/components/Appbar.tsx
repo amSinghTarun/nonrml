@@ -14,7 +14,7 @@ import Image from "next/image";
 export const Appbar = async () => {
     let categoryList = await redis.redisClient.get<string[]|null>("productCategory")
     if(!categoryList || !categoryList.length){
-        const { categoryNameArray } = (await (await serverClient()).viewer.productCategories.getProductCategories()).data;
+        const { categoryNameArray } = (await (await serverClient()).viewer.productCategories.getProductCategories({})).data;
         categoryList = categoryNameArray
     }
 
@@ -27,7 +27,7 @@ export const Appbar = async () => {
                     <CartButton />
                 </div>
                 <div className="basis-1/2 items-center justify-end flex w-auto h-full">
-                    <Link className='hover:cursor-pointer' href='/'>
+                    <Link className='cursor-pointer' href='/'>
                         <Image
                             src={logo}
                             alt="No NRML logo"

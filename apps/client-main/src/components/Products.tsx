@@ -42,7 +42,7 @@ const Products: React.FC<ProductsProps> = ({ categoryName, products: initialProd
 
     return (
         <div className="flex flex-col h-max">
-            {<h1 className="flex mt-4 text-black text-2xl lg:text-4xl font-extrabold pl-4 pb-4">
+            {<h1 className="flex mt-4 text-md lg:text-xl font-extrabold pl-4 pb-4 text-gray-700">
                 {categoryName ? categoryName.replace("_", " ").toUpperCase() : "ALL PRODUCTS"}
             </h1>}
             <div className="flex flex-row flex-wrap">

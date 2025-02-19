@@ -1,33 +1,50 @@
 import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
-import { TAddInventoryItemSchema, TEditInventoryItemSchema, TDeleteInventoryItemSchema, TGetInventoryItemSchema, TGetSKUDetailsSchema, TGetInventoryItemsSchema, TAddInventoryItemsSchema } from "./inventory.schema";
+import { TEditInventoryItemSchema, TDeleteInventoryItemSchema, TGetInventoryItemSchema, TGetSKUDetailsSchema, TGetInventoryItemsSchema, TAddInventoryItemsSchema } from "./inventory.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { nullable } from "zod";
 const take = 20; // should come from env
 
 /*
 Get the inventory.
 Cursor based pagination.
 */
-export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetInventoryItemsSchema>)  => {
+export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetSKUDetailsSchema>)  => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
-                // const category = await prisma.productCategories.findUnique({
-        //     where: {
-        //         id: input.categoryId
-        //     }
-        // });
-        // if(!category)
-        //     throw new TRPCError({code: "NOT_FOUND", message:"No category for the selected category id"});
-
-        let findQuery : { take: number, skip: number, cursor: { id: number } } | { take: number } = input.lastId ? { 
-            take: input.back ? -1 * take : take,
-            skip: 1,
-            cursor: {
-                id: input.lastId
+        const whereCondition = input.sku ? { productVariant: { product: { sku: input.sku } } } : {};
+        const inventory = await prisma.inventory.findMany({
+            where: whereCondition,
+            select: {
+                id: true,
+                productVariantId: true,
+                baseSkuInventoryId: true,
+                quantity: true,
+                lastRestockDate:true,
+                lastRestockQuantity: true,
+                baseSkuInventory: {
+                    select: {
+                        baseSku: true,
+                        quantity: true,
+                        color: true,
+                        size: true
+                    }
+                },
+                productVariant: {
+                    select: {
+                        size: true,
+                        product: {
+                            select: {
+                                name: true,
+                                colour: true,
+                                sku: true
+                            }
+                        }
+                    }
+                }
             }
-         } : {
-            take: input.back ? -1 * take : take
-        };
-        const inventory = await prisma.inventory.findMany(findQuery);
+        });
         return { status: TRPCResponseStatus.SUCCESS, message: "", data: inventory};
     } catch(error) {
         //console.log("\n\n Error in getInventory----------------");
@@ -36,26 +53,6 @@ export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetInventor
         throw TRPCCustomError(error);
     }
 }
-
-/*
-Get a single inventory item
-*/
-export const getInventoryItem = async ({ctx, input} : TRPCRequestOptions<TGetInventoryItemSchema>)  => {
-    try{
-        const inventoryItem = await prisma.inventory.findUniqueOrThrow({
-            where: {
-                id: input.inventoryItemId
-            }
-        });
-        return { status: TRPCResponseStatus.SUCCESS, message: "", data: inventoryItem};
-    } catch(error) {
-        //console.log("\n\n Error in getInventoryItem ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error);
-    }
-};
-
 /*
 Get the details of a particular SKU
 */
@@ -104,14 +101,32 @@ Edit item in inventory,
 No need to find before update, as the error handling will tackle not found condition(P2025) while updating.
 */
 export const editInventoryItem = async ({ctx, input}: TRPCRequestOptions<TEditInventoryItemSchema>)  => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
-        const inventoryItemEditted = await prisma.inventory.update({
+        const updateData = {
+            ...(!isNaN(Number(input.quantity)) && { quantity: input.quantity }),
+            ...(input.productSize && { baseSkuInventoryId : null }),
+            ...(input.baseSkuId && { baseSkuInventoryId : input.baseSkuId })
+        }
+        console.log(isNaN(Number(input.quantity)))
+        const inventoryUpdated = await prisma.inventory.update({
             where: {
                 id: input.id
             },
-            data: input 
+            data: updateData
         });
-        return { status:TRPCResponseStatus.SUCCESS, message:"inventory item editted", data: inventoryItemEditted }
+
+        input.productSize && await prisma.productVariants.update({
+            where: {
+                id: inventoryUpdated.productVariantId
+            },
+            data: {
+                size: input.productSize
+            }
+        }) 
+
+        return { status:TRPCResponseStatus.SUCCESS, message:"inventory item editted", data: {} }
     } catch(error) {
         //console.log("\n\n Error in editInventoryItem ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -124,12 +139,25 @@ export const editInventoryItem = async ({ctx, input}: TRPCRequestOptions<TEditIn
 Delete the item from the inventory,
 */
 export const deleteInventoryItem = async ({ctx, input}: TRPCRequestOptions<TDeleteInventoryItemSchema>)  => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
-        await prisma.inventory.delete({
-            where: {
-                id: input.id
-            }
-        });
+        if(input.unlink){
+            await prisma.inventory.update({
+                where: {
+                    id: input.id
+                },
+                data: {
+                    baseSkuInventoryId: null
+                }
+            });
+        } else {
+            await prisma.inventory.delete({
+                where: {
+                    id: input.id
+                }
+            });
+        }
        return { status: TRPCResponseStatus.SUCCESS, message:"Inventory order deleted successfully", data: {}};
     } catch(error) {
         //console.log("\n\n Error in deleteInventoryItem ----------------");

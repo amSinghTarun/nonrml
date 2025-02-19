@@ -1,8 +1,13 @@
 import RzpInstance from "./connection";
 import { Orders } from "razorpay/dist/types/orders";
+import { Refunds } from "razorpay/dist/types/refunds";
 
 export const createOrder = async (input: Orders.RazorpayOrderCreateRequestBody) => {
     return await RzpInstance.orders.create(input)
+}
+
+export const initiateNormalRefund = async (paymentId: string, input: Refunds.RazorpayRefundBaseRequestBody) => {
+    return await RzpInstance.payments.refund(paymentId, input);
 }
 
 export const getPaymentDetials = async ({rzpPaymentId} : {rzpPaymentId: string}) => (

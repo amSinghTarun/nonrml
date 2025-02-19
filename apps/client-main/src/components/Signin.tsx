@@ -127,7 +127,7 @@ const Signin = () => {
                                 required
                                 onChange={otpOnChange} placeholder={'ENTER OTP . . .'}
                             />
-                            <button type='button' className='basis-1/5 rounded-r-xl text-white bg-black text-center hover:cursor-pointer hover:bg-white hover:text-black text-xs p-2' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
+                            <button type='button' className='basis-1/5 rounded-r-xl text-white bg-black text-center cursor-pointer hover:bg-white hover:text-black text-xs p-2' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
                         </div>
                         }
                         <FormSubmitButton 

@@ -83,11 +83,11 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                     <div className="flex divide-x-2 divide-black text-sm items-center">
                         { 
                          ( (Number(orderDetails?.deliveryDate) ?? 0) + 1000*60*60*24*500) > Date.now() && 
-                            <div className="flex px-2 py-1 hover:text-white hover:rounded-l-xl hover:cursor-pointer hover:bg-black" onClick={()=>{setShowReturnReplace("RETURN")}}>RETURN</div>
+                            <div className="flex px-2 py-1 hover:text-white hover:rounded-l-xl cursor-pointer hover:bg-black" onClick={()=>{setShowReturnReplace("RETURN")}}>RETURN</div>
                         }
                         { 
                         ( (Number(orderDetails?.deliveryDate) ?? 0) + 1000*60*60*24*500) > Date.now() && 
-                            <div className="flex px-2 py-1 hover:text-white hover:rounded-r-xl hover:cursor-pointer hover:bg-black" onClick={()=>{setShowReturnReplace("EXCHANGE")}}>EXCHANGE</div>
+                            <div className="flex px-2 py-1 hover:text-white hover:rounded-r-xl cursor-pointer hover:bg-black" onClick={()=>{setShowReturnReplace("EXCHANGE")}}>EXCHANGE</div>
                         }
                         </div>
                     </div>
@@ -104,14 +104,13 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                     width={60} 
                                     height={40} 
                                     sizes="100vw"
-                                    className="rounded-xl hover:cursor-pointer hover:shadow-sm hover:shadow-black"
+                                    className="rounded-xl cursor-pointer hover:shadow-sm hover:shadow-black"
                                     onClick={ () => router.push(`/products/${product.productVariant.product.sku.toLowerCase()}`)}
                                 />
-                                <div className="flex flex-col flex-1 justify-between space-y-1">
-                                    <p>{product.productVariant?.product.name.toUpperCase()}</p>
+                                <div className="flex flex-col flex-1 justify-center space-y-1">
+                                    <p>{`${product.productVariant?.product.name.toUpperCase()} ( ${product.productVariant?.size} )`}</p>
                                     <p>{convertStringToINR(+product.price)}</p>
-                                    <p>Size: {product.productVariant?.size}</p>
-                                    <p>Quantity: {product.quantity}</p>
+                                    <p>Total Quantity: {product.quantity}</p>
                                     { product.rejectedQuantity! > 0 && <p>Cancelled Quantity: {product.rejectedQuantity}</p> }
                                 </div>
                             </div>

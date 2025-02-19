@@ -17,7 +17,7 @@ export const UserButton = () => {
     
     return (
         <div 
-            className=' hover:cursor-pointer w-auto h-full' 
+            className=' cursor-pointer w-auto h-full' 
             onClick={handleOnClick}>
             {
                 appbarUtil == "USER_ACCESSIBILITY" ?

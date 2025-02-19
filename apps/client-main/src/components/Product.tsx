@@ -49,7 +49,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
     };
     
     return (
-        <article className="my-3 pl-3 pr-1 flex flex-col lg:flex-row flex-1 space-y-3 lg:space-x-3 lg:space-y-0 mr-2">
+        <article className="my-3 pl-3 pr-1 flex flex-col lg:flex-row flex-1 space-y-2 lg:space-x-3 lg:space-y-0 mr-2">
             <div className=" lg:basis-2/4 relative max-h-[500px] rounded-xl w-auto overscroll-auto">
                 <Carousel 
                     plugins={[
@@ -60,14 +60,14 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 >
                     <CarouselContent className="rounded-xl w-md lg:h-screen">{
                         product.productImages.sort((a, b) => a.priorityIndex - b.priorityIndex).map((image, key) => (
-                            <CarouselItem key={key} className="w-full sm:max-w-[70%] lg:max-w-full rounded-xl lg:max-h-[650px] 2xl:max-h-[750px]">
+                            <CarouselItem key={key} className="w-full sm:max-w-[70%] lg:max-w-full rounded-xl lg:max-h-[750px] 2xl:max-h-[750px]">
                                 <Image
                                     src={image.image}
                                     alt={product.name}
                                     width={0}
                                     height={0}
                                     sizes="100vw"
-                                    className= { `w-[100%] h-[440px] md:h-[500px] lg:h-full object-cover rounded-xl` }
+                                    className= { `w-[100%] h-[500px] md:h-[500px] lg:h-full object-cover` }
                                 />
                             </CarouselItem>
                         ))
@@ -76,7 +76,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 {
                     (!isScreenLg && buyNow) && 
                         <div 
-                            className=" absolute -right-1 -bottom-3 hover:bg-white hover:text-black hover p-3 rounded-full text-white bg-black" 
+                            className=" absolute -right-1 -bottom-3 hover:bg-white hover:text-black/90 cursor-pointer p-3 rounded-full text-white bg-neutral-800" 
                             onClick={() => {
                                 selectedSize[sizeSKU.current!].quantity > 0 ?
                                     handleAddToCart() :
@@ -89,12 +89,12 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                         ><ShoppingCartIcon /></div>
                 }
             </div>
-            <div className=" lg:basis-2/4 space-y-3 flex flex-col lg:h-screen lg:justify-end py-3">
+            <div className=" lg:basis-2/4 space-y-3 flex flex-col lg:h-screen lg:justify-center py-2">
                 <div className="flex flex-col pl-1 ">
-                    <span  className="text-black flex flex-col text-lg lg:text-2xl font-bold">
+                    <span  className="text-neutral-800 flex flex-col text-md lg:text-xl font-medium">
                         {product.name.toUpperCase()}
                     </span>
-                    <span  className="text-black text-base lg:text-xl font-medium flex flex-col">
+                    <span  className="text-neutral-700 text-sm lg:text-md font-normal flex flex-col">
                         {convertStringToINR(Number(product.price))}
                     </span>
                 </div>
@@ -105,12 +105,12 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                         )
                     })
                 }</div>
-                <div className="flex flex-row text-sm w-full gap-2">{
+                <div className="flex flex-row text-xs w-full gap-2">{
                     buyNow ?
                         <div className="flex flex-col w-full space-y-2">
                             {
                                 isScreenLg ? 
-                                <ProductPageActionButton display="Add to cart" onClick={() => {
+                                <ProductPageActionButton display="ADD TO CART" onClick={() => {
                                     selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                         handleAddToCart() : toast({
                                             duration: 1500,
@@ -119,9 +119,8 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                                 }} /> : <></>
                             }
                             <div className="flex flex-row w-full space-x-2">
-                            
                                 <QuantitySelectButton selectedQuantity={selectedQuantity} minQuantity={1} maxQuantity={selectedSize[sizeSKU.current!]?.quantity} onQuantityChange={setSelectedQuantity} />
-                                <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={() => {
+                                <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-neutral-800 text-white font-medium" display="CHECKOUT" onClick={() => {
                                     setBuyNowItems({
                                         [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
                                     })
@@ -131,14 +130,14 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                         </div>
                         :
                         <>
-                            <ProductPageActionButton display="Add to cart" onClick={() => {
+                            <ProductPageActionButton display="ADD TO CART" onClick={() => {
                                 selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                     handleAddToCart() : toast({
                                         duration: 1500,
                                         title: "Please Select An Available Size"
                                     })
                             }} />
-                            <GeneralButton className=" h-full w-full p-3 backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium"  display="Buy it now" onClick={() => {
+                            <GeneralButton className=" h-full w-full p-3 bg-neutral-800 text-white font-medium"  display="BUT IT NOW" onClick={() => {
                                 selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                     setBuyNow(true) : toast({
                                         duration: 1500,
@@ -148,35 +147,35 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                             />
                         </>
                 }</div>
-                <div className="flex-col flex font-normal bg-white bg-opacity-45 rounded-xl text-sm divide-y divide-black/25 space-y-2 px-3 py-2 shadow-black/15 shadow">
+                <div className="flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-black/25 space-y-2 px-3 py-2 shadow-black/15 shadow">
 
-                    <div className="flex">
-                        <span  className="font-semibold text-start text-md basis-1/3">
-                            Description
+                    <div className="flex lg:flex-col lg:space-y-1 lg:content-center lg:text-center">
+                        <span  className="font-medium text-start basis-1/3">
+                            DESCRIPTION
                         </span>
-                        <div className="basis-2/3"> {product.description} </div>
+                        <div className="basis-2/3 text-neutral-600 lg:pl-2"> {product.description} </div>
                     </div>
 
-                    <div className="flex pt-2">
-                        <span  className="font-semibold text-start text-md basis-1/3 ">
-                            Details
+                    <div className="flex pt-2 lg:flex-col lg:space-y-1">
+                        <span  className="font-medium text-start basis-1/3 ">
+                            DETAILS
                         </span>
-                        <ul className="basis-2/3"> { product.details.map((detail, index) => <li key={index} >{detail}</li>)} </ul>
+                        <ul className="basis-2/3 lg:pl-2"> { product.details.map((detail, index) => <li key={index} >{detail}</li>)} </ul>
                     </div>
                         
                         
-                    <div className="flex pt-2">
-                        <span  className="font-semibold text-md basis-1/3 text-start">
-                            Care
+                    <div className="flex pt-2 lg:flex-col lg:space-y-1">
+                        <span  className="font-medium basis-1/3 text-start">
+                            CARE
                         </span>
-                        <ul className="basis-2/3"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>
+                        <ul className="basis-2/3 lg:pl-2"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>
                     </div>
 
-                    <div className="flex pt-2">
-                        <span  className="font-semibold text-start text-md basis-1/3">
-                            Shipping
+                    <div className="flex pt-2 lg:flex-col lg:space-y-1">
+                        <span  className="font-medium text-start basis-1/3">
+                            SHIPPING
                         </span>
-                        <ul className="basis-2/3"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>
+                        <ul className="basis-2/3 lg:pl-2"> { product.care.map((careIns, index) => <li key={index} > {careIns}</li>)} </ul>
                     </div>
                     
                 </div>

@@ -21,7 +21,7 @@ const QuantityChangeDialog : React.FC<QuantityChangeDialogProps> = (props) => {
     const router = useRouter();
     return (
         <AlertDialog open={props.open}>
-            {/* <AlertDialogTrigger className="fixed hover:cursor-pointer rounded-full font-medium p-1 text-xs -right-3 -top-3">
+            {/* <AlertDialogTrigger className="fixed cursor-pointer rounded-full font-medium p-1 text-xs -right-3 -top-3">
                 <CancelIcon className="p-0"></CancelIcon>
             </AlertDialogTrigger> */}
             <AlertDialogContent className="bg-white/60 border-0 rounded-xl">

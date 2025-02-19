@@ -10,57 +10,50 @@ datasource db {
 
 model User {
   id            Int                 @id @default(autoincrement())
-  fullName      String?
   countryCode   String              @default("+91")
   contactNumber String              @unique
-  email         String?             @unique
-  emailVerified Boolean             @default(false)
   role          UserPermissionRoles
   cartId        Int?                @unique
   otp           Int
   otpExpire     BigInt
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
-  addressId     Address[]
+  address       Address[]
+  creditNotes   CreditNotes[]
   order         Orders[]
   cart          Cart?               @relation(fields: [cartId], references: [id])
-  creditNotes   CreditNotes[]
   discounts     UserDiscounts[]
 
   @@index([contactNumber])
 }
 
 model CreditNotes {
-  id                                Int                     @id @default(autoincrement())
+  id                                Int                                 @id @default(autoincrement())
   userId                            Int
-  creditCode                        String                   // GWGEIR-76253 || <6_string_long_alpha>-<5_digits>
+  creditCode                        String
   value                             Decimal
-  returnOrderId                     Int                     // the orderId it's generated from
-  orderRtoType                      OrderRtoType
-  redeemed                          Boolean                 @default(false)
+  returnOrderId                     Int?
   expiryDate                        DateTime
-  createdAt                         DateTime                @default(now())
-  updatedAt                         DateTime                @updatedAt
-  user                              User                    @relation(fields: [userId], references: [id])
-  returnOrder                       Returns                  @relation(fields: [returnOrderId], references: [id])
+  createdAt                         DateTime                            @default(now())
+  updatedAt                         DateTime                            @updatedAt
+  redeemed                          Boolean                             @default(false)
+  creditNoteOrigin                  CreditNotePurpose?
+  returnOrder                       Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
+  user                              User                                @relation(fields: [userId], references: [id])
   creditNotesPartialUseTransactions CreditNotesPartialUseTransactions[]
   orders                            Orders[]
-}
-
-enum OrderRtoType {
-  RETURN
-  REPLACEMENT
+  RefundTransactions                RefundTransactions[]
 }
 
 model CreditNotesPartialUseTransactions {
-  id                Int                       @id @default(autoincrement())
-  creditNoteId      Int
-  valueUtilised     Decimal
-  orderId           String                       @unique// the orderId it is used on
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @updatedAt
-  order             Orders                    @relation(fields: [orderId], references: [id])
-  creditNotes       CreditNotes               @relation(fields: [creditNoteId], references: [id])
+  id            Int         @id @default(autoincrement())
+  creditNoteId  Int
+  valueUtilised Decimal
+  orderId       String      @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  creditNotes   CreditNotes @relation(fields: [creditNoteId], references: [id])
+  order         Orders      @relation(fields: [orderId], references: [id])
 }
 
 model Cart {
@@ -94,8 +87,8 @@ model Address {
   countryCode   String      @default("+91")
   contactNumber String
   userId        Int
-  createAt      DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  createdAt     DateTime    @default(now())
   user          User        @relation(fields: [userId], references: [id], onDelete: NoAction)
   order         Orders[]
 }
@@ -143,7 +136,9 @@ model ProductCategorySizes {
   categoryId    Int?             @unique
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  productId     Int?             @unique
   category      ProductCategory? @relation(fields: [categoryId], references: [id])
+  Products      Products?        @relation(fields: [productId], references: [id])
 }
 
 model ProductCategory {
@@ -153,9 +148,11 @@ model ProductCategory {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   displayName         String?
+  sizeChartId         Int?
   discountCondition   DiscountConditions[]
   parent              ProductCategory?      @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children            ProductCategory[]     @relation("CategoryHierarchy")
+  SizeChart           SizeChart?            @relation(fields: [sizeChartId], references: [id], onDelete: Restrict)
   productCategorySize ProductCategorySizes?
   products            Products[]
 }
@@ -172,24 +169,29 @@ model ProductImage {
 }
 
 model Products {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
-  description     String
-  price           Decimal
-  tags            String[]
-  categoryId      Int
-  soldOut         Boolean           @default(false)
-  care            String[]
-  details         String[]
-  sku             String            @unique
-  visitedCount    Int               @default(0)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  exclusive       Boolean           @default(false)
-  productImages   ProductImage[]
-  ProductVariants ProductVariants[]
-  category        ProductCategory   @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discounts       Discounts[]       @relation("DiscountsToProducts")
+  id                   Int                   @id @default(autoincrement())
+  name                 String                @unique
+  description          String
+  price                Decimal
+  tags                 String[]
+  categoryId           Int
+  soldOut              Boolean               @default(false)
+  care                 String[]
+  details              String[]
+  sku                  String                @unique
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  visitedCount         Int                   @default(0)
+  exclusive            Boolean               @default(false)
+  colour               String                @default("white")
+  public               Boolean               @default(false)
+  sizeChartId          Int?
+  ProductCategorySizes ProductCategorySizes?
+  productImages        ProductImage[]
+  ProductVariants      ProductVariants[]
+  category             ProductCategory       @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  SizeChart            SizeChart?            @relation(fields: [sizeChartId], references: [id], onDelete: Restrict)
+  discounts            Discounts[]           @relation("DiscountsToProducts")
 }
 
 model ProductVariants {
@@ -255,15 +257,17 @@ model vendorOrder {
 }
 
 model Payments {
-  id                  Int           @id @default(autoincrement())
+  id                  Int                  @id @default(autoincrement())
   rzpOrderId          String
-  rzpPaymentId        String?
+  rzpPaymentId        String?              @unique
   rzpPaymentSignature String?
-  paymentStatus       PaymentStatus @default(PENDING)
-  paymentService      String        @default("Razorpay")
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  order               Orders[]
+  paymentStatus       PaymentStatus        @default(PENDING)
+  paymentService      String               @default("Razorpay")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  orderId             String               @default("ORD-20250102-1-1D18")
+  Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  RefundTransactions  RefundTransactions[]
 }
 
 model Shipment {
@@ -279,120 +283,147 @@ model Shipment {
 }
 
 model Orders {
-  id                      String                  @id @unique
-  type                    OrderType               @default(NEW)
-  creditUtilised          Int?                    @default(0)
-  totalAmount             Decimal
-  userId                  Int
-  productCount            Int
-  addressId               Int
-  creditNoteId            Int?
-  discountId              Int?
-  paymentId               Int?
-  shipmentId              Int?                    @unique
-  deliveryDate            BigInt?
-  orderStatus             OrderStatus             @default(PENDING)
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
-  orderProducts           OrderProducts[]
-  address                 Address                 @relation(fields: [addressId], references: [id])
-  creditNote              CreditNotes?            @relation(fields: [creditNoteId], references: [id])
-  discount                Discounts?              @relation(fields: [discountId], references: [id])
-  payment                 Payments?               @relation(fields: [paymentId], references: [id])
-  shipment                Shipment?               @relation(fields: [shipmentId], references: [id])
-  user                    User                    @relation(fields: [userId], references: [id])
-  replacementOrder        ReplacementOrder[]
-  return                  Returns[]
-  creditNoteTransaction   CreditNotesPartialUseTransactions?
+  id                    String                             @id @unique
+  type                  OrderType                          @default(NEW)
+  creditUtilised        Int?                               @default(0)
+  totalAmount           Decimal
+  userId                Int
+  productCount          Int
+  addressId             Int
+  discountId            Int?
+  shipmentId            Int?                               @unique
+  deliveryDate          BigInt?
+  orderStatus           OrderStatus                        @default(PENDING)
+  createdAt             DateTime                           @default(now())
+  updatedAt             DateTime                           @updatedAt
+  creditNoteId          Int?
+  returnAcceptanceDate  BigInt?
+  creditNoteTransaction CreditNotesPartialUseTransactions?
+  orderProducts         OrderProducts[]
+  address               Address                            @relation(fields: [addressId], references: [id])
+  creditNote            CreditNotes?                       @relation(fields: [creditNoteId], references: [id])
+  discount              Discounts?                         @relation(fields: [discountId], references: [id])
+  shipment              Shipment?                          @relation(fields: [shipmentId], references: [id])
+  user                  User                               @relation(fields: [userId], references: [id])
+  Payments              Payments[]
+  replacementOrder      ReplacementOrder[]
+  return                Returns[]
 }
 
 model OrderProducts {
   id                  Int             @id @default(autoincrement())
   productVariantId    Int
-  productStatus       ProductStatus   @default(PENDING)
   price               Decimal
   quantity            Int
   returnQuantity      Int?
   replacementQuantity Int?
   orderId             String
   rejectedQuantity    Int?            @default(0)
+  reimbursedQuantity  Int             @default(0)
   order               Orders          @relation(fields: [orderId], references: [id])
   productVariant      ProductVariants @relation(fields: [productVariantId], references: [id])
   returnItem          ReturnItem[]
-  
+
   @@unique([orderId, productVariantId])
 }
 
 model Returns {
-  id                      Int                     @id @default(autoincrement())
-  returnReceiveDate       DateTime?
-  orderId                 String
-  returnShipmentId        Int?                    @unique
-  returnStatus            ReturnStatus            @default(PENDING)
-  refundAmount            Decimal?                @default(0)
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
-  refundMode              ReturnRefundMode        @default(CREDIT)
-  returnType              ReturnType              @default(RETURN)
-  ReplacementOrder        ReplacementOrder?
-  returnItems             ReturnItem[]
-  order                   Orders                  @relation(fields: [orderId], references: [id])
-  shipment                Shipment?               @relation(fields: [returnShipmentId], references: [id])
-  creditNote              CreditNotes[] // in case user made two seperate returns so multiple credit notes will be generated
+  id                Int               @id @default(autoincrement())
+  returnReceiveDate DateTime?
+  orderId           String
+  returnShipmentId  Int?              @unique
+  returnStatus      ReturnStatus      @default(PENDING)
+  refundAmount      Decimal?          @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  refundMode        ReturnRefundMode  @default(CREDIT)
+  returnType        ReturnType        @default(RETURN)
+  creditNote        CreditNotes[]
+  ReplacementOrder  ReplacementOrder?
+  returnItems       ReturnItem[]
+  order             Orders            @relation(fields: [orderId], references: [id])
+  shipment          Shipment?         @relation(fields: [returnShipmentId], references: [id])
 }
 
 model ReturnItem {
-  id               Int               @id @default(autoincrement())
-  status           ReturnItemStatus  @default(PENDING)
+  id               Int              @id @default(autoincrement())
+  status           ReturnItemStatus @default(PENDING)
   returnId         Int
   orderProductId   Int
   quantity         Int
   rejectReason     String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  referenceImage   String
-  returnReason     String
-  acceptedQuantity Int?              @default(0)
-  ReplacementItem  ReplacementItem[]
-  orderProduct     OrderProducts     @relation(fields: [orderProductId], references: [id])
-  return           Returns           @relation(fields: [returnId], references: [id])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  referenceImage   String?
+  returnReason     String?
+  rejectedQuantity Int?             @default(0)
+  ReplacementItem  ReplacementItem?
+  orderProduct     OrderProducts    @relation(fields: [orderProductId], references: [id])
+  return           Returns          @relation(fields: [returnId], references: [id])
 }
 
-// model ReplacementReason {
-//   id                       Int                @id @default(autoincrement())
-//   description              String
-//   photoProofRequired       Boolean            @default(false)
-//   videoProofRequired       Boolean            @default(false)
-//   userCustomReasonRequired Boolean            @default(false)
-//   ReplacementOrder         ReplacementOrder[]
-// }
-
 model ReplacementOrder {
-  id                  Int                    @id @default(autoincrement())
-  orderId             String
-  status              ReplacementOrderStatus @default(PENDING)
-  returnOrderId       Int                    @unique
-  shipmentId          Int?                   @unique
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
-  replacementItems    ReplacementItem[]
-  order               Orders                 @relation(fields: [orderId], references: [id])
-  return              Returns                @relation(fields: [returnOrderId], references: [id])
-  shipment            Shipment?              @relation(fields: [shipmentId], references: [id])
+  id               Int                    @id @default(autoincrement())
+  orderId          String
+  status           ReplacementOrderStatus @default(PENDING)
+  returnOrderId    Int                    @unique
+  shipmentId       Int?                   @unique
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  replacementItems ReplacementItem[]
+  order            Orders                 @relation(fields: [orderId], references: [id])
+  return           Returns                @relation(fields: [returnOrderId], references: [id])
+  shipment         Shipment?              @relation(fields: [shipmentId], references: [id])
 }
 
 model ReplacementItem {
-  id                    Int                       @id @default(autoincrement())
+  id                    Int                      @id @default(autoincrement())
   replacementOrderId    Int
-  returnItemId          Int
+  returnItemId          Int                      @unique
   productVariantId      Int
-  replacementQuantity   Int                       @default(0)//how many quantities we can replace from accepted quantity(return item field)
-  nonReplaceAction      NonReplaceQantityAction   @default(CREDIT)
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @updatedAt
-  productVariant        ProductVariants           @relation(fields: [productVariantId], references: [id])
-  replacementOrder      ReplacementOrder          @relation(fields: [replacementOrderId], references: [id])
-  returnOrderItem       ReturnItem                @relation(fields: [returnItemId], references: [id])
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  nonReplaceAction      NonReplaceQantityAction?
+  nonReplacableQuantity Int                      @default(0)
+  productVariant        ProductVariants          @relation(fields: [productVariantId], references: [id])
+  replacementOrder      ReplacementOrder         @relation(fields: [replacementOrderId], references: [id])
+  returnOrderItem       ReturnItem               @relation(fields: [returnItemId], references: [id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SizeChart {
+  id              Int               @id @default(autoincrement())
+  name            String
+  value           String?
+  type            SizeType
+  parentId        Int?
+  sortOrder       Int?              @default(0)
+  createdat       DateTime?         @default(now()) @db.Timestamptz(6)
+  updatedat       DateTime?         @default(now()) @db.Timestamptz(6)
+  ProductCategory ProductCategory[]
+  Products        Products[]
+  SizeChart       SizeChart?        @relation("SizeChartToSizeChart", fields: [parentId], references: [id], onUpdate: NoAction)
+  other_SizeChart SizeChart[]       @relation("SizeChartToSizeChart")
+
+  @@index([parentId], map: "SizeChart_parentid_idx")
+}
+
+model RefundTransactions {
+  id              BigInt       @id(map: "BankRefunds_pkey") @default(autoincrement())
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime?    @db.Timestamptz(6)
+  rzpRefundId     String?      @unique(map: "BankRefunds_rzpRefundId_key")
+  rzpRefundStatus String?
+  rzpPaymentId    String
+  bankRefundValue Int          @default(0)
+  creditNoteId    Int?         @default(0)
+  Payments        Payments     @relation(fields: [rzpPaymentId], references: [rzpPaymentId], onDelete: NoAction, map: "BankRefunds_rzpPaymentId_fkey")
+  CreditNotes     CreditNotes? @relation(fields: [creditNoteId], references: [id], onDelete: NoAction)
+}
+
+enum OrderRtoType {
+  RETURN
+  REPLACEMENT
 }
 
 enum NonReplaceQantityAction {
@@ -443,10 +474,11 @@ enum DiscountStatus {
 
 enum ReturnStatus {
   PENDING
-  CONFIRMED
-  PICKED
-  PROCESSING
-  PROCESSED
+  REVIEW_DONE
+  CANCELLED_ADMIN
+  RECEIVED
+  CANCELLED
+  IN_TRANSIT
 }
 
 enum ReturnItemStatus {
@@ -467,7 +499,7 @@ enum PaymentStatus {
 
 enum ReplacementOrderStatus {
   PENDING
-  PROCESSED
+  PROCESSING
   SHIPPED
   DELIVERED
 }
@@ -480,7 +512,7 @@ enum ProductStatus {
 
 enum OrderStatus {
   PENDING
-  CONFIRMED
+  IN_TRANSIT
   ACCEPTED
   SHIPPED
   DELIVERED
@@ -505,4 +537,16 @@ enum OrderType {
 enum ReturnType {
   RETURN
   REPLACEMENT
+}
+
+enum SizeType {
+  MEASUREMENT_TYPE
+  SIZE_VALUE
+  DISPLAY_NAME
+}
+
+enum CreditNotePurpose {
+  RETURN
+  REPLACEMENT
+  GIFT
 }

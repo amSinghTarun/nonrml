@@ -23,9 +23,11 @@
   ],
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.4",
+    "admin-nonrml": "./apps/admin-nonrml",
     "bcrypt": "^5.1.1",
     "client-main": "./apps/client-main",
+    "eslint": "^9.17.0",
     "ts-loader": "^9.5.1"
   },
-  "packageManager": "yarn@4.5.0"
+  "packageManager": "yarn@4.6.0"
 }

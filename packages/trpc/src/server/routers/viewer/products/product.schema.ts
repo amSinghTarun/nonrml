@@ -25,19 +25,21 @@ export const ZGetProductsSchema = z.object({
     tags: z.array(string()).optional(), // the custom user input, like red oversize tshirt, black polo, hound design thsirt
     back: z.boolean().optional(),
     cursor: z.number().optional(),
+    admin: z.boolean().default(false)
 });
 export type TGetProductsSchema = z.infer<typeof ZGetProductsSchema>;
 
-export const ZAddProductSchema = z.array(z.object({
+export const ZAddProductSchema = z.object({
     name: z.string(),
     description: z.string(),
     price: z.number(),
     categoryId : z.number(),
+    colour: z.string(),
     tags: z.array(z.string()),
     sku: z.string(),
     care: z.array(z.string()),
-    details: z.array(z.string())
-}));
+    details: z.array(z.string()),
+});
 export type TAddProductSchema = z.infer<typeof ZAddProductSchema>;
 
 export const ZGetProductVariantQuantitySchema = z.object({
@@ -47,19 +49,18 @@ export type TGetProductVariantQuantitySchema = z.infer<typeof ZGetProductVariant
 
 export const ZEditProductSchema = z.object({
     productId: z.number(),
-    categoryId: z.number().optional(),
     name: z.string().optional(),
     description: z.string().optional(),
-    skuIds: z.array(string()).optional(),
-    customisable: z.boolean().optional(),
-    customisationOptionProductId: z.number().optional(),
-    siblingProductId: z.number().optional(),
-    discountId: z.number().optional(),
-    basePrice: z.number().optional(),
-    finalPrice: z.number().optional(),
-    avlSizeQuantity: z.object({size: string(), qunatity: number()}).optional(),
-    returnAvl: z.boolean().optional(),
-    tags: z.array(string())
+    price: z.number().optional(),
+    colour: z.string().optional(),
+    care: z.array(string()).optional(),
+    details: z.array(string()).optional(),
+    categoryId: z.number().optional(),
+    tags: z.array(string()).optional(),
+    soldOut: z.boolean().optional(),
+    exclusive: z.boolean().optional(),
+    public: z.boolean().optional(),
+    sizeChartId: z.number().optional()
 });
 export type TEditProductSchema = z.infer<typeof ZEditProductSchema>;
 

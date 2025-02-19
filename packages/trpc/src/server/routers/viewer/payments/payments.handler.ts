@@ -1,8 +1,9 @@
 import { TRPCResponseStatus } from "@nonrml/common";
-import { TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { calculateRejectedQuantityRefundAmounts, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { Prisma, prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import * as paymentSchemas from "./payments.schema";
-import { createOrder } from "@nonrml/payment";                                          
+import { createOrder, initiateNormalRefund } from "@nonrml/payment";         
+import crypto from 'crypto';                                 
 
 export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TCreateRzpOrderSchema>) => {
     try{
@@ -105,21 +106,95 @@ export const updateFailedPaymentStatus = async ({ctx, input}: TRPCRequestOptions
 Get the payment with custom status filter, by default the active status is set to true, it means
 if not specified any status, it will give the active payments
 */
-export const getpayments = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TGetpaymentSchema>)   => {
-    try{
-        const payments = await prisma.payments.findMany({
-            where: {
-                active: input.active
+// Backend function
+export const getPayments = async ({ ctx, input }: TRPCRequestOptions<paymentSchemas.TGetPaymentsSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    const pageSize = 20;
+    const skip = (input.page ?? 0) * pageSize;
+  
+    try {
+      let searchQuery = {
+        ...(input.search && { [input.search.includes("ORD") ? "orderId" : "id"]: input.search }),
+        ...(input.paymentStatus && { paymentStatus: input.paymentStatus }),
+        ...(input.startDate && { createdAt: { gte: input.startDate } }),
+        ...(input.endDate && { createdAt: { lte: input.endDate } }),
+      };
+  
+      const [payments, total] = await Promise.all([
+        prisma.payments.findMany({
+          where: searchQuery,
+          include: {
+            RefundTransactions: true,
+            Orders: {
+              select: {
+                totalAmount: true
+              }
             }
-        });
-        return { status: TRPCResponseStatus.SUCCESS, message: "Roles fetched", data: payments};
-    } catch(error) {
-        //console.log("\n\n Error in getpayments ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error)
+          },
+          orderBy: [
+            { createdAt: "desc" }
+          ],
+          take: pageSize,
+          skip: skip
+        }),
+        prisma.payments.count({
+          where: searchQuery
+        })
+      ]);
+  
+      return {
+        status: TRPCResponseStatus.SUCCESS,
+        message: "Payments fetched",
+        data: payments,
+        pagination: {
+          total,
+          pageSize,
+          pageCount: Math.ceil(total / pageSize),
+          page: input.page ?? 0
+        }
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        error = {
+          code: "BAD_REQUEST",
+          message: error.code === "P2025" ? "Requested record does not exist" : error.message,
+          cause: error.meta?.cause
+        };
+      throw TRPCCustomError(error);
     }
 };
+
+
+/**
+ * get all refunds detail against a payment id, bank refund, credit note issues 
+ */
+export const getPaymentRefundDetails = async ({ ctx, input }: TRPCRequestOptions<paymentSchemas.TGetPaymentRefundDetailsSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try {
+  
+        const refundDetails = await prisma.refundTransactions.findMany({
+            where: { 
+                rzpPaymentId: input.rzpPaymentId 
+            },
+            include: {
+                CreditNotes: true
+            }
+        })
+  
+        return { status: TRPCResponseStatus.SUCCESS, message: "Payments fetched", data: refundDetails };
+
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        error = {
+          code: "BAD_REQUEST",
+          message: error.code === "P2025" ? "Requested record does not exist" : error.message,
+          cause: error.meta?.cause
+        };
+      throw TRPCCustomError(error);
+    }
+  };
 
 /* 
 edit the active status and name of the payment of a payment,
@@ -160,3 +235,100 @@ export const deletepayments = async ({ctx, input}: TRPCRequestOptions<paymentSch
         throw TRPCCustomError(error)
     }
 };
+
+export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TInitiateUavailibiltyRefundSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        let refundTransactionId = null;
+        let refundDetails = await calculateRejectedQuantityRefundAmounts(input.orderId, true)
+        
+        if(!refundDetails.refundToBank)
+            throw { code: "BAD_REQUEST", message: "TO refund details to prcess"}
+
+        let razorpayPaymentDetails = await prisma.payments.findFirst({
+            where: {
+                orderId: input.orderId,
+                paymentStatus: "paid"
+            }
+        })
+
+        if(!razorpayPaymentDetails || razorpayPaymentDetails.rzpPaymentId === null)
+            throw { code: "BAD_REQUEST", message: "No valid payments"}
+
+        // to check for last refund process
+        let existingRefundTransactionDetails = await prisma.refundTransactions.findFirst({
+            where: {
+                rzpPaymentId: razorpayPaymentDetails?.rzpPaymentId
+            },
+            orderBy: [{
+                "createdAt" : "desc"
+            }]
+        });
+
+        if(!existingRefundTransactionDetails){
+            // create refund record update the credit note and amounts, as a precautionary to failures
+            const refundTransaction = await prisma.$transaction( async prisma => {
+                const refundTransaction = await prisma.refundTransactions.create({
+                    data: {
+                        rzpPaymentId: razorpayPaymentDetails.rzpPaymentId!,
+                        bankRefundValue: refundDetails.refundToBank,
+                        ...(refundDetails.creditNoteId && {creditNoteId: refundDetails.creditNoteId}),
+                    }
+                });
+
+                if(refundDetails.refundToCredit && refundDetails.creditNoteId) {
+                    await prisma.creditNotes.update({
+                        where: {
+                            id: refundDetails.creditNoteId
+                        },
+                        data: {
+                            value: {increment: refundDetails.refundToCredit},
+                            redeemed: false
+                        }
+                    })
+                }
+
+                return refundTransaction;
+            });
+            refundTransactionId = refundTransaction.id;
+        } else {
+            refundTransactionId = existingRefundTransactionDetails.id;
+        }
+
+        if(!refundTransactionId)
+            throw {code: "INTERNAL_SERVER_ERROR", message: "Refund Id missing"}
+        
+        if(!existingRefundTransactionDetails || !existingRefundTransactionDetails?.rzpRefundId || existingRefundTransactionDetails?.rzpRefundStatus == "failed") {            
+            
+            //initiate bank refund
+            const rzpRefundDetails = await initiateNormalRefund(razorpayPaymentDetails.rzpPaymentId, { amount: refundDetails.refundToBank, speed: "normal"})
+    
+            if(!rzpRefundDetails.id)
+                throw { code: "INTERNAL_SERVER_ERROR", message: "Refund not processed"}
+    
+            // update the refund in the create record
+            await prisma.refundTransactions.update({
+                where: {
+                    id: refundTransactionId
+                },
+                data: {
+                    rzpRefundId: rzpRefundDetails.id,
+                    rzpRefundStatus: rzpRefundDetails.status
+                }
+            })
+        }
+
+        prisma.$transaction([
+            ...refundDetails.updateOrderProductReimbursedQueries
+        ]);
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
+
+    } catch(error) {
+        //console.log("\n\n Error in editOrder ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+}

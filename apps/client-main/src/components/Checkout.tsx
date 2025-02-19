@@ -204,7 +204,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                     }</div>
                 )}
                 <article className="flex flex-row justify-between px-3 py-3 space-x-1 items-center">
-                    <div className=" hover:cursor-pointer text-md p-1 font-medium">
+                    <div className=" cursor-pointer text-md p-1 font-medium">
                         <span className={`${action == "SHOWADDRESS" && "underline font-bold"}`} onClick={()=>{setAction("SHOWADDRESS")}}>{`Shipping Address`}</span>
                     </div>
                     <div className="basis-1/3 text-xs font-normal w-full h-full ">
@@ -218,7 +218,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 {
                     applyCoupon && 
                     <article className="flex flex-row justify-between px-3 py-3 gap-3 items-center">
-                        <div className=" basis-2/3 hover:cursor-pointer text-md font-medium w-full bg-transparent">
+                        <div className=" basis-2/3 cursor-pointer text-md font-medium w-full bg-transparent">
                             <input 
                                 onChange={(e) => (couponCode.current = e.target.value)}
                                 placeholder="Paste your coupon code here"
@@ -238,7 +238,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                     </article>
                 }
                 <article className="flex flex-row justify-between px-3 py-3 space-x-1 items-center">
-                    <div className=" hover:cursor-pointer text-md p-1 font-medium">
+                    <div className=" cursor-pointer text-md p-1 font-medium">
                         <span className={`${action == "ORDER" && "underline font-bold"}`} onClick={()=>{setAction("ORDER")}}>{`Order summary *`}</span>
                     </div>
                     {

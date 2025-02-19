@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";
 import { TRPCContext } from "../contexts";
-import { session } from "@nonrml/configs";
 
 export const checkSessionUser = async (ctx: TRPCContext) => {
     const user = await ctx.prisma.user.findUnique({

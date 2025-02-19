@@ -7,11 +7,10 @@ export type TGetProductSchema = z.infer<typeof ZGetProductSchema>;
 
 
 
-export const ZAddProductVariantsSchema = z.array(z.object({
+export const ZAddProductVariantsSchema = z.object({
     productId: z.number(),
-    subSku: z.string(),
     size: z.string(),
-}))
+})
 export type TAddProductVariantsSchema = z.infer<typeof ZAddProductVariantsSchema>;
 
 export const ZEditProductSchema = z.object({
@@ -32,7 +31,7 @@ export const ZEditProductSchema = z.object({
 });
 export type TEditProductSchema = z.infer<typeof ZEditProductSchema>;
 
-export const ZDeleteProductSchema = z.object({
-    productId: z.number()    
+export const ZDeleteProductVariantSchema = z.object({
+    variantId: z.number()    
 });
-export type TDeleteProductSchema = z.infer<typeof ZDeleteProductSchema>;
+export type TDeleteProductVariantSchema = z.infer<typeof ZDeleteProductVariantSchema>;

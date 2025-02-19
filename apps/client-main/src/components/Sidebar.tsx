@@ -38,15 +38,15 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
           </div>
           <footer className="flex flex-col  font-medium text-sm text-center space-y-2 divide-y divide-dotted divide-black pl-2 pr-2">
             <div className="flex flex-row divide-x  divide-dotted divide-black pb-2 justify-around">
-              <Link className="text-black flex flex-col flex-grow justify-center hover:cursor-pointer" href="/contact-us">
+              <Link className="text-black flex flex-col flex-grow justify-center cursor-pointer" href="/contact-us">
                 <div><CallIcon fontSize="large"></CallIcon></div>
                 <div >Contact us</div>
               </Link>
-              <Link className="text-black flex flex-col flex-grow hover:cursor-pointer" href="www.instagram.com">
+              <Link className="text-black flex flex-col flex-grow cursor-pointer" href="www.instagram.com">
                 <div><InstagramIcon fontSize="large" /></div>
                 <div className="text-sm">Instagram</div>
               </Link>
-              <Link className="text-black flex flex-col flex-grow hover:cursor-pointer" href="/track-order">
+              <Link className="text-black flex flex-col flex-grow cursor-pointer" href="/track-order">
                 <div><LocalShippingIcon fontSize="large" /></div>
                 <div>Track order</div>
               </Link>

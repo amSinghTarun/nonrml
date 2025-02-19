@@ -44,7 +44,7 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                     { userOrders.data?.data.map((order, index) => {
                         return(
                         <article key={index} className="relative h-auto w-full p-2 pb-6 rounded-xl text-sm bg-white/25">
-                            <Link className="font-normal flex flex-col hover:cursor-pointer flex-1" href={`/order/${order.id}`}>
+                            <Link className="font-normal flex flex-col cursor-pointer flex-1" href={`/order/${order.id}`}>
                                     <div className="flex justify-between">
                                         <p> Order Id : </p>
                                         <p> {order.id} </p>
@@ -61,21 +61,11 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                         <p> Payment Status : </p>
                                         <p> {order.payment?.paymentStatus} </p>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <p> Order Status : </p>
-                                        <p> {order.orderStatus} </p>
-                                    </div>
                                 </Link>
                                 <div className="items-center justify-evenly flex flex-row text-xs sm:text-sm absolute w-full -bottom-2 space-x-1 sm:space-x-7"> 
-                                    <div className="basis-1/3 text-end"> {
-                                        order.return.length > 0 && <Link 
-                                        href={`/returns/${order.id}`}
-                                        className="rounded-full px-2 sm:px-4 bg-black py-2 text-white hover:bg-white hover:text-black"
-                                        >RETURN(s)</Link> 
-                                    } </div>
                                     <div className="text-center">
                                         {
-                                            order.orderStatus == "CONFIRMED" && 
+                                            order.orderStatus == "PENDING" && 
                                             <CancelOrderDialog cancelPurchase={async () => {await cancelOrder({orderId: order.id}); userOrders.refetch()}}></CancelOrderDialog>
                                         }
                                         { 
@@ -91,18 +81,30 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                             ><LocalShippingIcon/></Link>
                                         }
                                         {
-                                            order.orderStatus == "DELIVERED" && <Link
-                                                href={""}
-                                                className="rounded-full px-2 py-2 bg-white  text-black hover:cursor-none"
-                                            >DELIVERED</Link>
+                                            order.orderStatus == "DELIVERED" 
+                                            ? !order.return.length && !order.replacementOrder.length 
+                                                ? <Link
+                                                        href={""}
+                                                        className="rounded-full px-2 py-2 bg-white  text-black hover:cursor-none"
+                                                    >DELIVERED</Link>
+                                                : <div className="flex gap-10">
+                                                    { order.return.length > 0 && 
+                                                        <Link
+                                                            href={`/returns/${order.id}`}
+                                                            className="rounded-full px-2 sm:px-4 bg-black py-2 text-white hover:bg-white hover:text-black"
+                                                        >RETURN(s)</Link>
+                                                    } 
+                                                    { order.replacementOrder.length > 0 &&  
+                                                        <Link
+                                                            href={`/exchanges/${order.id}`}
+                                                            className="rounded-full px-2 sm:px-4 bg-black py-2  text-white hover:bg-white hover:text-black"
+                                                        >EXCHANGE(s)</Link>
+                                                    } 
+                                                </div> 
+                                            : <></>
                                         }
                                     </div>
-                                    <div className="basis-1/3 text-start"> {
-                                        order.replacementOrder.length > 0 && <Link
-                                        href={`/exchanges/${order.id}`}
-                                        className="rounded-full px-2 sm:px-4 bg-black py-2  text-white hover:bg-white hover:text-black"
-                                        >EXCHANGE(s)</Link>
-                                    } </div>
+
                                 </div>
                         </article>)
                     })}

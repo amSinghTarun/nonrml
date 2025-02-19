@@ -11,7 +11,7 @@ const ContactUsPage = () => {
                     <p>
                         {`To contact customer support for any product information or queries regarding an order, please reach out to us with the below email address: `}
                     </p>
-                    <p className="hover:cursor-pointer text-rose-400">
+                    <p className="cursor-pointer text-rose-400">
                         {mail}
                     </p>
                 </div>
