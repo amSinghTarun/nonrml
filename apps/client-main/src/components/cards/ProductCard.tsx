@@ -24,55 +24,46 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     sku,
     imageAlt,
     count
-  }) => {
+}) => {
     const priceInCurrency = `INR ${INR.format(price)}.00`;
     const href = `/products/${sku.toLowerCase()}`;
     
     return (
-        
-      <Link 
-        href={href} 
-        className="px-1 flex flex-col basis-1/2 lg:basis-1/3 xl:basis-1/4 text-black mb-3 cursor-pointer space-y-0.5 h-full"
-      >
-        <div className="flex flex-col relative flex-grow">
-          <div className="w-full h-[300px] md:h-[380px] lg:h-[420px] xl:h-[450px] relative">
-            <Image
-                src={image}
-                alt={imageAlt}
-                className="object-cover"
-                quality={100}
-                fill={true}
-                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                style={{
-                    width: '100%',
-                }}
-                width={0}
-                height={0}
-              
-            />
-            {count !== 0 ? (
-              <></>
-            ) : (
-              <div className="absolute right-2 bottom-2 text-[8px] font-normal bg-white p-1 pl-2 pr-2 z-10">
-                SOLD OUT
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="text-black items-center flex flex-col text-sm backdrop-blur-md py-2 w-full">
-            {/* <GlowingEffect
-                blur={0}
-                borderWidth={3}
-                spread={150}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-            /> */}
-          <h1 className="font-medium text-xs">{name.toUpperCase()}</h1>
-          <p className="font-normal text-gray-700 text-xs">{priceInCurrency}</p>
-        </div>
-      </Link>
+        <Link 
+            href={href} 
+            className="px-0.5 flex flex-col basis-1/2 lg:basis-1/3 xl:basis-1/4 text-black mb-3 cursor-pointer hover:shadow-sm h-full"
+        >
+            <div className="flex flex-col relative flex-grow">
+                <div className="w-full h-[300px] md:h-[380px] lg:h-[420px] xl:h-[450px] relative overflow-hidden">
+                    <div className="w-full h-full transform transition-transform duration-300 hover:scale-110">
+                        <Image
+                            src={image}
+                            alt={imageAlt}
+                            className="object-cover"
+                            quality={100}
+                            fill={true}
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                            style={{
+                                width: '100%',
+                            }}
+                            width={0}
+                            height={0}
+                        />
+                    </div>
+                    {count !== 0 ? (
+                        <></>
+                    ) : (
+                        <div className="absolute right-2 bottom-2 text-[8px] font-normal bg-white p-1 pl-2 pr-2 z-10">
+                            SOLD OUT
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="text-black items-center flex flex-col pt-1 pb-2 w-full">
+                <h1 className="font-medium text-xs">{name.toUpperCase()}</h1>
+                <p className="font-normal text-gray-700 text-xs">{priceInCurrency}</p>
+            </div>
+        </Link>
     );
 };
 
