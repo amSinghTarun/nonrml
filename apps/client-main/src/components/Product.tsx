@@ -12,6 +12,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
+import ProductDetails from "./cards/ProductDetailFlipCard";
 
 type ProductProps = RouterOutput["viewer"]["product"]["getProduct"]["data"];
 
@@ -48,7 +49,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
 
     return (
         <article className="my-3 px-1 flex flex-col lg:flex-row flex-1 space-y-2 lg:space-x-3 lg:space-y-0">
-            <div className="lg:w-1/2 xl:w-1/2 2xl:w-1/2 relative ">
+            <div className="lg:basis-5/12 relative lg:h-screen">
                 <Carousel
                     plugins={[
                         WheelGesturesPlugin("is-wheel-dragging")
@@ -56,16 +57,16 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                     opts={isScreenLg ? { dragFree: true, align: "start", loop: true } : { dragFree: true, align: "center", loop: true }}
                     orientation={isScreenLg ? "vertical" : "horizontal"}
                 >
-                    <CarouselContent className="w-full">{
+                    <CarouselContent className="w-full lg:h-screen">{
                         product.productImages.sort((a, b) => a.priorityIndex - b.priorityIndex).map((image, key) => (
-                            <CarouselItem key={key} className="w-full rounded-xl">
+                            <CarouselItem key={key} className="w-full bg-red-300">
                                 <Image
                                     src={image.image}
                                     alt={product.name}
                                     width={0}
                                     height={0}
                                     sizes="100vw"
-                                    className="w-full h-[550px] lg:h-[700px] lg:w-fit object-cover"
+                                    className="w-full h-[550px] lg:h-fit object-cover"
                                 />
                             </CarouselItem>
                         ))
@@ -74,7 +75,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 {
                     (!isScreenLg && buyNow) &&
                     <div
-                        className="absolute -right-1 -bottom-3 hover:bg-white hover:text-black/90 cursor-pointer p-3 rounded-full text-white bg-neutral-800"
+                        className="absolute right-0 -bottom-3 hover:bg-neutral-800 hover:text-white cursor-pointer p-3 rounded-md text-neutral-800 bg-white"
                         onClick={() => {
                             selectedSize[sizeSKU.current!].quantity > 0 ?
                                 handleAddToCart() :
@@ -86,116 +87,89 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                     ><ShoppingCartIcon /></div>
                 }
             </div>
-            <div className="lg:w-1/2 space-y-3 flex flex-col lg:h-[700px] lg:overflow-y-auto py-2 px-1 justify-center">
-                <div className="flex flex-col pl-1 text-center">
-                    <span className="text-neutral-800 flex flex-col text-sm lg:text-xl font-medium">
-                        {product.name.toUpperCase()}
-                    </span>
-                    <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
-                        {convertStringToINR(Number(product.price))}
-                    </span>
-                </div>
-                <div className="flex flex-row text-xs gap-2">{
-                    Object.values(productSizeQuantities).map(({ size, variantId, quantity }, index) => (
-                        <SizeButton
-                            key={index}
-                            sizeCount={Object.keys(productSizeQuantities).length}
-                            sku={product.sku}
-                            productId={product.id}
-                            display={size}
-                            price={+product.price}
-                            quantity={quantity}
-                            variantId={variantId}
-                            name={product.name}
-                            image={product.productImages[0].image}
-                            selectedSize={sizeSKU}
-                            setSelectedSize={setSelectedSize}
-                            setQuantity={setSelectedQuantity}
-                        />
-                    ))
-                }</div>
-                <div className="flex flex-row text-xs w-full gap-2">{
-                    buyNow ?
-                        <div className="flex flex-col w-full space-y-2">
-                            {
-                                isScreenLg ?
-                                    <ProductPageActionButton display="ADD TO CART" onClick={() => {
+            <div className=" lg:overflow-y-auto flex flex-1 lg:pt-10 py-1 px-1 xl:justify-center">
+                <div className="space-y-3 flex-col w-full xl:w-3/4 ">
+                    <div className="flex flex-col pl-1 text-center">
+                        <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
+                            {product.name.toUpperCase()}
+                        </span>
+                        <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
+                            {convertStringToINR(Number(product.price))}
+                        </span>
+                    </div>
+                    <div className="flex flex-row text-xs gap-2">{
+                        Object.values(productSizeQuantities).map(({ size, variantId, quantity }, index) => (
+                            <SizeButton
+                                key={index}
+                                sizeCount={Object.keys(productSizeQuantities).length}
+                                sku={product.sku}
+                                productId={product.id}
+                                display={size}
+                                price={+product.price}
+                                quantity={quantity}
+                                variantId={variantId}
+                                name={product.name}
+                                image={product.productImages[0].image}
+                                selectedSize={sizeSKU}
+                                setSelectedSize={setSelectedSize}
+                                setQuantity={setSelectedQuantity}
+                            />
+                        ))
+                    }</div>
+                    <div className="flex flex-row text-xs w-full gap-2">{
+                        buyNow ?
+                            <div className="flex flex-col w-full space-y-2">
+                                { isScreenLg 
+                                    && <ProductPageActionButton display="ADD TO CART" onClick={() => {
                                         selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                             handleAddToCart() : toast({
                                                 duration: 1500,
                                                 title: "Please Select An Available Size"
                                             })
-                                    }} /> : <></>
-                            }
-                            <div className="flex flex-row w-full space-x-2">
-                                <QuantitySelectButton
-                                    selectedQuantity={selectedQuantity}
-                                    minQuantity={1}
-                                    maxQuantity={selectedSize[sizeSKU.current!]?.quantity}
-                                    onQuantityChange={setSelectedQuantity}
-                                />
-                                <GeneralButton
-                                    className="h-full w-full backdrop-blur-3xl bg-neutral-800 text-white font-medium"
-                                    display="CHECKOUT"
-                                    onClick={() => {
-                                        setBuyNowItems({
-                                            [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
-                                        })
-                                        router.push(`/checkout?purchase=1`)
-                                    }}
-                                />
+                                    }} /> 
+                                }
+                                <div className="flex flex-row w-full space-x-2">
+                                    <QuantitySelectButton
+                                        selectedQuantity={selectedQuantity}
+                                        minQuantity={1}
+                                        maxQuantity={selectedSize[sizeSKU.current!]?.quantity}
+                                        onQuantityChange={setSelectedQuantity}
+                                    />
+                                    <GeneralButton
+                                        className="h-full w-full backdrop-blur-3xl bg-neutral-800 text-white font-medium"
+                                        display="CHECKOUT"
+                                        onClick={() => {
+                                            setBuyNowItems({
+                                                [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
+                                            })
+                                            router.push(`/checkout?purchase=1`)
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        :
-                        <>
-                            <ProductPageActionButton display="ADD TO CART" onClick={() => {
-                                selectedSize[sizeSKU.current!]?.quantity > 0 ?
-                                    handleAddToCart() : toast({
-                                        duration: 1500,
-                                        title: "Please Select An Available Size"
-                                    })
-                            }} />
-                            <GeneralButton
-                                className="h-full w-full p-3 bg-neutral-800 text-white font-medium"
-                                display="BUY IT NOW"
-                                onClick={() => {
+                            :
+                            <>
+                                <ProductPageActionButton display="ADD TO CART" onClick={() => {
                                     selectedSize[sizeSKU.current!]?.quantity > 0 ?
-                                        setBuyNow(true) : toast({
+                                        handleAddToCart() : toast({
                                             duration: 1500,
                                             title: "Please Select An Available Size"
                                         })
-                                }}
-                            />
-                        </>
-                }</div>
-                <div className="flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-black/25 space-y-2 px-3 py-2 shadow-black/15 shadow">
-                    <div className="flex">
-                        <span className="font-medium text-start basis-1/3">
-                            DESCRIPTION
-                        </span>
-                        <div className="basis-2/3 text-neutral-600"> {product.description} </div>
-                    </div>
-
-                    <div className="flex pt-2">
-                        <span className="font-medium text-start basis-1/3">
-                            DETAILS
-                        </span>
-                        <ul className="basis-2/3"> {product.details.map((detail, index) => <li key={index}>{detail}</li>)} </ul>
-                    </div>
-
-                    <div className="flex pt-2">
-                        <span className="font-medium basis-1/3 text-start">
-                            CARE
-                        </span>
-                        <ul className="basis-2/3"> {product.care.map((careIns, index) => <li key={index}>{careIns}</li>)} </ul>
-                    </div>
-
-                    <div className="flex pt-2 justify-center">
-                        <span className="font-medium text-start basis-1/3 justify-center">
-                            SHIPPING
-                        </span>
-                        <ul className="basis-2/3"> {product.care.map((careIns, index) => <li key={index}>{careIns}</li>)} </ul>
-                    </div>
+                                }} />
+                                <GeneralButton
+                                    className="h-full w-full p-3 bg-neutral-800 text-white font-medium"
+                                    display="BUY IT NOW"
+                                    onClick={() => {
+                                        selectedSize[sizeSKU.current!]?.quantity > 0 ?
+                                            setBuyNow(true) : toast({
+                                                duration: 1500,
+                                                title: "Please Select An Available Size"
+                                            })
+                                    }}
+                                />
+                            </>
+                    }</div>
+                    <ProductDetails product={product} />
                 </div>
             </div>
         </article>

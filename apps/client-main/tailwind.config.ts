@@ -18,6 +18,9 @@ const config: Config = {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
   		},
+		transform: {
+		'perspective-1000': 'perspective(1000px)',
+		},
   		animation: {
 			'spin-slow': 'spin 3s linear infinite',
 			'spin-fast': 'spin 1s linear infinite',
@@ -28,13 +31,19 @@ const config: Config = {
 			third: "moveInCircle 40s linear infinite",
 			fourth: "moveHorizontal 40s ease infinite",
 			fifth: "moveInCircle 20s ease infinite",
-			"slow-fade": "fade 20s ease-out forwards"
+			"slow-fade": "fade 20s ease-out forwards",
+			'flip': 'flip 0.5s ease-in-out',
+
   		},
   		keyframes: {
 			slideText: {
 				'0%': { transform: 'translateY(0%)', opacity: '1' },
 				'50%': { transform: 'translateY(-20%)', opacity: '0.6' },
 				'100%': { transform: 'translateY(0%)', opacity: '1' },
+			},
+			flip: {
+				'0%': { transform: 'rotateY(0deg)' },
+				'100%': { transform: 'rotateY(180deg)' },
 			},
 			fade: {
 				'0%': { opacity: '1' },
@@ -87,6 +96,18 @@ const config: Config = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+		transformStyle: {
+		'preserve-3d': 'preserve-3d',
+		},
+		backfaceVisibility: {
+		'hidden': 'hidden',
+		},
+		perspective: {
+		'1000': '1000px',
+		},
+		rotateY: {
+		'180': '180deg',
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -130,8 +151,26 @@ const config: Config = {
   			}
   		}
   	}
-  },
-  plugins: [require("tailwindcss-animate")],
+  	},
+  	plugins: [
+		require("tailwindcss-animate"),
+		function({ addUtilities }) {
+			addUtilities({
+				'.perspective-1000': {
+				'perspective': '1000px',
+				},
+				'.backface-hidden': {
+				'backface-visibility': 'hidden',
+				},
+				'.transform-style-preserve-3d': {
+				'transform-style': 'preserve-3d',
+				},
+				'.rotate-y-180': {
+				'transform': 'rotateY(180deg)',
+				},
+			});
+		}
+	],
 };
 
 export default config;
