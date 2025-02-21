@@ -49,24 +49,27 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
 
     return (
         <article className="my-3 px-1 flex flex-col lg:flex-row flex-1 space-y-2 lg:space-x-3 lg:space-y-0">
-            <div className="lg:basis-5/12 relative lg:h-screen">
+            <div className="lg:basis-1/2 2xl:basis-5/12 relative lg:min-h-screen">
                 <Carousel
                     plugins={[
                         WheelGesturesPlugin("is-wheel-dragging")
                     ]}
                     opts={isScreenLg ? { dragFree: true, align: "start", loop: true } : { dragFree: true, align: "center", loop: true }}
                     orientation={isScreenLg ? "vertical" : "horizontal"}
+                    className="lg:h-screen w-full"
                 >
                     <CarouselContent className="w-full lg:h-screen">{
                         product.productImages.sort((a, b) => a.priorityIndex - b.priorityIndex).map((image, key) => (
-                            <CarouselItem key={key} className="w-full bg-red-300">
+                            // the below basis-1/2 is important to tell the carousel to keep more thn 1 item in the view point otherwise,
+                            // it keeps only one image in whole content length
+                            <CarouselItem key={key} className="w-full bg-red-300 lg:basis-1/2"> 
                                 <Image
                                     src={image.image}
                                     alt={product.name}
                                     width={0}
                                     height={0}
                                     sizes="100vw"
-                                    className="w-full h-[550px] lg:h-fit object-cover"
+                                    className="w-full h-[550px] lg:h-auto object-cover"
                                 />
                             </CarouselItem>
                         ))
@@ -88,7 +91,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 }
             </div>
             <div className=" lg:overflow-y-auto flex flex-1 lg:pt-10 py-1 px-1 xl:justify-center">
-                <div className="space-y-3 flex-col w-full xl:w-3/4 ">
+                <div className="space-y-3 flex-col w-full 2xl:w-5/6 ">
                     <div className="flex flex-col pl-1 text-center">
                         <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
                             {product.name.toUpperCase()}

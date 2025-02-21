@@ -38,35 +38,28 @@ const ProductDetails = ({ product }: { product: any }) => {
 
   return (
     <>
-      {/* Mobile view */}
       <div className=" flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-black/25 space-y-2 px-3 py-3 shadow-black/15 shadow">
         <div className="flex">
-          <span className="font-medium text-start basis-1/3 flex items-center">DESCRIPTION</span>
-          <div className="basis-2/3 text-neutral-600">{product.description}</div>
+          <span className="font-normal text-start basis-1/3 flex items-center">DESCRIPTION</span>
+          <div className="basis-2/3 font-light text-neutral-600">{product.description}</div>
         </div>
 
         <div className="flex pt-2">
-          <span className="font-medium text-start basis-1/3 flex items-center">DETAILS</span>
-          <ul className="basis-2/3">{product.details.map((detail: string, index: number) => <li key={index}>{detail}</li>)}</ul>
+          <span className="font-normal text-start basis-1/3 flex items-center">DETAILS</span>
+          <ul className="basis-2/3 font-light">{product.details.map((detail: string, index: number) => <li key={index}>{detail}</li>)}</ul>
         </div>
 
         <div className="flex pt-2">
-          <span className="font-medium basis-1/3 text-start flex items-center">CARE</span>
-          <ul className="basis-2/3">{product.care.map((careIns: string, index: number) => <li key={index}>{careIns}</li>)}</ul>
+          <span className="font-normal basis-1/3 text-start flex items-center">CARE</span>
+          <ul className="basis-2/3 font-light">{product.care.map((careIns: string, index: number) => <li key={index}>{careIns}</li>)}</ul>
         </div>
 
         <div className="flex pt-2 justify-center">
-          <span className="font-medium text-start basis-1/3 flex items-center">SHIPPING</span>
-          <ul className="basis-2/3">{product.care.map((careIns: string, index: number) => <li key={index}>{careIns}</li>)}</ul>
+          <span className="font-normal text-start basis-1/3 flex items-center">SHIPPING</span>
+          <ul className="basis-2/3 font-light">{product.care.map((careIns: string, index: number) => <li key={index}>{careIns}</li>)}</ul>
         </div>
       </div>
 
-      {/* Desktop view with flip cards */}
-      {/* <div className="hidden lg:grid grid-cols-2 gap-4 p-4">
-        {sections.map((section, index) => (
-          <InfoCard key={index} title={section.title} content={section.content} />
-        ))}
-      </div> */}
     </>
   );
 };

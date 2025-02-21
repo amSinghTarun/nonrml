@@ -6886,7 +6886,7 @@ __metadata:
 
 "admin-nonrml@file:./apps/admin-nonrml::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=afc22b&locator=nonrml%40workspace%3A."
+  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=cf18e4&locator=nonrml%40workspace%3A."
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@nonrml/configs": "npm:*"
@@ -6922,7 +6922,7 @@ __metadata:
     tailwind-merge: "npm:^2.6.0"
     tailwindcss-animate: "npm:^1.0.7"
     zod: "npm:^3.24.1"
-  checksum: 10c0/12f0619f97c7ae5d3986de72fb6362c400e4945aa5f9cd76c9eb3786dc70e475b77596eee595a096fecabd59203da46499e2f173569857a501ffbf0eb6abd0cb
+  checksum: 10c0/9ac36efe2245e1200d1f70bcefeeb7366b8ebb69d2b47ceb1d7398d86c42e829c245b20d56e0a4ca2da84e03ad2a1c9721bc398bedc5a463abd7d637526de508
   languageName: node
   linkType: hard
 
@@ -7728,7 +7728,7 @@ __metadata:
 
 "client-main@file:./apps/client-main::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=39ea20&locator=nonrml%40workspace%3A."
+  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=49139d&locator=nonrml%40workspace%3A."
   dependencies:
     "@coreui/react": "npm:^5.4.1"
     "@emotion/react": "npm:^11.13.3"
@@ -7765,6 +7765,7 @@ __metadata:
     input-otp: "npm:^1.2.4"
     lucide-react: "npm:^0.475.0"
     mini-svg-data-uri: "npm:^1.4.4"
+    motion: "npm:^12.4.2"
     next: "npm:^15.0.3"
     next-auth: "npm:^4.24.10"
     nodemon: "npm:^3.1.9"
@@ -7781,7 +7782,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     three: "npm:^0.168.0"
     zustand: "npm:^5.0.1"
-  checksum: 10c0/6f85759a63ab5537973123c565f224a3ffe56b7dc10594412c6291c460da9a7369df7e9b631e75ade643bc1ab3d58f33de9211e9913670dc274ace881e2d1b6e
+  checksum: 10c0/79a61a2ca856581664ee748ae23ec36fc66dc1693f0e75a43be5b030707bf213d137a3fc6e18829cee346dd4f56a143d1f4a0a96e99651c8fb5c076acbcb103d
   languageName: node
   linkType: hard
 

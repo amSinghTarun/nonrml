@@ -25,11 +25,11 @@ export default function RootLayout({
       <body className={`${appFont.className} min-h-screen `}>
         <Providers>
           <Appbar/>
-            <BackgroundProvider>
+            {/* <BackgroundProvider> */}
               <NavbarStateControlProvider />
                 {children}
               <Footer />
-            </BackgroundProvider>
+            {/* </BackgroundProvider> */}
           <Toaster />
         </Providers>
       </body>

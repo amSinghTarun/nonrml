@@ -31,33 +31,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return (
         <Link 
             href={href} 
-            className="px-0.5 flex flex-col basis-1/2 lg:basis-1/3 xl:basis-1/4 text-black mb-3 cursor-pointer hover:shadow-sm h-full"
+            className="group px-0.5 flex flex-col basis-1/2 md:basis-1/3 xl:basis-1/4 text-black mb-3 cursor-pointer hover:shadow-sm"
         >
-            <div className="flex flex-col relative flex-grow">
-                <div className="w-full h-[300px] md:h-[380px] lg:h-[420px] xl:h-[450px] relative overflow-hidden">
-                    <div className="w-full h-full transform transition-transform duration-300 hover:scale-110">
-                        <Image
-                            src={image}
-                            alt={imageAlt}
-                            className="object-cover"
-                            quality={100}
-                            fill={true}
-                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                            style={{
-                                width: '100%',
-                            }}
-                            width={0}
-                            height={0}
-                        />
+            <div className="aspect-[3/4] w-full relative overflow-hidden">
+                <Image
+                    src={image}
+                    alt={imageAlt}
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    quality={100}
+                    fill={true}
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    priority={true}
+                />
+                {count === 0 && (
+                    <div className="absolute right-2 bottom-2 text-[8px] font-normal bg-white p-1 px-2 z-10">
+                        SOLD OUT
                     </div>
-                    {count !== 0 ? (
-                        <></>
-                    ) : (
-                        <div className="absolute right-2 bottom-2 text-[8px] font-normal bg-white p-1 pl-2 pr-2 z-10">
-                            SOLD OUT
-                        </div>
-                    )}
-                </div>
+                )}
             </div>
             <div className="text-black items-center flex flex-col pt-1 pb-2 w-full">
                 <h1 className="font-medium text-xs">{name.toUpperCase()}</h1>
