@@ -1,5 +1,7 @@
 import Link, { LinkProps } from "next/link";
 import { cn } from "@/lib/utils";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import { IconMinus, IconPlus } from "@tabler/icons-react";
 
 interface decisionButtonProps {
     display: string,
@@ -117,9 +119,9 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
                     <div className="flex items-center justify-center flex-grow font-medium"> ...</div>
                 :
                 <>
-                    <button onClick={handleDecrease} className="flex items-center basis-1/6 justify-center  cursor-pointer rounded-l-xl pl-4 pr-3"> - </button>
+                    <button type="button" onClick={handleDecrease} className="flex items-center basis-1/3 justify-center cursor-pointer"> <IconMinus size={'12px'} /> </button>
                     <div className="flex items-center justify-center flex-grow font-medium"> {selectedQuantity} </div>
-                    <button onClick={handleIncrease} className="flex items-center basis-1/6 justify-center cursor-pointer rounded-r-xl pr-4 pl-3"> + </button>
+                    <button type="button" onClick={handleIncrease} className="flex items-center basis-1/3 justify-center cursor-pointer text-sm"> <IconPlus size={'12px'} /> </button>
                 </>
             }
             </div>

@@ -22,6 +22,7 @@ const config: Config = {
 		'perspective-1000': 'perspective(1000px)',
 		},
   		animation: {
+			'slide-up': 'slideUp 0.1s ease-out',
 			'spin-slow': 'spin 3s linear infinite',
 			'spin-fast': 'spin 1s linear infinite',
 			fade: 'fade 3s ease-out forwards',
@@ -36,6 +37,10 @@ const config: Config = {
 
   		},
   		keyframes: {
+			slideUp: {
+				'0%': { transform: 'translateY(100%)' },
+				'100%': { transform: 'translateY(0)' }
+			},
 			slideText: {
 				'0%': { transform: 'translateY(0%)', opacity: '1' },
 				'50%': { transform: 'translateY(-20%)', opacity: '0.6' },

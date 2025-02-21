@@ -43,20 +43,20 @@ export const CartMenu = () => {
   const handleCheckoutRedirect = () => router.push("/checkout")
 
   return (
-    <>
+    <>  
     <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none "></div>
     <section className="fixed flex flex-col w-screen justify-end items-center z-40 h-full">
-      <article className="backdrop-blur-3xl shadow-sm shadow-black flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-tr-xl rounded-tl-xl">
+    <article className=" text-neutral-800 backdrop-blur-3xl shadow-sm shadow-black flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
       {
         Object.keys(cartItems).length == 0 ?
           <div className="flex flex-col p-3 overflow-x-scroll justify-center w-full h-full">
-            <div className="flex flex-col justify-center items-center space-y-5 w-full">
-              <div className="font-medium animate-bounce text-sm ">YOUR CART IS EMPTY</div>
+            <div className="flex flex-col justify-center items-center space-y-3 w-full">
               <GeneralButton 
-                className="flex animate-bounce hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black bg-black items-center justify-center rounded-xl p-10 text-white text-sm font-medium" 
-                display="CONTINUE SHOPPING" 
+                className="flex hover:animate-pulse bg-neutral-800 items-center justify-center rounded-md p-5 text-white text-sm font-normal" 
+                display='CONTINUE SHOPPING'
                 onClick={() => setAppbarUtil("")} 
               />
+              <div className="font-medium text-xs">YOUR CART IS EMPTY</div>
             </div> 
           </div>
           :
@@ -74,23 +74,23 @@ export const CartMenu = () => {
                 }
                 cartTotal.current += (cartItems[+variantId].price * cartItems[+variantId].quantity)
                 return (
-                <div key={index} className="flex flex-row space-x-2 p-2 rounded-xl bg-white/5">
+                <div key={index} className="flex flex-row space-x-2 rounded-md ">
                   <Image 
                     src={String(cartItems[+variantId].productImage)} 
                     alt="image" 
                     width={80} 
                     height={20}
-                    className="rounded-xl cursor-pointer hover:shadow-sm hover:shadow-black"
+                    className="rounded-md cursor-pointer hover:shadow-sm hover:shadow-black"
                     onClick={() => router.push(`/products/${cartItems[+variantId].productSku.toLowerCase()}`)}
                   ></Image>
                   {/* details part - column */}
                   <div className="flex flex-col flex-1 space-y-1">
-                    <div className="font-medium text-sm">{cartItems[+variantId].productName.toUpperCase()}</div>
+                    <div className="font-normal text-xs">{cartItems[+variantId].productName.toUpperCase()}</div>
+                      <div className="text-xs font-normal">{convertStringToINR(cartItems[+variantId].price)}</div>
                       <div className="text-xs font-medium">SIZE: {cartItems[+variantId].size}</div>
-                      <div className="text-sm font-medium">{convertStringToINR(cartItems[+variantId].price)}</div>
                     <div className="flex flex-1 flex-row justify-between text-xs pr-3">
                       <QuantitySelectButton 
-                        className="p-1 bg-white/10 text-black" 
+                        className="p-1 bg-white/10 text-neutral-800 rounded-md" 
                         selectedQuantity = {useCartItemStore.getState().cartItems[+variantId].quantity} 
                         minQuantity={+process.env.MIN_QUANTITY_TO_ORDER!} 
                         maxQuantity={+process.env.MAX_QUANTITY_TO_ORDER!} 
@@ -108,13 +108,13 @@ export const CartMenu = () => {
             }
           </div>
           {/* the total part of cart page */}
-          <div className="font-medium text-sm flex flex-row justify-between px-2 pt-4 space-x-1">
+          <div className="font-normal text-sm flex flex-row justify-between px-2 pt-4 space-x-1">
             <div className="flex flex-col basis-1/2">
               <span className="text-xs">TOTAL:</span>
-              <div className="text-xl"> {convertStringToINR(cartTotal.current)} </div> 
+              <div className="text-lg font-medium"> {convertStringToINR(cartTotal.current)} </div> 
             </div>
             <div className="basis-1/2">
-              <GeneralButton className=" h-full w-full backdrop-blur-3xl bg-black text-white hover:bg-white hover:text-black hover:shadow-sm hover:shadow-black font-medium" display="Checkout" onClick={ handleCheckoutRedirect }/>
+              <GeneralButton className=" h-full w-full bg-neutral-800 text-white hover:animate- font-medium" display="Checkout" onClick={ handleCheckoutRedirect }/>
             </div>
           </div>
         </div>

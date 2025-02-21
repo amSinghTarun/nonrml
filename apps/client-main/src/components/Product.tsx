@@ -12,7 +12,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
-import ProductDetails from "./cards/ProductDetailFlipCard";
 
 type ProductProps = RouterOutput["viewer"]["product"]["getProduct"]["data"];
 
@@ -62,7 +61,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                         product.productImages.sort((a, b) => a.priorityIndex - b.priorityIndex).map((image, key) => (
                             // the below basis-1/2 is important to tell the carousel to keep more thn 1 item in the view point otherwise,
                             // it keeps only one image in whole content length
-                            <CarouselItem key={key} className="w-full bg-red-300 lg:basis-1/2"> 
+                            <CarouselItem key={key} className="w-full lg:basis-1/2"> 
                                 <Image
                                     src={image.image}
                                     alt={product.name}
@@ -90,8 +89,8 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                     ><ShoppingCartIcon /></div>
                 }
             </div>
-            <div className=" lg:overflow-y-auto flex flex-1 lg:pt-10 py-1 px-1 xl:justify-center">
-                <div className="space-y-3 flex-col w-full 2xl:w-5/6 ">
+            <div className=" lg:overflow-y-auto flex flex-1 lg:pb-16 py-1 px-1 xl:justify-center">
+                <div className="space-y-3 flex-col w-full 2xl:w-5/6 content-end">
                     <div className="flex flex-col pl-1 text-center">
                         <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
                             {product.name.toUpperCase()}
@@ -100,6 +99,9 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                             {convertStringToINR(Number(product.price))}
                         </span>
                     </div>
+                    <span className="text-neutral-700 text-xs px-5 text-center lg:text-md font-normal flex flex-col">
+                        {"Repalce it with design inspiration text"}
+                    </span>
                     <div className="flex flex-row text-xs gap-2">{
                         Object.values(productSizeQuantities).map(({ size, variantId, quantity }, index) => (
                             <SizeButton
@@ -172,7 +174,27 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                                 />
                             </>
                     }</div>
-                    <ProductDetails product={product} />
+                    <div className=" flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-neutral-200 space-y-2 p-3 shadow-black/15 shadow lg:shadow-none">
+                        <div className="flex lg:flex-col lg:text-center lg:space-y-1">
+                            <span className="font-normal lg:font-medium basis-1/3 content-center">DESCRIPTION</span>
+                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.description}${product.description}${product.description}`}</div>
+                        </div>
+
+                        <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
+                            <span className="font-normal lg:font-medium basis-1/3 content-center">DETAILS</span>
+                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.details}`}</div>
+                        </div>
+
+                        <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
+                            <span className="font-normal lg:font-medium basis-1/3 content-center">CARE</span>
+                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.care}`}</div>
+                        </div>
+
+                        <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
+                            <span className="font-normal basis-1/3 lg:font-medium content-center">SHIPPING</span>
+                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.care}`}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </article>
