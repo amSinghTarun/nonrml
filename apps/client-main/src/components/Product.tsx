@@ -89,7 +89,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                     ><ShoppingCartIcon /></div>
                 }
             </div>
-            <div className=" lg:overflow-y-auto flex flex-1 lg:pb-16 py-1 px-1 xl:justify-center">
+            <div className=" lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
                 <div className="space-y-3 flex-col w-full 2xl:w-5/6 content-end">
                     <div className="flex flex-col pl-1 text-center">
                         <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
@@ -162,7 +162,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                                         })
                                 }} />
                                 <GeneralButton
-                                    className="h-full w-full p-3 bg-neutral-800 text-white font-medium"
+                                    className="h-full w-full p-3 font-medium"
                                     display="BUY IT NOW"
                                     onClick={() => {
                                         selectedSize[sizeSKU.current!]?.quantity > 0 ?
@@ -174,7 +174,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                                 />
                             </>
                     }</div>
-                    <div className=" flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-neutral-200 space-y-2 p-3 shadow-black/15 shadow lg:shadow-none">
+                    <div className=" flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-black/15 shadow lg:shadow-none">
                         <div className="flex lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal lg:font-medium basis-1/3 content-center">DESCRIPTION</span>
                             <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.description}${product.description}${product.description}`}</div>
