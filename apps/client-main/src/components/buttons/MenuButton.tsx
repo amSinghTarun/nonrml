@@ -18,8 +18,8 @@ export const MenuButton = () => {
             }}
         >
             { appbarUtil != "SIDEBAR" ? 
-            <BlurOnIcon sx={{ width: 'auto', height: '100%', color:"black" }} /> : 
-            <BlurOffIcon sx={{width:"auto", height:"100%", color:"black"}}/>}
+            <BlurOnIcon sx={{ width: 'auto', height: '90%', color:"black"}} /> : 
+            <BlurOffIcon sx={{width:"auto", height:"90%", color:"black"}}/>}
         </div>
     )
 };

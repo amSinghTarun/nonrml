@@ -5,8 +5,6 @@ import { Prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
-import { datetimeRegex } from "zod";
-import { paymentRouter } from "../payments/_router";
 const returnExchangeTime = 604800000; // 7 days
 /*
 Get all the orders of a user
@@ -20,11 +18,13 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
         const orders = await prisma.orders.findMany({
             where: {
                 userId: userId,
-                payment: {
-                    paymentStatus: {
-                        in: [prismaEnums.PaymentStatus.failed, prismaEnums.PaymentStatus.paid, prismaEnums.PaymentStatus.attempted]
-                    }
-                }
+                // Payments: {
+                //     some : {
+                //         paymentStatus: {
+                //             in: [prismaEnums.PaymentStatus.failed, prismaEnums.PaymentStatus.paid, prismaEnums.PaymentStatus.attempted]
+                //         }
+                //     }
+                // }
             },
             select:{
                 id: true,
@@ -46,10 +46,13 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
                         id: true,
                     }
                 },
-                payment:{
+                Payments:{
                     select: {
                         paymentStatus: true
-                    }
+                    },
+                    orderBy: [{
+                        createdAt: "desc"
+                    }]
                 }
             },
             orderBy: [{
@@ -136,7 +139,12 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
             },
             include: {
                 address: true,
-                payment:{
+                creditNote: {
+                    select: {
+                        creditCode: true
+                    }
+                },
+                Payments:{
                     select:{
                         paymentStatus: true
                     }

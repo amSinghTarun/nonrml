@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import React, { ReactNode, FormHTMLAttributes, InputHTMLAttributes, ButtonHTMLAttributes  } from "react";
 import { useFormStatus } from "react-dom";
+import { Textarea } from "./textarea";
 
 interface FormProps extends FormHTMLAttributes<HTMLFormElement>{
     children: ReactNode,
@@ -19,7 +20,7 @@ interface FormField extends InputHTMLAttributes<HTMLInputElement> {
 };
 export const FormInputField : React.FC<FormField> = ({className, ...props}) => {
     return (
-        <input className={cn("text-white flex bg-black rounded-xl p-3 outline-none placeholder:text-white/70 read-only", className)} {...props}/>
+        <input className={cn("text-neutral-800 flex flex-wrap break-all justify-start text-start rounded-md p-3 outline-none placeholder:text-neutral-600 read-only", className)} {...props}/>
     )
 };
 
@@ -32,7 +33,7 @@ export const FormSubmitButton : React.FC<FormSubmitButton> = ({label, className,
     return (
         <button 
             disabled={pending} 
-            className={cn(' w-full text-white hover:bg-white hover:text-black rounded-xl bg-black', className)}
+            className={cn(' w-full text-white rounded-md', className)}
             {...props}
         >
             {pending ? "SAVING..." : label }

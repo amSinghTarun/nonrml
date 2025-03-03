@@ -66,12 +66,12 @@ export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductI
                 <motion.div
                   layoutId={"file-upload-" + orderProductId}
                   className={cn(
-                    "relative overflow-hidden text-xs  bg-white/40  flex flex-col items-start justify-start p-4 mt-4 w-full mx-auto rounded-md",
+                    "relative overflow-hidden text-xs w-full flex flex-col items-start justify-start p-1 px-3 border border-neutral-100 rounded-md",
                     "shadow-sm"
                   )}
                 >
-                <div className="flex flex-row items-center w-full mt-1 justify-between text-neutral-600 dark:text-neutral-400">
-                  <div className="flex flex-col justify-between w-full items-center gap-2">
+                <div className="flex flex-row items-center w-full justify-between text-neutral-600">
+                  <div className="flex flex-col justify-between w-full items-center gap-1 ">
                     
                     <motion.p
                       initial={{ opacity: 0 }}
@@ -95,7 +95,7 @@ export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductI
                       setFile(undefined)
                     }}
                   >
-                    <DeleteOutlineIcon className="text-white p-1 text-xs"/>
+                    <DeleteOutlineIcon className="text-white p-1 text-2xl"/>
                   </button>
                 </div>
                 </motion.div>
@@ -112,8 +112,7 @@ export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductI
                   damping: 20,
                 }}
                 className={cn(
-                  "z-40 bg-white/40 text-xs flex items-center justify-center h-8 mt-2 w-full mx-auto rounded-md hover:bg-black hover:text-white",
-                  "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]"
+                  "z-40 text-xs flex items-center justify-center p-2 lg:p-4 w-full mx-auto rounded-md hover:underline font-light text-white cursor-pointer hover:bg-neutral-900 bg-neutral-800"
                 )}
               >
                 {isDragActive ? (
@@ -125,7 +124,7 @@ export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductI
                     Drop it
                   </motion.p>
                 ) : (
-                  "Upload An Image That Depicts Your Issue"
+                  "Upload An Image To Describe Your Issue"
                 )}
               </motion.div>
             )}

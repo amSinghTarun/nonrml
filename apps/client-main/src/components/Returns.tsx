@@ -17,57 +17,50 @@ interface ReturnProps {
 }
 
 export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => {
+    console.log(returnOrders)
     return (
-        <div className={cn("rounded-xl overflow-y-scroll bg-white/10 backdrop-blur-3xl h-full w-full p-2 ", className)}>
-            <h1 className="flex flex-grow text-2xl font-bold p-1 ">Return(s)</h1>
-            <div className="space-y-3">
+        <div className={cn("h-screen w-full p-2 pb-6 flex flex-col lg:flex-row", className)}>
+            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-medium p-1 lg:justify-center lg:text-center">Return Orders</h1>
+            <div className="space-y-7 lg:space-y-10 p-2 lg:p-4 flex flex-1 flex-col overflow-y-scroll overscroll-auto scrollbar-hide">
             {
                 returnOrders.map( (order, index) => {
-                    return ( <div className="space-y-3 backdrop-blur-3xl shadow-sm shadow-black rounded-xl p-2">
-                        <div className="flex flex-col justify-between space-y-1 text-sm relative">
+                    return ( <div className="space-y-2 hover:shadow-sm w-full h-fit hover:shadow-neutral-200 shadow-sm shadow-neutral-100 p-2 text-xs rounded-md text-neutral-800">
+                        <div className="flex flex-col justify-between space-y-1">
                             <div className="flex justify-between">
-                                <p className="font-medium"> Return Date : </p>
-                                <p> {order.createdAt.toDateString()}</p>
+                                <p className="font-medium lg:text-sm"> RET-{order.id} </p>
+                                <p className="text-neutral-600"> {order.createdAt.toDateString()}</p>
                             </div>
-                            <div className="flex justify-between">
-                                <p className="font-medium"> Return Status : </p>
+                            <div className="flex justify-between text-neutral-600">
+                                <p className=""> Return Status </p>
                                 <p> {order.returnStatus == "CANCELLED_ADMIN" ? "CANCELLED BY ADMIN" : order.returnStatus.replaceAll("_", " ")} </p>
                             </div>
-                            { Number(order.refundAmount) != 0 && 
-                                <>
-                                    <div className="flex justify-between">
-                                        <p className="font-medium"> Return Payment Mode : </p>
-                                        <p> {order.refundMode} </p>
-                                    </div> 
-                                    <div className="flex justify-between">
-                                        <p className="font-medium"> Return Amount : </p>
-                                        <p> {convertStringToINR(Number(order.refundAmount))} </p>
-                                    </div> 
-                                </>
+                            { Number(order.refundAmount) != 0 && <div className="flex justify-between text-neutral-600">
+                                    <p> {"order.creditNote[0].creditCode"} </p>
+                                    <p> {convertStringToINR(Number(order.creditNote[0].value))} </p>
+                                </div>
                             }
                         </div>
-                        <div className="flex flex-col space-y-2">
-                            <div className="text-xl font-medium">Products</div>
-                            { order.returnItems.map((product, index) => (
-                                <div key={index}
-                                    className="relative justify-between backdrop-blur-3xl flex flex-col text-xs shadow-sm shadow-black/15 p-2 rounded-xl"
-                                >
-                                    <div className="flex flex-row space-x-3">
-                                        <Image className="rounded-sm" src={`${product.orderProduct.productVariant.product.productImages[0].image}`} alt="product image" width={70} height={40} sizes="100vw"/>
-                                        <div className="flex flex-col flex-1 justify-center space-y-1">
-                                            <p className="font-semibold">{product.orderProduct.productVariant.product.name.toUpperCase()} ( {product.orderProduct.productVariant.size} )</p>
-                                            <p>Return Quantity: {product.quantity}</p>
-                                            { product.rejectedQuantity ? <p>Rejected Quantity: {product.rejectedQuantity}</p> :  <></>}
+                        <div className="flex flex-col space-y-2 text-neutral-600">
+                            <div className="flex justify-between text-xs text-neutral-500">Products ({order.returnItems.length})</div>
+                            <div className="space-y-1">
+                                { order.returnItems.map((product, index) => (
+                                    <div key={index} className="flex flex-col text-xs text-neutral-800" >
+                                        <div className="flex flex-row space-x-3">
+                                            <Image className="rounded-sm" src={`${product.orderProduct.productVariant.product.productImages[0].image}`} alt="product image" width={80} height={50} sizes="100vw"/>
+                                            <div className="flex flex-col flex-1 justify-center space-y-1">
+                                                <p className="font-medium">{product.orderProduct.productVariant.product.name.toUpperCase()} ( {product.orderProduct.productVariant.size} )</p>
+                                                <p>Return Quantity: {product.quantity}</p>
+                                                { product.rejectedQuantity ? <p>Rejected Quantity: {product.rejectedQuantity}</p> :  <></>}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ) ) }
+                                ) ) }
+                            </div>
                         </div>
                     </div> )
                 })
             }
-        </div>
             </div>
+        </div>
     )
 }
-    

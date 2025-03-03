@@ -94,46 +94,50 @@ const Signin = () => {
 
     return (
         <>
+        {/* this is required to make backdrop work as on direct parent childern the children backdrop blue doesn't apply */}
         <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none "></div>
         <div className="fixed flex flex-col w-screen justify-center items-center z-40 h-full">
-            <div className=" backdrop-blur-3xl rounded-xl shadow-sm p-4 shadow-black/80 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
-                <div className = " flex flex-1 flex-col pb-2 rounded-t-xl ">
-                    <div className='text-left text-3xl text-black font-medium mb-1 '>
+            <div className=" backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
+                <div className = " flex flex-1 flex-col mb-4">
+                    <div className='text-left text-2xl text-black font-medium mb-1 '>
                         WELCOME BACK!
                     </div>
-                    <div className='text-left text-xs text-black font-normal'>
+                    <div className='text-left text-xs text-black font-light'>
                         Login for a better personalised experience
                     </div>
                 </div>
-                <div className='p-2 pb-3'> {
+                <div > {
                     <Form onSubmit={otpSent ? onOTPSubmit : onMobileSubmit} >
-                        {error && <div className='text-white text-xs bg-red-600 text-center p-2 rounded-xl'>{error}</div>}
-                        <div className='flex flex-row'>
+                        <div className="flex flex-row">
                             <FormInputField
-                                className={` text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl ${otpSent ? "rounded-r-none basis-4/5 w-full" : "w-full"}`}
+                                className={` text-center text-sm placeholder:text-xs placeholder:text-neutral-700 text-black bg-white/20 backdrop-blur-3xl ${otpSent ? "rounded-r-none basis-4/5 w-full" : "w-full"}`}
                                 required 
                                 value = {mobileNumber} 
                                 type = "string" 
-                                onChange = {otpSent ? ()=>{} : mobileNumberOnChange} placeholder='Enter Mobile Number . . .'
+                                onChange = {otpSent ? ()=>{} : mobileNumberOnChange} 
+                                placeholder='Enter Mobile Number . . .'
                             />
-                            { otpSent && <button type="button" className=' p-2 basis-1/5 text-xs rounded-r-xl text-white bg-black hover:text-red-500 hover:bg-red-200' onClick={mobileNumberOnChange}> CHANGE</button> }
+                            { otpSent && <button type="button" className=' p-2 basis-1/5 text-xs rounded-r-md text-neutral-600 border-l bg-white/20 backdrop-blur-3xl border-neutral-400 hover:underline hover:text-white' onClick={mobileNumberOnChange}> CHANGE</button> }
                         </div>
                         { otpSent && 
-                            <div className='flex flex-row'>
+                            <div className='flex flex-row rounded-md'>
                             < FormInputField 
-                                className={`w-full basis-4/5 text-center text-md placeholder:text-sm placeholder:text-black/80 text-black bg-white/20 backdrop-blur-3xl rounded-r-none`}
+                                className={`w-full basis-4/5 text-center text-sm placeholder:text-xs placeholder:text-neutral-700 text-black bg-white/20 backdrop-blur-3xl rounded-r-none`}
                                 type="string" 
                                 value={otp} 
                                 required
                                 onChange={otpOnChange} placeholder={'ENTER OTP . . .'}
                             />
-                            <button type='button' className='basis-1/5 rounded-r-xl text-white bg-black text-center cursor-pointer hover:bg-white hover:text-black text-xs p-2' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
+                            <button type='button' className='basis-1/5 rounded-r-md border-neutral-400 text-neutral-600 border-l bg-white/20 text-center cursor-pointer hover:underline text-xs p-2 hover:text-white' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
                         </div>
+                        }
+                        {
+                            <p className="text-red-500 text-xs pl-3">{error}</p>
                         }
                         <FormSubmitButton 
                             type='submit'
                             label={otpSent ? (verifyingOTP.current ? "VERIFYING..." : "VERIFY OTP") : (sendingOTP.current ? "SENDING..." : "SEND OTP")}
-                            className={`p-3 `}
+                            className="w-full p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                         />
                     </Form>
                 }</div>

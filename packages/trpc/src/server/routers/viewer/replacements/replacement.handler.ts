@@ -17,6 +17,7 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
                 }
             },
             select: {
+                id: true,
                 status: true,
                 createdAt: true,
                 shipmentId: true,
@@ -27,7 +28,7 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
                 },
                 replacementItems: {
                     select: {
-                        replacementQuantity: true,
+                        nonReplacableQuantity: true,
                         nonReplaceAction: true,
                         productVariant: {
                             select:{

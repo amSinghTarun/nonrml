@@ -35,11 +35,11 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
     };
 
     return (
-        <div className={cn("rounded-xl h-[80%] bg-white/10 w-[90%] flex flex-col backdrop-blur-3xl p-4 text-center", trackOrderProps.className)}>
-            <h1 className="flex text-black justify-center place-items-end basis-1/3 text-4xl mb-1">
+        <div className={cn("w-[90%] text-neutral-800 flex flex-col text-center text-xs", trackOrderProps.className)}>
+            <h1 className="flex justify-center text-neutral-800 font-medium place-items-end basis-1/3 text-xl mb-1">
                 TRACK ORDER
             </h1>
-            <p className="mb-10 text-sm">Please Enter The Mobile Associated With The Order</p>
+            <p className="mb-10 text-xs text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
             <Form 
                 className="flex justify-center text-sm items-center px-10"
                 action={async () => {
@@ -51,27 +51,27 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
                     }
                 }}
             >
-                {error && <div className='text-white text-xs bg-red-600 text-center p-2 rounded-xl'>{error}</div>}
                 <FormInputField 
                     name="orderId"
                     value={formData?.orderId}
                     onChange={handleChange}
-                    className="bg-white/20 p-5 shadow-sm shadow-black/15 text-black placeholder:text-black/80 w-full"
+                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
                     placeholder="Order Id"
                 />
                 <FormInputField
                     name="mobile"
                     value={formData?.mobile}
                     onChange={handleChange}
-                    className="bg-white/20 p-5 shadow-sm shadow-black/15 text-black placeholder:text-black/80 w-full"
+                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
                     placeholder="Mobile Number"/>
                 {
-                    <p className="text-red-500 text-xs pl-3">{formError}</p>
+                    <p className="text-red-500 text-xs pl-3">{formError || error}</p>
                 } 
+                {/* {error && <div className='text-red-500 text-xs text-center p-2 '>{error}</div>} */}
                 <FormSubmitButton 
                     type="submit"
                     label="TRACK ORDER"
-                    className="w-fit p-5 text-sm font-medium"
+                    className="w-fit p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                 />
             </Form>
         </div>

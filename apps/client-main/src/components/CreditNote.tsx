@@ -43,11 +43,11 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     }
     
     return (
-        <div className={cn("rounded-xl h-[80%] bg-white/10 w-[90%] flex flex-col backdrop-blur-3xl p-4 text-center", creditNoteProps.className)}>
-            <h1 className={`flex text-black justify-center ${!creditNoteDetails && "place-items-end basis-1/3"}  text-4xl mb-1`}>
+        <div className={cn("h-[80%] w-[90%] flex flex-col text-center", creditNoteProps.className)}>
+            <h1 className={`flex text-neutral-800 font-medium justify-center ${!creditNoteDetails && "place-items-end basis-1/3"} text-xl mb-1`}>
                 CREDIT NOTE
             </h1>
-            { !creditNoteDetails && <p className="mb-10 text-sm">CHANGE IT</p> }
+            { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }
             {
                 creditNoteDetails 
                 ? <CreditNoteDetails creditNoteDetails={creditNoteDetails}></CreditNoteDetails> 
@@ -55,31 +55,30 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                     className="flex justify-center text-sm items-center px-10"
                     action={handleSubmit}
                 >
-                    {error && <div className='text-white text-xs bg-red-600 text-center p-2 rounded-xl'>{error}</div>}
                     <FormInputField 
                         name="creditNoteCode"
                         value={formData?.creditNoteCode}
                         onChange={handleChange}
-                        className="bg-white/20 p-5 shadow-sm shadow-black/15 text-black placeholder:text-black/80 w-full"
+                        className="bg-white p-5 rounded-md placeholder:text-xs shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
                         placeholder="Credit Note Code"
                     />
                     <FormInputField
                         name="userMobile"
                         value={formData?.userMobile}
                         onChange={handleChange}
-                        className="bg-white/20 p-5 shadow-sm shadow-black/15 text-black placeholder:text-black/80 w-full"
+                        className="bg-white p-5 shadow-sm placeholder:text-xs rounded-md shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
                         placeholder="Mobile Number"/>
                     {
-                        <p className="text-red-500 text-xs pl-3">{formError}</p>
+                        <p className="text-red-500 text-xs pl-3">{formError || error}</p>
                     } 
                     <FormSubmitButton 
                         type="submit"
                         label="VIEW DETAILS"
-                        className="w-fit p-5 text-sm font-medium"
+                       className="w-fit p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                     />
                 </Form>
             }
-            { creditNoteDetails && <GeneralButton className="py-3 rounded-xl bg-black text-white hover:bg-white hovere:text-black" display="Close" onClick={() => setCreditNoteDetails(undefined)} />}
+            { creditNoteDetails && <div className="w-full flex flex-1 justify-center"><GeneralButton className="p-5 w-40 font-medium rounded-md text-xs text-white" display="Close" onClick={() => setCreditNoteDetails(undefined)} /></div>}
         </div>
     )
 };

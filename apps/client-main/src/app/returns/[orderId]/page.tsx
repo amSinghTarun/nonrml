@@ -7,8 +7,8 @@ const ReturnOrders = async ({params}: {params: {orderId: string}}) => {
     const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: (await params).orderId}) ;
 
     return (
-        <section className="z-30 pt-24 flex flex-row w-screen h-screen text-black justify-center">
-            <Returns className="h-[95%] w-[90%] lg:w-[50%]" returnOrders={userReturns.data}/> 
+        <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-scroll flex bg-white mb-64 lg:mb-32">
+            <Returns returnOrders={userReturns.data}/> 
         </section>
     )
 }

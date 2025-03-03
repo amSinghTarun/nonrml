@@ -4,10 +4,10 @@ import { Exchanges } from "@/components/Exchanges";
 
 const ExchangeOrders = async ({params}: {params: {orderId: string}}) => {
     await redirectToHomeIfNotLoggedIn();
-    const userExchanges = await (await serverClient()).viewer.replacement.getReplacement({orderId: +(await params).orderId});
+    const userExchanges = await (await serverClient()).viewer.replacement.getReplacement({orderId: (await params).orderId});
     return (
-        <section className="z-30 pt-24 flex flex-row w-screen h-screen text-black justify-center">
-            <Exchanges className="h-[95%] w-[90%] lg:w-[50%]" exchangeOrders={userExchanges.data}/> 
+        <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-scroll flex bg-white mb-64 lg:mb-32">
+            <Exchanges exchangeOrders={userExchanges.data}/> 
         </section>
     )
 }

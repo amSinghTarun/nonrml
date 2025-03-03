@@ -202,6 +202,12 @@ export const getReturnOrders = async ({ctx, input}: TRPCRequestOptions<TGetRetur
                 returnType: "RETURN"
             },
             include: {
+                creditNote: {
+                    select: {
+                        creditCode: true,
+                        value: true
+                    }
+                },
                 returnItems: {
                     select: {
                         quantity: true,

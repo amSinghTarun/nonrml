@@ -1,7 +1,6 @@
 "use client"
 
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import { useRecoilState } from 'recoil';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { usePathname } from 'next/navigation';
 import { useSetAppbarUtilStore } from "@/store/atoms";
@@ -26,9 +25,9 @@ const CartButton = () => {
             onClick={handleOnClick}>
             {
                 appbarUtil == "CART" ?
-                    <HighlightOffIcon sx={{ width: '80%', height: '100%', color:"black" }} />
+                    <HighlightOffIcon sx={{ width: '80%', height: '90%', color:"black" }} />
                 :
-                    <ShoppingBagIcon sx={{ width: 'auto', height: '100%', color:"black" }} />    
+                    <ShoppingBagIcon sx={{ width: 'auto', height: '90%', color:"black" }} />    
             }
         </div>
     )

@@ -1,7 +1,7 @@
 "use clinet"
 import { cn } from "@/lib/utils"
 import { Form, FormInputField, FormSubmitButton } from "./ui/form"
-import { GeneralButton } from "./ui/buttons"
+import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons"
 import { useState } from "react"
 import React from "react"
 import { addAddress, editAddress } from "@/app/actions/address.action"
@@ -156,37 +156,33 @@ export const EditAddress : React.FC<EditAddressProps> = (editdAddressProps) => {
     ]
 
     return (
-        <div className={cn("w-full pb-2 flex h-full", editdAddressProps.className)}> 
+        <div className={cn("w-full p-2 text-xs flex h-full shadow-sm shadow-neutral-100 rounded-md", editdAddressProps.className)}> 
             <Form 
                 action={async() => {
-                    await editAddress({...formData, addressId: editdAddressProps.address.id!})
-                    editdAddressProps.onCancelClick()
+                    Object.keys(errors).length == 0 && (await editAddress({...formData, addressId: editdAddressProps.address.id!}), editdAddressProps.onCancelClick())
                 }} 
-                className="space-y-0"
+                className="space-y-3 "
             >
                 { addressFormFields.map( (field, index) => {
                     return (
-                    <div className="h-full flex flex-col">
-                        <FormInputField
-                            {...field}
-                            key={index}
-                            className={` backdrop-blur-xl bg-white/15  text-black placeholder:text-black/70 p-3 text-sm`}
-                            readOnly={field.readonly}
-                        ></FormInputField>
-                        {
-                           <p className="text-red-500 text-xs pl-3">{errors[field.name as keyof FormErrorType]}</p>
-                        }
+                        <div className="h-full flex flex-col relative">
+                            <FormInputField
+                                {...field}
+                                key={index}
+                                className={`text-neutral-800 h-full shadow-sm shadow-neutral-100 placeholder:text-neutral-600`}
+                                readOnly={field.readonly}
+                            ></FormInputField>
+                            {
+                               <p className="pl-3 text-[10px] md:text-xs z-40 text-red-400 absolute right-1 bottom-0">{errors[field.name as keyof FormErrorType]}</p>
+                            }
+                        </div>
+                        )
+                    })}
+                    <div className="flex flex-row space-x-4 w-full px-4 justify-around">
+                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 p-2 bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={"SAVE CHANGES"}></FormSubmitButton>
+                        <GeneralButtonTransparent display="CANCEL" className="basis-1/2 py-2 text-[11px] rounded-sm" onClick={editdAddressProps.onCancelClick}/>
                     </div>
-                    )
-                })}
-                <div className="flex flex-row space-x-4 w-full px-4 justify-around">
-                    <div className="basis-1/2">
-                    { Object.keys(errors).length == 0 &&
-                        <FormSubmitButton type="submit" className=" py-2 text-xs shadow-sm shadow-black/15 bg-transparent backdrop-blur-3xl text-black hover:bg-black hover:text-white" label={"SAVE CHANGES"}></FormSubmitButton>
-                    }
-                    </div>
-                    <GeneralButton display="CANCEL" className=" basis-1/2 shadow-black/15 text-xs py-2" onClick={editdAddressProps.onCancelClick}/>
-                </div>
+
             </Form>
         </div>
     )
@@ -329,36 +325,33 @@ export const AddAddress : React.FC<AddAddressProps> = (addAddressProps) => {
     ]
 
     return (
-        <div className={cn("w-full pb-2 flex h-full", addAddressProps.className)}> 
+        <div className={cn("w-full p-2 text-xs flex h-full shadow-sm shadow-neutral-100 rounded-md", addAddressProps.className)}> 
             <Form 
                 action={async() => {
-                    await addAddress(formData)
-                    addAddressProps.onCancelClick()
+                    Object.keys(errors).length == 0 && (await addAddress(formData), addAddressProps.onCancelClick())
                 }} 
-                className="space-y-0"
+                className="space-y-3 "
             >
                 { addressFormFields.map( (field, index) => {
                     return (
-                    <div className="h-full flex flex-col">
+                    <div className="h-full flex flex-col relative">
                         <FormInputField
                             {...field}
                             key={index}
-                            className={` backdrop-blur-xl bg-white/15  text-black placeholder:text-black/70 p-3 text-sm`}
+                            className={`text-neutral-800 h-full shadow-sm shadow-neutral-100 placeholder:text-neutral-600`}
                             readOnly={field.readonly}
                         ></FormInputField>
                         {
-                           <p className="text-red-500 text-xs pl-3">{errors[field.name as keyof FormErrorType]}</p>
+                           <p className="pl-3 text-[10px] md:text-xs z-40 text-red-400 absolute right-1 bottom-0">{errors[field.name as keyof FormErrorType]}</p>
                         }
                     </div>
                     )
                 })}
                 <div className="flex flex-row space-x-4 w-full px-4 justify-around">
-                    <div className="basis-1/2">
-                    { Object.keys(errors).length == 0 &&
-                        <FormSubmitButton type="submit" className=" py-2 text-xs shadow-sm shadow-black/15 bg-transparent backdrop-blur-3xl text-black hover:bg-black hover:text-white" label={"SAVE"}></FormSubmitButton>
-                    }
-                    </div>
-                    <GeneralButton display="CANCEL" className=" basis-1/2 shadow-black/15 text-xs py-2" onClick={addAddressProps.onCancelClick}/>
+                    {/* <div className="basis-1/2"> */}
+                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 py-2 text-xs bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={"ADD"}></FormSubmitButton>
+                    {/* </div> */}
+                    <GeneralButtonTransparent display="CANCEL" className="basis-1/2 p-2 text-[11px] rounded-sm" onClick={addAddressProps.onCancelClick}/>
                 </div>
             </Form>
         </div>

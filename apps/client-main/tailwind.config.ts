@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 
-
 const config: Config = {
     darkMode: ["class"],
     content: [
@@ -173,6 +172,33 @@ const config: Config = {
 				'.rotate-y-180': {
 				'transform': 'rotateY(180deg)',
 				},
+                // Added scrollbar hiding utilities
+                '.scrollbar-hide': {
+                    /* Firefox */
+                    'scrollbar-width': 'none',
+                    /* IE and Edge */
+                    '-ms-overflow-style': 'none',
+                    /* Hide WebKit scrollbar */
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+                },
+                '.scrollbar-thin': {
+                    'scrollbar-width': 'thin',
+                    '&::-webkit-scrollbar': {
+                        width: '6px',
+                        height: '6px',
+                    },
+                },
+                '.scrollbar-transparent': {
+                    '&::-webkit-scrollbar-track': {
+                        background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(0, 0, 0, 0.1)',
+                        borderRadius: '10px',
+                    }
+                },
 			});
 		}
 	],

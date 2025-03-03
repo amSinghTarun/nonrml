@@ -16,7 +16,21 @@ interface generalButtonProps {
 
 export const GeneralButton : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('rounded-md hover:bg-neutral-900 text-white bg-neutral-800', className)} onClick={onClick}>
+        <button className={cn('rounded-md hover:bg-neutral-900 hover:underline text-white bg-neutral-800', className)} onClick={onClick}>
+            {display}
+        </button>
+    )
+};
+
+interface generalButtonTransparentProps {
+    display: string,
+    onClick: () => void,
+    className?: string
+}
+
+export const GeneralButtonTransparent : React.FC<generalButtonProps> = ({display, onClick, className}) => {
+    return (
+        <button className={cn('border bg-white rounded-sm border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-white', className)} onClick={onClick}>
             {display}
         </button>
     )
@@ -62,13 +76,13 @@ interface sizeButtonProps {
 export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, price, sku, quantity, variantId, selectedSize, name, image, setSelectedSize, setQuantity, productId}) => {
     if(quantity <= 0){
         return (    
-            <GeneralButton display={display} onClick={()=>{}} className={`basis-1/${sizeCount} bg-white justify-center flex rounded-md cursor-no-drop py-3 font-normal hover:bg-white hover:text-neutral-800 text-neutral-800 line-through`}/>
+            <GeneralButton display={display} onClick={()=>{}} className={`flex-1 bg-white justify-center flex rounded-md cursor-no-drop py-3 font-normal hover:bg-white hover:text-neutral-800 text-neutral-800 line-through`}/>
         )
     }
     return (
         variantId == selectedSize.current 
-        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`basis-1/${sizeCount} justify-center flex font-extrabold rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md`} />         
-    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={` basis-1/${sizeCount} bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:text-neutral-800`}/>
+        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`flex-1 justify-center flex font-extrabold text-neutral-800 bg-white rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md hover:no-underline`} />         
+    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={`flex-1 bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:no-underline hover:text-neutral-800`}/>
     )
 }
 
@@ -79,7 +93,7 @@ interface productPageActionButtonProps {
 }
 export const ProductPageActionButton : React.FC<productPageActionButtonProps> = ({ display, onClick, className}) => (
     <div 
-        className={cn("bg-white text-neutral-800 hover:bg-neutral-800 hover:text-white basis-1/2 flex justify-center p-3 font-medium cursor-pointer rounded-md shadow-none shadow-black/15", className)}
+        className={cn("bg-white text-neutral-800 hover:bg-neutral-800 hover:text-white basis-1/2 flex justify-center p-3 cursor-pointer rounded-md shadow-none", className)}
         onClick={onClick}
     >{display}</div> 
 )
@@ -94,6 +108,7 @@ interface quantitySelectButtonProps {
     className?: string,
     updatingQuantity?: boolean
 }
+
 export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({selectedQuantity, minQuantity=1, maxQuantity, onQuantityChange, variantId, className, updatingQuantity}) => {
     console.log(selectedQuantity, minQuantity=1, maxQuantity, onQuantityChange, variantId, className, updatingQuantity)
     const handleDecrease = () => {
@@ -120,7 +135,7 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
                 :
                 <>
                     <button type="button" onClick={handleDecrease} className="flex items-center basis-1/3 justify-center cursor-pointer"> <IconMinus size={'12px'} /> </button>
-                    <div className="flex items-center justify-center flex-grow font-medium"> {selectedQuantity} </div>
+                    <div className="flex items-center justify-center flex-grow font-normal text-neutral-600"> {selectedQuantity} </div>
                     <button type="button" onClick={handleIncrease} className="flex items-center basis-1/3 justify-center cursor-pointer text-sm"> <IconPlus size={'12px'} /> </button>
                 </>
             }

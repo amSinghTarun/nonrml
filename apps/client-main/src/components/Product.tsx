@@ -90,18 +90,18 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 }
             </div>
             <div className=" lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
-                <div className="space-y-3 flex-col w-full 2xl:w-5/6 content-end">
-                    <div className="flex flex-col pl-1 text-center">
+                <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
+                    <div className="flex flex-col pl-1 text-center space-y-2">
                         <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
                             {product.name.toUpperCase()}
                         </span>
-                        <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
+                        <span className="text-neutral-600 text-xs lg:text-md font-normal flex flex-col">
                             {convertStringToINR(Number(product.price))}
                         </span>
+                        <span className="text-neutral-500 text-xs text-center lg:text-md font-normal flex flex-col">
+                            {"Repalce it with design inspiration text"}
+                        </span>
                     </div>
-                    <span className="text-neutral-700 text-xs px-5 text-center lg:text-md font-normal flex flex-col">
-                        {"Repalce it with design inspiration text"}
-                    </span>
                     <div className="flex flex-row text-xs gap-2">{
                         Object.values(productSizeQuantities).map(({ size, variantId, quantity }, index) => (
                             <SizeButton
@@ -174,25 +174,24 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                                 />
                             </>
                     }</div>
-                    <div className=" flex-col text-neutral-800 flex text-xs bg-white bg-opacity-45 rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-black/15 shadow lg:shadow-none">
+                    <div className="flex-col text-neutral-700 flex text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
                         <div className="flex lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal lg:font-medium basis-1/3 content-center">DESCRIPTION</span>
-                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.description}${product.description}${product.description}`}</div>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.description}${product.description}${product.description}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal lg:font-medium basis-1/3 content-center">DETAILS</span>
-                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.details}`}</div>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.details}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal lg:font-medium basis-1/3 content-center">CARE</span>
-                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.care}`}</div>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.care}`}</div>
                         </div>
-
                         <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal basis-1/3 lg:font-medium content-center">SHIPPING</span>
-                            <div className="basis-2/3 font-light text-neutral-600 lg:px-2 line-">{`${product.care}`}</div>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.care}`}</div>
                         </div>
                     </div>
                 </div>
