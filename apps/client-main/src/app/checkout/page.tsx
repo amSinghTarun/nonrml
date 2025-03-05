@@ -19,6 +19,10 @@ const CheckoutPage = () => {
         }
     });
     const userAddresses = trpc.viewer.address.getAddresses.useQuery(undefined, {
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
         enabled: !!session
     });
 

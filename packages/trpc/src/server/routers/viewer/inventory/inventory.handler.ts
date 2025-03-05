@@ -53,24 +53,6 @@ export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetSKUDetai
         throw TRPCCustomError(error);
     }
 }
-/*
-Get the details of a particular SKU
-*/
-export const getSKUDetails = async ({ctx, input}: TRPCRequestOptions<TGetSKUDetailsSchema>)  => {
-    try{
-        const skuDetails = await prisma.inventory.findUniqueOrThrow({
-            where: {
-                sku: input.sku
-            }
-        });
-        return { status: TRPCResponseStatus.SUCCESS, message: "", data:skuDetails};
-    } catch(error) {
-        //console.log("\n\n Error in getSKUDetails ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error);        
-    }
-};
 
 /*
 Add item to inventory

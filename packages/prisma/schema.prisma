@@ -265,7 +265,7 @@ model Payments {
   paymentService      String               @default("Razorpay")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  orderId             String               @default("ORD-20250102-1-1D18")
+  orderId             String               
   Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: Cascade)
   RefundTransactions  RefundTransactions[]
 }

@@ -1,4 +1,4 @@
-import { Prisma, prisma } from "@nonrml/prisma";
+import { Prisma } from "@nonrml/prisma";
 import { TAddAddressSchema, TDeleteAddressSchema, TEditAddressByAdmin, TEditAddressSchema, TGetUserAddressSchema } from "./address.schema";
 import { TRPCError } from "@trpc/server";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
@@ -9,6 +9,7 @@ Get the a particular user address
 userId is taken form the ctx to ensure no other user can see address of anyone else
 */
 export const getUserAddress = async ({ctx, input}: TRPCRequestOptions<TGetUserAddressSchema>)  => {
+    const prisma = ctx.prisma;
     try{
         const userId = input?.userId
         const address = await prisma.address.findMany({
@@ -33,10 +34,11 @@ get the userId from the ctx
 */
 export const getAddresses = async ({ ctx }: TRPCRequestOptions<null>) => {
     const prisma = ctx.prisma;
+    const userId = +ctx.user?.id!
     try{
         const addresses = await prisma.address.findMany({
             where: {
-                userId: +ctx.user?.id!
+                userId: userId
             }
         })
         return { status: TRPCResponseStatus.SUCCESS, message:"", data: addresses}
@@ -53,8 +55,9 @@ Add address for a user,
 1 user can have only 1 address with a particular addressName
 */
 export const addAddress = async ({ctx, input}: TRPCRequestOptions<TAddAddressSchema>)  => {
+    const prisma = ctx.prisma;
+    const userId = +ctx.user?.id!
     try{
-        const userId = +ctx.session.user.id!;
         const newAddress = await prisma.address.create({
             data: {...input!, userId: userId}
         });
@@ -72,11 +75,13 @@ export const addAddress = async ({ctx, input}: TRPCRequestOptions<TAddAddressSch
 Delete address of a user
 */
 export const removeAddress = async ({ctx, input}: TRPCRequestOptions<TDeleteAddressSchema>)  => {
+    const prisma = ctx.prisma;
+    const userId = +ctx.user?.id!
     try{
         await prisma.address.delete({
             where: {
                 id: input!.id,
-                userId: +ctx.session.user.id
+                userId: userId
             }
         });
         return { status: TRPCResponseStatus.SUCCESS, message: "Address deleted", data: {}};

@@ -1,6 +1,6 @@
 import { TRPCResponseStatus } from "@nonrml/common"
 import { acceptOrder, calculateRejectedQuantityRefundAmounts, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TInitiateUavailibiltyRefundSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
+import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
 import { Prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
@@ -80,7 +80,7 @@ export const cancelOrder = async ({ ctx, input } : TRPCRequestOptions<TCancelOrd
         const cancelledOrder = await prisma.orders.update({
             where: {
                 id: input.orderId,
-                orderStatus: "CONFIRMED"
+                orderStatus: "PENDING"
             },
             data: {
                 orderStatus: "CANCELED"
@@ -210,8 +210,15 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
 };
 
 /*
-Verify razorpay signature after sucessful payment
-*/
+    Verify razorpay signature after sucessful payment
+
+    * update the payment status
+    * update the credit note
+    * put order in pending state if cod 
+    accept the order if prepaid
+        update the sku quantity
+        update the order status
+*/ 
 export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
@@ -220,23 +227,29 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         const orderDetails = await prisma.orders.findFirst({
             where: {
                 userId: userId,
-                payment: {
-                    rzpOrderId: input.razorpayOrderId
-                }
             },
-            select:{
+            select: {
                 id: true,
-                payment: true,
                 creditUtilised: true,
                 totalAmount: true,
                 creditNoteId: true
             }
         });
-        if(!orderDetails || !orderDetails.payment)
+
+        const paymentDetails = await prisma.payments.findFirst({
+            where: {
+                rzpOrderId: input.razorpayOrderId,
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+
+        if(!orderDetails || !paymentDetails || orderDetails.id != paymentDetails.orderId)
             throw new TRPCError({code: "BAD_REQUEST", message: "Order not found"});
 
         const generated_signature = crypto.createHmac('sha256', "vQ3zPC5d2jh0USeUhsOd0jbe")
-            .update(orderDetails.payment.rzpOrderId + "|" + input.razorpayPaymentId)
+            .update(paymentDetails.rzpOrderId + "|" + input.razorpayPaymentId)
             .digest('hex');
         if (generated_signature != input.razorpaySignature) 
             throw new TRPCError({code: "BAD_REQUEST", message: "Payment signature verification failed"});
@@ -245,7 +258,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
 
         await prisma.payments.update({
             where: {
-                id: orderDetails.payment.id,
+                id: paymentDetails.id,
                 rzpOrderId: input.razorpayOrderId
             },
             data: {
@@ -254,14 +267,16 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
                 rzpPaymentSignature: input.razorpaySignature
             }
         });
+
         await prisma.orders.update({
             where: {
                 id: orderDetails.id
             },
             data: {
-                orderStatus: paymentMethod == "Cash on Delivery" ? prismaEnums.OrderStatus.CONFIRMED : prismaEnums.OrderStatus.ACCEPTED
+                orderStatus: paymentMethod == "Cash on Delivery" ? prismaEnums.OrderStatus.PENDING : prismaEnums.OrderStatus.ACCEPTED
             }
         });
+
         //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
         orderDetails.creditNoteId && (
             Number(orderDetails.totalAmount) == orderDetails.creditUtilised! ? 
