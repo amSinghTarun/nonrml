@@ -36,7 +36,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
           </div>
           <footer className="flex flex-col text-xs text-center space-y-2 divide-y divide-dotted divide-black px-2">
             <div className="flex flex-row divide-x divide-dotted divide-black py-1 font-medium justify-evenly">
-              { session?.user && <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/order">
+              { session?.user && <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/account">
                 ACCOUNT
               </Link>}
               <Link className="text-neutral-800 flex-1 justify-center hover:underline py-2" href="/creditNote">
@@ -46,7 +46,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
                 TRACK ORDER
               </Link>
             </div>
-            <span className="flex text-[10px] pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</span>
+            <span className="flex text-[10px] md:text-xs pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</span>
           </footer>
         </aside>
       </nav>

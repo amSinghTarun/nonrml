@@ -13,23 +13,23 @@ interface CreditNoteDetailsProps {
 }
 export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNoteDetails}) => {
     return (
-        <div className=" h-full w-full ">
+        <div className=" h-full w-full text-neutral-600 ">
              <div className="flex flex-col justify-between space-y-1 text-xs relative p-3 ">
                     <div className="flex justify-between">
                         <p className="font-light"> Credit Code : </p>
-                        <p> {creditNoteDetails.creditCode} </p>
+                        <p className="text-neutral-800"> {creditNoteDetails.creditCode} </p>
                     </div>
                     <div className="flex justify-between">
                         <p className="font-light"> Value : </p>
-                        <p> {convertStringToINR(+creditNoteDetails.value)} </p>
+                        <p className="text-neutral-800"> {convertStringToINR(+creditNoteDetails.value)} </p>
                     </div>
                     <div className="flex justify-between">
                         <p className="font-light"> Created at : </p>
-                        <p> {creditNoteDetails.createdAt.toDateString()} </p>
+                        <p className="text-neutral-800"> {creditNoteDetails.createdAt.toDateString()} </p>
                     </div>
                     <div className="flex justify-between">
                         <p className="font-light"> Expire at : </p>
-                        <p> {creditNoteDetails.expiryDate.toDateString()} </p>
+                        <p className="text-neutral-800"> {creditNoteDetails.expiryDate.toDateString()} </p>
                     </div>
             </div>
             <h2 className="pb-2 pt-4 text-md font-medium">CREDIT NOTE TRANSACTION(s)</h2>
