@@ -46,9 +46,17 @@ export const getProduct = async ({
       product = await prisma.products.findUniqueOrThrow({
         where: {
           sku: input!.productSku.toUpperCase(),
+          public: true
         },
         select: {
           visitedCount: true,
+          public: true,
+          sizeChartId: true,
+          SizeChart:{
+            select: {
+              SizeChart: true
+            }
+          },
           name: true,
           description: true,
           price: true,
@@ -333,7 +341,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT start --------------------------------- ", input);
     
     type LatestProducts = {
-      price: Prisma.Decimal;
+      price: number;
       sku: string;
       name: string;
       id: number;
@@ -395,7 +403,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           { createdAt: "desc" }
         ]
       });
-      redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+      latestProducts.length && redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
     }
     console.log(latestProducts,  "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
@@ -604,8 +612,8 @@ export const getProductsSizes = async ({ ctx, input }: TRPCRequestOptions<TGetPr
 }
 
 /*
-    make the available size qunatity concept using redis, don't put it in db
-    althought the field hasn't been removed from the usage for now as for sake of implementation simplicity
+  make the available size qunatity concept using redis, don't put it in db
+  althought the field hasn't been removed from the usage for now as for sake of implementation simplicity
 */
 export const addProduct = async ({
   ctx,
@@ -774,32 +782,32 @@ Delete a record from the DB,
 Cascade is off so if any product id is being used in some inventory or anywhere else then it will
 result in error
 */
-export const deleteProduct = async ({
-  ctx,
-  input,
-}: TRPCRequestOptions<TDeleteProductSchema>) => {
-  try {
-    await prisma.products.delete({
-      where: {
-        id: input.productId,
-      },
-    });
-    return {
-      status: TRPCResponseStatus.SUCCESS,
-      message: "Product deleted",
-      data: {},
-    };
-  } catch (error) {
-    //console.log("\n\n Error in deleteProductImage ----------------");
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      error = {
-        code: "BAD_REQUEST",
-        message:
-          error.code === "P2025"
-            ? "Requested record does not exist"
-            : error.message,
-        cause: error.meta?.cause,
-      };
-    throw TRPCCustomError(error);
-  }
-};
+// export const deleteProduct = async ({
+//   ctx,
+//   input,
+// }: TRPCRequestOptions<TDeleteProductSchema>) => {
+//   try {
+//     await prisma.products.delete({
+//       where: {
+//         id: input.productId,
+//       },
+//     });
+//     return {
+//       status: TRPCResponseStatus.SUCCESS,
+//       message: "Product deleted",
+//       data: {},
+//     };
+//   } catch (error) {
+//     //console.log("\n\n Error in deleteProductImage ----------------");
+//     if (error instanceof Prisma.PrismaClientKnownRequestError)
+//       error = {
+//         code: "BAD_REQUEST",
+//         message:
+//           error.code === "P2025"
+//             ? "Requested record does not exist"
+//             : error.message,
+//         cause: error.meta?.cause,
+//       };
+//     throw TRPCCustomError(error);
+//   }
+// };

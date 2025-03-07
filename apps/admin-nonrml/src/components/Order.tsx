@@ -517,7 +517,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                         </div>
                                         <div>
                                             <h3 className="font-medium text-sm text-gray-500">Status</h3>
-                                            <p> {creditNote.redeemed ? 'Redeemed' : 'Active'} </p>
+                                            <p> {!creditNote.remainingValue ? 'Redeemed' : 'Active'} </p>
                                         </div>
                                     </div>
                                 ))}

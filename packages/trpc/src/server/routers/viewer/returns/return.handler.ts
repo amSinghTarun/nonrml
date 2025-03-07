@@ -257,133 +257,133 @@ export const getReturnOrders = async ({ctx, input}: TRPCRequestOptions<TGetRetur
         update the quantity
         update the status as return accepted and date as well
 */
-export const finaliseReturnOrderStatus = async ({ctx, input}: TRPCRequestOptions<TFinaliseReturnOrderSchema>) => {
-    try{        
-        let returnOrderUpdated = {};
-        if(input.status == "RETURN_ACCEPTED"){
-            const products = await prisma.orderProducts.findMany({
-                where: {
-                    id: {
-                        in: input.productIds
-                    }
-                }
-            });
-            if(products.length == 0)
-                throw new TRPCError({code: "NOT_FOUND", message: "No data for selected products"});
+// export const finaliseReturnOrderStatus = async ({ctx, input}: TRPCRequestOptions<TFinaliseReturnOrderSchema>) => {
+//     try{        
+//         let returnOrderUpdated = {};
+//         if(input.status == "RETURN_ACCEPTED"){
+//             const products = await prisma.orderProducts.findMany({
+//                 where: {
+//                     id: {
+//                         in: input.productIds
+//                     }
+//                 }
+//             });
+//             if(products.length == 0)
+//                 throw new TRPCError({code: "NOT_FOUND", message: "No data for selected products"});
             
-            const orderDetails = await prisma.orders.findUnique({
-                where: {
-                    id: input.orderId
-                },
-                include: {
-                    discount: true
-                }
-            });
-            if(!orderDetails)
-                throw new TRPCError({code:"NOT_FOUND", message: "No data for the order id" + input.orderId});
+//             const orderDetails = await prisma.orders.findUnique({
+//                 where: {
+//                     id: input.orderId
+//                 },
+//                 include: {
+//                     discount: true
+//                 }
+//             });
+//             if(!orderDetails)
+//                 throw new TRPCError({code:"NOT_FOUND", message: "No data for the order id" + input.orderId});
             
             
-            let refundAmount = '0';
-            if(orderDetails?.productCount == products.length) {
-                refundAmount = orderDetails.finalPrice
-            } else {
-                let grossRefundAmount = 0;
-                for(let product of products){
-                    grossRefundAmount += <number><unknown>product.price
-                }
-                if(orderDetails?.discount?.type == prismaEnums.DiscountType.PERCENTAGE){
-                    grossRefundAmount -= ( ( grossRefundAmount * orderDetails.discount.discount ) / 100 );
-                } else {
-                    grossRefundAmount -= (orderDetails.discount?.discount! / orderDetails.productCount) * products.length;
-                }
-                refundAmount = <string><unknown>grossRefundAmount;
-            }
+//             let refundAmount = '0';
+//             if(orderDetails?.productCount == products.length) {
+//                 refundAmount = orderDetails.finalPrice
+//             } else {
+//                 let grossRefundAmount = 0;
+//                 for(let product of products){
+//                     grossRefundAmount += <number><unknown>product.price
+//                 }
+//                 if(orderDetails?.discount?.type == prismaEnums.DiscountType.PERCENTAGE){
+//                     grossRefundAmount -= ( ( grossRefundAmount * orderDetails.discount.discount ) / 100 );
+//                 } else {
+//                     grossRefundAmount -= (orderDetails.discount?.discount! / orderDetails.productCount) * products.length;
+//                 }
+//                 refundAmount = <string><unknown>grossRefundAmount;
+//             }
             
-            const queries = [];
-            for(let product of products) {
-                if(product.productStatus != prismaEnums.ProductStatus.RETURN_INITIATED)
-                    throw new TRPCError({code:"BAD_REQUEST", message:"product must be in return state"});
+//             const queries = [];
+//             for(let product of products) {
+//                 if(product.productStatus != prismaEnums.ProductStatus.RETURN_INITIATED)
+//                     throw new TRPCError({code:"BAD_REQUEST", message:"product must be in return state"});
 
-                let inventoryQuery = prisma.inventory.update({
-                    where: {
-                        SKU: product.productSKU
-                    },
-                    data: {
-                        quantity: product.quantity,
+//                 let inventoryQuery = prisma.inventory.update({
+//                     where: {
+//                         SKU: product.productSKU
+//                     },
+//                     data: {
+//                         quantity: product.quantity,
                         
-                    }
-                });
-                let orderProductQuery = prisma.orderProducts.update({
-                    where: {
-                        id: product.id
-                    },
-                    data: {
-                        productStatus: prismaEnums.ProductStatus.RETURN_ACCEPTED
-                    }
-                });
-                queries.push(inventoryQuery);
-                queries.push(orderProductQuery);
-            };
+//                     }
+//                 });
+//                 let orderProductQuery = prisma.orderProducts.update({
+//                     where: {
+//                         id: product.id
+//                     },
+//                     data: {
+//                         productStatus: prismaEnums.ProductStatus.RETURN_ACCEPTED
+//                     }
+//                 });
+//                 queries.push(inventoryQuery);
+//                 queries.push(orderProductQuery);
+//             };
 
-            // initiate the refund with the payment service            
+//             // initiate the refund with the payment service            
 
-            // send e-mail saying that refund has been initiated
+//             // send e-mail saying that refund has been initiated
             
-            queries.push(
-                prisma.returns.update({
-                    where: {
-                        id: input.returnOrderId
-                    },
-                    data: {
-                        returnReceiveDate: new Date(),
-                        status: prismaEnums.ReturnStatus.RETURN_ACCEPTED
-                    }
-                })
-            );
+//             queries.push(
+//                 prisma.returns.update({
+//                     where: {
+//                         id: input.returnOrderId
+//                     },
+//                     data: {
+//                         returnReceiveDate: new Date(),
+//                         status: prismaEnums.ReturnStatus.RETURN_ACCEPTED
+//                     }
+//                 })
+//             );
 
-            await prisma.$transaction(queries);
+//             await prisma.$transaction(queries);
 
-        } else {
+//         } else {
 
-            // send the mail saying that the product didn't meet the quanlity check standards
+//             // send the mail saying that the product didn't meet the quanlity check standards
 
-            const queries = [];
-            for(let product of input.productIds) {
-                let orderProductQuery = prisma.orderProducts.update({
-                    where: {
-                        id: product
-                    },
-                    data: {
-                        productStatus: prismaEnums.ProductStatus.RETURN_REJECTED
-                    }
-                });
-                queries.push(orderProductQuery);
-            };
+//             const queries = [];
+//             for(let product of input.productIds) {
+//                 let orderProductQuery = prisma.orderProducts.update({
+//                     where: {
+//                         id: product
+//                     },
+//                     data: {
+//                         productStatus: prismaEnums.ProductStatus.RETURN_REJECTED
+//                     }
+//                 });
+//                 queries.push(orderProductQuery);
+//             };
 
-            queries.push(
-                prisma.returns.update({
-                    where: {
-                        id: input.returnOrderId
-                    },
-                    data: {
-                        returnReceiveDate: new Date(),
-                        status: prismaEnums.ReturnStatus.RETURN_REJECTED
-                    }
-                })
-            );
+//             queries.push(
+//                 prisma.returns.update({
+//                     where: {
+//                         id: input.returnOrderId
+//                     },
+//                     data: {
+//                         returnReceiveDate: new Date(),
+//                         status: prismaEnums.ReturnStatus.RETURN_REJECTED
+//                     }
+//                 })
+//             );
 
-            await prisma.$transaction(queries);
-        }
+//             await prisma.$transaction(queries);
+//         }
 
-        return {status:TRPCResponseStatus.SUCCESS, message: "", data: returnOrderUpdated};
+//         return {status:TRPCResponseStatus.SUCCESS, message: "", data: returnOrderUpdated};
 
-    }catch(error) {
-        //console.log("\n\n Error in getAddress ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error);
-    }
-};
+//     }catch(error) {
+//         //console.log("\n\n Error in getAddress ----------------");
+//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
+//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+//         throw TRPCCustomError(error);
+//     }
+// };
 
 /*
     as per the documentation, if the order is in ready to ship/pick status, thn it can be cancelled
@@ -533,7 +533,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
-                        redeemed: false,
+                        remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
                         userId: returnProductVariantDetails.order.userId,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),

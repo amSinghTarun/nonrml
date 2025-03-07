@@ -75,10 +75,6 @@ export const CreditNotes = ({ creditNotes }: { creditNotes: CreditNotes }) => {
         </TableHeader>
         <TableBody>
           {creditNotes.data?.data.map((note) => {
-            const remainingValue = calculateRemainingValue(
-              +note.value,
-              note.creditNotesPartialUseTransactions
-            );
             return (
               <TableRow key={note.id}>
                 <DropdownMenu>
@@ -110,15 +106,15 @@ export const CreditNotes = ({ creditNotes }: { creditNotes: CreditNotes }) => {
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded-full text-sm ${
-                      note.redeemed
+                      !note.remainingValue
                         ? "bg-red-100 text-red-800"
                         : "bg-green-100 text-green-800"
                     }`}
                   >
-                    {note.redeemed ? "Redeemed" : "Active"}
+                    {!note.remainingValue ? "Redeemed" : "Active"}
                   </span>
                 </TableCell>
-                <TableCell>{remainingValue.toString()}</TableCell>
+                <TableCell>{note.remainingValue}</TableCell>
               </TableRow>
             );
           })}

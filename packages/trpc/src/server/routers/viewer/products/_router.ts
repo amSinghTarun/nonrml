@@ -38,11 +38,5 @@ export const productRouter = router({
     editProduct : adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
         .input(ZEditProductSchema)
-        .mutation( async ({ctx, input}) => await editProduct({ctx, input}) ),
-    // deleteProduct : adminProcedure
-    //     .meta({ openAPI: {method: "POST", descrription: "Delete a product"}})
-    //     .input(ZDeleteProductSchema)
-    //     .mutation( async ({ctx, input}) => {
-    //     return await deleteProduct({ctx, input});
-    // })
+        .mutation( async ({ctx, input}) => await editProduct({ctx, input}) )
 });

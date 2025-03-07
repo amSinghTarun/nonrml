@@ -41,9 +41,11 @@ export const displayRazorpay = async ({rzpOrder, cartOrder, onDismissHandler}: {
       },
       onDismissHandler: onDismissHandler
     });
+
     const paymentObject = new (window as any).Razorpay(options); 
+
     paymentObject.on('payment.failed', (response: any) => {
-        changePaymentStatus({orderId: response.error.metadata.order_id, paymentStatus: 'failed'})
+      changePaymentStatus({orderId: response.error.metadata.order_id, paymentStatus: 'failed'})
     });
     paymentObject.open();
 }

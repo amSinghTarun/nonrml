@@ -31,13 +31,13 @@ model CreditNotes {
   id                                Int                                 @id @default(autoincrement())
   userId                            Int
   creditCode                        String
-  value                             Decimal
+  value                             Float
   returnOrderId                     Int?
   expiryDate                        DateTime
   createdAt                         DateTime                            @default(now())
   updatedAt                         DateTime                            @updatedAt
-  redeemed                          Boolean                             @default(false)
   creditNoteOrigin                  CreditNotePurpose?
+  remainingValue                    Float
   returnOrder                       Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
   user                              User                                @relation(fields: [userId], references: [id])
   creditNotesPartialUseTransactions CreditNotesPartialUseTransactions[]
@@ -58,7 +58,7 @@ model CreditNotesPartialUseTransactions {
 
 model Cart {
   id        Int         @id @default(autoincrement())
-  cartTotal Decimal
+  cartTotal Float
   quantity  Int
   cartItems CartItems[]
   user      User?
@@ -172,7 +172,7 @@ model Products {
   id                   Int                   @id @default(autoincrement())
   name                 String                @unique
   description          String
-  price                Decimal
+  price                Float
   tags                 String[]
   categoryId           Int
   soldOut              Boolean               @default(false)
@@ -240,12 +240,12 @@ model vendorOrder {
   id                        Int       @id @default(autoincrement())
   vendorName                String
   vendorAddress             String
-  totalPrice                Decimal
-  advPayment                Decimal
+  totalPrice                Float
+  advPayment                Float
   advPaymentMode            String
   advPaymentDate            DateTime
   advPaymentTransactionId   String
-  finalPayment              Decimal?
+  finalPayment              Float?
   finalPaymentMode          String?
   finalPaymentDate          DateTime?
   finalPaymentTransactionId String?
@@ -258,14 +258,14 @@ model vendorOrder {
 
 model Payments {
   id                  Int                  @id @default(autoincrement())
-  rzpOrderId          String
+  rzpOrderId          String               @unique
   rzpPaymentId        String?              @unique
   rzpPaymentSignature String?
   paymentStatus       PaymentStatus        @default(PENDING)
   paymentService      String               @default("Razorpay")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  orderId             String               
+  orderId             String               @default("")
   Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: Cascade)
   RefundTransactions  RefundTransactions[]
 }
@@ -286,7 +286,7 @@ model Orders {
   id                    String                             @id @unique
   type                  OrderType                          @default(NEW)
   creditUtilised        Int?                               @default(0)
-  totalAmount           Decimal
+  totalAmount           Float
   userId                Int
   productCount          Int
   addressId             Int
@@ -313,7 +313,7 @@ model Orders {
 model OrderProducts {
   id                  Int             @id @default(autoincrement())
   productVariantId    Int
-  price               Decimal
+  price               Float
   quantity            Int
   returnQuantity      Int?
   replacementQuantity Int?
@@ -333,7 +333,7 @@ model Returns {
   orderId           String
   returnShipmentId  Int?              @unique
   returnStatus      ReturnStatus      @default(PENDING)
-  refundAmount      Decimal?          @default(0)
+  refundAmount      Float?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   refundMode        ReturnRefundMode  @default(CREDIT)

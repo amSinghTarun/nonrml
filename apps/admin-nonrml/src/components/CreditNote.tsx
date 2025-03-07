@@ -21,7 +21,7 @@ export function CreditNoteEditDialog({note, onSave}: {note: CreditNote, onSave: 
   const [formData, setFormData] = useState<Omit<editCNInput, "id">>({
     value: +note.value,
     expiryDate: new Date(note.expiryDate),
-    redeemed: note.redeemed
+    // remainingValue: note.remainingValue
   });
 
   const handleSubmit = async (e: any) => {

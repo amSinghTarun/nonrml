@@ -5,6 +5,7 @@ import { TRPCRequestOptions } from "../helper";
 import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
+import { validateHeaderValue } from "http";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
     const prisma = ctx.prisma;
@@ -23,7 +24,7 @@ export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditN
         })
         if(!creditNote)
             throw new TRPCError({code:"NOT_FOUND", message: "No Credit note found for the given code"});
-        if(creditNote.redeemed)
+        if(!creditNote.remainingValue)
             throw new TRPCError({code:"FORBIDDEN", message: "Credit note is already redeemed"});
         
         let cnUsableValue = Number(creditNote.value);
@@ -99,6 +100,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 data: {
                     returnOrderId: input.returnOrderId,
                     value: orderDetail?.order.totalAmount!,
+                    remainingValue: orderDetail?.order.totalAmount!,
                     creditNoteOrigin: orderDetail.returnType as keyof typeof prismaEnums.CreditNotePurpose,
                     userId: orderDetail?.order.userId,
                     expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
@@ -113,6 +115,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                         value: input.value,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.GIFT,
                         userId: input.userId,
+                        remainingValue: input.value,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
                         creditCode: `GIFT-${input.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${(new Date()).toISOString().split('T')[0]!.replaceAll('-', "").slice(2)}`
                     }
@@ -166,6 +169,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 prisma.creditNotes.create({
                     data: {
                         value: refundAmount,
+                        remainingValue: refundAmount,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.GIFT,
                         userId: replacementOrderDetails.return.order.userId,
                         returnOrderId: input.replacementOrderId,
@@ -210,7 +214,7 @@ export const editCreditNote = async ({ctx, input}: TRPCRequestOptions<TEditCredi
         const updateData = {
             ...(input.value && { value: input.value}),
             ...(input.expiryDate && { expiryDate: input.expiryDate}),
-            ...(input.redeemed && { redeemed: input.redeemed}),
+            // ...(input.remainigValue && { redeemed: input.remainingValue}),
         }
 
         if(Object.keys(updateData).length == 0)

@@ -37,6 +37,7 @@ export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSch
         });        
         const payment = await prisma.payments.create({
             data: {
+                orderId: input?.orderId,
                 rzpOrderId: rzpOrder.id,
                 paymentStatus: rzpOrder.status as prismaTypes.PaymentStatus,
             }
@@ -54,38 +55,19 @@ export const updateFailedPaymentStatus = async ({ctx, input}: TRPCRequestOptions
     const prisma = ctx.prisma;
     input = input!
     try{
-        //console.log(input)
-        const orderDetails = await prisma.orders.findFirstOrThrow({
+        const paymentDetails = await prisma.payments.update({
             where: {
-                payment:{
-                    rzpOrderId: input.orderId,
-                    paymentStatus: {
-                        in: ["failed", "attempted", "created"]
-                    }
-                }
-            },
-            select: {
-                id: true,
-                payment: {
-                    select: {
-                        id: true
-                    }
-                }
-            }
-        });
-        if(!orderDetails.payment) throw new Error("Payment details not found"); 
-        await prisma.payments.update({
-            where: {
-                id: orderDetails.payment.id
+                rzpOrderId: input.orderId
             },
             data: {
                 paymentStatus: input.paymentStatus
             }
         });
+        // if(!orderDetails.payment) throw new Error("Payment details not found"); 
         //console.log("payment status updated", orderDetails.id)
         const orderUpdated = await prisma.orders.update({
             where: {
-                id: orderDetails.id
+                id: paymentDetails.orderId
             },
             data: {
                 orderStatus: prismaEnums.OrderStatus.PAYMENT_FAILED
@@ -199,42 +181,42 @@ export const getPaymentRefundDetails = async ({ ctx, input }: TRPCRequestOptions
 /* 
 edit the active status and name of the payment of a payment,
 */
-export const editpayments = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TEditpaymentSchema>)   => {
-    try{
-        const updateData : {active: boolean, paymentName: string} | {active: boolean} = input;
-        const edittedpayment = await prisma.payments.update({
-            where:{
-                id: input.paymentId
-            },
-            data: updateData
-        });
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data: edittedpayment};
-    } catch(error) {
-        //console.log("\n\n Error in editpayments ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error)
-    }
-};
+// export const editpayments = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TEditpaymentSchema>)   => {
+//     try{
+//         const updateData : {active: boolean, paymentName: string} | {active: boolean} = input;
+//         const edittedpayment = await prisma.payments.update({
+//             where:{
+//                 id: input.paymentId
+//             },
+//             data: updateData
+//         });
+//         return { status: TRPCResponseStatus.SUCCESS, message:"", data: edittedpayment};
+//     } catch(error) {
+//         //console.log("\n\n Error in editpayments ----------------");
+//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
+//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+//         throw TRPCCustomError(error)
+//     }
+// };
 
 /*
 Delete a payment
 */
-export const deletepayments = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TDeletepaymentSchema>)   => {
-    try{
-        await prisma.payments.delete({
-            where: {
-                id: input.paymentId
-            }
-        });
-        return { status: TRPCResponseStatus.SUCCESS, message:"Role deleted", data: {}};
-    } catch(error) {
-        //console.log("\n\n Error in deletepayments ----------------");
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error)
-    }
-};
+// export const deletepayments = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TDeletepaymentSchema>)   => {
+//     try{
+//         await prisma.payments.delete({
+//             where: {
+//                 id: input.paymentId
+//             }
+//         });
+//         return { status: TRPCResponseStatus.SUCCESS, message:"Role deleted", data: {}};
+//     } catch(error) {
+//         //console.log("\n\n Error in deletepayments ----------------");
+//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
+//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+//         throw TRPCCustomError(error)
+//     }
+// };
 
 export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TInitiateUavailibiltyRefundSchema>) => {
     const prisma = ctx.prisma;
@@ -283,8 +265,7 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
                             id: refundDetails.creditNoteId
                         },
                         data: {
-                            value: {increment: refundDetails.refundToCredit},
-                            redeemed: false
+                            remainingValue: {increment: refundDetails.refundToCredit},
                         }
                     })
                 }
