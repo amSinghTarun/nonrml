@@ -51,10 +51,11 @@ export const CreateProductCategory = ({categoriesQuery}:{categoriesQuery: Catego
     });
 
     const onSubmit = (values: FormValues) => {
+        console.log(values)
         createCategory.mutate({
             categoryName: values.categoryName,
             displayName: values.displayName,
-            parentId: Number(values.parentId),
+            ...(values.parentId && {parentId: Number(values.parentId)})
         });
     };
 

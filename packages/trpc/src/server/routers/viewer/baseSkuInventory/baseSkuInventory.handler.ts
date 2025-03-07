@@ -78,8 +78,9 @@ export const editBaseInventory = async ({ctx, input}: TRPCRequestOptions<TEditBa
     const prisma = ctx.prisma;
     input = input!;
     try{
+        console.log(input)
         const updateData = {
-            ...(input.quantity && { quantity: input.quantity }),
+            ...(!isNaN(Number(input.quantity)) && { quantity: input.quantity }),
             ...(input.sku && { baseSku: input.sku })
         };
 

@@ -33,7 +33,20 @@ export const getUsers = async ({ctx, input}: TRPCRequestOptions<TGetUsersSchema>
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error);
     }
-    
+}
+
+export const getUserContact = async ({ctx}: TRPCRequestOptions<{}>)  => {
+    try{
+        if(ctx.user?.contactNumber)
+            return { status: TRPCResponseStatus.SUCCESS, message: "Details updated", data: ctx.user?.contactNumber};
+        throw { code: "BAD_REQUEST", message: "No User Contact Not Available." };
+
+    } catch(error) {
+        //console.log("\n\n Error in getAddress ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
 }
 
 export const changeRole = async ({ctx, input}: TRPCRequestOptions<TChangeRoleSchema>)  => {

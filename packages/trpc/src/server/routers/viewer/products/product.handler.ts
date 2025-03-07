@@ -52,11 +52,6 @@ export const getProduct = async ({
           visitedCount: true,
           public: true,
           sizeChartId: true,
-          SizeChart:{
-            select: {
-              SizeChart: true
-            }
-          },
           name: true,
           description: true,
           price: true,
@@ -66,6 +61,11 @@ export const getProduct = async ({
           details: true,
           soldOut: true,
           categoryId: true,
+          category: {
+            select: {
+              sizeChartId: true
+            }
+          },
           productImages: {
             select: {
               image: true,
@@ -80,26 +80,26 @@ export const getProduct = async ({
       redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
     };
 
-    let categorySizeChart = await redis.redisClient.get(`categorySizeChart_${product.categoryId}`);
-    if (!categorySizeChart) {
-      const categorySizes = await prisma.productCategory.findFirst({
-        where: {
-          id: product.categoryId
-        },
-        select: {
-          productCategorySize: {
-            select: {
-                sizeChart: true,
-            },
-          },
-        }
-      });
-      // set category sizechart cache
-      if (categorySizes){
-        categorySizeChart = JSON.stringify( categorySizes.productCategorySize!.sizeChart )
-        redis.redisClient.set(`categorySizeChart_${product.categoryId}`, categorySizeChart, {ex: 60*60*5});
-      }
-    }
+    // let categorySizeChart = await redis.redisClient.get(`categorySizeChart_${product.categoryId}`);
+    // if (!categorySizeChart) {
+    //   const categorySizes = await prisma.productCategory.findFirst({
+    //     where: {
+    //       id: product.categoryId
+    //     },
+    //     select: {
+    //       SizeChart: {
+    //         select: {
+    //             sizeChart: true,
+    //         },
+    //       },
+    //     }
+    //   });
+    //   // set category sizechart cache
+    //   if (categorySizes){
+    //     categorySizeChart = JSON.stringify( categorySizes.productCategorySize!.sizeChart )
+    //     redis.redisClient.set(`categorySizeChart_${product.categoryId}`, categorySizeChart, {ex: 60*60*5});
+    //   }
+    // }
     
     //cache it and get from cache, delete at the time of order
     let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${product.id}`);
@@ -148,7 +148,7 @@ export const getProduct = async ({
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product: product!, productSizeQuantities: productSizeQuantities!, categorySizeChart: categorySizeChart! },
+      data: { product: product!, productSizeQuantities: productSizeQuantities! },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");
@@ -200,14 +200,11 @@ export const getAdminProduct = async ({
           select: {
             categoryName: true, 
             id: true,
-            productCategorySize: {
-              select: {
-                sizeChart: true
-              }
-            }
+            sizeChartId: true
           }
         },
         productImages: true,
+        sizeChartId: true,
         ProductVariants: {
           select: {
             id: true,
@@ -232,14 +229,35 @@ export const getAdminProduct = async ({
       },
     });
 
+    const sizeChartWithValues = await prisma.sizeChart.findFirst({
+      where: {
+        parentId: product.sizeChartId ?? product.category.sizeChartId,
+      },
+      select: {
+        id: true,
+        other_SizeChart: {
+          where: {
+            type: "SIZE_VALUE"
+          },
+          distinct: ["name"],
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+    
+    // Now you can access the values as:
+    const sizeChartValues = sizeChartWithValues?.other_SizeChart || [];
+
     const categories = await prisma.productCategory.findMany();
 
-    console.log("\n\n\n\n\n -----END");
+    console.log("\n\n\n\n\n -----END", sizeChartValues);
 
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product: product!, categories: categories },
+      data: { product: product!, categories: categories, avlSizes: sizeChartValues },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");

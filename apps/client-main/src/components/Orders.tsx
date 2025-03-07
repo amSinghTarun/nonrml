@@ -3,15 +3,17 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client";
-import { GeneralButton } from "@/components/ui/buttons";
+import { GeneralButton, GeneralButtonTransparent } from "@/components/ui/buttons";
 import Link from "next/link";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CancelOrderDialog from "./dialog/CancelOrderDialog";
 import { cancelOrder } from "@/app/actions/order.actions";
 import { signOut } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 interface OrdersProps {
-    className?: string
+    className?: string,
+    userContact: string
 }
 
 const convertStringToINR = (currencyString: number) => {
@@ -56,7 +58,7 @@ const renderOrderStatus = (status: string) => {
     return statusEnum[status as keyof typeof statusEnum];
 };
 
-export const Orders : React.FC<OrdersProps> = ({className})  => {
+export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
         
     const userOrders = trpc.viewer.orders.getUserOrders.useQuery(undefined,{
         staleTime: Infinity,
@@ -66,12 +68,12 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
     });
 
     return (
-        <div className={cn("overflow-none h-full w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
+        <div className={cn("overflow-none h-screen w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
             <div className="flex flex-row lg:flex-col lg:text-center justify-between lg:justify-center lg:basis-5/12 p-2 text-xs lg:text-sm gap-4">
-                <span className="hover:font-medium cursor-none font-medium text-neutral-600">Usser Contact</span>
+                <span className="hover:font-medium cursor-none font-medium text-neutral-600">{userContact}</span>
                 <span className="cursor-pointer hover:underline text-neutral-500" onClick={()=> {signOut()}}> LOGOUT</span>
             </div>
-            <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto scrollbar-hide">
+            <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto scrollbar-hide h-full">
                 {/* <p className="text-sm text-neutral-600">ORDERS</p> */}
                 {
                     userOrders.isLoading &&
@@ -89,11 +91,11 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                     userOrders.isSuccess && (
                         userOrders.data.data.length == 0 ? 
                         <article className="flex flex-col p-3 justify-center w-full h-full items-center space-y-3">
-                            <span className="flex justify-center items-center font-normal text:xs">You Haven't Placed Any Orders Yet :(</span>
-                            <GeneralButton 
+                            <span className="flex justify-center items-center font-normal text-xs">You Haven't Placed Any Orders Yet :(</span>
+                            <GeneralButtonTransparent 
                                 display="ENTER STORE" 
-                                className="flex w-[60%] bg-neutral-800 items-center justify-center rounded-md p-6 text-white text-sm font-normal" 
-                                onClick={() => {}} 
+                                className="flex w-[60%] items-center justify-center p-6 text-xs font-normal" 
+                                onClick={() => redirect("/store")} 
                             />
                         </article>
                         :

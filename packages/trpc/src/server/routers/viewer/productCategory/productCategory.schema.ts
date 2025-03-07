@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ZAddProductCategorySchema = z.object({
     categoryName: z.string(),
-    parentId: z.number(),
+    parentId: z.number().optional(),
     displayName: z.string(),
 });
 export type TAddProductCategorySchema = z.infer<typeof ZAddProductCategorySchema>;

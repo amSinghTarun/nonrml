@@ -20,7 +20,7 @@ const convertStringToINR = (currencyString: number) => {
     return `INR ${INR.format(currencyString)}.00`;
 }
 
-const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categorySizeChart }) => {
+const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => {
     const { toast } = useToast();
     const [buyNow, setBuyNow] = useState(false);
     const [selectedQuantity, setSelectedQuantity] = useState(1);
@@ -77,7 +77,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities, categ
                 {
                     (!isScreenLg && buyNow) &&
                     <div
-                        className="absolute right-0 -bottom-3 hover:bg-neutral-800 hover:text-white cursor-pointer p-3 rounded-md text-neutral-800 bg-white"
+                        className="absolute right-0 -bottom-3 hover:bg-neutral-800 hover:text-white cursor-pointer p-3 rounded-tl-md text-neutral-800 bg-white"
                         onClick={() => {
                             selectedSize[sizeSKU.current!].quantity > 0 ?
                                 handleAddToCart() :

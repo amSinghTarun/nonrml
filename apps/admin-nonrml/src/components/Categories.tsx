@@ -15,8 +15,9 @@ interface CategoryTableProps {
 export const CategoryHierarchyTable = ({ categories }: CategoryTableProps) => {
   
   const [expandedCategories, setExpandedCategories] = React.useState<Set<number>>(new Set());
+  
   const allSizeCharts = trpc.viewer.sizeChart.getSizeChart.useQuery({type: "DISPLAY_NAME"});
-  const addSizeChartToCategory = trpc.viewer.productCategories.editProductCategories.useMutation();
+  const addSizeChartToCategory = trpc.viewer.productCategories.editProductCategories.useMutation({});
   const deleteProductCategory = trpc.viewer.productCategories.deleteProductCategories.useMutation({});
 
   const toggleCategory = (categoryId: number) => {

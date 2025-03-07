@@ -45,7 +45,7 @@ export const Products = ({products}: {products: Products}) => {
       </TableHeader>
       
       <TableBody>
-        { products.data?.data?.map( product => (
+        { products.data?.data.length && products.data?.data?.map( product => (
             <TableRow key={product.id}>
               <TableCell>{product.id}</TableCell>
               <TableCell className={`${product.exclusive && "bg-green-200"}`}>{product.name}</TableCell>

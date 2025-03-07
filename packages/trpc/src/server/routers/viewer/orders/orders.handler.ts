@@ -1,7 +1,7 @@
 import { TRPCResponseStatus } from "@nonrml/common"
 import { acceptOrder, calculateRejectedQuantityRefundAmounts, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
-import { Prisma, prismaEnums } from "@nonrml/prisma";
+import { prisma, Prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
@@ -13,18 +13,11 @@ No pagination required for now, as the result quantity is gonna stay small
 export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
     const prisma = ctx.prisma;
     const userId = ctx.user?.id;
-    //console.log(userId);
+
     try{
         const orders = await prisma.orders.findMany({
             where: {
-                userId: userId,
-                // Payments: {
-                //     some : {
-                //         paymentStatus: {
-                //             in: [prismaEnums.PaymentStatus.failed, prismaEnums.PaymentStatus.paid, prismaEnums.PaymentStatus.attempted]
-                //         }
-                //     }
-                // }
+                userId: userId
             },
             select:{
                 id: true,
@@ -58,8 +51,10 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
             orderBy: [{
                 "createdAt" : "desc"
             }]
-        })
+        });
+
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: orders};
+
     } catch(error){
         // console.log("\n\n Error in getUserOrders ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 

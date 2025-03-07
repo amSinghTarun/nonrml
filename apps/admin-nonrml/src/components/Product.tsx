@@ -25,6 +25,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
     console.log(productDetails.data?.data.product.ProductVariants)
     const router = useRouter();
     const product = productDetails.data?.data.product!;
+    const productSizes = productDetails.data?.data.avlSizes;
     const [ priorityIndex, setPriorityIndex ] = useState<{[imageId: number]: number}>();
     const handlePriorityIndexOfImage = ({imageId, priorityIndex}: {imageId: number, priorityIndex: number}) => {
         setPriorityIndex((prev) => ({...prev, [imageId]:priorityIndex }) )
@@ -279,15 +280,15 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                     <span className="p-2 text-xl font-semibold">Product Variants</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <TableCell className="p-2 bg-stone-600 text-white rounded-md cursor-pointer">Add Variant</TableCell>
+                            <TableCell className="p-2 bg-stone-600 text-white rounded-md cursor-pointer">{addVariant.isLoading ? "Adding..." : "Add Variant"}</TableCell>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-stone-700 text-white">
                             {
-                                product?.category.productCategorySize && Object.keys(product.category.productCategorySize?.sizeChart!).map(size => {
-                                    if(!product?.ProductVariants.find( variant => variant.size == size))
+                                productSizes && productSizes.map(size => {
+                                    if(!product?.ProductVariants.find( variant => variant.size == size.name))
                                         return (
                                             //SKU will be the same as product just the size added in advance
-                                            <DropdownMenuItem onClick={async () => {await addVariant.mutateAsync({size: size, productId: product.id});}}>Add {size}</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={async () => {await addVariant.mutateAsync({size: size.name, productId: product.id});}}>Add {size.name}</DropdownMenuItem>
                                         )
                                 })
                             }
@@ -315,7 +316,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                         <TableCell>{variant.createdAt.toDateString()}</TableCell>
                                         <TableCell className="gap-2 flex text-white text-xs flex-col">
                                             <Button disabled={variant.inventory?.quantity ? true : false} onClick={ async () => {!variant.inventory?.quantity && await deleteVariant.mutateAsync({variantId: variant.id}) } } className="p-1 bg-stone-600 rounded-md hover:bg-stone-200 hover:text-black">DELETE VARIANT</Button>
-                                            { !variant.inventory?.id && <Button onClick={async () => {await addVariantToInventory.mutateAsync([{productVariantId: variant.id}])} } className=" bg-stone-400 hover:bg-stone-200 hover:text-black p-1 rounded-sm cursor-pointer">ADD TO INVENTORY</Button>}
+                                            { !variant.inventory?.id && <Button onClick={async () => {await addVariantToInventory.mutateAsync([{productVariantId: variant.id}])} } className=" bg-stone-400 hover:bg-stone-200 hover:text-black p-1 rounded-sm cursor-pointer">{addVariantToInventory.isLoading ? "POOKIE VISHAL" : "ADD TO INVENTORY"}</Button>}
                                         </TableCell>
                                     </TableRow>
                                 )

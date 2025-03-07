@@ -38,10 +38,17 @@ export const addProductCategories = async ({ctx, input}: TRPCRequestOptions<TAdd
     const prisma = ctx.prisma;
     input = input!;
     try{
+        console.log(input)
         const categoryNewRecord = await prisma.productCategory.create({
-            data: input
-        })
+            data: {
+                categoryName: input.categoryName,
+                displayName: input.displayName,
+                ...(input.parentId && {parentId: input.parentId})
+            }
+        });
+
         return {status: TRPCResponseStatus.SUCCESS, message:"", data:categoryNewRecord};
+
     } catch(error) {
         //console.log("\n\n Error in addProductCategories ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
