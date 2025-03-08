@@ -110,7 +110,7 @@ interface quantitySelectButtonProps {
 }
 
 export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({selectedQuantity, minQuantity=1, maxQuantity, onQuantityChange, variantId, className, updatingQuantity}) => {
-    console.log(selectedQuantity, minQuantity=1, maxQuantity, onQuantityChange, variantId, className, updatingQuantity)
+    console.log(selectedQuantity, minQuantity=1, maxQuantity, variantId)
     const handleDecrease = () => {
         if(selectedQuantity > minQuantity) {
             onQuantityChange.length == 1 && (onQuantityChange as (newQuantity: number) => void)(selectedQuantity-1);

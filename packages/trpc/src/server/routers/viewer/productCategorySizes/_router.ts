@@ -1,8 +1,8 @@
-import { adminProcedure } from "../../../procedures/authedProcedure";
+import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { procedure, router } from "../../../trpc";
-import { addSizeChart, deleteSizeChart, editSizeChart, getSizeChart } from "./productCategorySizes.handler";
-import { ZGetSizeChartSchema, ZDeleteSizeChartSchema, ZEditSizeChartSchema, ZAddSizeChartSchema } from "./productCategorySizes.schema";
+import { addSizeChart, deleteSizeChart, editSizeChart, getSizeChart, getProductSizeChart } from "./productCategorySizes.handler";
+import { ZGetSizeChartSchema, ZDeleteSizeChartSchema, ZEditSizeChartSchema, ZAddSizeChartSchema, ZGetProductSizeChartSchema } from "./productCategorySizes.schema";
 
 export const sizeChartRouter = router({
     addSizeChart: adminProcedure
@@ -21,4 +21,7 @@ export const sizeChartRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Delete size"}})
         .input(ZDeleteSizeChartSchema)
         .mutation( async ({ctx, input}) => await deleteSizeChart({ctx, input})),
+    getProductSizeChart: publicProtectedProcedure
+        .input(ZGetProductSizeChartSchema)
+        .query( async ({ctx, input}) => await getProductSizeChart({ctx, input}) )
 });

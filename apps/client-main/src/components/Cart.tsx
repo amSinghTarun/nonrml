@@ -8,7 +8,7 @@ import { useRef } from "react";
 import { useSetAppbarUtilStore, useCartItemStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
-import { checkProductVariantQuantityAvl } from "@/app/actions/product.action";
+import { trpc } from "@/app/_trpc/client";
 
 const convertStringToINR = (currencyString: number) => {
   let INR = new Intl.NumberFormat();
@@ -20,25 +20,23 @@ export const CartMenu = () => {
   const alterQuantity = useStore(useCartItemStore, (state) => state.alterQuantity);
   const removeCartProduct = useStore(useCartItemStore, (state) => state.removeProduct);
   const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
-  const [ updateingQuantity, setUpdateQuantity ] = useState<number>(-1);
   const router = useRouter();
   let cartTotal = useRef(0);
+  const updateCartQuantity = trpc.viewer.product.getProductVariantQuantity.useMutation();
   
   if(appbarUtil != "CART") return (<></>);
-  
-  const handleOnQuantityChange = (quantity: number, variantId:number) => {
-    console.log(quantity, variantId)
-    setUpdateQuantity(variantId);
-    checkProductVariantQuantityAvl(cartItems[variantId].productId, variantId, quantity)
-    .then( avl => {
-      avl && (variantId in cartItems) && (setUpdateQuantity(-1), alterQuantity(variantId, quantity));
-    })
-    .catch( error => {
 
-      console.log("EH! LOOK AWAY");
-
-    })
+  const handleOnQuantityChange = (quantity: number, variantId:number) => {    
+    try{
+      console.log(quantity, variantId);
+      (variantId in cartItems) && updateCartQuantity.mutate({productId: cartItems[variantId].productId})
+      if(updateCartQuantity.isSuccess && updateCartQuantity.data && updateCartQuantity.data.data.productSizeQuantities[variantId])
+        quantity <= updateCartQuantity.data.data.productSizeQuantities[variantId].quantity && alterQuantity(variantId, quantity )
+    } catch (error) {
+      //show error
+    }
   }
+
   const handleOnDelete = (variantId: number) => (variantId in cartItems) && removeCartProduct(variantId)
   const handleCheckoutRedirect = () => router.push("/checkout")
 
@@ -94,7 +92,7 @@ export const CartMenu = () => {
                         selectedQuantity = {useCartItemStore.getState().cartItems[+variantId].quantity} 
                         minQuantity={+process.env.MIN_QUANTITY_TO_ORDER!} 
                         maxQuantity={+process.env.MAX_QUANTITY_TO_ORDER!} 
-                        updatingQuantity= {updateingQuantity == Number(variantId)}
+                        updatingQuantity= {updateCartQuantity.isLoading}
                         onQuantityChange={handleOnQuantityChange} 
                         variantId={+variantId}
                       />

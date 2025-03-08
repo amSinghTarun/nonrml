@@ -9,7 +9,7 @@ export const verifyRzpOrder = async ({razorpayPaymentId, razorpayOrderId, razorp
     const response = await (await serverClient()).viewer.orders.verifyOrder({razorpayPaymentId, razorpayOrderId, razorpaySignature})
     if(response.status == "SUCCESS" && response.data.orderId) {
         console.log("SUCCESSFULL")
-        redirect(`/order/${response.data.orderId}`)
+        
     }
     return response;
 

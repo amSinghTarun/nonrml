@@ -34,7 +34,7 @@ export const productRouter = router({
         .query( async ({ctx, input}) => await verifyCheckoutProducts({ctx, input})),
     getProductVariantQuantity: publicProcedure
         .input(ZGetProductVariantQuantitySchema)
-        .query( async ({ctx, input}) => await getProductVariantQuantity({ctx, input})),
+        .mutation( async ({ctx, input}) => await getProductVariantQuantity({ctx, input})),
     editProduct : adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
         .input(ZEditProductSchema)

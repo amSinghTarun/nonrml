@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { RouterOutput } from "@/app/_trpc/client";
+import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { QuantitySelectButton, GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Textarea } from "@/components/ui/textarea"
-import { InitiateReturnOrder } from "@/app/actions/order.actions";
 import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';
-import { getExchangeProductSizes } from "@/app/actions/product.action";
 
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 type exchangeProduct = RouterOutput["viewer"]["product"]["getProductSizes"]["data"];
@@ -28,6 +26,28 @@ const convertStringToINR = (currencyString: number) => {
 }
 
 export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
+
+    const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {
+        const getExchangeProductSizes = trpc.useUtils();    
+        const productIdsJson : { [productId: number] : 1 }= {};
+        const productIds : number[] = []
+        for(let exchangeProduct of exchangeProducts){
+            //this to prevent duplicate product ids in productIds array, and peoduct id can be duplicate as variants of same product can be in 1 order
+            if(!productIdsJson[exchangeProduct.productVariant.productId]){
+                productIds.push(exchangeProduct.productVariant.productId);
+            }
+            productIdsJson[exchangeProduct.productVariant.productId] = 1;
+        }
+        let { data } = await getExchangeProductSizes.viewer.product.getProductSizes.fetch(productIds);
+        return data;
+    };
+
+    const initiateReturnOrder = trpc.viewer.return.initiateReturn.useMutation({
+        onSuccess: () => {
+            backToOrderDetails()
+        }
+    });
+
     const [selectedProducts, setSelectedProducts] = useState<{
         [orderProductId: number]: { exchangeVariant?:number, quantity: number, referenceImage?:File, reason?:string }
     }>({});
@@ -115,8 +135,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
             setError(errors);
             return;
         }
-        InitiateReturnOrder({...productDetails, returnType: "REPLACEMENT"});
-        backToOrderDetails();
+        initiateReturnOrder.mutate({...productDetails, returnType: "REPLACEMENT"});
     }
 
     return(
@@ -202,7 +221,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
                 <div className="flex justify-center">
                     <GeneralButton 
                         className="text-xs w-fit p-4" 
-                        display={`EXCHANGE ${Object.values(selectedProducts).reduce((total, product) => total + product.quantity, 0)} Item`}
+                        display={initiateReturnOrder.isLoading ? `Initiating Exchange...` : `EXCHANGE ${Object.values(selectedProducts).reduce((total, product) => total + product.quantity, 0)} Item`}
                         onClick={handleSubmit}
                     />
                 </div>

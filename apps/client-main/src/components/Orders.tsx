@@ -3,11 +3,9 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client";
-import { GeneralButton, GeneralButtonTransparent } from "@/components/ui/buttons";
+import { GeneralButtonTransparent } from "@/components/ui/buttons";
 import Link from "next/link";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CancelOrderDialog from "./dialog/CancelOrderDialog";
-import { cancelOrder } from "@/app/actions/order.actions";
 import { signOut } from "next-auth/react";
 import { redirect } from "next/navigation";
 
@@ -66,6 +64,12 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
+
+    const cancelOrder = trpc.viewer.orders.cancelOrder.useMutation({
+        onSuccess: () => {
+            userOrders.refetch()
+        }
+    })
 
     return (
         <div className={cn("overflow-none h-screen w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
@@ -142,8 +146,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                                         {order.orderStatus === "PENDING" && (
                                             <CancelOrderDialog 
                                                 cancelPurchase={async () => {
-                                                    await cancelOrder({orderId: order.id}); 
-                                                    userOrders.refetch();
+                                                    await cancelOrder.mutateAsync({orderId: order.id})
                                                 }}
                                             />
                                         )}

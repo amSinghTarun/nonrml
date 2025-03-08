@@ -4,16 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import CanclePurchaseDialog from "@/components/dialog/CancelPurchaseDialog";
 import { AddressCard } from "@/components/cards/AddressCard"
 import { cn } from "@/lib/utils";
-import { deleteAddress } from "@/app/actions/address.action";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
-import { initiateOrder } from "@/app/actions/order.actions";
-import { applyCreditNote } from "@/app/actions/creditNotes.action";
 import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import Loading from "@/app/loading";
@@ -44,6 +41,12 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
     const [ quantityChange, setQuantityChange ] = useState(false);
     const [ orderInProcess, setOrderInProcess ] = useState(false);
+    const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
+    const deleteAddress = trpc.viewer.address.removeAddress.useMutation({
+        onSuccess: () => {
+            setAction("SHOWADDRESS");
+        }
+    });
 
     const router = useRouter();
     const couponCode = useRef("");
@@ -86,7 +89,9 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 return
             }
             setOrderInProcess(true);
-            const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
+
+            // const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
+            const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
                 setQuantityChange(true);
                 setOrderInProcess(false);
@@ -108,7 +113,8 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
 
     const handleApplyCreditNote = async () => {
         try{
-            const creditNoteApplied = await applyCreditNote(couponCode.current, totalAmount.current);
+            const getCreditNoteDetails = trpc.useUtils();
+            const creditNoteApplied = await getCreditNoteDetails.viewer.creditNotes.getCreditNote.fetch({creditNote:couponCode.current, orderValue:totalAmount.current});
             setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
         } catch(error:any){
             toast({
@@ -177,11 +183,9 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                                             pincode={address.pincode}
                                             onEdit={()=>{handleAddressEdit(address)}}
                                             onDelete={()=>{
-                                                userAddresses.data.data.slice(index, 1),
-                                                deleteAddress(address.id).then( () => {
-                                                    setAction("SHOWADDRESS")
-                                                })
+                                                deleteAddress.mutate({id:address.id})
                                             }}
+                                            deleting={deleteAddress.isLoading && address.id == deleteAddress.variables?.id}
                                             id={address.id}
                                             onSelect={() => setSelectedAddress(address)}
                                             className={`${selectedAddress?.id == address.id && "shadow-sm shadow-neutral-300"}`}

@@ -402,11 +402,11 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
                 where: {
                   inventory: {
                     baseSkuInventory: {
-                      quantity: { gt:0 }
+                      quantity: { gte:0 }
                     },
-                    quantity: { gt:0 }
+                    quantity: {gte: 0}
                   }
-                }
+                },
               }
             }
           },
@@ -423,7 +423,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       });
       latestProducts.length && redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
     }
-    console.log(latestProducts,  "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
+    console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
     if (latestProducts && latestProducts.length >= take) {
       const nextItem = latestProducts.pop();

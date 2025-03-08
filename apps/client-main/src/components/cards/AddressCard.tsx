@@ -14,10 +14,11 @@ interface AddressCardProps {
     onDelete: () => void,
     id: number,
     pincode: string,
-    selected: number | undefined
+    selected: number | undefined,
+    deleting: boolean
 }
 
-export const AddressCard : React.FC<AddressCardProps> = ({name, selected, id, email, address, mobile, className, pincode, onDelete, onEdit, onSelect}) => {
+export const AddressCard : React.FC<AddressCardProps> = ({name, selected, id, email, address, mobile, deleting, className, pincode, onDelete, onEdit, onSelect}) => {
     return (
         <div 
             className={cn(" flex flex-col text-neutral-600 text-xs shadow-sm shadow-neutral-100 p-2 rounded-md cursor-pointer", className)}
@@ -28,7 +29,7 @@ export const AddressCard : React.FC<AddressCardProps> = ({name, selected, id, em
                 <div onClick={()=> onSelect(id)} >{mobile}</div>
                 <div className="gap-x-4 flex flex-row">
                     <div className="basis-1/2 cursor-pointer" onClick={onEdit}><EditNoteIcon fontSize="small"/></div>
-                    {  (selected != id) && <button className="basis-1/2 text-neutral-800 cursor-pointer" onClick={onDelete}><DeleteIcon fontSize="small"  className=" p-[3px]"/></button>}
+                    {  (selected != id) && <button className="basis-1/2 text-neutral-800 cursor-pointer" onClick={onDelete}>{deleting ? "..." : <DeleteIcon fontSize="small"  className=" p-[3px]"/>}</button>}
                 </div>
             </div>
         </div>

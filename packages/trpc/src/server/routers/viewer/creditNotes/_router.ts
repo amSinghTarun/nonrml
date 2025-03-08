@@ -8,7 +8,7 @@ export const creditNotesRouter = router({
     getCreditNote: publicProcedure
         .meta({ openAPI: {method: "POST", descrription: "Use the credit Note"}})
         .input(ZGetCreditNoteSchema)
-        .mutation( async ({ctx, input}) => await getCreditNote({ctx, input}) ),
+        .query( async ({ctx, input}) => await getCreditNote({ctx, input}) ),
     getCreditNoteDetails: publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get all the discounts available"}})
         .input(ZGetCreditNoteDetailsSchema)

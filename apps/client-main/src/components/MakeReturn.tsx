@@ -2,11 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { RouterOutput } from "@/app/_trpc/client";
+import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { GeneralButton, GeneralButtonTransparent, QuantitySelectButton } from "./ui/buttons";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Textarea } from "@/components/ui/textarea"
-import { InitiateReturnOrder } from "@/app/actions/order.actions";
 import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';
 import { ArrowLeft, Image as ImageIcon, AlertCircle } from 'lucide-react';
@@ -27,6 +26,13 @@ const convertStringToINR = (currencyString: number) => {
 }
 
 export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
+
+    const initiateReturnOrder = trpc.viewer.return.initiateReturn.useMutation({
+        onSuccess: () => {
+            backToOrderDetails()
+        }
+    });
+
     const [selectedProducts, setSelectedProducts] = useState<{
         [orderProductId: number]: { quantity: number, referenceImage?:File, reason?:string }
     }>({});
@@ -101,8 +107,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, product
             return;
         }
         // //console.log(productDetails);
-        await InitiateReturnOrder(productDetails);
-        backToOrderDetails()
+        initiateReturnOrder.mutateAsync(productDetails);
     }
 
     return(
@@ -176,7 +181,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, product
                 <div className="flex justify-center">
                     <GeneralButton 
                         className=" text-xs w-fit p-4" 
-                        display={`RETURN ${Object.values(selectedProducts).reduce((total, product) => total + product.quantity, 0)} Item`}
+                        display={initiateReturnOrder.isLoading ? "Initiating Return..." : `RETURN ${Object.values(selectedProducts).reduce((total, product) => total + product.quantity, 0)} Item`}
                         onClick={handleSubmit}
                     />
                 </div>

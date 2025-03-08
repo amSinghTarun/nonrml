@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React from 'react';
-import { GeneralButton, ProductPageActionButton, QuantitySelectButton, SizeButton } from "./ui/buttons";
+import { GeneralButton, GeneralButtonTransparent, ProductPageActionButton, QuantitySelectButton, SizeButton } from "./ui/buttons";
 import { useState, useRef } from "react";
 import { RouterOutput } from "@/app/_trpc/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
+import {SizeChart} from "./SizeChart";
 
 type ProductProps = RouterOutput["viewer"]["product"]["getProduct"]["data"];
 
@@ -24,6 +25,12 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
     const { toast } = useToast();
     const [buyNow, setBuyNow] = useState(false);
     const [selectedQuantity, setSelectedQuantity] = useState(1);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
     const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, productSku: string, quantity: number, productImage: string, productName: string, price: number } }>({});
     const { setBuyNowItems } = useBuyNowItemsStore();
     const { cartItems, setCartItems } = useCartItemStore.getState();
@@ -77,7 +84,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                 {
                     (!isScreenLg && buyNow) &&
                     <div
-                        className="absolute right-0 -bottom-3 hover:bg-neutral-800 hover:text-white cursor-pointer p-3 rounded-tl-md text-neutral-800 bg-white"
+                        className="absolute left-0 bottom-0 hover:bg-white cursor-pointer p-3 rounded-tr-md text-black bg-white/45 backdrop-blur-3xl"
                         onClick={() => {
                             selectedSize[sizeSKU.current!].quantity > 0 ?
                                 handleAddToCart() :
@@ -88,6 +95,10 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                         }}
                     ><ShoppingCartIcon /></div>
                 }
+                <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-0 right-0"}`}>
+                    <GeneralButtonTransparent display="Size Chart" className={`px-2 py-1 rounded-sm text-neutral-200 bg-neutral-500 opacity-70 backdrop-blur-3xl border-none w-fit text-xs ${isModalOpen && "opacity-0"}`} onClick={openModal}/>
+                </div>
+
             </div>
             <div className=" lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
                 <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
@@ -177,7 +188,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                     <div className="flex-col text-neutral-700 flex text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
                         <div className="flex lg:flex-col lg:text-center lg:space-y-1">
                             <span className="font-normal lg:font-medium basis-1/3 content-center">DESCRIPTION</span>
-                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.description}${product.description}${product.description}`}</div>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.description}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
@@ -196,6 +207,11 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                     </div>
                 </div>
             </div>
+            <SizeChart 
+                isOpen={isModalOpen} 
+                onClose={closeModal} 
+                sizeChartCategoryNameId={product.sizeChartId ?? product.category.sizeChartId} 
+            />
         </article>
     )
 };

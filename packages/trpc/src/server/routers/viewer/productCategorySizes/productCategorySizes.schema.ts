@@ -1,7 +1,6 @@
 import { prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
-
 export const ZGetSizeChartSchema = z.object({
     id: z.number().optional(),
     type: z.enum(Object.keys(prismaEnums.SizeType) as [keyof typeof prismaEnums.SizeType]).optional()
@@ -27,3 +26,8 @@ export const ZDeleteSizeChartSchema = z.object({
     id: z.number()    
 });
 export type TDeleteSizeChartSchema = z.infer<typeof ZDeleteSizeChartSchema>;
+
+export const ZGetProductSizeChartSchema = z.object({
+    sizeChartCategoryNameId: z.number()    
+});
+export type TGetProductSizeChartSchema = z.infer<typeof ZGetProductSizeChartSchema>;

@@ -1,7 +1,6 @@
 "use client"
 
-import { RouterOutput } from "@/app/_trpc/client";
-import { viewCreditNote } from "@/app/actions/creditNotes.action";
+import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { Form, FormInputField, FormSubmitButton } from "@/components/ui/form"
 import { cn } from "@/lib/utils"
 import { useState } from "react";
@@ -33,10 +32,11 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     
     const handleSubmit = async () => {
         try{
+            const viewCreditNote = trpc.useUtils();
             if(formData.userMobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.userMobile))
                 throw new Error("Please enter a valid 10 digit mobile number");
-            const creditNoteDetails = await viewCreditNote({creditNote: formData.creditNoteCode, userMobile: formData.userMobile});
-            setCreditNoteDetails(creditNoteDetails);
+            const creditNoteDetails = await viewCreditNote.viewer.creditNotes.getCreditNoteDetails.fetch({creditNoteCode: formData.creditNoteCode, mobile: formData.userMobile});
+            setCreditNoteDetails(creditNoteDetails.data);
         } catch(error: any){
             setError(error.message)
         }

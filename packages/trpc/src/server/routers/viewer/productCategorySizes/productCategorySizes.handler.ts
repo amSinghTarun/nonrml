@@ -1,7 +1,7 @@
 import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TAddSizeChartSchema, TDeleteSizeChartSchema, TEditSizeChartSchema, TGetSizeChartSchema } from "./productCategorySizes.schema";
+import { TAddSizeChartSchema, TDeleteSizeChartSchema, TEditSizeChartSchema, TGetProductSizeChartSchema, TGetSizeChartSchema } from "./productCategorySizes.schema";
 
 export const getSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetSizeChartSchema>) => {
     const prisma = ctx.prisma;
@@ -76,6 +76,64 @@ export const deleteSizeChart = async ({ctx, input}: TRPCRequestOptions<TDeleteSi
             }
         })
         return {status: TRPCResponseStatus.SUCCESS, message:"Record deleted", data:{}}
+    } catch(error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};
+
+/*
+Delete a size chart, cascade is off
+*/
+export const getProductSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetProductSizeChartSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        console.log(input)
+        const sizeChartData = await prisma.sizeChart.findUnique({
+            where: {
+              id: input.sizeChartCategoryNameId,
+              type: "DISPLAY_NAME"
+            },
+            include: {
+              other_SizeChart: {
+                where: {
+                  type: "MEASUREMENT_TYPE"
+                },
+                include: {
+                  other_SizeChart: {
+                    where: {
+                      type: "SIZE_VALUE"
+                    },
+                    orderBy: {
+                      sortOrder: 'asc'
+                    }
+                  }
+                },
+                orderBy: {
+                  sortOrder: 'asc'
+                }
+              }
+            }
+        });
+
+        if (!sizeChartData) return null;
+  
+        let sizeChart = {
+            chartName: sizeChartData.name,
+            measurements: sizeChartData.other_SizeChart.map(measurementType => ({
+                name: measurementType.name,
+                sizeValues: measurementType.other_SizeChart.map(sizeValue => ({
+                    size: sizeValue.name,
+                    value: sizeValue.value || ''
+                }))
+            }))
+        };
+
+        //add to cache
+
+        return {status: TRPCResponseStatus.SUCCESS, message:"Record deleted", data: sizeChart}
     } catch(error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };

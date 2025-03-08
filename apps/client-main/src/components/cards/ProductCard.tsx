@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { motion, MotionValue } from "framer-motion";
-import { GlowingEffect } from "../ui/glowing-effect";
 
 let INR = new Intl.NumberFormat();
 

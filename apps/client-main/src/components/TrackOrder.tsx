@@ -1,6 +1,6 @@
 "use client"
 
-import { trackOrder } from "@/app/actions/trackOrder.action";
+import { trpc } from "@/app/_trpc/client";
 import { Form, FormInputField, FormSubmitButton } from "@/components/ui/form"
 import { cn } from "@/lib/utils"
 import { useState } from "react";
@@ -27,10 +27,19 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
         setNewFormData && setFormData({...formData, [name]:value});
     };
 
-    const handleSubmit = () => {
-        if(formData.mobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.mobile)){
-            submitForm = false;
-            setFormError("Please enter a valid 10 digit mobile number");
+    const handleSubmit = async () => {
+        try{
+            if(formData.mobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.mobile)){
+                submitForm = false;
+                setFormError("Please enter a valid 10 digit mobile number");
+            }
+            const trpcTrackOrder = trpc.useUtils().viewer.orders.trackOrder;
+            if(submitForm) {
+                const trackData = await trpcTrackOrder.fetch({orderId: formData.orderId, mobile: formData.mobile});
+                // redirect as per trackorder
+            }
+        } catch(error: any){
+            setError(error.message)
         }
     };
 
@@ -42,14 +51,7 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
             <p className="mb-10 text-xs text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
             <Form 
                 className="flex justify-center text-sm items-center px-10"
-                action={async () => {
-                    try{
-                        handleSubmit();
-                        submitForm && await trackOrder({orderId: formData.orderId, mobile: formData.mobile});
-                    } catch(error: any){
-                        setError(error.message)
-                    }
-                }}
+                action={handleSubmit}
             >
                 <FormInputField 
                     name="orderId"

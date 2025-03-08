@@ -16,7 +16,6 @@ interface QuantityChangeDialogProps {
 }
 
 const CancelOrderDialog : React.FC<QuantityChangeDialogProps> = (props) => {
-    const router = useRouter();
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild >
