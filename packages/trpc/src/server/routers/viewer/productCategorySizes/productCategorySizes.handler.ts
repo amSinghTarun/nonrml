@@ -2,6 +2,7 @@ import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TAddSizeChartSchema, TDeleteSizeChartSchema, TEditSizeChartSchema, TGetProductSizeChartSchema, TGetSizeChartSchema } from "./productCategorySizes.schema";
+import { redis } from "@nonrml/cache";
 
 export const getSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetSizeChartSchema>) => {
     const prisma = ctx.prisma;
@@ -90,48 +91,51 @@ export const getProductSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetP
     const prisma = ctx.prisma;
     input = input!;
     try{
-        console.log(input)
-        const sizeChartData = await prisma.sizeChart.findUnique({
-            where: {
-              id: input.sizeChartCategoryNameId,
-              type: "DISPLAY_NAME"
-            },
-            include: {
-              other_SizeChart: {
+        let sizeChart : {chartName: string, measurements: { name: string, sizeValues: {size: string, value: string}[]}[]} | null = await redis.redisClient.get(`categorySizeChart_${input.sizeChartCategoryNameId}`);
+        if (!sizeChart) {
+
+            const sizeChartData = await prisma.sizeChart.findUnique({
                 where: {
-                  type: "MEASUREMENT_TYPE"
+                id: input.sizeChartCategoryNameId,
+                type: "DISPLAY_NAME"
                 },
                 include: {
-                  other_SizeChart: {
+                other_SizeChart: {
                     where: {
-                      type: "SIZE_VALUE"
+                    type: "MEASUREMENT_TYPE"
+                    },
+                    include: {
+                    other_SizeChart: {
+                        where: {
+                        type: "SIZE_VALUE"
+                        },
+                        orderBy: {
+                        sortOrder: 'asc'
+                        }
+                    }
                     },
                     orderBy: {
-                      sortOrder: 'asc'
+                    sortOrder: 'asc'
                     }
-                  }
-                },
-                orderBy: {
-                  sortOrder: 'asc'
                 }
-              }
-            }
-        });
+                }
+            });
 
-        if (!sizeChartData) return null;
-  
-        let sizeChart = {
-            chartName: sizeChartData.name,
-            measurements: sizeChartData.other_SizeChart.map(measurementType => ({
-                name: measurementType.name,
-                sizeValues: measurementType.other_SizeChart.map(sizeValue => ({
-                    size: sizeValue.name,
-                    value: sizeValue.value || ''
+            if (!sizeChartData) return null;
+    
+            sizeChart = {
+                chartName: sizeChartData.name,
+                measurements: sizeChartData.other_SizeChart.map(measurementType => ({
+                    name: measurementType.name,
+                    sizeValues: measurementType.other_SizeChart.map(sizeValue => ({
+                        size: sizeValue.name,
+                        value: sizeValue.value || ''
+                    }))
                 }))
-            }))
-        };
+            };
 
-        //add to cache
+            redis.redisClient.set(`categorySizeChart_${input.sizeChartCategoryNameId}`, sizeChart, {ex: 60*60*5});
+        }
 
         return {status: TRPCResponseStatus.SUCCESS, message:"Record deleted", data: sizeChart}
     } catch(error) {

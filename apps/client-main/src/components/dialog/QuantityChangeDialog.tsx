@@ -21,20 +21,18 @@ const QuantityChangeDialog : React.FC<QuantityChangeDialogProps> = (props) => {
     const router = useRouter();
     return (
         <AlertDialog open={props.open}>
-            {/* <AlertDialogTrigger className="fixed cursor-pointer rounded-full font-medium p-1 text-xs -right-3 -top-3">
-                <CancelIcon className="p-0"></CancelIcon>
-            </AlertDialogTrigger> */}
-            <AlertDialogContent className="bg-white/60 border-0 rounded-xl">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-xl text-red-500">QUANTITY CHANGE UPDATE</AlertDialogTitle>
-                    <AlertDialogDescription className="font-lg font-medium pb-3 text-black">
-                        {`Some items in your cart were less then required quantity so we updated it for you.`}
-                    </AlertDialogDescription>
-                    <AlertDialogCancel onClick={props.continuePurchase}>ALRIGHT! LET'S CONTINUE</AlertDialogCancel> 
-                    <AlertDialogAction onClick={props.cancelPurchase}>VIEW CART</AlertDialogAction> 
-                </AlertDialogHeader>
-            </AlertDialogContent>
+        <AlertDialogContent className="bg-white border-0 rounded-sm w-72 sm:w-96 ">
+            <AlertDialogHeader>
+                <AlertDialogTitle className="text-md sm:text-xl text-neutral-600">QUANTITY CHANGE UPDATE</AlertDialogTitle>
+                <AlertDialogDescription className="text-xs sm:text-sm pb-3 text-neutral-500">
+                    {`Some items in your cart were more then available quantity so we updated it for you.`}
+                </AlertDialogDescription>
+                <AlertDialogAction className="text-xs rounded-sm shadow-none border hover:bg-transparent border-neutral-400 text-neutral-500 hover:text-neutral-900 bg-transparent  sm:text-sm font-normal" onClick={props.cancelPurchase}>VIEW CART</AlertDialogAction> 
+                <AlertDialogCancel className="text-xs rounded-sm sm:text-sm font-normal bg-neutral-800 text-white hover:underline hover:bg-neutral-900 border-none hover:text-white" onClick={props.continuePurchase}>ALRIGHT! LET'S CONTINUE</AlertDialogCancel> 
+            </AlertDialogHeader>
+        </AlertDialogContent>
         </AlertDialog>
+
     )
 }
 

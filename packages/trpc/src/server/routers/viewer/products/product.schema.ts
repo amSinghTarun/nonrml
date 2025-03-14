@@ -2,7 +2,8 @@ import { prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { number, string, z } from "zod";
 
 export const ZGetProductSchema = z.object({
-    productSku: z.string()
+    productSku: z.string(),
+    fetch: z.enum(["product", "sizes", "all"]).optional()
 });
 export type TGetProductSchema = z.infer<typeof ZGetProductSchema>;
 
@@ -32,12 +33,14 @@ export type TGetProductsSchema = z.infer<typeof ZGetProductsSchema>;
 export const ZAddProductSchema = z.object({
     name: z.string(),
     description: z.string(),
+    inspiration: z.string(),
     price: z.number(),
     categoryId : z.number(),
     colour: z.string(),
     tags: z.array(z.string()),
     sku: z.string(),
     care: z.array(z.string()),
+    shippingDetails: z.array(z.string()),
     details: z.array(z.string()),
 });
 export type TAddProductSchema = z.infer<typeof ZAddProductSchema>;
@@ -51,9 +54,11 @@ export const ZEditProductSchema = z.object({
     productId: z.number(),
     name: z.string().optional(),
     description: z.string().optional(),
+    inspiration: z.string().optional(),
     price: z.number().optional(),
     colour: z.string().optional(),
     care: z.array(string()).optional(),
+    shippingDetails: z.array(string()).optional(),
     details: z.array(string()).optional(),
     categoryId: z.number().optional(),
     tags: z.array(string()).optional(),

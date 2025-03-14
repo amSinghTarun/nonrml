@@ -12,7 +12,6 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
     const [formData, setFormData] = useState<{orderId: string, mobile:string}>({orderId:"", mobile:""})
     const [error, setError] = useState<string|null>(null);
     const [formError, setFormError] = useState<string|null>(null);
-    let submitForm = true;
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault();
@@ -30,14 +29,11 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
     const handleSubmit = async () => {
         try{
             if(formData.mobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.mobile)){
-                submitForm = false;
                 setFormError("Please enter a valid 10 digit mobile number");
+                return;
             }
             const trpcTrackOrder = trpc.useUtils().viewer.orders.trackOrder;
-            if(submitForm) {
-                const trackData = await trpcTrackOrder.fetch({orderId: formData.orderId, mobile: formData.mobile});
-                // redirect as per trackorder
-            }
+            const trackData = await trpcTrackOrder.fetch({orderId: formData.orderId, mobile: formData.mobile});
         } catch(error: any){
             setError(error.message)
         }

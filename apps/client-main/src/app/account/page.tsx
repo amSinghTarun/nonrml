@@ -8,7 +8,7 @@ const OrdersPage = async () => {
     const {data: userContact} = await (await serverClient()).viewer.user.getUserContact();
     return (
         <>
-            <section className="z-30 pt-14 flex flex-row w-screen h-screen bg-white text-black justify-center mb-64 lg:mb-32">
+            <section className="pt-14 pb-5 z-30 scrollbar-hide flex flex-row min-h-screen h-auto w-screen overflow-y-scroll overscroll-none bg-white text-black justify-center mb-64 lg:mb-32">
                 <Orders userContact={userContact}/>
             </section>
         </>

@@ -4,8 +4,8 @@ import { Form, FormInputField, FormSubmitButton } from "./ui/form"
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons"
 import { useState } from "react"
 import React from "react"
-import { addAddress, editAddress } from "@/app/actions/address.action"
-import { RouterOutput } from "@/app/_trpc/client"
+// import { addAddress, editAddress } from "@/app/actions/address.action"
+import { RouterOutput, trpc } from "@/app/_trpc/client"
 
 type AddressesTRPCOutput = RouterOutput["viewer"]["address"]["getAddresses"]["data"]
 
@@ -34,6 +34,12 @@ export const EditAddress : React.FC<EditAddressProps> = (editdAddressProps) => {
         contactNumber: editdAddressProps.address.contactNumber,
     });
     const [errors, setErrors] = useState<FormErrorType>({});
+
+    const editAddress = trpc.viewer.address.editAddress.useMutation({
+        onSuccess: () => {
+            editdAddressProps.onCancelClick()
+        }
+    });
     
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -159,7 +165,7 @@ export const EditAddress : React.FC<EditAddressProps> = (editdAddressProps) => {
         <div className={cn("w-full p-2 text-xs flex h-full shadow-sm shadow-neutral-100 rounded-md", editdAddressProps.className)}> 
             <Form 
                 action={async() => {
-                    Object.keys(errors).length == 0 && (await editAddress({...formData, addressId: editdAddressProps.address.id!}), editdAddressProps.onCancelClick())
+                    Object.keys(errors).length == 0 && (editAddress.mutate({...formData, addressId: editdAddressProps.address.id!}))
                 }} 
                 className="space-y-3 "
             >
@@ -179,7 +185,7 @@ export const EditAddress : React.FC<EditAddressProps> = (editdAddressProps) => {
                         )
                     })}
                     <div className="flex flex-row space-x-4 w-full px-4 justify-around">
-                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 p-2 bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={"SAVE CHANGES"}></FormSubmitButton>
+                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 p-2 bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={`${ editAddress.isLoading ? "SAVING..." : "SAVE CHANGES"}`}></FormSubmitButton>
                         <GeneralButtonTransparent display="CANCEL" className="basis-1/2 py-2 text-[11px] rounded-sm" onClick={editdAddressProps.onCancelClick}/>
                     </div>
 
@@ -203,6 +209,11 @@ export const AddAddress : React.FC<AddAddressProps> = (addAddressProps) => {
         contactNumber: "",
     });
     const [errors, setErrors] = useState<FormErrorType>({});
+    const addAddress = trpc.viewer.address.addAddress.useMutation({
+        onSuccess: () => {
+            addAddressProps.onCancelClick()
+        }
+    });
     
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -328,7 +339,7 @@ export const AddAddress : React.FC<AddAddressProps> = (addAddressProps) => {
         <div className={cn("w-full p-2 text-xs flex h-full shadow-sm shadow-neutral-100 rounded-md", addAddressProps.className)}> 
             <Form 
                 action={async() => {
-                    Object.keys(errors).length == 0 && (await addAddress(formData), addAddressProps.onCancelClick())
+                    Object.keys(errors).length == 0 && (addAddress.mutate(formData))
                 }} 
                 className="space-y-3 "
             >
@@ -349,7 +360,7 @@ export const AddAddress : React.FC<AddAddressProps> = (addAddressProps) => {
                 })}
                 <div className="flex flex-row space-x-4 w-full px-4 justify-around">
                     {/* <div className="basis-1/2"> */}
-                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 py-2 text-xs bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={"ADD"}></FormSubmitButton>
+                        <FormSubmitButton type="submit" className={` ${ Object.keys(errors).length != 0 && "cursor-not-allowed" } basis-1/2 py-2 text-xs bg-neutral-800 rounded-sm text-white hover:bg-neutral-900 hover:underline text-[11px]`} label={`${addAddress.isLoading ? "ADDING..." : "ADD"}`}></FormSubmitButton>
                     {/* </div> */}
                     <GeneralButtonTransparent display="CANCEL" className="basis-1/2 p-2 text-[11px] rounded-sm" onClick={addAddressProps.onCancelClick}/>
                 </div>

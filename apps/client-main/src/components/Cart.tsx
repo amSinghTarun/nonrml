@@ -51,7 +51,7 @@ export const CartMenu = () => {
             <div className="flex flex-col justify-center items-center space-y-3 w-full">
               <div className="font-medium text-xs">YOUR CART IS EMPTY</div>
               <GeneralButton 
-                className="flex hover:animate-bounce bg-neutral-800 items-center justify-center rounded-md p-5 text-white text-xs font-normal" 
+                className="flex bg-neutral-800 items-center justify-center rounded-md p-5 text-white text-xs font-normal" 
                 display='CONTINUE SHOPPING'
                 onClick={() => setAppbarUtil("")} 
               />

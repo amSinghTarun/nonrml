@@ -32,7 +32,6 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, product
             backToOrderDetails()
         }
     });
-
     const [selectedProducts, setSelectedProducts] = useState<{
         [orderProductId: number]: { quantity: number, referenceImage?:File, reason?:string }
     }>({});

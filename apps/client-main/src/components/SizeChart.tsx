@@ -12,7 +12,7 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
   
   // Close when clicking outside the modal
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event:any) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         onClose();
       }
@@ -29,8 +29,6 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
       document.body.style.overflow = 'auto';
     };
   }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   // Get all unique sizes across all measurement types
   let allSizes = chartData.isSuccess ? Array.from(

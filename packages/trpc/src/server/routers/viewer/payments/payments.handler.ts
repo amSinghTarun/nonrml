@@ -12,7 +12,7 @@ export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSch
                 id: input!.addressId
             }
         })
-        //console.log(input);
+        console.log(input);
         const rzpOrder = await createOrder({ 
             amount: input!.orderTotal*100,
             currency: "INR",
@@ -35,14 +35,7 @@ export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSch
                 contact: ctx.user?.contactNumber!
             }
         });        
-        const payment = await prisma.payments.create({
-            data: {
-                orderId: input?.orderId,
-                rzpOrderId: rzpOrder.id,
-                paymentStatus: rzpOrder.status as prismaTypes.PaymentStatus,
-            }
-        })
-        return { status: TRPCResponseStatus.SUCCESS, message: "Order created", data: payment };
+        return { status: TRPCResponseStatus.SUCCESS, message: "Order created", data: {rzpOrder, address} };
     } catch(error) {
         //console.log("\n\n Error in createpayments ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 

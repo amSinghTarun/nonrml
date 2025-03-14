@@ -21,7 +21,7 @@ interface AddressCardProps {
 export const AddressCard : React.FC<AddressCardProps> = ({name, selected, id, email, address, mobile, deleting, className, pincode, onDelete, onEdit, onSelect}) => {
     return (
         <div 
-            className={cn(" flex flex-col text-neutral-600 text-xs shadow-sm shadow-neutral-100 p-2 rounded-md cursor-pointer", className)}
+            className={cn(" flex flex-col text-neutral-500 text-xs shadow-sm shadow-neutral-100 p-2 rounded-md cursor-pointer", className)}
         >
             <div className="flex flex-row" onClick={()=> onSelect(id)}>{`${name.toLocaleUpperCase()}, ${address}, ${pincode}`}</div>
             <div className="flex flex-row" onClick={()=> onSelect(id)}>{email}</div>

@@ -18,27 +18,31 @@ import { redirect } from "next/navigation";
 
 export const CreateProduct = () => {
 
-    const createProduct = trpc.viewer.product.addProduct.useMutation();
+    const createProduct = trpc.viewer.product.addProduct.useMutation({
+        onSuccess: (response) => {
+            redirect(`/products/${response.data.sku}`);
+        }
+    });
 
     const form = useForm<z.infer<typeof productCreateFormSchema>>({
         resolver: zodResolver(productCreateFormSchema)
     });
 
-    const onSubmit = async (values: z.infer<typeof productCreateFormSchema>) => {
+    const onSubmit = (values: z.infer<typeof productCreateFormSchema>) => {
         const newData = {
             name: values.name,
             colour: values.colour,
-            description: values.description,
             price: Number(values.price),
             tags: values.tags.split(","),
             categoryId: Number(values.categoryId),
+            description: values.description,
+            inspiration: values.inspiration,
+            shippingDetails: values.care.split(","),
             care: values.care.split(","),
             details: values.details.split(","),
             sku: values.sku.toUpperCase(),
         }
-        const productCreated = await createProduct.mutateAsync(newData);
-        if(productCreated.status == "SUCCESS")
-            redirect(`/products/${productCreated.data.sku}`);
+        createProduct.mutate(newData);
     };
 
     return (
@@ -116,6 +120,23 @@ export const CreateProduct = () => {
                 />
                 <FormField
                     control={form.control}
+                    name="inspiration"
+                    render={({ field }) => (
+                        <FormItem className="basis-1/2 flex flex-col">
+                            <FormLabel className="font-semibold">Inspiration</FormLabel>
+                            <FormControl className="pl-2 text-sm">
+                                <textarea 
+                                    className="p-2 border border-black rounded-md" 
+                                    placeholder="Enter design inspiration (min. 20 characters)"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
                     name="tags"
                     render={({ field }) => (
                         <FormItem className="basis-1/2 flex flex-col">
@@ -160,6 +181,23 @@ export const CreateProduct = () => {
                                 <input 
                                     className="p-2 border border-black rounded-md" 
                                     placeholder="Enter care instructions separated by commas (e.g., wash cold,hang dry)"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="shippingDetails"
+                    render={({ field }) => (
+                        <FormItem className="basis-1/2 flex flex-col">
+                            <FormLabel className="font-semibold">Care Instructions (comma-separated)</FormLabel>
+                            <FormControl className="pl-2 text-sm">
+                                <input 
+                                    className="p-2 border border-black rounded-md" 
+                                    placeholder="Enter Shipping Details separated by commas (e.g., wash cold,hang dry)"
                                     {...field}
                                 />
                             </FormControl>

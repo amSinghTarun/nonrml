@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils"
 import { useState } from "react";
 import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton } from "./ui/buttons";
+import CancelOrderDialog from "./dialog/CancelOrderDialog";
+import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 

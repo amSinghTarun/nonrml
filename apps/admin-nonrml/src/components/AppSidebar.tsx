@@ -27,7 +27,7 @@ export function AppSidebar() {
   return (
     <div className="fixed inset-y-0 left-0 z-50">
       <Sidebar collapsible="offcanvas" variant="floating" className="h-full">
-        <SidebarContent className="bg-black text-white shadow-lg">
+        <SidebarContent className="bg-white text-black shadow-lg">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>

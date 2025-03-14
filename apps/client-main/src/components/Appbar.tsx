@@ -8,8 +8,9 @@ import { serverClient } from '@/app/_trpc/serverClient';
 import { CartMenu } from './Cart';
 import { UserAccessibility } from './UserAccessibility';
 import Link from 'next/link';
-import logo from "@/images/logo.jpg";
+import logo from "@/images/logo.png";
 import Image from "next/image";
+import { redirect } from 'next/navigation';
 
 export const Appbar = async () => {
     let categoryList = await redis.redisClient.get<string[]|null>("productCategory")
@@ -20,21 +21,20 @@ export const Appbar = async () => {
 
     return (
         <>
-            <nav className=" w-full z-50 p-3 h-14 backdrop-blur-3xl flex flex-row fixed top-0 justify-between ">
-                <div className="basis-1/2 flex justify-left items-center gap-4 w-auto h-full">
+            <nav className=" w-full z-50 p-3 pr-0 h-14 backdrop-blur-3xl flex flex-row fixed top-0 justify-between ">
+                <div className="basis-1/2 flex justify-left items-center gap-4 w-auto h-full b">
                     <MenuButton />
                     <UserButton />
                     <CartButton />
                 </div>
                 <div className="basis-1/2 items-center justify-end flex w-auto h-full">
-                    <Link className='cursor-pointer' href='/'>
+                    <Link className='cursor-pointer h-full w-full justify-end flex' href='/'>
                         <Image
+                            className='h-auto w-4/5 md:w-1/3 lg:w-1/4 bg-none p-0 object-cover'
                             src={logo}
                             alt="No NRML logo"
                             priority
-                            width={0} height={0} 
-                            sizes="100vw" 
-                            style={{ color:"white",width: 'auto', height: "33px"}}
+                            width={0} height={0}
                         ></Image>
                     </Link>
                 </div>

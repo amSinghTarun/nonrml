@@ -126,7 +126,7 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
     };
 
     return (
-        <div className={cn(`flex basis-1/2 ${"bg-white bg-opacity-50 shadow-sm shadow-black/10 text-neutral-800" } p-3 rounded-md`, className)}>
+        <div className={cn(`flex basis-1/2 ${"bg-white bg-opacity-80 text-neutral-800" } p-3 rounded-md`, className)}>
             <div className="flex flex-row flex-1 justify-evenly rounded-md">
             {   
                 updatingQuantity 

@@ -3,8 +3,7 @@ import { z } from "zod";
 
 export const ZCreateRzpOrderSchema = z.object({
     orderTotal:z.number(),
-    addressId: z.number(),
-    orderId: z.string()
+    addressId: z.number()
 });
 export type TCreateRzpOrderSchema = z.infer<typeof ZCreateRzpOrderSchema>;
 

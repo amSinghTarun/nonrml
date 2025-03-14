@@ -8,6 +8,8 @@ import Link from "next/link";
 import CancelOrderDialog from "./dialog/CancelOrderDialog";
 import { signOut } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { prismaTypes } from "@nonrml/prisma";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrdersProps {
     className?: string,
@@ -19,7 +21,7 @@ const convertStringToINR = (currencyString: number) => {
     return `INR ${INR.format(currencyString)}.00`;
 }
 
-const getOrderProgressMessage = (status: string) => {
+const getOrderProgressMessage = (status: prismaTypes.OrderStatus) => {
     switch (status) {
         case "ACCEPTED":
             return "Your order is being packed with care";
@@ -27,6 +29,10 @@ const getOrderProgressMessage = (status: string) => {
             return "Your order is on its way";
         case "DELIVERED":
             return "Order successfully delivered";
+        case "CANCELED":
+            return "Order cancelled";
+        case "PAYMENT_FAILED":
+            return "Payment failed";
         default:
             return "Order processing";
     }
@@ -49,14 +55,18 @@ const renderOrderStatus = (status: string) => {
     const statusEnum = {
         "PENDING": "PENDING",
         "ACCEPTED": "PACKING",
+        "CANCELED": "CANCELED",
         "SHIPPED": "SHIPPED",
-        "DELIVERED": "DELIVERED"
+        "DELIVERED": "DELIVERED",
+        "PAYMENT_FAILED": "PAYMENT_FAILED"
     };
     
     return statusEnum[status as keyof typeof statusEnum];
 };
 
 export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
+
+    const { toast } = useToast();
         
     const userOrders = trpc.viewer.orders.getUserOrders.useQuery(undefined,{
         staleTime: Infinity,
@@ -68,6 +78,12 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
     const cancelOrder = trpc.viewer.orders.cancelOrder.useMutation({
         onSuccess: () => {
             userOrders.refetch()
+        },
+        onError: () => {
+            toast({
+                duration: 1500,
+                title: "Please Select An Available Size"
+            })
         }
     })
 
@@ -78,7 +94,6 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                 <span className="cursor-pointer hover:underline text-neutral-500" onClick={()=> {signOut()}}> LOGOUT</span>
             </div>
             <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto scrollbar-hide h-full">
-                {/* <p className="text-sm text-neutral-600">ORDERS</p> */}
                 {
                     userOrders.isLoading &&
                     <article className="flex flex-row p-2 w-full h-full justify-center items-center bg-white text-xs">
@@ -122,7 +137,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                                             {/* Payment Status */}
                                             <div className="flex justify-between items-center text-neutral-500">
                                                 <span>Payment</span>
-                                                <span> {getOrderPaymentStatus(order.Payments[0].paymentStatus)} </span>
+                                                <span> {getOrderPaymentStatus(order.Payments?.paymentStatus ?? "")} </span>
                                             </div>
                         
                                             {/* Order Details */}
@@ -136,22 +151,19 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                         
                                     {/* Action Buttons */}
                                     <div className="flex justify-end gap-3 mt-2 pt-2 border-t border-neutral-100 "> 
-                                        
-                                        { order.orderStatus != "PENDING" && order.orderStatus != "DELIVERED" && (
-                                            <div className=" text-xs text-neutral-600">
-                                                {getOrderProgressMessage(order.orderStatus)}
-                                            </div>
-                                        )}
 
                                         {order.orderStatus === "PENDING" && (
-                                            <CancelOrderDialog 
+                                            cancelOrder.isLoading && cancelOrder.variables?.orderId == order.id
+                                            ? <p className="text-xs pl-2 text-neutral-600">Cancelling order...</p> 
+                                            : <CancelOrderDialog 
                                                 cancelPurchase={async () => {
                                                     await cancelOrder.mutateAsync({orderId: order.id})
                                                 }}
                                             />
                                         )}
                                         
-                                        {order.orderStatus === "DELIVERED" && (order.return.length || order.replacementOrder.length) ? (
+                                        {order.orderStatus === "DELIVERED" ? (
+                                            (order.return.length || order.replacementOrder.length) ?
                                             <div className="flex divide-x divide-neutral-200">
                                                 {order.return.length > 0 && (
                                                     <Link
@@ -169,8 +181,9 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                                                         View Replacements
                                                     </Link>
                                                 )}
-                                            </div>
-                                        ): <p className="text-xs pl-2 text-neutral-600">Order successfully delivered</p> }
+                                            </div> : <p className="text-xs pl-2 text-neutral-600">Order successfully delivered</p> 
+                                        ): order.orderStatus != "PENDING" && <div className=" text-xs text-neutral-500">{getOrderProgressMessage(order.orderStatus)}</div> }
+                                    
                                     </div>
                                 </article>
                             ))}

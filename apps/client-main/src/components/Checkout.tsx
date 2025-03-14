@@ -32,6 +32,9 @@ const convertStringToINR = (currencyString: number) => {
 export const Checkout = ({className, buyOption, userAddresses}: AddressProps) => {
     
     const { toast } = useToast();
+    const router = useRouter();
+    const couponCode = useRef("");
+    const totalAmount = useRef(0);
     const [ selectedAddress, setSelectedAddress ] = useState<AddressesTRPCOutput[number]>();
     const [ applyCoupon, setApplyCoupn ] = useState(false);
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
@@ -40,17 +43,25 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     const { cartItems, setCartItems } = useCartItemStore();
     const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
     const [ quantityChange, setQuantityChange ] = useState(false);
-    const [ orderInProcess, setOrderInProcess ] = useState(false);
     const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
     const deleteAddress = trpc.viewer.address.removeAddress.useMutation({
         onSuccess: () => {
-            setAction("SHOWADDRESS");
+            userAddresses.refetch()
         }
     });
-
-    const router = useRouter();
-    const couponCode = useRef("");
-    const totalAmount = useRef(0);
+    const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
+    const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
+      onSuccess: (response) => {
+        router.push(`/account/${response.data.orderId}`);
+      },
+      onError: () => {
+        toast({
+            duration: 5000,
+            title: "Something went wrong. Any payment deducted will be reimbursed",
+            variant: "destructive"
+        });
+      }
+    });
 
     const handleAddressEdit = (address: AddressesTRPCOutput[number]) => {
         setSelectedAddress(address);
@@ -58,8 +69,8 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     }
 
     const orderProducts = !buyOption ? cartItems : buyNowItems;
-    console.log("ORDER_IN_PROCESS", orderInProcess);
-    if(Object.keys(orderProducts).length == 0 && !orderInProcess)
+    // console.log("ORDER_IN_PROCESS", orderInProcess);
+    if(Object.keys(orderProducts).length == 0 && !initiateOrder.isLoading)
         router.back();
 
     useEffect( () => {
@@ -77,7 +88,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
         return () => clearTimeout(timer);
     }, [router]);
 
-    const onDismissHandler = () => setOrderInProcess(false);
+    // const onDismissHandler = () => setOrderInProcess(false);
 
     const handlePayment = async () => {
         try{
@@ -88,20 +99,29 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 });
                 return
             }
-            setOrderInProcess(true);
+            // setOrderInProcess(true);
 
             // const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
             const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
                 setQuantityChange(true);
-                setOrderInProcess(false);
+                // setOrderInProcess(false);
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
                 return;
             }
-            displayRazorpay({rzpOrder: data, cartOrder: !buyOption ? true : false, onDismissHandler: onDismissHandler});
+            console.log("OPEN RAZORPAY");
+
+            await displayRazorpay({
+                rzpOrder: data, 
+                cartOrder: !buyOption ? true : false,
+                updatePaymentStatus: updatePaymentStatus.mutate,
+                verifyOrder: verifyOrder.mutate,
+            });
+
             return;
+
         } catch(error: any) {
-            setOrderInProcess(false);
+            // setOrderInProcess(false);
             toast({
                 duration: 3000,
                 title: "Something went wrong. Please try again !!",
@@ -127,8 +147,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
 
     return (
         <div className={cn("h-screen w-full p-2 shadow-sm shadow-neutral-100 rounded-md", className)}>
-            < CanclePurchaseDialog />
-            { orderInProcess ? 
+            { initiateOrder.isLoading || verifyOrder.isLoading ? 
                 <Loading  text="PROCESSING YOUR PAYMENT..."/> : 
                 <>
                 <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false); setAction("ORDER") }} />
@@ -164,9 +183,9 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                         ) : (
                             userAddresses.data && userAddresses.data?.data.length === 0 ? (
                                 <article className="flex flex-row p-2 w-full h-full justify-center items-center">
-                                <div className="text-xs">
+                                <div className="text-xs text-neutral-500 text-center">
                                     <p>NO ADDRESS FOUND</p>
-                                    <p className="text-xs">PLEASE ADD ONE TO CONTINUE WITH PURCHASE</p>
+                                    <p className="text-xs">PLEASE ADD ONE TO CONTINUE WITH PURCHASE!</p>
                                 </div>
                             </article>
                         ) :
@@ -184,11 +203,12 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                                             onEdit={()=>{handleAddressEdit(address)}}
                                             onDelete={()=>{
                                                 deleteAddress.mutate({id:address.id})
+                                                userAddresses.data.data.splice(index, 1)
                                             }}
                                             deleting={deleteAddress.isLoading && address.id == deleteAddress.variables?.id}
                                             id={address.id}
                                             onSelect={() => setSelectedAddress(address)}
-                                            className={`${selectedAddress?.id == address.id && "shadow-sm shadow-neutral-300"}`}
+                                            className={`${selectedAddress?.id == address.id && "shadow-sm text-neutral-700 shadow-neutral-400"}`}
                                         />
                                     ))
                                 }
@@ -292,7 +312,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                         <span className="text-lg font-medium">{convertStringToINR(couponValue?.orderValue ?? totalAmount.current)}</span>
                     </div>
                     <div className=" w-fit h-full">
-                        <GeneralButton className=" p-2 px-6 h-full w-full" display={ orderInProcess ? "PROCESSING..." : "PAY NOW"} onClick={handlePayment} />
+                        <GeneralButton className=" p-2 px-6 h-full w-full" display={ initiateOrder.isLoading ? "PROCESSING..." : "PAY NOW"} onClick={handlePayment} />
                     </div>
                 </article>
             </div>

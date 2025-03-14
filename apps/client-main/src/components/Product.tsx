@@ -81,22 +81,8 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                         ))
                     }</CarouselContent>
                 </Carousel>
-                {
-                    (!isScreenLg && buyNow) &&
-                    <div
-                        className="absolute left-0 bottom-0 hover:bg-white cursor-pointer p-3 rounded-tr-md text-black bg-white/45 backdrop-blur-3xl"
-                        onClick={() => {
-                            selectedSize[sizeSKU.current!].quantity > 0 ?
-                                handleAddToCart() :
-                                toast({
-                                    duration: 1500,
-                                    title: "Please Select An Available Size",
-                                })
-                        }}
-                    ><ShoppingCartIcon /></div>
-                }
-                <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-0 right-0"}`}>
-                    <GeneralButtonTransparent display="Size Chart" className={`px-2 py-1 rounded-sm text-neutral-200 bg-neutral-500 opacity-70 backdrop-blur-3xl border-none w-fit text-xs ${isModalOpen && "opacity-0"}`} onClick={openModal}/>
+                <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-1 right-0"}`}>
+                    <GeneralButtonTransparent display="Measures" className={`p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-none w-fit text-[10px] md:text-xs ${isModalOpen && "opacity-0"}`} onClick={openModal}/>
                 </div>
 
             </div>
@@ -106,11 +92,11 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                         <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
                             {product.name.toUpperCase()}
                         </span>
-                        <span className="text-neutral-600 text-xs lg:text-md font-normal flex flex-col">
+                        <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
                             {convertStringToINR(Number(product.price))}
                         </span>
                         <span className="text-neutral-500 text-xs text-center lg:text-md font-normal flex flex-col">
-                            {"Repalce it with design inspiration text"}
+                            {product.inspiration}
                         </span>
                     </div>
                     <div className="flex flex-row text-xs gap-2">{
@@ -133,26 +119,18 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                         ))
                     }</div>
                     <div className="flex flex-row text-xs w-full gap-2">{
-                        buyNow ?
-                            <div className="flex flex-col w-full space-y-2">
-                                { isScreenLg 
-                                    && <ProductPageActionButton display="ADD TO CART" onClick={() => {
-                                        selectedSize[sizeSKU.current!]?.quantity > 0 ?
-                                            handleAddToCart() : toast({
-                                                duration: 1500,
-                                                title: "Please Select An Available Size"
-                                            })
-                                    }} /> 
-                                }
+                        buyNow 
+                            ? <div className="flex flex-col w-full space-y-2">
                                 <div className="flex flex-row w-full space-x-2">
                                     <QuantitySelectButton
                                         selectedQuantity={selectedQuantity}
                                         minQuantity={1}
                                         maxQuantity={selectedSize[sizeSKU.current!]?.quantity}
                                         onQuantityChange={setSelectedQuantity}
+                                        className="shadow-neutral-200 shadow-sm"
                                     />
                                     <GeneralButton
-                                        className="h-full w-full backdrop-blur-3xl bg-neutral-800 text-white font-medium"
+                                        className="h-full w-full bg-neutral-800 text-white font-medium"
                                         display="CHECKOUT"
                                         onClick={() => {
                                             setBuyNowItems({
@@ -162,9 +140,16 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                                         }}
                                     />
                                 </div>
+                                <ProductPageActionButton display="ADD TO CART" className="shadow-neutral-200 shadow-sm" onClick={() => {
+                                    selectedSize[sizeSKU.current!]?.quantity > 0 
+                                    ? handleAddToCart() 
+                                    : toast({
+                                        duration: 1500,
+                                        title: "Please Select An Available Size"
+                                    })
+                                }} /> 
                             </div>
-                            :
-                            <>
+                            : <>
                                 <ProductPageActionButton display="ADD TO CART" onClick={() => {
                                     selectedSize[sizeSKU.current!]?.quantity > 0 ?
                                         handleAddToCart() : toast({
@@ -185,33 +170,33 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                                 />
                             </>
                     }</div>
-                    <div className="flex-col text-neutral-700 flex text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
+                    <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
                         <div className="flex lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3 content-center">DESCRIPTION</span>
+                            <span className="font-normal lg:font-medium basis-1/3 ">DESCRIPTION</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.description}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3 content-center">DETAILS</span>
+                            <span className="font-normal lg:font-medium basis-1/3">DETAILS</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.details}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3 content-center">CARE</span>
+                            <span className="font-normal lg:font-medium basis-1/3 ">CARE</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.care}`}</div>
                         </div>
                         <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal basis-1/3 lg:font-medium content-center">SHIPPING</span>
-                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.care}`}</div>
+                            <span className="font-normal basis-1/3 lg:font-medium ">SHIPPING</span>
+                            <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.shippingDetails}`}</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <SizeChart 
+            {isModalOpen && <SizeChart 
                 isOpen={isModalOpen} 
                 onClose={closeModal} 
                 sizeChartCategoryNameId={product.sizeChartId ?? product.category.sizeChartId} 
-            />
+            />}
         </article>
     )
 };

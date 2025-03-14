@@ -52,6 +52,8 @@ export const getProduct = async ({
           visitedCount: true,
           public: true,
           sizeChartId: true,
+          inspiration: true,
+          shippingDetails: true,
           name: true,
           description: true,
           price: true,
@@ -79,27 +81,6 @@ export const getProduct = async ({
       });
       redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
     };
-
-    // let categorySizeChart = await redis.redisClient.get(`categorySizeChart_${product.categoryId}`);
-    // if (!categorySizeChart) {
-    //   const categorySizes = await prisma.productCategory.findFirst({
-    //     where: {
-    //       id: product.categoryId
-    //     },
-    //     select: {
-    //       SizeChart: {
-    //         select: {
-    //             sizeChart: true,
-    //         },
-    //       },
-    //     }
-    //   });
-    //   // set category sizechart cache
-    //   if (categorySizes){
-    //     categorySizeChart = JSON.stringify( categorySizes.productCategorySize!.sizeChart )
-    //     redis.redisClient.set(`categorySizeChart_${product.categoryId}`, categorySizeChart, {ex: 60*60*5});
-    //   }
-    // }
     
     //cache it and get from cache, delete at the time of order
     let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${product.id}`);
@@ -733,10 +714,12 @@ export const editProduct = async ({
     const updateData = {
       ...(input.name && {name: input.name}),
       ...(input.description && {description: input.description}),
+      ...(input.inspiration && {description: input.inspiration}),
       ...(!isNaN(Number(input.price)) && {price: input.price}),
       ...(!isNaN(Number(input.categoryId)) && {categoryId: input.categoryId}),
       ...(input.colour && {colour: input.colour}),
       ...(input.care && {care: input.care}),
+      ...(input.shippingDetails && {care: input.shippingDetails}),
       ...(input.details && {details: input.details}),
       ...(input.tags && {tags: input.tags}),
       ...(input.soldOut !== undefined && {soldOut: input.soldOut}),

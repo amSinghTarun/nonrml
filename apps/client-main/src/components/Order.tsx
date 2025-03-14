@@ -2,7 +2,6 @@
 import { cn } from "@/lib/utils";
 import { RouterOutput } from "@/app/_trpc/client";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import { MakeReturn } from "./MakeReturn";
 import { MakeExchange } from "./MakeExchange";
@@ -30,6 +29,8 @@ const getOrderProgressMessage = (status: string, date?:number) => {
             return "Your Order Is On Its Way";
         case "DELIVERED":
             return `Order Delivered on ${(new Date(date!).toDateString())}`;
+        case "PAYMENT_FAILED":
+            return `Payment failed`;
         default:
             return "Order Processing";
     }
@@ -39,6 +40,7 @@ const getOrderPaymentStatus = (status: string) => {
     switch (status) {
         case "paid":
             return "Complete";
+            break;
         case "failed":
             return "Failed";
         case "COD":
@@ -50,7 +52,9 @@ const getOrderPaymentStatus = (status: string) => {
 
 export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
     const [showReturnReplace, setShowReturnReplace] = useState<"RETURN"|"EXCHANGE"|"ORIGINAL">("ORIGINAL");
+    console.log(orderDetails)
     const router = useRouter();
+
     return (
         <div className={cn("h-full w-full p-4 lg:p-20", className)}>
             { showReturnReplace == "RETURN" &&  <MakeReturn returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} makeNewReturn={orderDetails?.return.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
@@ -75,7 +79,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                         </div>
                         <div className="flex justify-between">
                             <p>Payment</p>
-                            <p>{getOrderPaymentStatus(orderDetails?.Payments[0].paymentStatus)} </p>
+                            <p>{getOrderPaymentStatus(orderDetails.Payments?.paymentStatus ?? "")} </p>
                         </div>
                         <p className="text-xs font-normal text-neutral-500 lg:text-sm pt-6 lg:pt-10"> {`${getOrderProgressMessage(orderDetails?.orderStatus, Number(orderDetails.deliveryDate))}`}</p>
                     </div>
@@ -87,15 +91,13 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                 />
                         </div>}
                         { orderDetails.orderStatus == "DELIVERED" && <div className=" text-xs flex lg:text-sm space-x-7 text-neutral-600">
-                            { 
-                            ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500 ) > Date.now() && <div className=" text-xs text-neutral-600">
+                            { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500 ) > Date.now() && <div className=" text-xs text-neutral-600">
                                     <GeneralButtonTransparent className=" w-fit p-2" onClick={()=>{setShowReturnReplace("RETURN")}}
                                         display="RETURN"
                                     />
                                 </div>
                             }
-                            { 
-                            ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500) > Date.now() && <div className=" text-xs text-neutral-600">
+                            { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500) > Date.now() && <div className=" text-xs text-neutral-600">
                                     <GeneralButtonTransparent className="w-fit p-2" onClick={()=>{setShowReturnReplace("EXCHANGE")}}
                                         display="EXCHANGE"
                                     />
@@ -108,7 +110,6 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
 
                 <div className="flex flex-col space-y-2 lg:w-1/2">
                     { orderDetails?.orderProducts.map((product, index) => {
-                        console.log(product.productVariant.product)
                         return (
                             <div key={index} className="relative justify-between flex flex-col text-xs rounded-md " >
                                 <div className="flex flex-row space-x-3">

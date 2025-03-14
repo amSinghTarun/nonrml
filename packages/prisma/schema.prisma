@@ -171,13 +171,15 @@ model ProductImage {
 model Products {
   id                   Int                   @id @default(autoincrement())
   name                 String                @unique
-  description          String
   price                Float
   tags                 String[]
   categoryId           Int
   soldOut              Boolean               @default(false)
-  care                 String[]
+  inspiration          String
+  description          String
   details              String[]
+  care                 String[]
+  shippingDetails       String[]
   sku                  String                @unique
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -265,8 +267,8 @@ model Payments {
   paymentService      String               @default("Razorpay")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  orderId             String               @default("")
-  Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId             String               @unique
+  Orders              Orders              @relation(fields: [orderId], references: [id])
   RefundTransactions  RefundTransactions[]
 }
 
@@ -305,7 +307,7 @@ model Orders {
   discount              Discounts?                         @relation(fields: [discountId], references: [id])
   shipment              Shipment?                          @relation(fields: [shipmentId], references: [id])
   user                  User                               @relation(fields: [userId], references: [id])
-  Payments              Payments[]
+  Payments              Payments?
   replacementOrder      ReplacementOrder[]
   return                Returns[]
 }

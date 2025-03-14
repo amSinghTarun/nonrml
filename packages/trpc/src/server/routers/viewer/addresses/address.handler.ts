@@ -98,12 +98,12 @@ Edit address of an user
 */
 export const editAddress = async ({ctx, input}: TRPCRequestOptions<TEditAddressSchema>) => {
     const prisma = ctx.prisma;
-    const userId = +ctx.user?.id!
     try{
-        const editedAddress = {...input};
+        let editedAddress = {...input};
+        delete editedAddress.addressId;
         const newAddress = await prisma.address.update({
             where: {
-                id: userId
+                id: input?.addressId,
             }, 
             data : editedAddress
         });

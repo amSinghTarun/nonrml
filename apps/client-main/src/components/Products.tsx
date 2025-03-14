@@ -11,7 +11,8 @@ type ProductsProps = {
     nextCursor: RouterOutput["viewer"]["product"]["getProducts"]["nextCursor"];
 };
 
-const Products: React.FC<ProductsProps> = ({ categoryName, products: initialProducts, nextCursor: initialNextCursor }) => {
+const 
+Products: React.FC<ProductsProps> = ({ categoryName, products: initialProducts, nextCursor: initialNextCursor }) => {
     const { ref } = useInView({onChange:(inView) => inView && fetchMoreProducts()});
     const [products, setProducts] = useState(initialProducts);
     const [nextCursor, setNextCursor] = useState(initialNextCursor);

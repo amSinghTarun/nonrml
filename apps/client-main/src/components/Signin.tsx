@@ -10,8 +10,6 @@ const Signin = () => {
     const [mobileNumber, setMobileNumber] = useState("");
     const [error, setError] = useState<string | null>(null)
     const [otp, setOtp] = useState("");
-    const sendingOTP = useRef(false);
-    const verifyingOTP = useRef(false);
 
     const sendOTP = trpc.viewer.auth.sendOTP.useMutation();
     const verifyOTP = trpc.viewer.auth.verifyOTP.useMutation();
@@ -27,18 +25,16 @@ const Signin = () => {
         try {
             e.preventDefault()
             setError(null) // Clear previous errors when a new request starts
-            if(sendingOTP.current)
+            if(sendOTP.isLoading)
                 return
-            sendingOTP.current = true;
             if(mobileNumber.length != 10){
                 setError("Mobile number should be 10 digit long");
                 return;
             }
             !otpSent && await sendOTP.mutateAsync({contactNumber: mobileNumber});
             setSendOtp(true);
-            sendingOTP.current = false
         } catch (error:any) {
-            sendingOTP.current = false;
+            // sendingOTP.current = false;
             setError(error.message ? error.message : "Having some trouble, try after sometime")
       };
     };
@@ -47,17 +43,14 @@ const Signin = () => {
         try {
             setError(null) // Clear previous errors when a new request starts
             setOtp("");
-            if(sendingOTP.current)
+            if(sendOTP.isLoading)
                 return
-            sendingOTP.current = true;
             if(mobileNumber.length != 10){
                 setError("Mobile number should be 10 digit long");
                 return;
             }
             await sendOTP.mutateAsync({contactNumber: mobileNumber});
-            sendingOTP.current = false
         } catch (error:any) {
-            sendingOTP.current = false
             setError(error.message ? error.message : "Having some trouble, try after sometime")
         };
     };
@@ -73,9 +66,8 @@ const Signin = () => {
         setError(null)
         let lengthError = false;
         try{
-            if(verifyingOTP.current)
+            if(verifyOTP.isLoading)
                 return;
-            verifyingOTP.current = true;
             if(otp.length != 6){
                 lengthError = true;
                 throw new Error("OTP should be 6 digit long");
@@ -83,11 +75,9 @@ const Signin = () => {
             const userVerified = await verifyOTP.mutateAsync({contactNumber: mobileNumber, otp: Number(otp)});
             if(userVerified.data.id)
                 signIn("credentials", {id: userVerified.data.id});
-            verifyingOTP.current = false
         } catch(error:any) {
             // for type validation we need to check for array.
             //console.log(error)
-            verifyingOTP.current = false
             lengthError ?  setError("OTP should be 6 digit long") : setError(typeof error.message == "object" ? JSON.parse(error.message)[0].message : error.message);
         };
     };
@@ -128,7 +118,7 @@ const Signin = () => {
                                 required
                                 onChange={otpOnChange} placeholder={'ENTER OTP . . .'}
                             />
-                            <button type='button' className='basis-1/5 rounded-r-md border-neutral-400 text-neutral-600 border-l bg-white/20 text-center cursor-pointer hover:underline text-xs p-2 hover:text-white' onClick={onOtpResend} >{sendingOTP.current ? "SENDING": "RESEND"}</button>
+                            <button type='button' className='basis-1/5 rounded-r-md border-neutral-400 text-neutral-600 border-l bg-white/20 text-center cursor-pointer hover:underline text-xs p-2 hover:text-white' onClick={onOtpResend} >{sendOTP.isLoading ? "SENDING": "RESEND"}</button>
                         </div>
                         }
                         {
@@ -136,7 +126,7 @@ const Signin = () => {
                         }
                         <FormSubmitButton 
                             type='submit'
-                            label={otpSent ? (verifyingOTP.current ? "VERIFYING..." : "VERIFY OTP") : (sendingOTP.current ? "SENDING..." : "SEND OTP")}
+                            label={otpSent ? (verifyOTP.isLoading ? "VERIFYING..." : "VERIFY OTP") : (sendOTP.isLoading ? "SENDING..." : "SEND OTP")}
                             className="w-full p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                         />
                     </Form>
