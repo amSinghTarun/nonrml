@@ -6,7 +6,6 @@ import { GeneralButton, GeneralButtonTransparent, ProductPageActionButton, Quant
 import { useState, useRef } from "react";
 import { RouterOutput } from "@/app/_trpc/client";
 import { useToast } from "@/hooks/use-toast";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useSetAppbarUtilStore, useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { useRouter } from "next/navigation";

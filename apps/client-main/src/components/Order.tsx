@@ -40,7 +40,6 @@ const getOrderPaymentStatus = (status: string) => {
     switch (status) {
         case "paid":
             return "Complete";
-            break;
         case "failed":
             return "Failed";
         case "COD":

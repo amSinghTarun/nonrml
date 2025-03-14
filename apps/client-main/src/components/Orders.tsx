@@ -82,7 +82,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
         onError: () => {
             toast({
                 duration: 1500,
-                title: "Please Select An Available Size"
+                title: "Please Try again in some time"
             })
         }
     })
