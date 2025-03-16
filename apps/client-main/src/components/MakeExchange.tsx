@@ -8,12 +8,12 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Textarea } from "@/components/ui/textarea"
 import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';
+import { useRouter } from "next/navigation";
 
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 type exchangeProduct = RouterOutput["viewer"]["product"]["getProductSizes"]["data"];
 
 interface ExchangeProps {
-    makeNewExchange: boolean,
     products: NonNullable<OrderProduct>["orderProducts"],
     orderId: string,
     returnAcceptanceDate: number,
@@ -25,10 +25,10 @@ const convertStringToINR = (currencyString: number) => {
     return `INR ${INR.format(currencyString)}.00`;
 }
 
-export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
-
+export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
+    const fetchExchangeProductSizes = trpc.useUtils().viewer.product.getProductSizes;
+    const router = useRouter();
     const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {
-        const getExchangeProductSizes = trpc.useUtils();    
         const productIdsJson : { [productId: number] : 1 }= {};
         const productIds : number[] = []
         for(let exchangeProduct of exchangeProducts){
@@ -38,13 +38,14 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
             }
             productIdsJson[exchangeProduct.productVariant.productId] = 1;
         }
-        let { data } = await getExchangeProductSizes.viewer.product.getProductSizes.fetch(productIds);
+        let { data } = await fetchExchangeProductSizes.fetch(productIds);
+        console.log(data)
         return data;
     };
 
     const initiateReturnOrder = trpc.viewer.return.initiateReturn.useMutation({
-        onSuccess: () => {
-            backToOrderDetails()
+        onSuccess: (response) => {
+            router.replace(`/exhanges/${response.data.orderId}`);
         }
     });
 
@@ -153,12 +154,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
             <p className="text-xs text-neutral-500 mb-5 pl-1">Select item you wish to exchange</p>
             <p className="text-xs text-neutral-500 mb-5 pl-1">Exchange Available Untill {(new Date(returnAcceptanceDate)).toDateString()}</p>
             <div className="flex flex-col flex-1 space-y-3 mb-3">
-                { !makeNewExchange && 
-                    <div className="flex-1 flex justify-center text-center items-center">
-                        <div className="text-sm rounded-xl bg-red-200 justify-center text-center px-3 py-2">Can't make a new exchange unless last one is Accepted or Rejected.</div> 
-                    </div>
-                }
-                { makeNewExchange && products.map((product, index) => {
+                { products.map((product, index) => {
                     return ( 
                         <div 
                             key={index}
@@ -185,7 +181,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({makeNewExchange, product
                                         <p>Size: {product.productVariant?.size}</p>
                                         <p>{convertStringToINR(+product.price!)}</p>
                                     </div>
-                                    { !selectedProducts[product.id] && <p>Available For Exchange: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
+                                    { !selectedProducts[product.id] && <p className="font-medium text-neutral-600">Available For Exchange: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
                                     { selectedProducts[product.id] && (
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-neutral-400">Exchange:</p>

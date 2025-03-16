@@ -16,26 +16,26 @@ export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNote
         <div className=" h-full w-full text-neutral-600 ">
              <div className="flex flex-col justify-between space-y-1 text-xs relative p-3 ">
                     <div className="flex justify-between">
-                        <p className="font-light"> Credit Code : </p>
-                        <p className="text-neutral-800"> {creditNoteDetails.creditCode} </p>
+                        <p className="text-neutral-600"> {creditNoteDetails.creditCode} </p>
+                        <p className="text-neutral-600"> {convertStringToINR(+creditNoteDetails.value)} </p>
                     </div>
                     <div className="flex justify-between">
-                        <p className="font-light"> Value : </p>
-                        <p className="text-neutral-800"> {convertStringToINR(+creditNoteDetails.value)} </p>
+                        <p className="text-neutral-500"> Remaining Value </p>
+                        <p className="text-neutral-600"> {convertStringToINR(+creditNoteDetails.remainingValue)} </p>
                     </div>
                     <div className="flex justify-between">
-                        <p className="font-light"> Created at : </p>
-                        <p className="text-neutral-800"> {creditNoteDetails.createdAt.toDateString()} </p>
+                        <p className="text-neutral-500"> Created at </p>
+                        <p className="text-neutral-600"> {creditNoteDetails.createdAt.toDateString()} </p>
                     </div>
                     <div className="flex justify-between">
-                        <p className="font-light"> Expire at : </p>
-                        <p className="text-neutral-800"> {creditNoteDetails.expiryDate.toDateString()} </p>
+                        <p className="text-neutral-500"> Expire at </p>
+                        <p className="text-neutral-600"> {creditNoteDetails.expiryDate.toDateString()} </p>
                     </div>
             </div>
-            <h2 className="pb-2 pt-4 text-md font-medium">CREDIT NOTE TRANSACTION(s)</h2>
-            <div className="space-y-2">
+            <h2 className="pb-2 pt-4 text-xs text-neutral-500 font-medium">CREDIT NOTE TRANSACTION(s)</h2>
+            <div className="space-y-2 flex justify-center">
             {
-                creditNoteDetails.creditNotesPartialUseTransactions.map( (transaction, index) => {
+                creditNoteDetails.creditNotesPartialUseTransactions.length ? creditNoteDetails.creditNotesPartialUseTransactions.map( (transaction, index) => {
                     return (
                         <div className="flex flex-col justify-between space-y-1 text-xs relative p-3">
                             <div className="flex justify-between">
@@ -47,7 +47,7 @@ export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNote
                                 <p> {transaction.createdAt.toDateString()} </p>
                             </div>
                         </div>
-                )})
+                )}) : <p className="text-xs border mt-6 border-neutral-300 py-3 px-6 w-fit text-neutral-400 rounded-sm">No Transactions yet</p>
             }
             </div>
         </div>

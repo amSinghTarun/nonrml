@@ -476,6 +476,7 @@ enum DiscountStatus {
 
 enum ReturnStatus {
   PENDING
+  ALLOWED
   REVIEW_DONE
   CANCELLED_ADMIN
   RECEIVED

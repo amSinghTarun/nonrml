@@ -1,11 +1,12 @@
 "use client"
 
-import { RouterOutput, trpc } from "@/app/_trpc/client"
+import { RouterInput, RouterOutput, trpc } from "@/app/_trpc/client"
 import { createRzpConfig } from "@nonrml/payment"
 import { useCartItemStore } from "@/store/atoms"
 import { useRouter } from "next/navigation"
 
 type rzpOrder = RouterOutput["viewer"]["orders"]["initiateOrder"]["data"]
+type UpdatePaymentStatusInput = RouterInput["viewer"]["payment"]["updateFailedPaymentStatus"]
 
 function loadScript(src: string) {
   return new Promise((resolve) => {
@@ -24,14 +25,13 @@ function loadScript(src: string) {
 export const displayRazorpay = async ({
   rzpOrder, 
   cartOrder, 
-  onDismissHandler,
   updatePaymentStatus,
   verifyOrder
 }: {
   rzpOrder: rzpOrder, 
   cartOrder: boolean, 
   onDismissHandler?: () => void,
-  updatePaymentStatus: (data: { orderId: string, paymentStatus: string }) => void,
+  updatePaymentStatus: (data: UpdatePaymentStatusInput ) => void,
   verifyOrder: (data: { 
     razorpayPaymentId: string, 
     razorpayOrderId: string, 

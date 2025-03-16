@@ -4,10 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { useSetAppbarUtilStore } from "@/store/atoms";
 import { useSession } from 'next-auth/react';
+import { FlipWords } from './ui/flip-words';
 
 export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
   const { appbarUtil } = useSetAppbarUtilStore();
-  const { data: session } = useSession(); 
+  const { data: session } = useSession();
+  const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"]; 
     
     if(appbarUtil != "SIDEBAR") return (<></>);
     
@@ -46,7 +48,9 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
                 TRACK ORDER
               </Link>
             </div>
-            <span className="flex text-[10px] md:text-xs pt-2 justify-center">ALL IT TAKES IS A NO TO REDEFINE WHAT IS NRML.</span>
+            <span className="flex text-[10px] md:text-xs pt-2 text-neutral-700 justify-center">
+              ALL IT TAKES IS A NO TO REDEFINE WHAT IS <FlipWords className="text-red-600" words={words} />
+            </span>
           </footer>
         </aside>
       </nav>

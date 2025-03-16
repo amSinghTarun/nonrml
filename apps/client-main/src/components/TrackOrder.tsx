@@ -53,14 +53,14 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
                     name="orderId"
                     value={formData?.orderId}
                     onChange={handleChange}
-                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
+                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-500 w-full"
                     placeholder="Order Id"
                 />
                 <FormInputField
                     name="mobile"
                     value={formData?.mobile}
                     onChange={handleChange}
-                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-700 w-full"
+                    className="bg-white p-5 placeholder:text-xs rounded-md shadow-sm shadow-neutral-200 text-neutral-800 placeholder:text-neutral-500 w-full"
                     placeholder="Mobile Number"/>
                 {
                     <p className="text-red-500 text-xs pl-3">{formError || error}</p>

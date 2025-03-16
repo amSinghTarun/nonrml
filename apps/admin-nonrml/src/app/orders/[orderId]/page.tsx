@@ -1,12 +1,10 @@
 "use client"
 
-import { Products } from "@/components/Products";
 import { trpc } from '@/app/_trpc/client';
-import { Product } from "@/components/Product";
 import OrderDetails from "@/components/Order";
 
-export default ({params} : {params: {orderId: string}}) => {
-    const orderId = (params).orderId
+const OrderPage = ({params} : {params: {orderId: string}}) => {
+    const orderId = params.orderId
     const orderResponse = trpc.viewer.orders.getOrder.useQuery({ orderId: orderId }, {
         staleTime: Infinity,
         cacheTime: Infinity,
@@ -24,3 +22,5 @@ export default ({params} : {params: {orderId: string}}) => {
         </>
     )
 }
+
+export default OrderPage;

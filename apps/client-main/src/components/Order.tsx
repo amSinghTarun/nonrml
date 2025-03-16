@@ -8,6 +8,7 @@ import { MakeExchange } from "./MakeExchange";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { GeneralButtonTransparent } from "./ui/buttons";
+import { toast } from "@/hooks/use-toast";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
@@ -56,8 +57,8 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
 
     return (
         <div className={cn("h-full w-full p-4 lg:p-20", className)}>
-            { showReturnReplace == "RETURN" &&  <MakeReturn returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} makeNewReturn={orderDetails?.return.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
-            { showReturnReplace == "EXCHANGE" &&  <MakeExchange returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} makeNewExchange={orderDetails?.replacementOrder.length ? false : true} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
+            { showReturnReplace == "RETURN" &&  <MakeReturn returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)}  products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
+            { showReturnReplace == "EXCHANGE" &&  <MakeExchange returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
             { showReturnReplace == "ORIGINAL" && <div className="space-y-7 lg:space-y-10 h-full">
                 
                 <div className="text-sm text-start lg:text-base font-medium">
@@ -91,13 +92,13 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                         </div>}
                         { orderDetails.orderStatus == "DELIVERED" && <div className=" text-xs flex lg:text-sm space-x-7 text-neutral-600">
                             { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500 ) > Date.now() && <div className=" text-xs text-neutral-600">
-                                    <GeneralButtonTransparent className=" w-fit p-2" onClick={()=>{setShowReturnReplace("RETURN")}}
+                                    <GeneralButtonTransparent className=" w-fit p-2" onClick={()=>{!orderDetails?.return.length ? setShowReturnReplace("RETURN") : toast({variant:"default", title: "You can't request a new return until the last one is processed.", duration: 4000 })}}
                                         display="RETURN"
                                     />
                                 </div>
                             }
                             { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500) > Date.now() && <div className=" text-xs text-neutral-600">
-                                    <GeneralButtonTransparent className="w-fit p-2" onClick={()=>{setShowReturnReplace("EXCHANGE")}}
+                                    <GeneralButtonTransparent className="w-fit p-2" onClick={()=>{!orderDetails?.replacementOrder.length ? setShowReturnReplace("EXCHANGE") : toast({variant:"default", title: "You can't request a new exchange until the last one is processed.", duration: 4000 })}}
                                         display="EXCHANGE"
                                     />
                                 </div>
@@ -125,7 +126,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                         <p>{`${product.productVariant?.product.name.toUpperCase()} ( ${product.productVariant?.size} )`}</p>
                                         <p>{convertStringToINR(+product.price)}</p>
                                         <p>{`${product.quantity} Piece${product.quantity > 1 ? 's' : ""}`} </p>
-                                        { product.rejectedQuantity! > 0 && <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled`}</p> }
+                                        { product.rejectedQuantity && <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled`}</p> }
                                     </div>
                                 </div>
                             </div>

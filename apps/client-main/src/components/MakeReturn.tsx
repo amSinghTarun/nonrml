@@ -9,11 +9,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';
 import { ArrowLeft, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
 interface ReturnReplaceProps {
-    makeNewReturn: boolean,
     products: NonNullable<OrderProduct>["orderProducts"],
     orderId: string,
     returnAcceptanceDate: number,
@@ -25,11 +25,12 @@ const convertStringToINR = (currencyString: number) => {
     return `INR ${INR.format(currencyString)}.00`;
 }
 
-export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
+export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
 
+    const router = useRouter()
     const initiateReturnOrder = trpc.viewer.return.initiateReturn.useMutation({
-        onSuccess: () => {
-            backToOrderDetails()
+        onSuccess: (response) => {
+            router.replace(`/returns/${response.data.orderId}`);
         }
     });
     const [selectedProducts, setSelectedProducts] = useState<{
@@ -124,12 +125,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, product
             <p className="text-xs text-neutral-500 mb-5 pl-1">Select item you wish to return</p>
             <p className="text-xs text-neutral-500 mb-5 pl-1">Return Available Untill {(new Date(returnAcceptanceDate)).toDateString()}</p>
             <div className="flex flex-col flex-1 space-y-3 overflow-y-scroll mb-3  ">
-                { !makeNewReturn && 
-                    <div className="flex-1 flex justify-center text-center items-center">
-                        <div className="text-sm rounded-xl bg-red-200 justify-center text-center px-3 py-2" >Can't make a new return unless last one is Accepted or Rejected.</div> 
-                    </div>
-                }
-                { makeNewReturn && products.map((product, index) => {
+                { products.map((product, index) => {
                     return ( 
                         <div 
                             key={index}
@@ -155,7 +151,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({makeNewReturn, product
                                         <p>Size: {product.productVariant?.size}</p>
                                         <p>{convertStringToINR(+product.price!)}</p>
                                     </div>
-                                    { !selectedProducts[product.id] && <p>Available For Return: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
+                                    { !selectedProducts[product.id] && <p className="font-medium text-neutral-600">Available For Return: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
                                     { selectedProducts[product.id] && (
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-neutral-400">Return:</p>

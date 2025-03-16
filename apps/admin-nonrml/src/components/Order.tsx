@@ -61,8 +61,12 @@ export interface ReturnFormData {
   }
 
 const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
+    // Early return if data is not available
+    if (!orderQuery.data?.data) {
+        return null;
+    }
 
-    const order = orderQuery.data?.data!
+    const order = orderQuery.data.data;
     const [isReimbursementPending, setIsReimbursementPending] = useState(false)
     const utils = trpc.useUtils()
     const [isEditing, setIsEditing] = useState(false);
@@ -203,7 +207,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                     <p className="text-lg">₹{+order.totalAmount}</p>
                 </div>
                 <div>
-                    <PaymentDetailsDialog payments={order.Payments} />
+                    <PaymentDetailsDialog payment={order.Payments} />
                 </div>
                 <div>
                     <h3 className="font-medium text-sm text-gray-500">Product Count</h3>
@@ -505,8 +509,8 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                 </div>}
 
                                 {/** Credit note details */}
-                                {returnOrder.creditNote && returnOrder.creditNote.map( creditNote => (
-                                    <div className="flex flex-row justify-between text-md gap-2 pt-4">
+                                {returnOrder.creditNote && returnOrder.creditNote.map( (creditNote, index) => (
+                                    <div className="flex flex-row justify-between text-md gap-2 pt-4" key={index}>
                                         <div>
                                             <h3 className="font-medium text-sm text-gray-500">Credit Code</h3>
                                             <p onClick={ () => {redirect(`/creditNotes?orderId=${order.id}`)} } className='text-orange-500 cursor-pointer'>{creditNote.creditCode}</p>
@@ -525,21 +529,30 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                 {/** Actions based on status*/}
                                 <div className="flex flex-row justify-end text-md gap-2 pt-4"> 
                                     { returnOrder.returnStatus === 'PENDING' && (
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => mutations.cancelReturn.mutate({ returnOrderId: returnOrder.id })}
-                                        >
-                                            Cancel
-                                        </Button>
+                                        <>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => mutations.cancelReturn.mutate({ returnOrderId: returnOrder.id })}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => mutations.updateReturnOrder.mutate({ returnId: returnOrder.id, returnStatus: "ALLOWED"})}
+                                            >
+                                                Allow return
+                                            </Button>
+                                        </>
                                     )}
-                                    { (returnOrder.returnStatus === "PENDING" || returnOrder.returnStatus == "IN_TRANSIT") && (
+                                    { (returnOrder.returnStatus === "ALLOWED" || returnOrder.returnStatus == "IN_TRANSIT") && (
                                         <Button
                                             variant="default"
                                             size="sm"
                                             onClick={() => mutations.updateReturnOrder.mutate({ returnId: returnOrder.id, returnStatus: "RECEIVED" })}
                                         >
-                                            Mark Received
+                                            {mutations.updateReturnOrder.isLoading ? "..." : "Mark Received" }
                                         </Button>
                                     )}
                                     { (returnOrder.returnStatus === "RECEIVED" && returnOrder.returnType == "RETURN") && (
@@ -548,7 +561,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                             size="sm"
                                             onClick={() => handlers.handleReturnReviewSubmit(returnOrder.id)}
                                         >
-                                            Submit Return
+                                            {mutations.updateReturnOrder.isLoading ? "..." : "Submit Return"}
                                         </Button>
                                     )}
                                     { (returnOrder.returnStatus === "RECEIVED" && returnOrder.returnType == "REPLACEMENT") && (

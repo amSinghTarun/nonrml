@@ -7,7 +7,7 @@ import Image from "next/image";
 import homeImage from "../../images/AMI_4024-Edit-2_1668x2500_crop_center.jpg"
 import Link from "next/link";
 import logo from "@/images/logo.jpg";
-const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"];
+const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"]; 
 import { getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 
@@ -57,7 +57,7 @@ export async function LandingPage() {
           <span>{`ALL IT TAKES IS A `} </span>
           <span className="text-rose-500">NO</span>
           <span>{` TO REDEFINE WHAT IS`}</span>
-          <FlipWords className="text-rose-500" words={words} /> <br />
+          <FlipWords className="text-rose-500" words={words} />
         </h2>
       </div>
 

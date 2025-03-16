@@ -167,7 +167,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
         return { 
             status: TRPCResponseStatus.SUCCESS, 
             message: "", 
-            data: returnOrder 
+            data: { orderId: input.orderId} 
         };
 
     } catch (error) {

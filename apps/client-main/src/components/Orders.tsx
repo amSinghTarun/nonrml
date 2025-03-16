@@ -70,9 +70,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
         
     const userOrders = trpc.viewer.orders.getUserOrders.useQuery(undefined,{
         staleTime: Infinity,
-        cacheTime: Infinity,
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
     });
 
     const cancelOrder = trpc.viewer.orders.cancelOrder.useMutation({
@@ -82,7 +80,8 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
         onError: () => {
             toast({
                 duration: 1500,
-                title: "Please Try again in some time"
+                title: "Issue in cancelling order, please try after some time.",
+                variant: "destructive"
             })
         }
     })

@@ -100,7 +100,7 @@ const Signin = () => {
                     <Form onSubmit={otpSent ? onOTPSubmit : onMobileSubmit} >
                         <div className="flex flex-row">
                             <FormInputField
-                                className={` text-center text-sm placeholder:text-xs placeholder:text-neutral-700 text-black bg-white/20 backdrop-blur-3xl ${otpSent ? "rounded-r-none basis-4/5 w-full" : "w-full"}`}
+                                className={` text-center text-sm placeholder:text-xs placeholder:text-neutral-500 text-black bg-white/20 backdrop-blur-3xl ${otpSent ? "rounded-r-none basis-4/5 w-full" : "w-full"}`}
                                 required 
                                 value = {mobileNumber} 
                                 type = "string" 
@@ -112,7 +112,7 @@ const Signin = () => {
                         { otpSent && 
                             <div className='flex flex-row rounded-md'>
                             < FormInputField 
-                                className={`w-full basis-4/5 text-center text-sm placeholder:text-xs placeholder:text-neutral-700 text-black bg-white/20 backdrop-blur-3xl rounded-r-none`}
+                                className={`w-full basis-4/5 text-center text-sm placeholder:text-xs placeholder:text-neutral-500 text-black bg-white/20 backdrop-blur-3xl rounded-r-none`}
                                 type="string" 
                                 value={otp} 
                                 required

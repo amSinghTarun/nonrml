@@ -12,9 +12,9 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { CreditCard, ArrowDown } from "lucide-react";
 import { RouterOutput } from '@/app/_trpc/client';
 
-type Payments = NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["Payments"]
+type Payments = NonNullable<NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["Payments"]>
 
-const PaymentDetailsDialog = ({ payments } : {payments: Payments}) => {
+const PaymentDetailsDialog = ({ payment } : {payment: Payments}) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,7 +29,7 @@ const PaymentDetailsDialog = ({ payments } : {payments: Payments}) => {
         </DialogHeader>
         
         <div className="space-y-6">
-          {payments.map((payment) => (
+          {/* {payments.map((payment) => ( */}
             <div key={payment.id} className="space-y-4">
               {/* Payment Information */}
               <div className="border rounded-lg">
@@ -55,7 +55,7 @@ const PaymentDetailsDialog = ({ payments } : {payments: Payments}) => {
                         </span>
                       </TableCell>
                       <TableCell>{payment.paymentService}</TableCell>
-                      <TableCell>{new Date(payment.createdAt).toDateString()}</TableCell>
+                      <TableCell>{new Date(payment.createdAt!).toDateString()}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -108,7 +108,7 @@ const PaymentDetailsDialog = ({ payments } : {payments: Payments}) => {
                 )}
               </div>
             </div>
-          ))}
+          {/* ))} */}
         </div>
       </DialogContent>
     </Dialog>

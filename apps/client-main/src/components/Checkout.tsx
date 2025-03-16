@@ -31,19 +31,24 @@ const convertStringToINR = (currencyString: number) => {
 
 export const Checkout = ({className, buyOption, userAddresses}: AddressProps) => {
     
-    const { toast } = useToast();
     const router = useRouter();
+    const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
+    const { cartItems, setCartItems } = useCartItemStore();
+    const orderProducts = !buyOption ? cartItems : buyNowItems;
+    const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
+    
+    if(Object.keys(orderProducts).length == 0 && !initiateOrder.isLoading)
+        router.back();
+    
+    const { toast } = useToast();
     const couponCode = useRef("");
     const totalAmount = useRef(0);
+    const [ quantityChange, setQuantityChange ] = useState(false);
     const [ selectedAddress, setSelectedAddress ] = useState<AddressesTRPCOutput[number]>();
     const [ applyCoupon, setApplyCoupn ] = useState(false);
     const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
     const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    const { cartItems, setCartItems } = useCartItemStore();
-    const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
-    const [ quantityChange, setQuantityChange ] = useState(false);
-    const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
     const deleteAddress = trpc.viewer.address.removeAddress.useMutation({
         onSuccess: () => {
             userAddresses.refetch()
@@ -52,7 +57,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
       onSuccess: (response) => {
-        router.push(`/account/${response.data.orderId}`);
+        router.replace(`/account/${response.data.orderId}`);
       },
       onError: () => {
         toast({
@@ -67,11 +72,6 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
         setSelectedAddress(address);
         setAction("EDITADDRESS");
     }
-
-    const orderProducts = !buyOption ? cartItems : buyNowItems;
-    // console.log("ORDER_IN_PROCESS", orderInProcess);
-    if(Object.keys(orderProducts).length == 0 && !initiateOrder.isLoading)
-        router.back();
 
     useEffect( () => {
         totalAmount.current = 0;
