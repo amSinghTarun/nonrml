@@ -7,10 +7,10 @@ export const ZInitiateReturnSchema = z.object({
         quantity: z.number(),
         returnReason: z.string(),
         orderProductId: z.number(),
-        referenceImage: z.string(),
+        referenceImage: z.string().optional(),
         exchangeVariant: z.number().optional()
     })),
-    returnType: z.enum(["RETURN","REPLACEMENT"]).default("RETURN")
+    returnType: z.enum(Object.keys(prismaEnums.ReturnType) as [keyof typeof prismaEnums.ReturnType]).default("RETURN")
 });
 export type TInitiateReturnSchema = z.infer<typeof ZInitiateReturnSchema>;
 

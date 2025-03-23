@@ -19,7 +19,7 @@ export const UserButton = () => {
     
     return (
         <div 
-            className= {`cursor-pointer w-auto h-full ${session?.user && "hidden"}`}
+            className= {`cursor-pointer w-auto h-full content-center ${session?.user && "hidden"}`}
             onClick={handleOnClick}>
             {
                 appbarUtil == "USER_ACCESSIBILITY" ?

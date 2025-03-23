@@ -65,6 +65,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             title: "Something went wrong. Any payment deducted will be reimbursed",
             variant: "destructive"
         });
+        router.replace("/account");
       }
     });
 
@@ -104,8 +105,8 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             // const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
             const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
+                console.log("HERE")
                 setQuantityChange(true);
-                // setOrderInProcess(false);
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
                 return;
             }
@@ -122,6 +123,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
 
         } catch(error: any) {
             // setOrderInProcess(false);
+            console.log("ALSO HERE")
             toast({
                 duration: 3000,
                 title: "Something went wrong. Please try again !!",

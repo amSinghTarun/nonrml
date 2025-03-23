@@ -10,7 +10,6 @@ import { UserAccessibility } from './UserAccessibility';
 import Link from 'next/link';
 import logo from "@/images/logo.png";
 import Image from "next/image";
-import { redirect } from 'next/navigation';
 
 export const Appbar = async () => {
     let categoryList = await redis.redisClient.get<string[]|null>("productCategory")

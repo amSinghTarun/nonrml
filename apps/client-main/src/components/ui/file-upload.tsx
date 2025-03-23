@@ -18,10 +18,11 @@ const mainVariant = {
 interface FileUploadProps {
   onChange: (orderProductId: number, file: File) => void,
   onFileDelete: (orderProductId: number) => void,
-  orderProductId: number
+  orderProductId: number,
+  buttonClass?: string  
 }
 
-export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductId, onFileDelete }) => {
+export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductId, onFileDelete, buttonClass }) => {
 
   const [file, setFile] = useState<File>();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +114,7 @@ export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductI
                 }}
                 className={cn(
                   "z-40 text-xs flex items-center justify-center p-2 lg:p-4 w-full mx-auto rounded-md hover:underline font-light text-white cursor-pointer hover:bg-neutral-900 bg-neutral-800"
-                )}
+                , buttonClass)}
               >
                 {isDragActive ? (
                   <motion.p

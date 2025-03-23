@@ -1,7 +1,8 @@
 import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema } from "./replacement.schema";
+import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema, TEditReplacementOrderSchema } from "./replacement.schema";
 import { Prisma } from "@nonrml/prisma";
+import { redis } from "@nonrml/cache";
 
 
 export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGetReplacementOrderSchema>)   => {
@@ -23,9 +24,16 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
                 shipmentId: true,
                 return: {
                     select:{
-                        returnStatus: true
+                        returnStatus: true,
+                        returnReceiveDate: true
                     }
                 },
+                CreditNotes: {
+                    select: {
+                        creditCode: true,
+                        value: true
+                    }
+                }, 
                 replacementItems: {
                     select: {
                         nonReplacableQuantity: true,
@@ -102,6 +110,31 @@ export const updateNonReplaceQuantity = async ({ctx, input} : TRPCRequestOptions
     }
 }
 
+// Edit order
+export const editReplacementOrder = async ({ctx, input} : TRPCRequestOptions<TEditReplacementOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        let updateData = {
+            ...(input.replacementStatus && {status: input.replacementStatus})
+        }
+        const replacementUpdated = await prisma.replacementOrder.update({
+            where: {
+                id: input.replacementId
+            },
+            data: updateData
+        })
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementUpdated};
+
+    }  catch(error) {
+        //console.log("\n\n Error in Initiate Return ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+}
+
 // create a finc to finalize the return and start replacement    
     // Tasks
         // - Submit review and update status
@@ -126,6 +159,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                             select: {
                                 productVariant: {
                                     select: {
+                                        productId: true,
                                         inventory: {
                                             select: {
                                                 id: true
@@ -164,11 +198,13 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
         if(!dataForReplacement || !dataForReplacement?.returnItems.length)
             throw {code: "BAD_REQUEST", message: "Invalid Replacement Order Id"}
         
+        let replaceAllowedItems = 0;
         for( let returnItem of dataForReplacement.returnItems){
             let updateQueries = [];
-
+            
+            console.log("In the finalize method loop", returnItem);
             // A way to figure out the processed deeds
-            if(returnItem.status != "PENDING"){
+            if(returnItem.status == "PENDING"){
 
                 // prepare query to update the return item rejected quantity and reason and status
                 updateQueries.push(
@@ -183,6 +219,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                         }
                     })
                 )
+
 
                 // prepare query to update the returned product variant inventory with returned accepted quantity ( not rejected )
                 if( (returnItem.quantity - (input.reviewData[returnItem.id]?.rejectedQuantity || 0)) > 0 ){
@@ -199,6 +236,8 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                         })
                     )
                 }
+
+                replaceAllowedItems =+ (returnItem.quantity - (input.reviewData[returnItem.id]?.rejectedQuantity ?? 0))
                 
                 // to update the replaceable quantity in replacement table
                 let replacableQuantity = ( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) 
@@ -215,6 +254,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
 
 
                 updateQueries.push(
+                    // this is to decrement the quantity from the replaced size
                     prisma.inventory.update({
                         where: {
                             id: returnItem.ReplacementItem?.productVariant.inventory?.id
@@ -227,6 +267,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                 )
 
                 // prepare query to update non-replacable quantity, return - rejected - avl > 0 ? return - rejected - avl : 0.
+                console.log(Math.max(( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) - ( returnItem.ReplacementItem?.productVariant.inventory?.quantity! + returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! ), 0 ))
                 updateQueries.push(
                     prisma.replacementItem.update({
                         where: {
@@ -237,8 +278,10 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                         }
                     })
                 )
-
+                console.log("Going in treansactions", updateQueries)
                 await prisma.$transaction(updateQueries);
+                await redis.redisClient.del(`productVariantQuantity_${returnItem.orderProduct.productVariant.productId}`)
+                console.log("Out of treansactions")
             }
         }
 
@@ -250,8 +293,8 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                 id : input.replacementOrderId
             },
             data: {
-                status: "PROCESSING",
-                return: { update: { returnStatus: "REVIEW_DONE" } }
+                status: replaceAllowedItems == 0 ? "ASSESSED" : "PROCESSING",
+                return: { update: { returnStatus: "ASSESSED" } }
             }
         })
 
@@ -263,88 +306,3 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
         throw TRPCCustomError(error);
     }
 }
-
-// /* 
-//     Edit the status of replacement order
-//     Process:
-//         if status is accepted then create a new order to send the new item to the user,
-//         call the order creating function,
-//             payment, shipment and all will be handled there only
-// */
-// export const changeReplacementOrderStatus = async ({ctx, input} : TRPCRequestOptions<TChangeReplacementOrderStatusSchema>) => {
-//     try{
-//         switch(input.replacementOrderStatus){
-//             case prismaEnums.ReplacementOrderStatus.ACCEPTED:
-//                 const originalOrderDetails = await prisma.replacementOrder.findUnique({
-//                     where: {
-//                         id: input.replacementOrderId
-//                     },
-//                     include: {
-//                         productOrder: {
-//                             include : {
-//                                 order: true
-//                             }
-//                         }
-//                     }
-//                 })
-//                 const newOrderInput : TInitiateOrderSchema = {
-//                     type: prismaEnums.OrderType.REPLACEMENT,
-//                     directOrder: true,
-//                     productDetails: {
-//                         sku: originalOrderDetails?.productOrder.productSKU!,
-//                         quantity: originalOrderDetails?.quantity!
-//                     },
-//                     originalOrderId: originalOrderDetails?.productOrder.orderId!,
-//                     addressId: originalOrderDetails?.productOrder.order.addressId!,
-//                     paymentId: originalOrderDetails?.productOrder.order.paymentId!,
-//                 }
-
-//                 await initiateOrder({ctx: ctx, input: newOrderInput});
-//                 break;
-//             case prismaEnums.ReplacementOrderStatus.REJECTED:
-//                 //send mail saying the QC(quality check) has failed
-//                 break;
-//         }
-//         const updatedReplacementOrder = await prisma.replacementOrder.update({
-//             where: {
-//                 id: input.replacementOrderId
-//             },
-//             data: input
-//         });
-//         return { status: TRPCResponseStatus.SUCCESS, message:"", data: updatedReplacementOrder};
-//     } catch(error) {
-//         //console.log("\n\n Error in editReplacementOrder ----------------");
-//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
-//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-//         throw TRPCCustomError(error);
-//     } 
-// }
-
-// /*
-//     as per the documentation, if the order is in ready to ship/pick status, thn it can be cancelled
-//     Process:
-//         check the status of the shipment
-//         check for required status
-//         cancel / reject as per the status
-// */
-// export const cancelReplacementOrder = async ({ctx, input}: TRPCRequestOptions<TCancelReplacementOrderSchema>) => {
-//     try{
-//         const userId = ctx?.user?.id;
-//         const replacementOrderDetails = await prisma.replacementOrder.findUnique({
-//             where: {
-//                 id: input.replacementOrderId
-//             }
-//         });
-//         // check for status of shipment
-//         // if in transit cancel the order
-//         // else return the can't cancel thing 
-//         // put the below query in else condition
-//         throw new TRPCError({code: "UNAUTHORIZED", message: "Can't cancel the order once it's Confirmed"});
-//     } catch(error) {
-//         //console.log("\n\n Error in cancelReplacementOrder ----------------");
-//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
-//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-//         throw TRPCCustomError(error);
-//     } 
-
-// };

@@ -48,9 +48,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     </div>
                 )}
             </div>
-            <div className="text-black items-center flex flex-col pt-1 pb-2 w-full">
-                <h1 className="font-medium text-xs">{name.toUpperCase()}</h1>
-                <p className="font-normal text-gray-700 text-xs">{priceInCurrency}</p>
+            <div className="items-center flex flex-col pt-1 pb-2 w-full">
+                <h1 className=" text-neutral-900 font-medium text-xs">{name.toUpperCase()}</h1>
+                <p className="font-normal text-neutral-600 text-xs">{priceInCurrency}</p>
             </div>
         </Link>
     );

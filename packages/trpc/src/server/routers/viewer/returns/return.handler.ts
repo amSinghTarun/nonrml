@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
 import { dataURLtoFile } from "@nonrml/common";
 import crypto from 'crypto';
+import { redis } from "@nonrml/cache";
 
 /*
     Return the order
@@ -19,11 +20,8 @@ import crypto from 'crypto';
 */
 export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateReturnSchema>) => {
     const prisma = ctx.prisma;
-    
-    // Validate input
-    
     try {
-
+        console.log(input)
         if (!input || input.products.length === 0)
             throw { code: "BAD_REQUEST", message: "Invalid return input" }
 
@@ -61,13 +59,14 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
 
         // Process return images and prepare return items data
         const returnItemsData: {
-            referenceImage : string,
+            referenceImage : string | null,
             returnReason : string,
             orderProductId : number,
             quantity : number,
         }[] = []
 
         //upload images and store links in returnItemsData
+        let imageUrl = null;
         for (let orderProduct of orderProducts) {
             const productToReturn = orderProductsToReturn[orderProduct.id];
             
@@ -80,23 +79,26 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
             }
 
             // Upload image
-            const imageUploaded = await uploadToBucketFolder(
-                `return/${ctx.user?.id}:${orderProduct.id}:${productToReturn.quantity}:${Date.now()}`,
-                dataURLtoFile(productToReturn.referenceImage, `${input.orderId}:${Date.now()}`)
-            );
-
-            if (imageUploaded.error) {
-                throw new TRPCError({ 
-                    code: "UNPROCESSABLE_CONTENT", 
-                    message: "Unable to upload image" 
-                });
+            if(productToReturn.referenceImage){
+                const imageUploaded = await uploadToBucketFolder(
+                    `return/${ctx.user?.id}:${orderProduct.id}:${productToReturn.quantity}:${Date.now()}`,
+                    dataURLtoFile(productToReturn.referenceImage, `${input.orderId}:${Date.now()}`)
+                );
+    
+                if (imageUploaded.error) {
+                    throw new TRPCError({ 
+                        code: "UNPROCESSABLE_CONTENT", 
+                        message: "Unable to upload image" 
+                    });
+                }
+    
+                // Get public URL
+                const { data } = await getPublicURLOfImage(imageUploaded.data.path, false);
+                imageUrl = data;
             }
 
-            // Get public URL
-            const { data: imageUrl } = await getPublicURLOfImage(imageUploaded.data.path, false);
-
             returnItemsData.push({
-                referenceImage: imageUrl.publicUrl,
+                ...(imageUrl && {referenceImage: imageUrl.publicUrl}),
                 returnReason: productToReturn.returnReason,
                 orderProductId: productToReturn.orderProductId,
                 quantity: productToReturn.quantity,
@@ -129,7 +131,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
             });
 
             // Handle replacement order if applicable
-            if (input.returnType === "REPLACEMENT") {
+            if (input.returnType == prismaEnums.ReturnType.REPLACEMENT) {
 
                 let replacementItemsData = []
                 for( let returnItem of returnOrderCreated.returnItems){
@@ -139,7 +141,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     })
                 }
 
-                tx.replacementOrder.create({
+                await tx.replacementOrder.create({
                     data: {
                         returnOrderId: returnOrderCreated.id,
                         orderId: input.orderId,
@@ -460,9 +462,8 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
     input = input!;
     try{
         console.log(input)
-        if( input.returnStatus == "REVIEW_DONE" ){
-            let returnItemsQueries = [];
-            let returnItemsReview = input.reviewData;
+        if( input.returnStatus == "ASSESSED" ){
+            let returnItemsReview = input.reviewData; 
 
             const returnProductVariantDetails = await prisma.returns.findUnique({
                 where: {
@@ -475,6 +476,12 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                             id: true
                         }
                     },
+                    refundAmount: true,
+                    creditNote: {
+                        select: {
+                            id: true
+                        }
+                    },
                     returnType: true,
                     returnItems: {
                         select: {
@@ -482,7 +489,13 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                             quantity: true,
                             orderProduct: {
                                 select: {
-                                    price: true
+                                    price: true,
+                                    productVariantId: true,
+                                    productVariant: {
+                                        select: {
+                                            productId: true
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -494,8 +507,12 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                 throw { code: "BAD_REQUEST", message: "RETURN ID INVALID"}
             
             let refundAmount = 0;
+            let returnItemsQueries = [];
+            let restockQueries = [];
+            let redisQueries = []
 
             for( let returnProduct of returnProductVariantDetails.returnItems ){
+                redisQueries.push(redis.redisClient.del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
                 let rejectedQuamtity = returnItemsReview && returnItemsReview[returnProduct.id]?.rejectedQuantity;
                 if(returnItemsReview && rejectedQuamtity){
                     // for every product mark the rejected and reason
@@ -515,9 +532,27 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     )
                 }
                 refundAmount += ( returnProduct.quantity - ( rejectedQuamtity || 0 )) * ( +returnProduct.orderProduct.price )
+                
+                // Increment the accepted returned product in the inventory
+                restockQueries.push(
+                    prisma.inventory.update({
+                        where: {
+                            productVariantId: returnProduct.orderProduct.productVariantId
+                        },
+                        data: {
+                            quantity: {
+                                increment: returnProduct.quantity - ( rejectedQuamtity || 0 )
+                            }
+                        }
+                    })
+                )
+
             }
             
-            returnItemsQueries.push(
+            let refundQueries = [];
+            // update the refund amount
+            // The check in this and in 1 below it are precautionary so that if the process is running again, they don't perform the steps again
+            !returnProductVariantDetails.refundAmount && refundQueries.push(
                 prisma.returns.update({
                     where: {
                         id: input.returnId
@@ -528,7 +563,9 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                 }),
             );
 
-            refundAmount != 0 && returnItemsQueries.push(
+            // create the credit note
+            // TO-DO : Add functionality to send it over mail 
+            refundAmount != 0 && !returnProductVariantDetails.creditNote.length && refundQueries.push(
                 prisma.creditNotes.create({
                     data: {
                         returnOrderId: input.returnId,
@@ -542,8 +579,12 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                 })
             )
 
-            prisma.$transaction(returnItemsQueries);
+            await prisma.$transaction(refundQueries);
+            await prisma.$transaction(returnItemsQueries);            
+            await prisma.$transaction(restockQueries); 
+            await Promise.all(redisQueries);
         }
+
 
         // delete the cache whatever
         const replacementOrderDetails = await prisma.returns.update({

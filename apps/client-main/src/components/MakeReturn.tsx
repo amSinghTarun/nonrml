@@ -81,12 +81,12 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, ret
             products: { 
                 orderProductId: number, 
                 quantity:number, 
-                referenceImage:string,
+                referenceImage?:string,
                 returnReason:string
             }[]
         } = {orderId: orderId, products: []}
         for(let productId of Object.keys(selectedProducts)){
-            !selectedProducts[+productId].referenceImage && (errors = {...errors, [+productId]: "PLEASE UPLOAD A RELATED IMAGE"});
+            // !selectedProducts[+productId].referenceImage && (errors = {...errors, [+productId]: "PLEASE UPLOAD A RELATED IMAGE"});
             !selectedProducts[+productId].reason ? (
                 errors[+productId] ? ( errors = {...errors, [+productId]: "PLEASE UPLOAD A RELATED IMAGE AND EXPLAIN YOUR REASON"})
                 : (errors = {...errors, [+productId]: "PLEASE EXPLAIN YOUR ISSUE( more than 15 words)"})
@@ -97,7 +97,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, ret
                 productDetails.products.push({
                     quantity: selectedProducts[+productId].quantity,
                     returnReason: selectedProducts[+productId].reason!,
-                    referenceImage: await convertFileToDataURL(selectedProducts[+productId].referenceImage!),
+                    ...(selectedProducts[+productId].referenceImage && {referenceImage: await convertFileToDataURL(selectedProducts[+productId].referenceImage!)}),
                     orderProductId: +productId
                 });
             }
@@ -134,16 +134,15 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, ret
                             <div className="flex w-full flex-row">
                                 <Image src={`${product.productVariant?.product.productImages[0].image}`} alt="product image" className="h-28 w-auto object-cover rounded-md" width={10} height={10} sizes="100vw"/>
                                 {
-                                    selectedProducts[product.id] ? (
+                                    selectedProducts[product.id] ? 
                                         <button 
                                             className=" absolute cursor-pointer top-2 left-2  "
-                                        ><Checkbox color="default" className=" text-white border p-0 rounded-none" onClick={() => { removeSelectedProduct(product.id) }}/></button>
-                                    ) : (
+                                        ><Checkbox defaultChecked color="default" className=" text-white border p-0 rounded-none" onClick={() => { removeSelectedProduct(product.id) }}/></button>
+                                     : 
                                         <button 
                                             className=" absolute cursor-pointer top-2 left-2"
                                             disabled={product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0)) ? false : true}
                                         ><Checkbox className=" text-white  p-0 m-0 rounded-full hover:none" onClick={()=>setSelectedProducts({...selectedProducts, [product.id]: {quantity: product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}})} /></button>
-                                    )
                                 }
                                 <div className="flex flex-col text-xs flex-grow space-y-3 pl-3 text-neutral-500">
                                     <p>{product.productVariant?.product.name.toUpperCase()}</p>
@@ -162,8 +161,8 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, ret
                             </div>
                             { selectedProducts[product.id] && 
                                 <div className="flex flex-col w-full lg:space-y-0 space-y-4 lg:flex-row lg:gap-x-4 mt-2">
-                                    <FileUpload onFileDelete={deleteUploadedImage} onChange={handleImageUpload} orderProductId={product.id} /> 
-                                    <Textarea className="text-xs border-white border shadow-sm shadow-neutral-200" onChange={(e)=>{handleReasonUpload(e.target.value, product.id)}} placeholder="Explain Your Issue In More Than 15 Words" /> 
+                                    <FileUpload buttonClass="border border-neutral-200 text-neutral-400 bg-white hover:bg-white hover:text-neutral-700" onFileDelete={deleteUploadedImage} onChange={handleImageUpload} orderProductId={product.id} /> 
+                                    <Textarea className="text-xs border border-neutral-200 placeholder:text-neutral-400" onChange={(e)=>{handleReasonUpload(e.target.value, product.id)}} placeholder="Explain Your Issue In More Than 15 Words" /> 
                                 </div>
                             } 
                         {error[product.id] && <div key={product.id} className="text-xs text-red-600 pl-5">{error[product.id]}</div>}

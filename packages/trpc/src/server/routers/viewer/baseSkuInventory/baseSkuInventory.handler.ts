@@ -74,6 +74,7 @@ export const getBaseInventory = async ({ctx, input}: TRPCRequestOptions<TGetInve
     }
 }
 
+// TO-DO : Maybe delete the quantity related redis values
 export const editBaseInventory = async ({ctx, input}: TRPCRequestOptions<TEditBaseSkuInventorySchema>)  => {
     const prisma = ctx.prisma;
     input = input!;
@@ -92,7 +93,7 @@ export const editBaseInventory = async ({ctx, input}: TRPCRequestOptions<TEditBa
             where: {
                 id: input.baseSkuId
             },
-            data: updateData
+            data: updateData,
         });
         return { status: TRPCResponseStatus.SUCCESS, message: "", data: inventory};
     } catch(error) {

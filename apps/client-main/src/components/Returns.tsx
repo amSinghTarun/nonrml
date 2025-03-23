@@ -44,7 +44,7 @@ export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => 
                                 </div>
                             </div> }
                         </div>
-                        <div className="flex flex-col space-y-2 text-neutral-600">
+                        <div className="flex flex-col space-y-2 ">
                             <div className="space-y-1">
                                 { order.returnItems.map((product, index) => (
                                     <div key={index} className="flex flex-col text-xs text-neutral-500" >

@@ -26,6 +26,12 @@ export const ZInitReplacementOrderSchema =  z.object({
 });
 export type TInitReplacementOrderSchema = z.infer<typeof ZInitReplacementOrderSchema>;
 
+export const ZEditReplacementOrderSchema =  z.object({
+    replacementId: z.number(),
+    replacementStatus: z.enum(Object.keys(prismaEnums.ReplacementOrderStatus) as [keyof typeof prismaEnums.ReplacementOrderStatus]),
+});
+export type TEditReplacementOrderSchema = z.infer<typeof ZEditReplacementOrderSchema>;
+
 export const ZUpdateNonReplaceQuantitySchema =  z.object({
     replacementOrderProductId : z.number(),
     nonReplacementQuantity: z.number()

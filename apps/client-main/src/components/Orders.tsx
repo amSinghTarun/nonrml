@@ -85,14 +85,14 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
             })
         }
     })
-
+    console.log(userOrders.data?.data)
     return (
         <div className={cn("overflow-none h-screen w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
             <div className="flex flex-row lg:flex-col lg:text-center justify-between lg:justify-center lg:basis-5/12 p-2 text-xs lg:text-sm gap-4">
                 <span className="hover:font-medium cursor-none font-medium text-neutral-600">{userContact}</span>
                 <span className="cursor-pointer hover:underline text-neutral-500" onClick={()=> {signOut()}}> LOGOUT</span>
             </div>
-            <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto scrollbar-hide h-full">
+            <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto w-full scrollbar-hide h-full">
                 {
                     userOrders.isLoading &&
                     <article className="flex flex-row p-2 w-full h-full justify-center items-center bg-white text-xs">

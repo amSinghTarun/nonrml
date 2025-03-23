@@ -38,6 +38,8 @@ model CreditNotes {
   updatedAt                         DateTime                            @updatedAt
   creditNoteOrigin                  CreditNotePurpose?
   remainingValue                    Float
+  replacementOrderId                Int?
+  replacementOrder                  ReplacementOrder?                   @relation(fields: [replacementOrderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   returnOrder                       Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
   user                              User                                @relation(fields: [userId], references: [id])
   creditNotesPartialUseTransactions CreditNotesPartialUseTransactions[]
@@ -171,15 +173,13 @@ model ProductImage {
 model Products {
   id                   Int                   @id @default(autoincrement())
   name                 String                @unique
+  description          String
   price                Float
   tags                 String[]
   categoryId           Int
   soldOut              Boolean               @default(false)
-  inspiration          String
-  description          String
-  details              String[]
   care                 String[]
-  shippingDetails       String[]
+  details              String[]
   sku                  String                @unique
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -188,6 +188,8 @@ model Products {
   colour               String                @default("white")
   public               Boolean               @default(false)
   sizeChartId          Int?
+  inspiration          String
+  shippingDetails      String[]
   ProductCategorySizes ProductCategorySizes?
   productImages        ProductImage[]
   ProductVariants      ProductVariants[]
@@ -268,7 +270,7 @@ model Payments {
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   orderId             String               @unique
-  Orders              Orders              @relation(fields: [orderId], references: [id])
+  Orders              Orders               @relation(fields: [orderId], references: [id])
   RefundTransactions  RefundTransactions[]
 }
 
@@ -372,6 +374,7 @@ model ReplacementOrder {
   shipmentId       Int?                   @unique
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  CreditNotes      CreditNotes[]
   replacementItems ReplacementItem[]
   order            Orders                 @relation(fields: [orderId], references: [id])
   return           Returns                @relation(fields: [returnOrderId], references: [id])
@@ -476,12 +479,12 @@ enum DiscountStatus {
 
 enum ReturnStatus {
   PENDING
-  ALLOWED
-  REVIEW_DONE
+  ASSESSED
   CANCELLED_ADMIN
   RECEIVED
   CANCELLED
   IN_TRANSIT
+  ALLOWED
 }
 
 enum ReturnItemStatus {
@@ -505,6 +508,7 @@ enum ReplacementOrderStatus {
   PROCESSING
   SHIPPED
   DELIVERED
+  ASSESSED
 }
 
 enum ProductStatus {

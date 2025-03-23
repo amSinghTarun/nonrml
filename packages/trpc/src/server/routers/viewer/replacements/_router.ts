@@ -1,7 +1,7 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { procedure, router } from "../../../trpc";
-import { finaliseReturnAndMarkReplacementOrder, updateNonReplaceQuantity, getReplacementOrders } from "./replacement.handler";
-import { ZInitReplacementOrderSchema, ZUpdateNonReplaceQuantitySchema, ZGetReplacementOrderSchema } from "./replacement.schema";
+import { finaliseReturnAndMarkReplacementOrder, updateNonReplaceQuantity, getReplacementOrders, editReplacementOrder } from "./replacement.handler";
+import { ZInitReplacementOrderSchema, ZUpdateNonReplaceQuantitySchema, ZGetReplacementOrderSchema, ZEditReplacementOrderSchema } from "./replacement.schema";
 
 export const replacementRouter = router({
     getReplacement : publicProtectedProcedure
@@ -12,6 +12,10 @@ export const replacementRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Edit replacement order"}})
         .input(ZInitReplacementOrderSchema)
         .mutation(async ({ctx, input}) => await finaliseReturnAndMarkReplacementOrder({ctx, input}) ),
+    editReplacementOrder: procedure
+        .meta({ openAPI: {method: "POST", descrription: "Edit replacement order"}})
+        .input(ZEditReplacementOrderSchema)
+        .mutation(async ({ctx, input}) => await editReplacementOrder({ctx, input}) ),
     updateNonReplaceQuantity: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit replacement order"}})
         .input(ZUpdateNonReplaceQuantitySchema)

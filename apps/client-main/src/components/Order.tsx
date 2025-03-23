@@ -126,7 +126,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                         <p>{`${product.productVariant?.product.name.toUpperCase()} ( ${product.productVariant?.size} )`}</p>
                                         <p>{convertStringToINR(+product.price)}</p>
                                         <p>{`${product.quantity} Piece${product.quantity > 1 ? 's' : ""}`} </p>
-                                        { product.rejectedQuantity && <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled`}</p> }
+                                        { product.rejectedQuantity ? <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled`}</p> : <></>}
                                     </div>
                                 </div>
                             </div>

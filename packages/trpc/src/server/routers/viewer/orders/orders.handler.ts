@@ -5,6 +5,7 @@ import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
+import { redis } from "@nonrml/cache";
 const returnExchangeTime = 604800000; // 7 days
 /*
 Get all the orders of a user
@@ -261,14 +262,20 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
             }
         });
 
-        await prisma.orders.update({
-            where: {
-                id: orderDetails.Orders.id
-            },
-            data: {
-                orderStatus: paymentMethod == "Cash on Delivery" ? prismaEnums.OrderStatus.PENDING : prismaEnums.OrderStatus.ACCEPTED
-            }
-        });
+        if(paymentMethod == "Cash on Delivery"){
+            await prisma.orders.update({
+                where: {
+                    id: orderDetails.Orders.id
+                },
+                data: {
+                    orderStatus: prismaEnums.OrderStatus.PENDING
+                }
+            });
+        } else {
+            await acceptOrder(orderDetails.Orders.id);
+        }
+
+
 
         //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
         orderDetails.Orders.creditNote && (
@@ -292,6 +299,10 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: orderDetails.orderId}};
     }catch(error){  
         //console.log("\n\n Error in verifyOrder ----------------");
+        // if(error.message == "ERROR_ACCEPTING_ORDER"){
+            // throw some error and catch it in frontend to not show any toast but to redirect to the account page and 
+            // let admin do the accepting or whatever.
+        // }
         if (error instanceof Prisma.PrismaClientKnownRequestError)
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error)
@@ -348,6 +359,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 product:{
                     select:{
                         price: true,
+                        id: true,
                         name: true
                     }
                 },
@@ -373,6 +385,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
             if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
+                await redis.redisClient.del(`productVariantQuantity_${variant.product.id}`)
                 insufficientProductQuantities = {...insufficientProductQuantities, [variant.id] : { ...input.orderProducts[variant.id], quantity: 0}};
             }
             if (variant.product.price !== orderProduct!.price) {
@@ -383,7 +396,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             }
             orderTotal += (variant.product.price * orderProduct!.quantity);
         }
-
         if(Object.keys(insufficientProductQuantities).length != 0){
             return {
                 status: TRPCResponseStatus.SUCCESS,

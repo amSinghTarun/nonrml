@@ -4,6 +4,8 @@ import { useSetAppbarUtilStore } from "@/store/atoms";
 import BlurOffIcon from '@mui/icons-material/BlurOff';
 import BlurOnIcon from '@mui/icons-material/BlurOn';
 import { useStore } from "zustand";
+import { TbMenu4 } from "react-icons/tb";
+import { TbMenu3 } from "react-icons/tb";
 
 export const MenuButton = () => {
     // const [ selectedUtil, setSelectedUtil] = useRecoilState(appbarOpenUtilAtom);
@@ -12,14 +14,14 @@ export const MenuButton = () => {
 
     return (
         <div 
-            className=' cursor-pointer w-auto h-full' 
+            className=' cursor-pointer w-auto h-full content-center' 
             onClick={()=>{
                 appbarUtil != "SIDEBAR" ? setAppbarUtil("SIDEBAR") : setAppbarUtil("")
             }}
         >
             { appbarUtil != "SIDEBAR" ? 
-            <BlurOnIcon sx={{ width: 'auto', height: '90%', color:"black"}} /> : 
-            <BlurOffIcon sx={{width:"auto", height:"90%", color:"black"}}/>}
+            <TbMenu4 size={24} /> : 
+            <TbMenu3 size={24} />}
         </div>
     )
 };

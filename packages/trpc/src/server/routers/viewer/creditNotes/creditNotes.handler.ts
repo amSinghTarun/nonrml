@@ -101,7 +101,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     returnOrderId: input.returnOrderId,
                     value: orderDetail?.order.totalAmount!,
                     remainingValue: orderDetail?.order.totalAmount!,
-                    creditNoteOrigin: orderDetail.returnType as keyof typeof prismaEnums.CreditNotePurpose,
+                    creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
                     userId: orderDetail?.order.userId,
                     expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
                     creditCode: `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
@@ -142,12 +142,14 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     },
                     replacementItems: {
                         where: {
-                            nonReplaceAction: { not: "CREDIT" }
+                            nonReplaceAction: null
                         },
                         select: {
                             nonReplacableQuantity: true,
                             returnOrderItem: {
                                 select: {
+                                    rejectedQuantity: true,
+                                    quantity: true,
                                     orderProduct: {
                                         select: {
                                             price: true
@@ -160,29 +162,43 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 }
             })
 
-            if(!replacementOrderDetails)
+            if(!replacementOrderDetails || !replacementOrderDetails.replacementItems.length)
                 throw ({code: "BAD_REQUEST", message: "The order for which you are creating CN is invalid"});
 
-            let refundAmount = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.nonReplacableQuantity * +product.returnOrderItem.orderProduct.price), 0 );
-
+            let refundAmount = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.nonReplacableQuantity * product.returnOrderItem.orderProduct.price), 0 );
+            let replaceQuantity = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.returnOrderItem.quantity - (product.nonReplacableQuantity + (product.returnOrderItem.rejectedQuantity??0) )), 0 );
+            
             prismaUpdateQueries.push( 
                 prisma.creditNotes.create({
                     data: {
                         value: refundAmount,
                         remainingValue: refundAmount,
-                        creditNoteOrigin: prismaEnums.CreditNotePurpose.GIFT,
+                        creditNoteOrigin: prismaEnums.CreditNotePurpose.REPLACEMENT,
                         userId: replacementOrderDetails.return.order.userId,
-                        returnOrderId: input.replacementOrderId,
+                        replacementOrderId: input.replacementOrderId,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
                         creditCode: `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`
                     }
                 }),
                 prisma.replacementItem.updateMany({
                     where: {
-                        replacementOrderId: input.replacementOrderId
+                        replacementOrderId: input.replacementOrderId,
+                        nonReplacableQuantity: { gt: 0 } // to filter the item which actually are non replacable
                     },
                     data: {
-                        nonReplaceAction: "CREDIT"
+                        nonReplaceAction: prismaEnums.NonReplaceQantityAction.CREDIT
+                    }
+                })
+            )
+
+            // if the replaceQuantity is zero then make the status of replacement as ASSESSED coz nothing is left to replace
+            !replaceQuantity && prismaUpdateQueries.push(
+                prisma.replacementOrder.update({
+                    where: {
+                        id: input.replacementOrderId
+                    },
+                    data: {
+                        status: "ASSESSED"
                     }
                 })
             )

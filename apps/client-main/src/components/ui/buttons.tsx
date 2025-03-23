@@ -16,7 +16,7 @@ interface generalButtonProps {
 
 export const GeneralButton : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('rounded-md hover:bg-neutral-900 hover:underline text-white bg-neutral-800', className)} onClick={onClick}>
+        <button className={cn('rounded-md hover:bg-neutral-900 justify-center hover:underline text-white bg-neutral-800', className)} onClick={onClick}>
             {display}
         </button>
     )
@@ -30,7 +30,7 @@ interface generalButtonTransparentProps {
 
 export const GeneralButtonTransparent : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('border bg-white rounded-sm border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-white', className)} onClick={onClick}>
+        <button className={cn('border bg-white rounded-sm justify-center border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-white', className)} onClick={onClick}>
             {display}
         </button>
     )

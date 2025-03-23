@@ -15,16 +15,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UseTRPCQueryResult } from "@trpc/react-query/shared";
-import { useRouter } from "next/navigation";
-import { calculateRemainingValue, CreditNoteEditDialog } from "./CreditNote";
+import { CreditNoteEditDialog } from "./CreditNote";
 import { CreditNoteTransactions } from "./CreditNoteTransactions";
 
 type CreditNotes = UseTRPCQueryResult<RouterOutput["viewer"]["creditNotes"]["getCreditNotes"], unknown>;
 type editCNInput = RouterInput["viewer"]["creditNotes"]["editCreditNote"];
 
 export const CreditNotes = ({ creditNotes }: { creditNotes: CreditNotes }) => {
-  const router = useRouter();
-  const utils = trpc.useContext();
 
   const mutations = {
     editCN: trpc.viewer.creditNotes.editCreditNote.useMutation({

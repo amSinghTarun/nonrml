@@ -382,10 +382,10 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
               ProductVariants: {
                 where: {
                   inventory: {
-                    baseSkuInventory: {
-                      quantity: { gte:0 }
-                    },
-                    quantity: {gte: 0}
+                    OR: [
+                      {baseSkuInventory: { quantity: { gte: 1} }},
+                      {quantity: {gte: 1}}
+                    ]
                   }
                 },
               }

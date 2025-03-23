@@ -32,6 +32,7 @@ import { Edit2, Check, X } from 'lucide-react';
 import { Textarea } from './ui/textarea'
 import { redirect } from 'next/navigation'
 import PaymentDetailsDialog from './dialogs/PaymentDetaisDialog'
+import { prismaTypes } from '@nonrml/prisma'
 
 type Order = UseTRPCQueryResult<RouterOutput["viewer"]["orders"]["getOrder"], unknown>
 
@@ -119,6 +120,11 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
             onSuccess: () => {
                 orderQuery.refetch()
             }
+        }),
+        editReplacementOrder: trpc.viewer.replacement.editReplacementOrder.useMutation({
+            onSuccess: () => {
+                orderQuery.refetch()
+            } 
         })
     }
 
@@ -144,7 +150,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
             console.log(returnReviews)
             mutations.updateReturnOrder.mutate({
               returnId: returnId,
-              returnStatus: "REVIEW_DONE",
+              returnStatus: "ASSESSED",
               reviewData: returnReviews
             })
         },
@@ -179,6 +185,12 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
         handleCNonReplaceableCN: async ( replacementOrderId: number ) => {
             await mutations.createCreditNote.mutateAsync({
                 replacementOrderId
+            })
+        },
+        handleReplacementOrderStatusChange: async ( replacementOrderId: number, status: prismaTypes.ReplacementOrderStatus ) => {
+            await mutations.editReplacementOrder.mutateAsync({
+                replacementId: replacementOrderId,
+                replacementStatus: status
             })
         }
     }
@@ -572,10 +584,10 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                                 handlers.handleReplacementReviewSubmit(returnOrder.ReplacementOrder?.id!)
                                             }
                                         >
-                                            Init Replacement
+                                            Finalise Replacement
                                         </Button>
                                     )}
-                                    { (returnOrder.returnStatus === "REVIEW_DONE" && returnOrder.ReplacementOrder) && (
+                                    { (returnOrder.returnStatus === "ASSESSED" && returnOrder.ReplacementOrder) && (
                                         <>
                                             { returnOrder.ReplacementOrder?.status == "PROCESSING" && 
                                             <>
@@ -601,7 +613,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                                 <Button
                                                     variant="default"
                                                     size="sm"
-                                                    onClick={() => {}}
+                                                    onClick={ () => {handlers.handleReplacementOrderStatusChange(returnOrder.ReplacementOrder?.id!, "DELIVERED")}} // today review: most probably just the status change
                                                 >
                                                     Mark delivered
                                                 </Button>
@@ -630,12 +642,12 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                         {returnOrder.returnType == "REPLACEMENT" && <p>Exchange Size | {item.ReplacementItem?.productVariant.size}</p>}
                                     </TableCell>
                                     <TableCell className='space-y-2 divide-y align-top'>
-                                        <Image 
-                                            src={item.referenceImage!} 
+                                        { item.referenceImage && <Image 
+                                            src={item.referenceImage} 
                                             alt={item.id.toString()} 
                                             width={120} 
                                             height={120}
-                                        />
+                                        />}
                                         <p>{item.returnReason}</p>
                                     </TableCell>
                                     <TableCell className='align-top'>
@@ -665,7 +677,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                             disabled={returnOrder.returnStatus !== 'RECEIVED'}
                                         />
                                     </TableCell>
-                                    { returnOrder.returnType == "REPLACEMENT" && <TableCell className="space-y-3 align-top ">
+                                    { returnOrder.returnType == "REPLACEMENT" &&  <TableCell className="space-y-3 align-top ">
                                         <p>Non-Replace Quantity -- </p>
                                         <input
                                             type='number'
@@ -676,7 +688,7 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                                             onChange={e => updateNonAvl.current = +e.target.value}
                                             defaultValue={item.ReplacementItem?.nonReplacableQuantity}
                                         />
-                                        { item.ReplacementItem?.nonReplaceAction === null && <Button size={"sm"} onClick={async () => { await handlers.handleNonReplace(item.ReplacementItem?.id!, updateNonAvl.current )}}>Update</Button> }
+                                        { item.ReplacementItem?.nonReplaceAction === null && <Button size={"sm"} disabled={returnOrder.ReplacementOrder?.status == "DELIVERED"} onClick={async () => { await handlers.handleNonReplace(item.ReplacementItem?.id!, updateNonAvl.current )}}>Update</Button> }
                                         { item.ReplacementItem?.nonReplaceAction && <p>Non-Avl Refund Mode: {item.ReplacementItem?.nonReplaceAction}</p> }
                                     </TableCell>}
                                 </TableRow>

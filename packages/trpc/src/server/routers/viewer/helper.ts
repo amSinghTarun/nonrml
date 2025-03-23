@@ -99,43 +99,40 @@ export const TRPCCustomError = (error: any) => {
 }
 
 export const acceptOrder = async (orderId: string) => {
+    try{
 
-    let products : { [id: number]: number } = {};
-    const redisOperations: Promise<any>[] = []
+        let products : { [id: number]: number } = {};
+        const redisOperations: Promise<any>[] = []
 
-    const orderedProducts = await prisma.orderProducts.findMany({
-        where:{
-            orderId: orderId
-        }, 
-        select: {
-            productVariant: {
-                select: {
-                    id: true,
-                    product: {
-                        select: {
-                            id: true,
-                            sku: true
+        const orderedProducts = await prisma.orderProducts.findMany({
+            where:{
+                orderId: orderId
+            }, 
+            select: {
+                productVariant: {
+                    select: {
+                        id: true,
+                        product: {
+                            select: {
+                                id: true,
+                                sku: true
+                            }
                         }
                     }
-                }
-            },
-            quantity: true
-        }
-    });
-       
-    for(let orderProduct of orderedProducts) {
-        products[orderProduct.productVariant.product.id]  && (
-            redisOperations.push(
-                redis.redisClient.del(`product_${orderProduct.productVariant.product.sku}`),
-                redis.redisClient.del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
-            ),
-            products[orderProduct.productVariant.product.id] = 1
-        )
+                },
+                quantity: true
+            }
+        });
+        
+        for(let orderProduct of orderedProducts) {
+            !products[orderProduct.productVariant.product.id]  && (
+                redisOperations.push(
+                    redis.redisClient.del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
+                ),
+                products[orderProduct.productVariant.product.id] = 1
+            )
 
-        const { success } = await prisma.$transaction(async (prismaClient) => {
-    
-            // Get all inventory details in one query
-            const inventory = await prismaClient.inventory.findUnique({
+            const inventory = await prisma.inventory.findUnique({
                 where: {
                     productVariantId: orderProduct.productVariant.id
                 },
@@ -161,7 +158,7 @@ export const acceptOrder = async (orderId: string) => {
             const cancelQuantity = Math.max(0, orderQuantity - totalAvailable)
             let newInventoryQuantity = inventory.quantity
             let newBaseQuantity = inventory.baseSkuInventory?.quantity
-    
+
             if (cancelQuantity <= 0) {
                 if (orderQuantity <= inventory.quantity) {
                     newInventoryQuantity = inventory.quantity - orderQuantity
@@ -174,51 +171,57 @@ export const acceptOrder = async (orderId: string) => {
                 }
             };
 
-            prismaClient.inventory.update({
-                where: { id: inventory.id },
-                data: {
-                    quantity: newInventoryQuantity,
-                    ...(newBaseQuantity !== undefined && {
-                        baseSkuInventory: {
-                            update: { quantity: newBaseQuantity }
+            const { success } = await prisma.$transaction(async (prismaClient) => {
+        
+                // Get all inventory details in one query
+                console.log("IN PROCESS TO ACCEPT")
+                await prismaClient.inventory.update({
+                    where: { id: inventory.id },
+                    data: {
+                        quantity: newInventoryQuantity,
+                        ...(newBaseQuantity !== undefined && {
+                            baseSkuInventory: {
+                                update: { quantity: newBaseQuantity }
+                            }
+                        })
+                    }
+                });
+
+                if (cancelQuantity > 0) {
+                    await prismaClient.orderProducts.update({
+                        where: {
+                            orderId_productVariantId: {
+                                orderId: orderId,
+                                productVariantId: inventory.productVariantId
+                            }
+                        },
+                        data: {
+                            rejectedQuantity: cancelQuantity
                         }
                     })
                 }
-            });
+                return { success: true }
+            }, {timeout: 10000});
 
-            if (cancelQuantity > 0) {
-                prismaClient.orderProducts.update({
-                    where: {
-                        orderId_productVariantId: {
-                            orderId: orderId,
-                            productVariantId: inventory.productVariantId
-                        }
-                    },
-                    data: {
-                        rejectedQuantity: cancelQuantity,
-                        reimbursedQuantity: cancelQuantity
-                    }
-                })
-            }
-            return { success: true }
-        }, {timeout: 10000});
-
-        success && redisOperations.length && Promise.all(redisOperations);
-    }
-
-    await prisma.orders.update({
-        where: {
-            id: orderId
-        },
-        data: {
-            orderStatus: "ACCEPTED"
+            success && redisOperations.length && await Promise.all(redisOperations);
         }
-    });
 
-    
-    if(!orderedProducts.length) throw {code: "BAD_REQUEST", message: "Order with 0 itemds not allowed"}
+        await prisma.orders.update({
+            where: {
+                id: orderId
+            },
+            data: {
+                orderStatus: "ACCEPTED"
+            }
+        });
 
-    return {orderedProducts}
+        
+        if(!orderedProducts.length) throw {code: "BAD_REQUEST", message: "Order with 0 itemds not allowed"}
+
+        return {orderedProducts}
+    } catch(error) {
+        throw new Error("ERROR_ACCEPTING_ORDER");
+    }
 };
 
 export const calculateRejectedQuantityRefundAmounts = async  (orderId: string, getUpdateQueries?: boolean) => {

@@ -5,6 +5,10 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { usePathname } from 'next/navigation';
 import { useSetAppbarUtilStore } from "@/store/atoms";
 import { useStore } from 'zustand';
+import { LuShoppingBag } from "react-icons/lu";
+import { RiShoppingBag3Line } from "react-icons/ri";
+import { RiShoppingBag3Fill } from "react-icons/ri";
+
 
 const CartButton = () => {
     const appbarUtil = useStore(useSetAppbarUtilStore, (state) => state.appbarUtil);
@@ -21,13 +25,12 @@ const CartButton = () => {
     }
     return (
         <div 
-            className=' cursor-pointer w-auto h-full' 
+            className=' cursor-pointer w-auto h-full content-center' 
             onClick={handleOnClick}>
             {
-                appbarUtil == "CART" ?
-                    <HighlightOffIcon sx={{ width: '80%', height: '90%', color:"black" }} />
-                :
-                    <ShoppingBagIcon sx={{ width: 'auto', height: '90%', color:"black" }} />    
+                appbarUtil == "CART" 
+                ? <RiShoppingBag3Line size={24} />
+                : <RiShoppingBag3Fill size={24} /> 
             }
         </div>
     )

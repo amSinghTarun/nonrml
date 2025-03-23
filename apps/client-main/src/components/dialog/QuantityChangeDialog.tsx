@@ -27,7 +27,7 @@ const QuantityChangeDialog : React.FC<QuantityChangeDialogProps> = (props) => {
                 <AlertDialogDescription className="text-xs sm:text-sm pb-3 text-neutral-500">
                     {`Some items in your cart were more then available quantity so we updated it for you.`}
                 </AlertDialogDescription>
-                <AlertDialogAction className="text-xs rounded-sm shadow-none border hover:bg-transparent border-neutral-400 text-neutral-500 hover:text-neutral-900 bg-transparent  sm:text-sm font-normal" onClick={props.cancelPurchase}>VIEW CART</AlertDialogAction> 
+                <AlertDialogAction className="text-xs rounded-sm shadow-none border hover:bg-transparent border-neutral-400 text-neutral-500 hover:text-neutral-900 bg-transparent  sm:text-sm font-normal" onClick={props.cancelPurchase}>REVIEW YOURSELF</AlertDialogAction> 
                 <AlertDialogCancel className="text-xs rounded-sm sm:text-sm font-normal bg-neutral-800 text-white hover:underline hover:bg-neutral-900 border-none hover:text-white" onClick={props.continuePurchase}>ALRIGHT! LET'S CONTINUE</AlertDialogCancel> 
             </AlertDialogHeader>
         </AlertDialogContent>
