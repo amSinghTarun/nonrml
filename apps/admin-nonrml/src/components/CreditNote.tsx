@@ -66,15 +66,16 @@ export function CreditNoteEditDialog({note, onSave}: {note: CreditNote, onSave: 
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="redeemed"
-              checked={formData.redeemed}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, redeemed: checked })
+          <div className="space-y-2">
+            <Label htmlFor="remainingValue">Remaining Value</Label>
+            <Input
+              id="remainingValue"
+              type="number"
+              value={formData.remainingValue}
+              onChange={(e) =>
+                setFormData({ ...formData, remainingValue: +e.target.value })
               }
             />
-            <Label htmlFor="redeemed">Redeemed</Label>
           </div>
 
           <div className="flex justify-end space-x-2">

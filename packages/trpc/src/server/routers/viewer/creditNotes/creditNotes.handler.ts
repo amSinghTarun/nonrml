@@ -230,12 +230,12 @@ export const editCreditNote = async ({ctx, input}: TRPCRequestOptions<TEditCredi
         const updateData = {
             ...(input.value && { value: input.value}),
             ...(input.expiryDate && { expiryDate: input.expiryDate}),
-            // ...(input.remainigValue && { redeemed: input.remainingValue}),
+            ...(!isNaN(Number(input.remainingValue)) && { redeemed: input.remainingValue}),
         }
 
         if(Object.keys(updateData).length == 0)
             throw {code: "BAD_REQUEST", message: "Empty update payload"}
-
+        console.log(updateData)
         const discountEditted = await prisma.creditNotes.update({
             where: {
                 id: input.id

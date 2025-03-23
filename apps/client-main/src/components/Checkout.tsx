@@ -68,6 +68,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
         router.replace("/account");
       }
     });
+    const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote;
 
     const handleAddressEdit = (address: AddressesTRPCOutput[number]) => {
         setSelectedAddress(address);
@@ -105,7 +106,6 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             // const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
             const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
-                console.log("HERE")
                 setQuantityChange(true);
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
                 return;
@@ -122,8 +122,6 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             return;
 
         } catch(error: any) {
-            // setOrderInProcess(false);
-            console.log("ALSO HERE")
             toast({
                 duration: 3000,
                 title: "Something went wrong. Please try again !!",
@@ -135,8 +133,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
 
     const handleApplyCreditNote = async () => {
         try{
-            const getCreditNoteDetails = trpc.useUtils();
-            const creditNoteApplied = await getCreditNoteDetails.viewer.creditNotes.getCreditNote.fetch({creditNote:couponCode.current, orderValue:totalAmount.current});
+            const creditNoteApplied = await getCreditNoteDetails.fetch({creditNote:couponCode.current, orderValue:totalAmount.current});
             setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
         } catch(error:any){
             toast({

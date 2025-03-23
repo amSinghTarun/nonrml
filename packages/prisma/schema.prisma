@@ -421,7 +421,7 @@ model RefundTransactions {
   rzpRefundStatus String?
   rzpPaymentId    String
   bankRefundValue Int          @default(0)
-  creditNoteId    Int?         @default(0)
+  creditNoteId    Int?
   Payments        Payments     @relation(fields: [rzpPaymentId], references: [rzpPaymentId], onDelete: NoAction, map: "BankRefunds_rzpPaymentId_fkey")
   CreditNotes     CreditNotes? @relation(fields: [creditNoteId], references: [id], onDelete: NoAction)
 }

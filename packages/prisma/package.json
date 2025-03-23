@@ -10,7 +10,7 @@
     "generate": "npx prisma generate",
     "format": "npx prisma ",
     "migrate": "npx prisma migrate dev",
-    "sync" : "npx prisma db pull"
+    "sync": "npx prisma db pull"
   },
   "keywords": [],
   "author": "",

@@ -262,6 +262,25 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
             }
         });
 
+        //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
+        orderDetails.Orders.creditNote && (
+            await prisma.creditNotesPartialUseTransactions.create({
+                data : {
+                    creditNoteId: orderDetails.Orders.creditNote.id,
+                    orderId: orderDetails.Orders.id,
+                    valueUtilised: orderDetails.Orders.creditUtilised!
+                }
+            }) ,
+            await prisma.creditNotes.update({
+                where:{
+                    id: orderDetails.Orders.creditNote.id
+                },
+                data : {
+                    remainingValue: orderDetails.Orders.creditNote.remainingValue - orderDetails.Orders.creditUtilised!
+                }
+            })
+        )
+
         if(paymentMethod == "Cash on Delivery"){
             await prisma.orders.update({
                 where: {
@@ -274,27 +293,6 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         } else {
             await acceptOrder(orderDetails.Orders.id);
         }
-
-
-
-        //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
-        orderDetails.Orders.creditNote && (
-                await prisma.creditNotesPartialUseTransactions.create({
-                    data : {
-                        creditNoteId: orderDetails.Orders.creditNote.id,
-                        orderId: orderDetails.Orders.id,
-                        valueUtilised: Number(orderDetails.Orders.totalAmount) - 10
-                    }
-                }) ,
-                await prisma.creditNotes.update({
-                    where:{
-                        id: orderDetails.Orders.creditNote.id
-                    },
-                    data : {
-                        remainingValue: orderDetails.Orders.totalAmount - orderDetails.Orders.creditUtilised!
-                    }
-                })
-        )
 
         return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: orderDetails.orderId}};
     }catch(error){  
@@ -412,8 +410,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         let orderId = `ORD-${date}${userId}${randomPart}`;
 
         console.log(orderId)
-
-        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ( (orderTotal <= cnUseableValue) ? 10 : (orderTotal - cnUseableValue) ), addressId: input.addressId }});
+        
+        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ((orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)), addressId: input.addressId }});
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 

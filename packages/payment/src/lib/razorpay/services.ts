@@ -43,5 +43,4 @@ export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : 
     };
 }
 
-
 // "callback_url":`http://localhost:3000/api/trpc/viewer.orders.verifyOrder`, //process.env.RAZORPAY_CALLBACK_URL

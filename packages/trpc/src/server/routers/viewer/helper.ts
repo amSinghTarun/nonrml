@@ -220,6 +220,7 @@ export const acceptOrder = async (orderId: string) => {
 
         return {orderedProducts}
     } catch(error) {
+        console.log(error)
         throw new Error("ERROR_ACCEPTING_ORDER");
     }
 };
@@ -262,23 +263,24 @@ export const calculateRejectedQuantityRefundAmounts = async  (orderId: string, g
     }
 
     let orderOldTotal = Number(orderDetails.totalAmount);
-    let creditUsed = orderDetails.creditUtilised || 0;
+    let creditUsed = orderDetails.creditUtilised ?? 0;
     let paid = orderOldTotal - creditUsed;
     let newOrderTotal = orderOldTotal - rejectedQuantityTotal;
 
     let refundToBank = 0;
     let refundToCredit = 0;
 
-    if( newOrderTotal > creditUsed )
+    if( newOrderTotal > creditUsed ){
         refundToBank = paid - newOrderTotal + creditUsed
         refundToCredit = 0
-    if( newOrderTotal < creditUsed)
+    }else if( newOrderTotal < creditUsed){
         refundToBank = paid
         refundToCredit = creditUsed - newOrderTotal
-    if( creditUsed == newOrderTotal)
+    } else if( creditUsed == newOrderTotal){
         refundToBank = paid
         refundToCredit = 0
-
+    }
+    
     return {
         refundToBank,
         refundToCredit,

@@ -1,9 +1,8 @@
 import { TRPCResponseStatus } from "@nonrml/common";
 import { calculateRejectedQuantityRefundAmounts, TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { Prisma, prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
+import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import * as paymentSchemas from "./payments.schema";
-import { createOrder, initiateNormalRefund } from "@nonrml/payment";         
-import crypto from 'crypto';                                 
+import { createOrder, initiateNormalRefund } from "@nonrml/payment";
 
 export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TCreateRzpOrderSchema>) => {
     try{
@@ -240,6 +239,8 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
                 "createdAt" : "desc"
             }]
         });
+
+        console.log("REFUnD DETAILS", refundDetails);
 
         if(!existingRefundTransactionDetails){
             // create refund record update the credit note and amounts, as a precautionary to failures

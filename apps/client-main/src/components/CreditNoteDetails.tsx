@@ -14,7 +14,7 @@ interface CreditNoteDetailsProps {
 export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNoteDetails}) => {
     return (
         <div className=" h-full w-full text-neutral-600 ">
-             <div className="flex flex-col justify-between space-y-1 text-xs relative p-3 ">
+             <div className="flex flex-col justify-between space-y-1 text-xs p-3 ">
                     <div className="flex justify-between">
                         <p className="text-neutral-600"> {creditNoteDetails.creditCode} </p>
                         <p className="text-neutral-600"> {convertStringToINR(+creditNoteDetails.value)} </p>
@@ -37,7 +37,7 @@ export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNote
             {
                 creditNoteDetails.creditNotesPartialUseTransactions.length ? creditNoteDetails.creditNotesPartialUseTransactions.map( (transaction, index) => {
                     return (
-                        <div className="flex flex-col justify-between space-y-1 text-xs relative p-3">
+                        <div className="flex w-full flex-col justify-between space-y-1 text-xs relative p-3 shadow-sm shadow-neutral-200 rounded-md">
                             <div className="flex justify-between">
                                 <p className="font-light"> Value Utilized: </p>
                                 <p> {convertStringToINR(Number(transaction.valueUtilised))} </p>

@@ -13,7 +13,7 @@ export const ZEditCreditNoteSchema = z.object({
     id: z.number(),
     value: z.number().optional(),
     expiryDate: z.date().optional(),
-    redeemed: z.boolean().optional()
+    remainingValue: z.number().optional(),
 });
 export type TEditCreditNoteSchema = z.infer<typeof ZEditCreditNoteSchema>; 
 

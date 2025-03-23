@@ -14,7 +14,6 @@ const nextConfig = {
         "@nonrml/common"
     ],
     env: {
-        MIN_ORDER_VALUE: 1,
         CART_EXPIRATION_TIME: 1000 * 60 * 60 * 24 * 7,
         MAX_QUANTITY_TO_ORDER : 11,
         MIN_QUANTITY_TO_ORDER: 1

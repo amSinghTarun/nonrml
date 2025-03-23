@@ -414,10 +414,14 @@ const OrderDetails = ({ orderQuery }: { orderQuery: Order }) => {
                 <CardTitle className='flex flex-row justify-between'>
                     Order Items
                     {/** Reimbuse Rejected quantity */}
-                    { isReimbursementPending && <button 
-                        onClick = { async ()=> { await mutations.refundUnavailableProduct.mutateAsync({orderId: order.id}) }} 
-                        className = 'px-2 bg-red-500 rounded-md text-sm hover:bg-stone-100 border border-stone-300'
-                    >{mutations.refundUnavailableProduct.isLoading ? "Refund Under process..." : "Initiate Unavailable Refund"}</button> }
+                    { isReimbursementPending && <>
+                        <button 
+                            onClick = { async ()=> { await mutations.refundUnavailableProduct.mutateAsync({orderId: order.id}) }} 
+                            className = 'px-2 bg-red-500 rounded-md text-sm hover:bg-stone-100 border border-stone-300'
+                        >{mutations.refundUnavailableProduct.isLoading ? "Refund Under process..." : "Initiate Unavailable Refund"}</button> 
+                        <p>* Initiate refund only once, so do it right before creating shipment</p>
+                    </>
+                    }
 
                 </CardTitle>
                 </CardHeader>
