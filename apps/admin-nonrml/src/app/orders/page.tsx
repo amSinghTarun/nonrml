@@ -25,6 +25,7 @@ const initialFilterState: FilterState = {
 
 export default () => {
   const userIdParam = useSearchParams().get('userId');
+  const returnParam = useSearchParams().get('returns');
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
 
   console.log(filters.date?.getTimezoneOffset());
@@ -34,6 +35,7 @@ export default () => {
     ordersDate: filters.date,
     orderStatus: filters.status,
     userId: userIdParam ? +userIdParam : undefined,
+    returns: returnParam ? true : undefined,
     orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
   }, {
     staleTime: Infinity,

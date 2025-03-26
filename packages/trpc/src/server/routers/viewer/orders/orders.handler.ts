@@ -479,7 +479,8 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
             ...( input.orderStatus && { orderStatus : input.orderStatus }),
             ...( input.ordersDate && { createdAt: getDateRangeForQuery(input.ordersDate) }),
             ...( input.userId && { userId: input.userId} ),
-            ...( input.orderId && { id: input.orderId} )
+            ...( input.orderId && { id: input.orderId} ),
+            // ...( input.returns && { })
         }
 
         const take = 30;
@@ -499,6 +500,11 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
                 orderStatus: true,
                 productCount: true,
                 createdAt: true,
+                _count: {
+                    select: {
+                        return: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: "desc"

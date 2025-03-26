@@ -13,6 +13,8 @@ export type TRPCRequestOptions<T> = {
     input?: T
 }
 
+export const createOTP = (len: number) : number => Number(Math.floor(100000 + Math.random() * 899999))
+
 export const createPasswordHash = async (password: string): Promise<string> => {
     try {
         const hash  = await bcrypt.hash(password, SALT_SIZE);

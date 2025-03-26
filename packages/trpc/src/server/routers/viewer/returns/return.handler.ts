@@ -609,3 +609,33 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
         throw TRPCCustomError(error);
     }   
 }
+
+export const getAllReturnOrders = async ({ctx, input}: TRPCRequestOptions<{}>)   => {
+    const prisma = ctx.prisma;
+    try{
+        const returnOrders = await prisma.returns.findMany({
+            select: {
+                id:true,
+                orderId: true,
+                returnReceiveDate: true,
+                returnStatus: true,
+                ReplacementOrder: {
+                    select: {
+                        id: true,
+                        status: true
+                    }
+                } 
+            },
+            orderBy: [
+                {createdAt: "desc"}
+            ]
+        });
+    
+        return {status:TRPCResponseStatus.SUCCESS, message: "", data: returnOrders};
+    }  catch(error) {
+        //console.log("\n\n Error in getAddress ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};

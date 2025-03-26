@@ -1,11 +1,12 @@
 import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
-import { TRPCCustomError } from "../helper";
+import { createOTP, TRPCCustomError } from "../helper";
 import { TRPCRequestOptions } from "../helper";
 import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
 import { validateHeaderValue } from "http";
+import { redis } from "@nonrml/cache";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
     const prisma = ctx.prisma;
@@ -36,6 +37,47 @@ export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditN
         }
 
         return { status: TRPCResponseStatus.SUCCESS, message:"Discount applied", data: { afterCnOrderValue: (input.orderValue < cnUsableValue ? 10 : input.orderValue-cnUsableValue ), usableValue: cnUsableValue}};
+    } catch(error) {
+        //console.log("\n\n Error in useCreditNote ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+}
+
+export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.user?.id;
+    input = input!;
+    try{
+        const attemptNumber : string|null = await redis.redisClient.get(`${userId!}`);
+        if(attemptNumber)
+            if(Number(attemptNumber) > 5)
+                throw new TRPCError({code:"FORBIDDEN", message: "Attempt limit exceeded"});
+        else{
+            const expireUserOTPAt = Date.now() + 172800000;
+            await redis.redisClient.set(`${userId!}`, 1, {ex: expireUserOTPAt})
+        }
+
+        const creditNote = await prisma.creditNotes.findFirst({
+            where: {
+                userId: userId
+            }
+        })
+        if(!creditNote)
+            throw new TRPCError({code:"NOT_FOUND", message: "No Credit Notes On Your Name"});
+        
+
+        const otp = createOTP(6);
+        console.log("CREDIT NOTE OTP",otp);
+        
+        //send OTP
+
+        //after otp successs
+        await redis.redisClient.incr(`${userId!}`);
+        await redis.redisClient.set(`${userId!}`, `${otp}`, {ex: 600000})
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"SUCCESS", data: {}};
     } catch(error) {
         //console.log("\n\n Error in useCreditNote ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -294,4 +336,3 @@ export const getCreditNotesAdmin = async ({ctx, input} : TRPCRequestOptions<TGet
         throw TRPCCustomError(error);
     }
 }
-

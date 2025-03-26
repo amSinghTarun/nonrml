@@ -1,12 +1,10 @@
 import { prismaEnums } from "@nonrml/prisma";
 import { TSendOTPSchema, TVerifyOTPSchema } from "./sign.schema";
-import { TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { createOTP, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TRPCResponseStatus } from "@nonrml/common";
 import { sendOTP } from "@nonrml/otp";
 import { TRPCError } from "@trpc/server";
 import { ratelimit } from "@nonrml/rate-limit";
-
-const createOTP = (len: number) : number => Number(Math.floor(100000 + Math.random() * 899999))
 
 export const sendLoginOTP = async ({ctx, input}: TRPCRequestOptions<TSendOTPSchema>)  => {
     const prisma = ctx.prisma;

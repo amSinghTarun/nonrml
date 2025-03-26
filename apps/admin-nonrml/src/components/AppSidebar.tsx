@@ -13,6 +13,7 @@ import {
 // Menu items
 const items = [
   { title: "Orders", url: "/orders" },
+  { title: "Returns/Replacements Pending", url: "/returns" },
   { title: "Products", url: "/products" },
   { title: "Users", url: "/users" },
   { title: "Base Inventory", url: "/baseInventory" },

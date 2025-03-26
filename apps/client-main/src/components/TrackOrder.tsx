@@ -44,7 +44,7 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
             <h1 className="flex justify-center text-neutral-800 font-medium place-items-end basis-1/3 text-xl mb-1">
                 TRACK ORDER
             </h1>
-            <p className="mb-10 text-xs text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
+            <p className="mb-10 sm:text-xs text-[10px] text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
             <Form 
                 className="flex justify-center text-sm items-center px-10"
                 action={handleSubmit}

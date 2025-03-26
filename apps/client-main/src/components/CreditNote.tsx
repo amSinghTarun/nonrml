@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils"
 import { useState } from "react";
 import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
-import CancelOrderDialog from "./dialog/CancelOrderDialog";
-import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
@@ -20,7 +18,8 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
     const viewCreditNote = trpc.useUtils();
-    
+    const sendCreditViewOtp = trpc.viewer.creditNotes.sendCreditNoteOtp.useMutation();
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault();
         setError(null);
@@ -43,13 +42,23 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
             setError(error.message)
         }
     }
+
+    const handleCreditShowOTP = () => {
+
+
+        // here we are
+        sendCreditViewOtp.mutate({});
+        if(sendCreditViewOtp.isSuccess){console.log("open prompt to take otp and if success then show the creditNote code with email")}
+
+        // what to do after success
+    }
     
     return (
         <div className={cn("h-[80%] w-[90%] flex flex-col text-center", creditNoteProps.className)}>
             <h1 className={`flex text-neutral-800 font-medium justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
             CREDIT NOTE
             </h1>
-            { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }
+            { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-[10px] sm:text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }
             {
                 creditNoteDetails 
                 ? <CreditNoteDetails creditNoteDetails={creditNoteDetails}></CreditNoteDetails> 
@@ -80,6 +89,11 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                     />
                 </Form>
             }
+            <GeneralButtonTransparent 
+                display={` ${sendCreditViewOtp.isLoading ? "..." : "SHOW ALL"}`}
+                onClick={handleCreditShowOTP}
+                className="p-4 text-xs"
+            />
             { creditNoteDetails && <div className="w-full flex flex-1 justify-center"><GeneralButton className="p-5 w-40 font-medium rounded-md text-xs" display="Close" onClick={() => setCreditNoteDetails(undefined)} /></div>}
         </div>
     )

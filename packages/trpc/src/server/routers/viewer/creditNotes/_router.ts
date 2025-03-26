@@ -1,7 +1,8 @@
+import z from "zod";
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { addCreditNote, deleteCreditNote, editCreditNote, getCreditNote, getCreditNoteDetails, getCreditNotesAdmin } from "./creditNotes.handler";
+import { addCreditNote, deleteCreditNote, editCreditNote, getCreditNote, getCreditNoteDetails, getCreditNotesAdmin, sendCreditNoteOtp } from "./creditNotes.handler";
 import { ZAddCreditNoteSchema, ZGetCreditNoteSchema, ZDeleteCreditNoteSchema, ZEditCreditNoteSchema, ZGetCreditNoteDetailsSchema, ZGetCreditNotesAdminSchema } from "./creditNotes.schema";
 
 export const creditNotesRouter = router({
@@ -9,6 +10,10 @@ export const creditNotesRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Use the credit Note"}})
         .input(ZGetCreditNoteSchema)
         .query( async ({ctx, input}) => await getCreditNote({ctx, input}) ),
+    sendCreditNoteOtp: publicProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Use the credit Note"}})
+        .input(z.object({}))
+        .mutation( async ({ctx, input}) => await sendCreditNoteOtp({ctx, input}) ),
     getCreditNoteDetails: publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get all the discounts available"}})
         .input(ZGetCreditNoteDetailsSchema)

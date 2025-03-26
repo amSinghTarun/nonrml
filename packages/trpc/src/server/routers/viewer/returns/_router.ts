@@ -1,6 +1,7 @@
+import z from "zod";
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { router } from "../../../trpc";
-import { initiateReturn, getReturnOrders, editReturn, cancelReturn } from "./return.handler";
+import { initiateReturn, getReturnOrders, editReturn, cancelReturn, getAllReturnOrders } from "./return.handler";
 import { ZInitiateReturnSchema, ZGetReturnOrdersSchema, ZEditReturnSchema, ZCancelReturnOrderSchema } from "./return.schema";
 
 export const returnRouter = router({
@@ -19,5 +20,9 @@ export const returnRouter = router({
     editReturn: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "cancel return order"}})
         .input(ZEditReturnSchema)
-        .mutation( async ({ctx, input}) => await editReturn({ctx, input}) )
+        .mutation( async ({ctx, input}) => await editReturn({ctx, input}) ),
+    getAllReturns: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "cancel return order"}})
+        .input(z.object({}))
+        .query( async ({ctx, input}) => await getAllReturnOrders({ctx, input}) )
 });

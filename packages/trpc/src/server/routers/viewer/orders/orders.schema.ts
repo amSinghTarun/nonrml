@@ -63,6 +63,7 @@ export const ZGetAllOrdersSchema = z.object({
     ordersDate: z.date().optional(),
     page: z.number().optional(),
     userId: z.number().optional(),
+    returns: z.boolean().optional(),
     orderStatus: z.enum(Object.keys(prismaEnums.OrderStatus) as [keyof typeof prismaEnums.OrderStatus]).optional()
 });
 export type TGetAllOrdersSchema = z.infer<typeof ZGetAllOrdersSchema>;

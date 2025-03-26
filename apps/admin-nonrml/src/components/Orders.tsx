@@ -9,12 +9,10 @@ import {
 import { RouterOutput } from "@/app/_trpc/client"
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
 import { redirect } from "next/navigation"
-import { useRouter} from "next/navigation"
 
 type Orders = UseTRPCQueryResult<RouterOutput["viewer"]["orders"]["getAllOrders"], unknown>
 
 export const Orders = ({orders}:{orders: Orders}) => {
-  const router = useRouter();
   return (
     <Table>
       <TableHeader>
@@ -35,7 +33,7 @@ export const Orders = ({orders}:{orders: Orders}) => {
         {
           orders.data?.data.map( order => (
             <TableRow>
-              <TableCell className="font-medium cursor-pointer hover:bg-orange-400" onClick={ () => { redirect(`/orders/${order.id}`) }}>{order.id}</TableCell>
+              <TableCell className={`font-medium cursor-pointer hover:bg-orange-400 ${order._count.return && "bg-yellow-100"}`} onClick={ () => { redirect(`/orders/${order.id}`) }}>{order.id}</TableCell>
               <TableCell className="font-medium">{+order.totalAmount}</TableCell>
               <TableCell className="font-medium">{order.creditUtilised}</TableCell>
               <TableCell className="font-medium">{order.userId}</TableCell>
