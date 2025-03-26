@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { useState } from "react";
 import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
+import { useToast } from "@/hooks/use-toast";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
@@ -13,11 +14,12 @@ interface CreditNoteProps {
     className?: string
 };
 export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
+    const { toast } = useToast();
     const [formData, setFormData] = useState<{creditNoteCode: string, userMobile:string}>({creditNoteCode:"", userMobile:""})
     const [error, setError] = useState<string|null>(null);
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
-    const viewCreditNote = trpc.useUtils();
+    const creditNote = trpc.useUtils();
     const sendCreditViewOtp = trpc.viewer.creditNotes.sendCreditNoteOtp.useMutation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -36,7 +38,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
         try{
             if(formData.userMobile.length < 10 || !/^[6-9]\d{9}$/g.test(formData.userMobile))
                 throw new Error("Please enter a valid 10 digit mobile number");
-            const creditNoteDetails = await viewCreditNote.viewer.creditNotes.getCreditNoteDetails.fetch({creditNoteCode: formData.creditNoteCode, mobile: formData.userMobile});
+            const creditNoteDetails = await creditNote.viewer.creditNotes.getCreditNoteDetails.fetch({creditNoteCode: formData.creditNoteCode, mobile: formData.userMobile});
             setCreditNoteDetails(creditNoteDetails.data);
         } catch(error: any){
             setError(error.message)
@@ -44,13 +46,29 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     }
 
     const handleCreditShowOTP = () => {
+        try{
+                // here we are
+            sendCreditViewOtp.mutate({});
+            if(sendCreditViewOtp.isSuccess){
+                console.log("open prompt to take otp")
+                // most probably set state for otp
+            }
+        } catch(error:any) {
+            toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
+        }
+    }
 
-
-        // here we are
-        sendCreditViewOtp.mutate({});
-        if(sendCreditViewOtp.isSuccess){console.log("open prompt to take otp and if success then show the creditNote code with email")}
-
-        // what to do after success
+    const handleCreditShowOTPSubmit = () => {
+        try{
+            let otp = "786767"
+            creditNote.viewer.creditNotes.getAllCreditNotes.fetch({otp: otp})
+            if(sendCreditViewOtp.isSuccess){
+                console.log("show credits with email and code")
+                // most probably set state for to show the note prompt or whatever
+            }
+        } catch(error:any) {
+            toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
+        }
     }
     
     return (

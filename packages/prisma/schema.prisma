@@ -39,6 +39,7 @@ model CreditNotes {
   creditNoteOrigin                  CreditNotePurpose?
   remainingValue                    Float
   replacementOrderId                Int?
+  email                             String                              @default("tarunsingh2118@gmail.com")
   replacementOrder                  ReplacementOrder?                   @relation(fields: [replacementOrderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   returnOrder                       Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
   user                              User                                @relation(fields: [userId], references: [id])

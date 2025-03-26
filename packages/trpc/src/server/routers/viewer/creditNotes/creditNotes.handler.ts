@@ -2,10 +2,9 @@ import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { createOTP, TRPCCustomError } from "../helper";
 import { TRPCRequestOptions } from "../helper";
-import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
+import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TGetAllCreditNotesSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
-import { validateHeaderValue } from "http";
 import { redis } from "@nonrml/cache";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
@@ -50,7 +49,7 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
     const userId = ctx.user?.id;
     input = input!;
     try{
-        const attemptNumber : string|null = await redis.redisClient.get(`${userId!}`);
+        const attemptNumber : string|null = await redis.redisClient.get(`${userId}`);
         if(attemptNumber)
             if(Number(attemptNumber) > 5)
                 throw new TRPCError({code:"FORBIDDEN", message: "Attempt limit exceeded"});
@@ -74,8 +73,8 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
         //send OTP
 
         //after otp successs
-        await redis.redisClient.incr(`${userId!}`);
-        await redis.redisClient.set(`${userId!}`, `${otp}`, {ex: 600000})
+        await redis.redisClient.incr(`${userId}`);
+        await redis.redisClient.set(`${userId}`, `${otp}`, {ex: 600000})
 
         return { status: TRPCResponseStatus.SUCCESS, message:"SUCCESS", data: {}};
     } catch(error) {
@@ -85,6 +84,39 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
         throw TRPCCustomError(error);
     }
 }
+
+/*
+Get all the details with transactions and all
+*/
+export const getAllCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetAllCreditNotesSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!
+    const userId = ctx.user?.id!;
+    try{
+        const otp = await redis.redisClient.get(`${userId}`)
+        
+        if(!otp || otp != input.otp)
+            throw {code: "FORBIDDEN", message:"INVALID_OTP"};
+
+        const creditNotes = await prisma.creditNotes.findFirst({
+            where: {
+                userId: userId
+            }, 
+            select: {
+                creditCode: true,
+                email: true
+            }
+        });
+
+        return {status: TRPCResponseStatus.SUCCESS, message:"", data: creditNotes};
+
+    } catch(error) {
+        //console.log("\n\n Error in getDiscounts ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};
 
 /*
 Get all the details with transactions and all
@@ -131,7 +163,15 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     id: input.returnOrderId
                 },
                 include: {
-                    order: true
+                    order: {
+                        include: {
+                            address: {
+                                select: {
+                                    email: true
+                                }
+                            }
+                        }
+                    }
                 }
             })
 
@@ -141,6 +181,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
             prisma.creditNotes.create({
                 data: {
                     returnOrderId: input.returnOrderId,
+                    email: orderDetail.order.address.email,
                     value: orderDetail?.order.totalAmount!,
                     remainingValue: orderDetail?.order.totalAmount!,
                     creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
@@ -156,6 +197,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     data: {
                         value: input.value,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.GIFT,
+                        email: input.email,
                         userId: input.userId,
                         remainingValue: input.value,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
@@ -177,7 +219,12 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                             order: {
                                 select: {
                                     userId: true,
-                                    id: true
+                                    id: true,
+                                    address: {
+                                        select: {
+                                            email: true
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -215,6 +262,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     data: {
                         value: refundAmount,
                         remainingValue: refundAmount,
+                        email: replacementOrderDetails.return.order.address.email,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.REPLACEMENT,
                         userId: replacementOrderDetails.return.order.userId,
                         replacementOrderId: input.replacementOrderId,

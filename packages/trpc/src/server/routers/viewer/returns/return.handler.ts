@@ -473,7 +473,12 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     order: {
                         select: {
                             userId: true,
-                            id: true
+                            id: true,
+                            address: {
+                                select: {
+                                    email: true
+                                }
+                            }
                         }
                     },
                     refundAmount: true,
@@ -570,6 +575,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
+                        email: returnProductVariantDetails.order.address.email, 
                         remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
                         userId: returnProductVariantDetails.order.userId,

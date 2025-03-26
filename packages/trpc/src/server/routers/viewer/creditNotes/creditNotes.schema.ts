@@ -4,9 +4,10 @@ import { prismaEnums } from "@nonrml/prisma";
 export const ZAddCreditNoteSchema = z.object({
     returnOrderId: z.number().optional(),
     userId: z.number().optional(),
+    email: z.string().optional(),
     value: z.number().optional(),
     replacementOrderId: z.number().optional()
-});
+}).refine( values => values.userId && (!values.email || !values.value), { message: "Value and Email both are needed"} );
 export type TAddCreditNoteSchema = z.infer<typeof ZAddCreditNoteSchema>;
 
 export const ZEditCreditNoteSchema = z.object({
@@ -27,6 +28,11 @@ export const ZGetCreditNoteSchema = z.object({
     orderValue: z.number()
 });
 export type TGetCreditNoteSchema = z.infer<typeof ZGetCreditNoteSchema>;
+
+export const ZGetAllCreditNotesSchema = z.object({
+    otp: z.string().length(6)
+});
+export type TGetAllCreditNotesSchema = z.infer<typeof ZGetAllCreditNotesSchema>;
 
 export const ZGetCreditNotesAdminSchema = z.object({
     userId: z.number().optional(),
