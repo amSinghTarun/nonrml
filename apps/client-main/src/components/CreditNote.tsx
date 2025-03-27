@@ -8,6 +8,7 @@ import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import { useToast } from "@/hooks/use-toast";
 import CreditNoteOTPVerification from "./CreditNotesList";
+import { TRPCClientError } from "@trpc/client";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
@@ -22,7 +23,11 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
     const creditNote = trpc.useUtils();
-    const sendCreditViewOtp = trpc.viewer.creditNotes.sendCreditNoteOtp.useMutation();
+    const sendCreditViewOtp = trpc.viewer.creditNotes.sendCreditNoteOtp.useMutation({
+        onSuccess : () => {
+            setShowCredits(true)
+        }
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault();
@@ -49,32 +54,15 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
 
     const handleCreditShowOTP = () => {
         try{
-                // here we are
             sendCreditViewOtp.mutate({});
-            if(sendCreditViewOtp.isSuccess){
-                setShowCredits(true);
-            }
         } catch(error:any) {
-            toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
+            toast({variant:"destructive", title: "Can'nt serve you right now, Sorry!", duration:5000 })
         }
     }
 
-    const handleCreditShowOTPSubmit = () => {
-        try{
-            let otp = "786767"
-            creditNote.viewer.creditNotes.getAllCreditNotes.fetch({otp: otp})
-            if(sendCreditViewOtp.isSuccess){
-                console.log("show credits with email and code")
-                // most probably set state for to show the note prompt or whatever
-            }
-        } catch(error:any) {
-            toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
-        }
-    }
-    
     return (
         <div className={cn("h-[80%] w-[90%] flex flex-col text-center", creditNoteProps.className)}>
-            {showCredits && <CreditNoteOTPVerification></CreditNoteOTPVerification>}
+            {showCredits && <CreditNoteOTPVerification ></CreditNoteOTPVerification>}
             <h1 className={`flex text-neutral-800 font-medium justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
             CREDIT NOTE
             </h1>

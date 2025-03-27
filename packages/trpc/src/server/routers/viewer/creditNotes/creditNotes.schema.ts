@@ -30,7 +30,7 @@ export const ZGetCreditNoteSchema = z.object({
 export type TGetCreditNoteSchema = z.infer<typeof ZGetCreditNoteSchema>;
 
 export const ZGetAllCreditNotesSchema = z.object({
-    otp: z.string().length(6)
+    otp: z.string().length(6, "Invalid OTP length")
 });
 export type TGetAllCreditNotesSchema = z.infer<typeof ZGetAllCreditNotesSchema>;
 

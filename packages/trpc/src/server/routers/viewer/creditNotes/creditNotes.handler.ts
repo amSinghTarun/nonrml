@@ -94,12 +94,12 @@ export const getAllCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetAllC
     input = input!
     const userId = ctx.user?.id!;
     try{
-        const otp = await redis.redisClient.get(`${userId}`)
+        const otp = await redis.redisClient.get(`${userId}:otp`)
         
         if(!otp || otp != input.otp)
             throw {code: "FORBIDDEN", message:"INVALID_OTP"};
 
-        const creditNotes = await prisma.creditNotes.findFirst({
+        const creditNotes = await prisma.creditNotes.findMany({
             where: {
                 userId: userId
             }, 

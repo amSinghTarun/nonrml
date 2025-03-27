@@ -16,7 +16,7 @@ interface generalButtonProps {
 
 export const GeneralButton : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('rounded-md hover:bg-neutral-900 justify-center hover:underline text-white bg-neutral-800', className)} onClick={onClick}>
+        <button className={cn('rounded-md hover:bg-neutral-900 justify-center hover:underline text-xs p-2 text-white bg-neutral-800', className)} onClick={onClick}>
             {display}
         </button>
     )
