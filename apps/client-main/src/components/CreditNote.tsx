@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import { useToast } from "@/hooks/use-toast";
+import CreditNoteOTPVerification from "./CreditNotesList";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
@@ -17,6 +18,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     const { toast } = useToast();
     const [formData, setFormData] = useState<{creditNoteCode: string, userMobile:string}>({creditNoteCode:"", userMobile:""})
     const [error, setError] = useState<string|null>(null);
+    const [showCredits, setShowCredits] = useState<boolean>(false);
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
     const creditNote = trpc.useUtils();
@@ -50,8 +52,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                 // here we are
             sendCreditViewOtp.mutate({});
             if(sendCreditViewOtp.isSuccess){
-                console.log("open prompt to take otp")
-                // most probably set state for otp
+                setShowCredits(true);
             }
         } catch(error:any) {
             toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
@@ -73,6 +74,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     
     return (
         <div className={cn("h-[80%] w-[90%] flex flex-col text-center", creditNoteProps.className)}>
+            {showCredits && <CreditNoteOTPVerification></CreditNoteOTPVerification>}
             <h1 className={`flex text-neutral-800 font-medium justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
             CREDIT NOTE
             </h1>
