@@ -8,7 +8,7 @@ import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import { useToast } from "@/hooks/use-toast";
 import CreditNoteOTPVerification from "./CreditNotesList";
-import { TRPCClientError } from "@trpc/client";
+
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
@@ -16,16 +16,21 @@ interface CreditNoteProps {
     className?: string
 };
 export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
-    const { toast } = useToast();
+    const { toast } = useToast();
     const [formData, setFormData] = useState<{creditNoteCode: string, userMobile:string}>({creditNoteCode:"", userMobile:""})
     const [error, setError] = useState<string|null>(null);
     const [showCredits, setShowCredits] = useState<boolean>(false);
     const [creditNoteDetails, setCreditNoteDetails] = useState<creditNoteDetails>();
     const [formError, setFormError] = useState<string|null>(null);
     const creditNote = trpc.useUtils();
+    
     const sendCreditViewOtp = trpc.viewer.creditNotes.sendCreditNoteOtp.useMutation({
-        onSuccess : () => {
+        onSuccess: () => {
             setShowCredits(true)
+        },
+        onError: (error) => {
+            console.log(error.message)
+            toast({variant:"destructive", title: error.message, duration:5000 })
         }
     });
 
@@ -53,18 +58,14 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     }
 
     const handleCreditShowOTP = () => {
-        try{
-            sendCreditViewOtp.mutate({});
-        } catch(error:any) {
-            toast({variant:"destructive", title: "Can'nt serve you right now, Sorry!", duration:5000 })
-        }
+        sendCreditViewOtp.mutate({});
     }
 
     return (
-        <div className={cn("h-[80%] w-[90%] flex flex-col text-center", creditNoteProps.className)}>
-            {showCredits && <CreditNoteOTPVerification ></CreditNoteOTPVerification>}
+        <div className={cn("h-[80%] w-[90%] flex flex-col items-center", creditNoteProps.className)}>
+            {showCredits && <CreditNoteOTPVerification closeHandler={() => setShowCredits(false)}></CreditNoteOTPVerification> }
             <h1 className={`flex text-neutral-800 font-medium justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
-            CREDIT NOTE
+                CREDIT NOTE
             </h1>
             { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-[10px] sm:text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }
             {
@@ -97,10 +98,10 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                     />
                 </Form>
             }
-            <GeneralButtonTransparent 
+            <GeneralButtonTransparent
                 display={` ${sendCreditViewOtp.isLoading ? "..." : "SHOW ALL"}`}
                 onClick={handleCreditShowOTP}
-                className="p-4 text-xs"
+                className="p-4 text-xs px-8 w-fit mt-5"
             />
             { creditNoteDetails && <div className="w-full flex flex-1 justify-center"><GeneralButton className="p-5 w-40 font-medium rounded-md text-xs" display="Close" onClick={() => setCreditNoteDetails(undefined)} /></div>}
         </div>

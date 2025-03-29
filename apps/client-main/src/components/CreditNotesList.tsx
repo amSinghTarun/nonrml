@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { GeneralButton } from './ui/buttons';
 import { trpc } from '@/app/_trpc/client';
 import { useToast } from '@/hooks/use-toast';
-import { TRPCClientError } from '@trpc/client';
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 interface OutputItem {
   creditCode: string;
   email: string;
 }
 
-export default function CreditNoteOTPVerification() {
+export default function CreditNoteOTPVerification({closeHandler}:{closeHandler: ()=>void}) {
   const [otp, setOtp] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,9 +36,9 @@ export default function CreditNoteOTPVerification() {
 
   return (
     <div className="fixed inset-0 flex items-center pt-20 justify-center backdrop-blur-sm z-50 text-xs bg-black/10">
-      <div className="max-w-3xl scrollbar-hide overscroll-none w-11/12 max-h-[70%] overflow-x-auto shadow-md shadow-neutral-200 bg-white/95 p-4 rounded-md text-neutral-900 relative">
+      <div className="max-w-3xl w-11/12 max-h-[70%] shadow-md shadow-neutral-200 bg-white/95 p-4 rounded-md text-neutral-900 relative flex flex-col">
+        <Cross2Icon className='text-neutral-700 cursor-pointer absolute right-2 top-2' onClick={closeHandler}></Cross2Icon>
         {isLoading ? (
-      add cancel button
           <p className='text-xs text-neutral-600 text-center py-8'>Verifying OTP...</p>
         ) : !isVerified ? (
           <>
@@ -60,12 +60,15 @@ export default function CreditNoteOTPVerification() {
           </>
         ) : (
           <>
-            <h2 className="text-sm text-center h-[30%] font-semibold mb-4 mt-2">Credit Notes</h2>
-            <div>
+            <h2 className="text-sm text-center font-semibold mb-4 mt-2">Credit Notes</h2>
+            <div className='flex-grow overflow-auto'>
               <table className="w-full text-xs">
-                <tbody className='space-y-2'>
+                <tbody>
                   {outputList.map((item, index) => (
-                    <tr key={index} className='p-2 shadow-sm shadow-neutral-200 rounded-sm flex flex-row justify-between'>
+                    <tr 
+                      key={index} 
+                      className='p-2 shadow-sm shadow-neutral-200 rounded-sm flex flex-row justify-between mb-2 bg-white'
+                    >
                       <td>{item.creditCode}</td>
                       <td>{item.email}</td>
                     </tr>

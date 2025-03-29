@@ -50,13 +50,12 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
     input = input!;
     try{
         const attemptNumber : string|null = await redis.redisClient.get(`${userId}`);
-        console.log(attemptNumber)
-        if(attemptNumber)
+        if(attemptNumber){
             if(Number(attemptNumber) > 5)
                 throw {code:"FORBIDDEN", message: "Attempt limit exceeded"};
-        else{
+        }else{
             const expireUserOTPAt =  172800000;
-            await redis.redisClient.set(`${userId}`, 0, {ex: expireUserOTPAt})
+            await redis.redisClient.set(`${userId}`, '0', {ex: expireUserOTPAt})
         }
 
         const creditNote = await prisma.creditNotes.findFirst({
