@@ -266,7 +266,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     </TableCell>
                                     <TableCell>{image.active ? "YESSSS" : "NOOOO"}</TableCell>
                                     <TableCell className="flex flex-col gap-2">
-                                        <Button className={`p-3 ${image.active ? "bg-red-500" : "bg-green-500"} text-white rounded-xl`} onClick={ async () => {await editImageProps.mutateAsync({productImageId: image.id,active: !image.active})}}>{ image.active ? "INACTIVE" : "ACTIVE" }</Button>
+                                        <Button className={`p-3 ${image.active ? "bg-red-500" : "bg-green-500"} text-white rounded-xl`} onClick={ () => {editImageProps.mutate({productImageId: image.id,active: !image.active})}}>{ image.active ? editImageProps.isLoading ? "..." : "INACTIVE" : "ACTIVE" }</Button>
                                         <Button className="p-3 bg-stone-600 text-white rounded-xl" onClick={ async () => {await deleteImage.mutateAsync({productImageId: image.id})}}>DELETE</Button>
                                     </TableCell>
                                 </TableRow>

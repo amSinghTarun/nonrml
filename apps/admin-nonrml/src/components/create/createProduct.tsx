@@ -37,7 +37,7 @@ export const CreateProduct = () => {
             categoryId: Number(values.categoryId),
             description: values.description,
             inspiration: values.inspiration,
-            shippingDetails: values.care.split(","),
+            shippingDetails: values.shippingDetails.split(","),
             care: values.care.split(","),
             details: values.details.split(","),
             sku: values.sku.toUpperCase(),
@@ -193,11 +193,11 @@ export const CreateProduct = () => {
                     name="shippingDetails"
                     render={({ field }) => (
                         <FormItem className="basis-1/2 flex flex-col">
-                            <FormLabel className="font-semibold">Care Instructions (comma-separated)</FormLabel>
+                            <FormLabel className="font-semibold">Shipping Instructions (comma-separated)</FormLabel>
                             <FormControl className="pl-2 text-sm">
                                 <input 
                                     className="p-2 border border-black rounded-md" 
-                                    placeholder="Enter Shipping Details separated by commas (e.g., wash cold,hang dry)"
+                                    placeholder="Enter Shipping Details separated by commas (e.g., ship next day, 1 week to deliver)"
                                     {...field}
                                 />
                             </FormControl>
@@ -239,7 +239,7 @@ export const CreateProduct = () => {
                         </FormItem>
                     )}
                 />
-                <Button type="submit">{createProduct.isLoading ? "Creating" : "Create"}</Button>
+                <Button type="submit">{createProduct.isLoading ? "..." : "Create"}</Button>
             </form>
         </Form>
     )

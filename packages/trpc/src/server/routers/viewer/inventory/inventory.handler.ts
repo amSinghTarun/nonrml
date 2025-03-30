@@ -113,7 +113,7 @@ export const editInventoryItem = async ({ctx, input}: TRPCRequestOptions<TEditIn
             }
         });
 
-        if(updateData.quantity){
+        if(updateData.quantity || updateData.baseSkuInventoryId){
             await redis.redisClient.del(`product_${inventoryUpdated.productVariant.product.sku}`),
             await redis.redisClient.del(`productVariantQuantity_${inventoryUpdated.productVariant.product.id}`)
         }
