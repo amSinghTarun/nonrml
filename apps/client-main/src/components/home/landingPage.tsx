@@ -46,8 +46,28 @@ export async function LandingPage() {
       <div className="h-screen overscroll-auto bg-transparent w-full ">
       </div>
 
+      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-white/10 pt-5 space-y-5 px-1">
+        <div className="flex flex-row w-full align-baseline">
+          <h1 className=" font-medium text-md sm:text-md flex flex-grow pl-3 text-black">LATEST DROP</h1>
+        </div>
+        <div className="flex flex-row flex-wrap w-full h-full">
+          {
+            products.popularProducts.map( product => ( 
+              <ProductCardHome  
+                key={product.sku}
+                image={product.productImages[0]?.image}
+                name={product.name}
+                sku={product.sku}
+                count={product._count.ProductVariants}
+                imageAlt={product.name}
+                price={+product.price}
+              />
+            ))
+          }
+        </div>
+      </div>
 
-      {/* <HeroParallax products={[...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts, ...products.homePageNewProducts]} /> */}
+{/* 
 
 
       <div
@@ -84,7 +104,7 @@ export async function LandingPage() {
             </div>
           </Link>
         </Vortex>
-      </div>
+      </div> */}
 
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
@@ -95,7 +115,6 @@ export async function LandingPage() {
         <div className="flex flex-row flex-wrap w-full h-full">
           {
             products.popularProducts.map( product => ( 
-              <>
               <ProductCardHome  
                 key={product.sku}
                 image={product.productImages[0]?.image}
@@ -105,70 +124,6 @@ export async function LandingPage() {
                 imageAlt={product.name}
                 price={+product.price}
               />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
-              </>
             ))
           }
         </div>

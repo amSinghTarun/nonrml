@@ -55,18 +55,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
     );
 };
-
+ 
 export const ProductCardHome : React.FC<ProductCardProps> = ({image, price, name, imageAlt, sku, count}) => {
     const priceInCurrency = `INR ${INR.format(price)}.00`
     const href = `/products/${sku.toLowerCase()}`;
 
     return (
-        <Link href={href} className="relative hover:bg-red-50 hover:rounded-xl flex px-1 flex-col basis-1/2 lg:basis-1/4 text-black mb-2 cursor-pointer">
+        <Link href={href} className="relative flex px-1 flex-col basis-1/2 md:basis-1/4 text-black mb-2 cursor-pointer">
             {/* <div className="flex flex-col rounded-sm"> */}
                     <Image 
                         src={image} 
                         alt={imageAlt} 
-                        className={`object-cover rounded-lg w-auto h-[265px] md:h-[100%] lg:h-max`} 
+                        className={`object-cover rounded-md transition-transform duration-300 group-hover:scale-110 w-auto h-[100%]`} 
                         width={2000}
                         height={1000}
                     />
