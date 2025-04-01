@@ -2,18 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { motion, MotionValue } from "framer-motion";
 
 let INR = new Intl.NumberFormat();
 
 interface ProductCardProps {
-    image: string, 
-    imageAlt: string
-    price: number,
-    name: string,
-    count: number,
-    sku: string
+    image: string;
+    imageAlt: string;
+    hoverImage?: string;
+    price: number;
+    name: string;
+    count: number;
+    sku: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -56,31 +57,54 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     );
 };
  
-export const ProductCardHome : React.FC<ProductCardProps> = ({image, price, name, imageAlt, sku, count}) => {
-    const priceInCurrency = `INR ${INR.format(price)}.00`
+export const ProductCardHome: React.FC<ProductCardProps> = ({
+    image,
+    hoverImage,
+    price,
+    name,
+    imageAlt,
+    sku,
+    count
+  }) => {
+    const [isHovering, setIsHovering] = useState(false);
     const href = `/products/${sku.toLowerCase()}`;
-
+    console.log(isHovering, image, hoverImage)
     return (
-        <Link href={href} className="relative flex px-1 flex-col basis-1/2 md:basis-1/4 text-black mb-2 cursor-pointer">
-            {/* <div className="flex flex-col rounded-sm"> */}
-                    <Image 
-                        src={image} 
-                        alt={imageAlt} 
-                        className={`object-cover rounded-md transition-transform duration-300 group-hover:scale-110 w-auto h-[100%]`} 
-                        width={2000}
-                        height={1000}
-                    />
-                    {/* {
-                        count == 0 ? <></> : 
-                        <div className="absolute left-2 bottom-2 text-[10px] font-medium bg-white rounded-full p-1 pl-2 pr-2">SOLD OUT</div>
-                    } */}
-            {/* </div> */}
-            <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-xs bg-white/70 backdrop-blur-lg py-2 px-3 rounded-tl-md rounded-br-md">
-                <h1 className="font-medium">{name.toUpperCase()}</h1>
-            </div>
-        </Link>
+      <Link 
+        href={href} 
+        className="relative flex px-1 flex-col basis-1/2 md:basis-1/4 text-black mb-2 cursor-pointer"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <div className="relative w-full h-full">
+          {/* Original image */}
+          <Image 
+            src={image} 
+            alt={imageAlt} 
+            className={`object-cover rounded-md w-auto h-[100%] transition-opacity duration-300 ${isHovering && hoverImage ? 'opacity-0' : 'opacity-100'}`} 
+            width={2000}
+            height={1000}
+          />
+          
+          {/* Hover image - preloaded but hidden until hover */}
+          {hoverImage && (
+            <Image 
+              src={hoverImage} 
+              alt={`${imageAlt} alternate view`} 
+              className={`object-cover rounded-md w-auto h-[100%] transition-opacity duration-300 absolute top-0 left-0 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
+              width={2000}
+              height={1000}
+              priority
+            />
+          )}
+        </div>
+        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-xs bg-white/70 backdrop-blur-lg py-2 px-3 rounded-tl-md rounded-br-md">
+          <h1 className="font-medium">{name.toUpperCase()}</h1>
+        </div>
+      </Link>
     );
-};
+  };
+  
 
 export const ProductCardParallax = ({ product, translate } : {
     product: {

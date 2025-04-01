@@ -24,7 +24,7 @@ export const Products = ({products}: {products: Products}) => {
 
   const router = useRouter();
 
-  const changeVisibility = trpc.viewer.product.editProduct.useMutation();
+  const manageVisibility = trpc.viewer.product.editProduct.useMutation();
   const allSizeCharts = trpc.viewer.sizeChart.getSizeChart.useQuery({type: "DISPLAY_NAME"});
   const addSizeChartToProduct = trpc.viewer.product.editProduct.useMutation();
 
@@ -35,6 +35,8 @@ export const Products = ({products}: {products: Products}) => {
           <TableHead>Id</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Public</TableHead>
+          <TableHead>Latest</TableHead>
+          <TableHead>Exclusive</TableHead>
           <TableHead>Sold out</TableHead>
           <TableHead className="bg-orange-400 text-white cursor-pointer">Sku</TableHead>
           <TableHead>Avl count</TableHead>
@@ -50,8 +52,18 @@ export const Products = ({products}: {products: Products}) => {
               <TableCell>{product.id}</TableCell>
               <TableCell className={`${product.exclusive && "bg-green-200"}`}>{product.name}</TableCell>
               <TableCell>
-                <button onClick={async () => {await changeVisibility.mutateAsync({productId: product.id, public: !product?.public}); products.refetch()}} className=" text-sm p-1 bg-stone-400 cursor-pointer hover:bg-stone-300 rounded-sm">
+                <button onClick={async () => {await manageVisibility.mutateAsync({productId: product.id, public: !product?.public}); products.refetch()}} className=" text-sm p-1 bg-stone-400 cursor-pointer hover:bg-stone-300 rounded-sm">
                   {`${product.public ? "HIDE" : "SHOW"}`}
+                </button>
+              </TableCell>
+              <TableCell>
+                <button onClick={async () => {await manageVisibility.mutateAsync({productId: product.id, latest: !product?.latest}); products.refetch()}} className=" text-sm p-1 bg-stone-400 cursor-pointer hover:bg-stone-300 rounded-sm">
+                  {`${product.latest ? "UNMARK" : "MARK"}`}
+                </button>
+              </TableCell>
+              <TableCell>
+                <button onClick={async () => {await manageVisibility.mutateAsync({productId: product.id, exclusive: !product?.exclusive}); products.refetch()}} className=" text-sm p-1 bg-stone-400 cursor-pointer hover:bg-stone-300 rounded-sm">
+                  {`${product.exclusive ? "REMOVE" : "MAKE"}`}
                 </button>
               </TableCell>
               <TableCell>{`${product.soldOut}`}</TableCell>

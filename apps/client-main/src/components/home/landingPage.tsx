@@ -48,14 +48,15 @@ export async function LandingPage() {
 
       <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-white/10 pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-md sm:text-md flex flex-grow pl-3 text-black">LATEST DROP</h1>
+          <h1 className=" font-medium text-sm flex flex-grow pl-3 text-black">LATEST DROP</h1>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full">
           {
-            products.popularProducts.map( product => ( 
+            products.latestProducts.map( product => ( 
               <ProductCardHome  
                 key={product.sku}
                 image={product.productImages[0]?.image}
+                hoverImage={product.productImages[1]?.image}
                 name={product.name}
                 sku={product.sku}
                 count={product._count.ProductVariants}
@@ -109,8 +110,8 @@ export async function LandingPage() {
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-md sm:text-md flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
-          <Link href="/store" className=" text-xs content-center sm:text-sm font-normal bg-black/10 text-black hover:bg-black hover:text-white rounded-sm px-2">DISCOVER MORE</Link>
+          <h1 className=" font-medium text-sm flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
+          <Link href="/store" className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2">DISCOVER MORE</Link>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full">
           {
@@ -118,6 +119,7 @@ export async function LandingPage() {
               <ProductCardHome  
                 key={product.sku}
                 image={product.productImages[0]?.image}
+                hoverImage={product.productImages[1]?.image}
                 name={product.name}
                 sku={product.sku}
                 count={product._count.ProductVariants}

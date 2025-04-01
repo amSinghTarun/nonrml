@@ -375,6 +375,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           public: input.admin && true,
           exclusive: true,
           sku: true,
+          latest: true,
           visitedCount: true,
           sizeChartId: true,
           _count:{
@@ -448,7 +449,8 @@ export const getHomeProducts = async ({
         // skip: input.cursor == 1 ? 0 : 1,
         take: take + 1,
         where: {
-          public: true
+          public: true,
+          latest: true
         },
         select: {
           name: true,
@@ -470,10 +472,14 @@ export const getHomeProducts = async ({
             }
           },
           productImages: {
-            where: { active: true, priorityIndex: 0 },
+            where: { active: true },
             select: {
               image: true,
-            }
+            },
+            orderBy: [
+              {priorityIndex: "asc"}
+            ],
+            take: 2
           }
         },
         orderBy: [
@@ -485,7 +491,7 @@ export const getHomeProducts = async ({
 
     if(input.exclusive){
       // Cache this as exclusive page, it can be cached for a long time as no quantity and shit, 1 day
-      exclusiveProducts = await prisma.products.findFirst({
+      exclusiveProducts = await prisma.products.findMany({
         where: {
           exclusive: true,
           public: true
@@ -509,7 +515,9 @@ export const getHomeProducts = async ({
       popularProducts = await prisma.products.findMany({
         take: 4,
         where: {
-          public: true
+          public: true,
+          latest: false,
+          exclusive: false
         },
         select: {
           name: true,
@@ -531,10 +539,14 @@ export const getHomeProducts = async ({
             }
           },
           productImages: {
-            where: { active: true, priorityIndex: 0 },
+            where: { active: true },
             select: {
               image: true,
-            }
+            },
+            orderBy: [
+              {priorityIndex: "asc"}
+            ],
+            take: 2
           }
         },
         orderBy: [
@@ -725,6 +737,7 @@ export const editProduct = async ({
       ...(input.soldOut !== undefined && {soldOut: input.soldOut}),
       ...(input.exclusive !== undefined && {exclusive: input.exclusive}),
       ...(input.public !== undefined && {public: input.public}),
+      ...(input.latest !== undefined && {latest: input.latest}),
       ...(isNaN(Number(input.sizeChartId)) !== undefined && {sizeChartId: input.sizeChartId! < 0 ? null : input.sizeChartId })
     }
 
@@ -739,20 +752,6 @@ export const editProduct = async ({
       });
       if(!category) 
         throw { code: "NOT_FOUND", message: "No category for the selected category id" };
-    }
-
-    if(updateData.exclusive) {
-      const exclusive = await prisma.products.findFirst({
-        where: {
-          exclusive: true
-        },
-        select: {
-          id: true,
-          sku: true
-        }
-      });
-      if( exclusive && exclusive.id != input.productId ){
-        throw { code: "BAD_REQUEST", message: `${exclusive.sku} is already marked as exclusive` };}
     }
 
     await prisma.products.update({

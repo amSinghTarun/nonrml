@@ -65,6 +65,7 @@ export const ZEditProductSchema = z.object({
     soldOut: z.boolean().optional(),
     exclusive: z.boolean().optional(),
     public: z.boolean().optional(),
+    latest: z.boolean().optional(),
     sizeChartId: z.number().optional()
 });
 export type TEditProductSchema = z.infer<typeof ZEditProductSchema>;

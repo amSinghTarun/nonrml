@@ -9,9 +9,9 @@ type HomeProductsType = RouterOutput["viewer"]["product"]["getHomeProducts"]["da
 
 export const getHomepageProducts = async () => {
 
-    let latestProducts : HomeProductsType["latestProducts"] | null =        null;//await redis.redisClient.get("latestProducts");
-    let popularProducts : HomeProductsType["popularProducts"] | null =      null;//await redis.redisClient.get("popularProducts");
-    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null =  null;//await redis.redisClient.get("exclusiveProducts");
+    let latestProducts    : HomeProductsType["latestProducts"]    | null = null;//await redis.redisClient.get("latestProducts");
+    let popularProducts   : HomeProductsType["popularProducts"]   | null = null;//await redis.redisClient.get("popularProducts");
+    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = null;//await redis.redisClient.get("exclusiveProducts");
 
     if( !latestProducts || !popularProducts || !exculsiveProducts ){
 
@@ -34,7 +34,7 @@ export const getHomepageProducts = async () => {
         }
     });
 
-    return { homePageNewProducts: homePageNewProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
+    return { latestProducts: latestProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
 }
 
 // export const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {

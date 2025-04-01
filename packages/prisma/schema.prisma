@@ -191,6 +191,7 @@ model Products {
   sizeChartId          Int?
   inspiration          String
   shippingDetails      String[]
+  latest               Boolean               @default(false)
   ProductCategorySizes ProductCategorySizes?
   productImages        ProductImage[]
   ProductVariants      ProductVariants[]
