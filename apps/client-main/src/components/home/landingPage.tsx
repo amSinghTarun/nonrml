@@ -43,14 +43,14 @@ export async function LandingPage() {
          and yes to innovation, creativity, and progress. In a world full of conformity, <span className="text-red-500">nonrml</span>  stands
           out by embracing the bold, the different, and the unapologetic pursuit of greatness.
       </MaskContainer>
-      <div className="h-screen overscroll-auto bg-transparent w-full ">
-      </div>
 
-      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-white/10 pt-5 space-y-5 px-1">
+      <div className="h-screen overscroll-auto bg-transparent w-full " />
+      
+      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-white/10 pt-3 space-y-3 pb-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-sm flex flex-grow pl-3 text-black">LATEST DROP</h1>
+          <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
         </div>
-        <div className="flex flex-row flex-wrap w-full h-full">
+        <div className="flex flex-row flex-wrap w-full h-full px-1">
           {
             products.latestProducts.map( product => ( 
               <ProductCardHome  
@@ -68,19 +68,22 @@ export async function LandingPage() {
         </div>
       </div>
 
-{/* 
-
-
-      <div
-        className="flex z-30 relative py-7 md:py-10 bg-white flex-col justify-center px-2 md:px-3 w-full h-full"
-      >
-        <h2 className="text-black bg-transparent text-sm md:text-3xl font-bold text-center">
+      <div className="flex z-30 relative py-5 md:py-8 bg-white flex-col justify-center w-full h-full ">
+        <h2 className="text-neutral-800 bg-transparent text-xs sm:text-sm md:text-xl font-bold text-center">
           <span>{`ALL IT TAKES IS A `} </span>
           <span className="text-rose-500">NO</span>
           <span>{` TO REDEFINE WHAT IS`}</span>
           <FlipWords className="text-rose-500" words={words} />
         </h2>
       </div>
+
+      <div className="z-30 relative h-screen flex flex-row w-full">
+        <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
+        <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
+      </div>
+{/* 
+
+
 
 
       <div className="w-[100%] h-[500px] sm:h-[600px] relative">
@@ -110,7 +113,7 @@ export async function LandingPage() {
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-sm flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
+          <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
           <Link href="/store" className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2">DISCOVER MORE</Link>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full">

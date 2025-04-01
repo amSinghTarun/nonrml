@@ -31,7 +31,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return (
         <Link 
             href={href} 
-            className="group px-0.5 flex flex-col basis-1/2 md:basis-1/3 xl:basis-1/4 text-black mb-3 cursor-pointer hover:shadow-sm"
+            className="group px-0.5 flex flex-col basis-1/2 md:basis-1/3 xl:basis-1/4  mb-3 cursor-pointer"
         >
             <div className="aspect-[3/4] w-full relative overflow-hidden">
                 <Image
