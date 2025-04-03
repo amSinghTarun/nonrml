@@ -53,23 +53,35 @@ export async function LandingPage() {
         <div className="flex flex-row flex-wrap w-full h-full px-1">
           {
             products.latestProducts.map( product => ( 
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                hoverImage={product.productImages[1]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
+              <>
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+              </>
             ))
           }
         </div>
       </div>
 
-      <div className="flex z-30 relative py-5 md:py-8 bg-white flex-col justify-center w-full h-full ">
-        <h2 className="text-neutral-800 bg-transparent text-xs sm:text-sm md:text-xl font-bold text-center">
+      <div className="flex z-30 relative py-7 md:py-8 bg-black text-white justify-center w-full h-full font-bold text-center text-xs sm:text-sm md:text-xl ">
+        <h2>
           <span>{`ALL IT TAKES IS A `} </span>
           <span className="text-rose-500">NO</span>
           <span>{` TO REDEFINE WHAT IS`}</span>
@@ -77,9 +89,12 @@ export async function LandingPage() {
         </h2>
       </div>
 
-      <div className="z-30 relative h-screen flex flex-row w-full">
-        <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
-        <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
+      <div className="z-30 relative flex flex-col md:flex-row">
+        <div className="bg-red-100 basis-1/2 flex">
+          <p className="h-[300px]">huia</p>
+        </div>
+        <div className="bg-black text-white flex basis-1/2 ">
+        <p className="h-[600px]">huip</p></div>
       </div>
 {/* 
 
@@ -119,21 +134,56 @@ export async function LandingPage() {
         <div className="flex flex-row flex-wrap w-full h-full">
           {
             products.popularProducts.map( product => ( 
-              <ProductCardHome  
-                key={product.sku}
-                image={product.productImages[0]?.image}
-                hoverImage={product.productImages[1]?.image}
-                name={product.name}
-                sku={product.sku}
-                count={product._count.ProductVariants}
-                imageAlt={product.name}
-                price={+product.price}
-              />
+              <>
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+                <ProductCardHome  
+                  key={product.sku}
+                  image={product.productImages[0]?.image}
+                  hoverImage={product.productImages[1]?.image}
+                  name={product.name}
+                  sku={product.sku}
+                  count={product._count.ProductVariants}
+                  imageAlt={product.name}
+                  price={+product.price}
+                />
+              </>
             ))
           }
         </div>
       </div>
 
+      <div className="flex z-30 relative py-7 md:py-8 bg-white flex-col items-center justify-center w-full h-full">
+        <Link href="/store" className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3 ">DISCOVER MORE</Link>
+      </div>
 
     </div> 
   )
