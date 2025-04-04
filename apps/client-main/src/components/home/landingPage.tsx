@@ -1,7 +1,5 @@
-import { Vortex } from "../ui/vortex";
 import { FlipWords } from "../ui/flip-words";
 import React from "react";
-import { HeroParallax } from "../ui/hero-parallax";
 import { MaskContainer } from "../ui/svg-mask-effect";
 import Image from "next/image";
 import homeImage from "../../images/AMI_4024-Edit-2_1668x2500_crop_center.jpg"
@@ -10,6 +8,7 @@ import logo from "@/images/logo.png";
 const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"]; 
 import { getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
+import NoNRMLFaceCard from "./Facecard";
 
 export async function LandingPage() {
   let products = await getHomepageProducts();
@@ -46,7 +45,7 @@ export async function LandingPage() {
 
       <div className="h-screen overscroll-auto bg-transparent w-full " />
       
-      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-white/10 pt-3 space-y-3 pb-1">
+      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-2xl bg-white/20 pt-3 space-y-3 pb-1">
         <div className="flex flex-row w-full align-baseline">
           <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
         </div>
@@ -80,7 +79,7 @@ export async function LandingPage() {
         </div>
       </div>
 
-      <div className="flex z-30 relative py-7 md:py-8 bg-black text-white justify-center w-full h-full font-bold text-center text-xs sm:text-sm md:text-xl ">
+      <div className="flex z-30 relative py-5 md:py-6 text-neutral-800 bg-white justify-center w-full h-full font-bold text-center text-xs sm:text-sm md:text-xl ">
         <h2>
           <span>{`ALL IT TAKES IS A `} </span>
           <span className="text-rose-500">NO</span>
@@ -89,42 +88,23 @@ export async function LandingPage() {
         </h2>
       </div>
 
-      <div className="z-30 relative flex flex-col md:flex-row">
+      <div className="z-30 relative flex flex-col lg:flex-row">
         <div className="bg-red-100 basis-1/2 flex">
-          <p className="h-[300px]">huia</p>
+          <div className="h-[400px] lg:h-[600px] relative w-full">
+            {/* Modified image container to use relative positioning and proper containment */}
+            <Image 
+              src={products.popularProducts[0].productImages[0].image} 
+              alt={"Product Image"} 
+              className="object-cover w-full h-full" 
+              width={1000} 
+              height={1000}
+            />
+          </div>
         </div>
-        <div className="bg-black text-white flex basis-1/2 ">
-        <p className="h-[600px]">huip</p></div>
+        <div className="text-white flex basis-1/2">
+          <NoNRMLFaceCard />
+        </div>
       </div>
-{/* 
-
-
-
-
-      <div className="w-[100%] h-[500px] sm:h-[600px] relative">
-        <Image 
-          src={products.exculsiveProducts.productImages[0].image} 
-          alt={"imageAlt"} 
-          className={`object-cover absolute w-[100%] h-[100%]`} 
-          width={1000} 
-          height={1000}
-        />
-        <Vortex 
-          backgroundColor="transparent"
-          className="absolute w-full flex h-full justify-center items-center content-center text-center"
-        >
-          <Link href={`/products/${products.exculsiveProducts.sku.toLowerCase()}`} className="rounded-lg bg-white/20 backdrop-blur-sm hover:bg-white text-black flex flex-col px-14 py-7 space-y-5">
-            <div className="items-center flex justify-center basis-1/3 text-xl sm:text-2xl font-bold" >
-              <span>EXCLUSIVE DROP <span className={`text-rose-500`}>{` :)`}</span> </span>
-            </div>
-            <div className="justify-center text-sm font-medium items-center flex flex-col basis-2/3">
-              <span >A Brand New Exclusive Product Is Live! </span>
-              <span >{`Hurry Up!  BUY NOW!`}</span>
-            </div>
-          </Link>
-        </Vortex>
-      </div> */}
-
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
@@ -179,11 +159,11 @@ export async function LandingPage() {
             ))
           }
         </div>
+        <div className="flex z-30 relative pb-7 md:pb-8 flex-col items-center justify-center w-full h-full">
+          <Link href="/store" className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3 ">DISCOVER MORE</Link>
+        </div>
       </div>
 
-      <div className="flex z-30 relative py-7 md:py-8 bg-white flex-col items-center justify-center w-full h-full">
-        <Link href="/store" className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3 ">DISCOVER MORE</Link>
-      </div>
 
     </div> 
   )
