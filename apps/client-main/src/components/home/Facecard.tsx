@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect } from 'react';
-import { RotatingCircleText } from '../ui/rotating-text-circle';
 
 const NoNRMLFaceCard: React.FC = () => {
   // Add animation keyframes dynamically to the document
@@ -29,7 +28,7 @@ const NoNRMLFaceCard: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative h-[600px] w-full backdrop-blur-2xl bg-white/20 text-black overflow-hidden font-[Montserrat] pt-5">
+    <div className="relative h-[600px] w-full  text-white bg-black overflow-hidden font-[Montserrat] pt-5">
       {/* Noise Overlay */}
       <div 
         className="absolute inset-0 opacity-15 pointer-events-none"
@@ -44,9 +43,9 @@ const NoNRMLFaceCard: React.FC = () => {
         {[
           { top: '10%', rotate: '-30deg', texts: ['NONRML', 'RESTRICTED'] },
           { top: '30%', rotate: '-25deg', texts: ['NOT NORMAL', 'NONRML'] },
-          { top: '50%', rotate: '-35deg', texts: ['RESTRICTED AREA', 'NONRML'] },
-          { top: '70%', rotate: '-20deg', texts: ['CAUTION', 'NONRML'] },
-          { top: '90%', rotate: '-28deg', texts: ['NO NORMAL ENTRY', 'NONRML'] },
+          { top: '50%', rotate: '-35deg', texts: ['SAY NO', 'NONRML'] },
+          { top: '70%', rotate: '-20deg', texts: ['DARE TO CREATE', 'NONRML'] },
+          { top: '90%', rotate: '-28deg', texts: ['BE STUBBORN', 'SAY NO'] },
         ].map((position, index) => (
           <div 
             key={index}
@@ -75,36 +74,43 @@ const NoNRMLFaceCard: React.FC = () => {
       </div>
       
       {/* Content Wrapper */}
-      <div className="flex flex-col justify-center h-full p-12 relative z-10">
+      <div className="flex flex-col justify-center h-full p-6 relative z-10">
         {/* Heading */}
-        <h1 className="font-[Bebas_Neue] text-5xl leading-[0.9] text-white tracking-[0.2rem] relative mb-8">
-          NoNRML FACECARD.
+        <h1 className="font-[Bebas_Neue] text-6xl leading-[0.9] text-white tracking-[0.2rem] relative mb-8">
+          NoNRML FACECARD
           <span className="absolute bottom-[-1rem] left-0 w-20 h-1 bg-white"></span>
         </h1>
         
         {/* Body Text */}
-        <div className="leading-relaxed text-xs md:text-base max-w-[800px] font-semibold relative">
+        <div className="leading-relaxed text-sm md:text-base max-w-[800px] font-semibold relative">
           <div className="mb-6 font-bold text-left">
-            <span className='bg-white text-black'>Thought we were just another streetwear brand?</span> 
+            {/* <span className='bg-white text-black'> */}
+              Thought we were just another normal streetwear brand?
+              {/* </span>  */}
             <br/> 
-            <span className="font-extrabold text-base md:text-lg  px-1 text-black tracking-wider relative z-10 bg-white ">Nah, we are NoNRML.</span> 
+            {/* <span className="font-extrabold text-base md:text-lg  px-1 text-black tracking-wider relative z-10 bg-white "> */}
+              Nah, we are NoNRML.
+              {/* </span>  */}
           </div>
-          
-          <p className="mb-6">
-            Streetwear became a whisper when it was born to scream. It traded its chaos for comfort. Its revolution for recognition.  <span className='bg-white md:text-lg text-black px-1 text-base'> NoNRML isn't just fashion or clothing, it's rebelion against the ordinary</span>
-          </p>
-          
-          <div className="font-semibold leading-tight tracking-wider my-6">
+
+          <div className="font-semibold mb-6 text-center">
             Our vision?
             <br/> Difficult but simple, Unite the beautiful misfits who said NO to NORMAL
           </div>
           
-          <p className="mb-6">
-            From street corner philosophers to midnight dreamers. NoNRML is your battlecry.
-            <br/> 
-            <span className='bg-white md:text-lg text-black px-1 text-base'>
-              For the ones who  walk against the current, who question the answers, who rewrite what's possible.
-            </span>
+          <p className="mb-6 text-center">
+            Streetwear became a whisper when it was born to scream.
+            {/* <span className='bg-white md:text-lg text-black px-1'>  */}
+              <br/>NoNRML isn't just fashion or clothing, it's rebelion against the Normal
+              {/* </span> */}
+          </p>
+          
+          <p className="mb-6 text-right">
+            {/* <span className='bg-white text-black px-1'> */}
+            For the ones still figuring it out. 
+            <br/>For those who never fit the mold. 
+            <br/>NoNRML is your refusal to settle, your way of saying: I’ll define me.
+            {/* </span> */}
           </p>
         </div>
       </div>

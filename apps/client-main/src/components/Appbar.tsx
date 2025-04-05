@@ -20,7 +20,7 @@ export const Appbar = async () => {
 
     return (
         <>
-            <nav className=" w-full z-50 p-3 pr-0 h-14 backdrop-blur-3xl flex flex-row fixed top-0 justify-between ">
+            <nav className=" w-full z-50 p-3 pr-0 h-14 backdrop-blur-2xl bg-white/25 flex flex-row fixed top-0 justify-between ">
                 <div className="basis-1/2 flex justify-left items-center gap-4 w-auto h-full b">
                     <MenuButton />
                     <UserButton />

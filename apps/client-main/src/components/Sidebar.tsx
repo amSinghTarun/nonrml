@@ -17,7 +17,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
     <>
       <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none"></div>
       <nav className="fixed flex flex-col w-screen max-h-screen justify-end items-center z-40 h-full translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
-        <aside className=" backdrop-blur-3xl bg-white/5 flex flex-col shadow-sm shadow-neutral-500 h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] justify-between rounded-t-md pb-5">
+        <aside className=" backdrop-blur-2xl bg-white/10 flex flex-col shadow-sm shadow-neutral-500 h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] justify-between rounded-t-md pb-5">
           {/* <div className="flex-col flex w-[100%] items-center">
             <Searchbar />
             {/* <div className="text-white">SHOP</div> */}

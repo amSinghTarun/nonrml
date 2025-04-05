@@ -9,6 +9,9 @@ const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"];
 import { getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import NoNRMLFaceCard from "./Facecard";
+import { Permanent_Marker } from "next/font/google"
+
+const appFont = Permanent_Marker({subsets: ["latin"], weight:["400"]});
 
 export async function LandingPage() {
   let products = await getHomepageProducts();
@@ -20,18 +23,19 @@ export async function LandingPage() {
       <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
       <MaskContainer
         revealText={
-          <p className="max-w-4xl mx-auto bg-white/60 p-5 text-center">
+          <p className="w-fit flex
+           h-fit bg-none p-5 text-center items-center content-center justify-center">
             <Image
                 src={logo}
                 alt="No NRML logo"
                 priority
                 width={0} height={0}
                 sizes="100vw" 
-                style={{ color:"white",width: 'auto', height: "40px"}}
+                className='h-auto w-4/5 md:w-1/3 lg:w-1/4 bg-red-300 p-0 object-cover text-center items-center content-center justify-center'
             ></Image>
           </p>
         }
-        className=" w-full text-sm fixed "
+        className=" w-auto text-sm fixed text-center items-center content-center justify-center"
       >
         <span className="text-red-500">nonrml</span> is more than just a brand; it's a movement that challenges the status quo. 
         Built around the power of saying "no," <span className="text-red-500">nonrml</span>  defies conventions, breaks free from standards, 
@@ -39,13 +43,13 @@ export async function LandingPage() {
         the most groundbreaking achievements have come from those who dared to reject the <span className="text-red-500">nonrml</span> —
         those who refused to settle for the usual and pushed boundaries to create something extraordinary. 
         <span className="text-red-500">nonrml</span>  embodies this spirit of rebellion, inspiring a community that isn't afraid to say no to norms
-         and yes to innovation, creativity, and progress. In a world full of conformity, <span className="text-red-500">nonrml</span>  stands
-          out by embracing the bold, the different, and the unapologetic pursuit of greatness.
+        and yes to innovation, creativity, and progress. In a world full of conformity, <span className="text-red-500">nonrml</span>  stands
+        out by embracing the bold, the different, and the unapologetic pursuit of greatness.
       </MaskContainer>
 
       <div className="h-screen overscroll-auto bg-transparent w-full " />
       
-      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-2xl bg-white/20 pt-3 space-y-3 pb-1">
+      <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-black/20 pt-3 space-y-3 pb-1">
         <div className="flex flex-row w-full align-baseline">
           <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
         </div>
@@ -79,7 +83,7 @@ export async function LandingPage() {
         </div>
       </div>
 
-      <div className="flex z-30 relative py-5 md:py-6 text-neutral-800 bg-white justify-center w-full h-full font-bold text-center text-xs sm:text-sm md:text-xl ">
+      <div className={`flex z-30 ${appFont.className} relative py-4 md:py-5 text-neutral-800 bg-white justify-center w-full h-full text-center text-base sm:text-sm md:text-xl `}>
         <h2>
           <span>{`ALL IT TAKES IS A `} </span>
           <span className="text-rose-500">NO</span>
