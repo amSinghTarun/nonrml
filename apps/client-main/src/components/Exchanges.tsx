@@ -20,7 +20,7 @@ interface ExchangesProps {
 export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders }) => {
     return (
         <div className={cn("h-screen w-full p-2 pb-6 flex flex-col lg:flex-row", className)}>
-            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-medium p-1 lg:justify-center lg:text-center">Replacement Orders</h1>
+            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-bold p-1 lg:justify-center lg:text-center">Replacement Orders</h1>
             <div className="space-y-7 lg:space-y-10 p-2 lg:p-4 flex flex-col flex-1 overflow-y-scroll overscroll-auto scrollbar-hide">
             {
                 exchangeOrders.map((order, index) => {
@@ -28,7 +28,7 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                         <div key={index} className="space-y-2 hover:shadow-sm w-full h-fit hover:shadow-neutral-200 shadow-sm shadow-neutral-100 p-2 text-xs rounded-md text-neutral-500">
                             <div className="flex flex-col justify-between space-y-1 relative">
                                 <div className="flex justify-between">
-                                    <p className="font-medium text-neutral-800">REPL-{order.id}</p>
+                                    <p className="font-bold text-neutral-800">REPL-{order.id}</p>
                                     <p >{order.createdAt.toDateString()}</p>
                                 </div>
                                 <div className="flex justify-between ">
@@ -54,7 +54,7 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                                     <p> Credit Code </p>
                                 </div>
                                 <div className="flex justify-between">
-                                    <p className="font-medium text-neutral-600"> {order.CreditNotes[0].creditCode} </p>
+                                    <p className="font-bold text-neutral-600"> {order.CreditNotes[0].creditCode} </p>
                                     <p> {convertStringToINR(Number(order.CreditNotes[0].value))} </p>
                                 </div>
                             </div> }

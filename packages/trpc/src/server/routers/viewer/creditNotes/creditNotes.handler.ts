@@ -54,7 +54,7 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
             if(Number(attemptNumber) > 5)
                 throw {code:"FORBIDDEN", message: "Attempt limit exceeded"};
         }else{
-            const expireUserOTPAt =  172800000;
+            const expireUserOTPAt =  172800;
             await redis.redisClient.set(`${userId}`, '0', {ex: expireUserOTPAt})
         }
 

@@ -428,6 +428,23 @@ model RefundTransactions {
   CreditNotes     CreditNotes? @relation(fields: [creditNoteId], references: [id], onDelete: NoAction)
 }
 
+model HomePageImages {
+  id          Int           @id @unique @default(autoincrement())
+  legacyType  HomeImageType
+  currentType HomeImageType
+  active      Boolean       @default(false)
+  createdAt   DateTime      @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamp(6)
+  updatedAt   DateTime?     @db.Timestamp(6)
+}
+
+enum HomeImageType {
+  TOP_MD
+  TOP_LG
+  MIDDLE_MD
+  MIDDLE_LG
+  BOTTOM
+}
+
 enum OrderRtoType {
   RETURN
   REPLACEMENT

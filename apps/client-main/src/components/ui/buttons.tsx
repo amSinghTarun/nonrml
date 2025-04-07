@@ -131,7 +131,7 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
             {   
                 updatingQuantity 
                 ? 
-                    <div className="flex items-center justify-center flex-grow font-medium"> ...</div>
+                    <div className="flex items-center justify-center flex-grow font-bold"> ...</div>
                 :
                 <>
                     <button type="button" onClick={handleDecrease} className="flex items-center basis-1/3 justify-center cursor-pointer"> <IconMinus size={'12px'} /> </button>

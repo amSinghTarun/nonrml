@@ -50,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 )}
             </div>
             <div className="items-center flex flex-col pt-1 pb-2 w-full">
-                <h1 className=" text-neutral-900 font-medium text-xs">{name.toUpperCase()}</h1>
+                <h1 className=" text-neutral-900 font-bold text-xs">{name.toUpperCase()}</h1>
                 <p className="font-normal text-neutral-600 text-xs">{priceInCurrency}</p>
             </div>
         </Link>
@@ -99,7 +99,7 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
           )}
         </div>
         <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-xs bg-white/40 backdrop-blur-lg py-2 px-3 rounded-tl-md rounded-br-md">
-          <h1 className="font-medium">{name.toUpperCase()}</h1>
+          <h1 className="font-bold">{name.toUpperCase()}</h1>
         </div>
       </Link>
     );
@@ -131,7 +131,7 @@ export const ProductCardParallax = ({ product, translate } : {
                 className="object-cover h-full sm:h-[350px] w-full object-left-top inset-0 rounded-lg"
                 alt={product.title}
             />
-            <h2 className=" absolute bottom-0 right-0 text-black bg-white/50 px-4 py-3 backdrop-blur-2xl text-xs font-medium text-center rounded-tl-lg rounded-br-lg">
+            <h2 className=" absolute bottom-0 right-0 text-black bg-white/50 px-4 py-3 backdrop-blur-2xl text-xs font-bold text-center rounded-tl-lg rounded-br-lg">
                 {product.title.toUpperCase()}
             </h2>
         </Link>

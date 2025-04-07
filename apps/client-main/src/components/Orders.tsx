@@ -89,7 +89,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
     return (
         <div className={cn("overflow-none h-screen w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
             <div className="flex flex-row lg:flex-col lg:text-center justify-between lg:justify-center lg:basis-5/12 p-2 text-xs lg:text-sm gap-4">
-                <span className="hover:font-medium cursor-none font-medium text-neutral-600">{userContact}</span>
+                <span className="hover:font-bold cursor-none font-bold text-neutral-600">{userContact}</span>
                 <span className="cursor-pointer hover:underline text-neutral-500" onClick={()=> {signOut()}}> LOGOUT</span>
             </div>
             <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto w-full scrollbar-hide h-full">
@@ -122,7 +122,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                                 <article key={index} className="relative h-auto w-full p-2 rounded-md text-sm hover:shadow-sm hover:shadow-neutral-200 transition-all duration-200 ">
                                     <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/account/${order.id}`}>
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-medium">{order.id}</span>
+                                            <span className="text-sm font-bold">{order.id}</span>
                                             <span className="text-xs text-neutral-500">{order.createdAt.toDateString()}</span>
                                         </div>
                                         

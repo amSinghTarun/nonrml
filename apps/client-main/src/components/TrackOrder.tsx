@@ -41,7 +41,7 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
 
     return (
         <div className={cn("w-[90%] text-neutral-800 flex flex-col text-center text-xs", trackOrderProps.className)}>
-            <h1 className="flex justify-center text-neutral-800 font-medium place-items-end basis-1/3 text-xl mb-1">
+            <h1 className="flex justify-center text-neutral-800 font-bold place-items-end basis-1/3 text-xl mb-1">
                 TRACK ORDER
             </h1>
             <p className="mb-10 sm:text-xs text-[10px] text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
@@ -69,7 +69,7 @@ export const TrackOrder : React.FC<TrackOrderProps> = (trackOrderProps) => {
                 <FormSubmitButton 
                     type="submit"
                     label="TRACK ORDER"
-                    className="w-fit p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
+                    className="w-fit p-5 text-xs font-bold bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                 />
             </Form>
         </div>

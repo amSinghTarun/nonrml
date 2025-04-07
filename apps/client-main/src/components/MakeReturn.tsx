@@ -150,7 +150,7 @@ export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, ret
                                         <p>Size: {product.productVariant?.size}</p>
                                         <p>{convertStringToINR(+product.price!)}</p>
                                     </div>
-                                    { !selectedProducts[product.id] && <p className="font-medium text-neutral-600">Available For Return: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
+                                    { !selectedProducts[product.id] && <p className="font-bold text-neutral-600">Available For Return: {product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0))}</p>}
                                     { selectedProducts[product.id] && (
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-neutral-400">Return:</p>

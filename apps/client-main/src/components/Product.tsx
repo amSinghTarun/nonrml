@@ -88,7 +88,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
             <div className=" lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
                 <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
                     <div className="flex flex-col pl-1 text-center space-y-2">
-                        <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-medium">
+                        <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-bold">
                             {product.name.toUpperCase()}
                         </span>
                         <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
@@ -129,7 +129,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                                         className="shadow-neutral-200 shadow-sm"
                                     />
                                     <GeneralButton
-                                        className="h-full w-full bg-neutral-800 text-white font-medium"
+                                        className="h-full w-full bg-neutral-800 text-white font-bold"
                                         display="CHECKOUT"
                                         onClick={() => {
                                             setBuyNowItems({
@@ -157,7 +157,7 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                                         })
                                 }} />
                                 <GeneralButton
-                                    className="h-full w-full p-3 font-medium"
+                                    className="h-full w-full p-3 font-bold"
                                     display="BUY IT NOW"
                                     onClick={() => {
                                         selectedSize[sizeSKU.current!]?.quantity > 0 ?
@@ -171,21 +171,21 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                     }</div>
                     <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
                         <div className="flex lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3 ">DESCRIPTION</span>
+                            <span className="font-normal lg:font-bold basis-1/3 ">DESCRIPTION</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.description}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3">DETAILS</span>
+                            <span className="font-normal lg:font-bold basis-1/3">DETAILS</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.details}`}</div>
                         </div>
 
                         <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal lg:font-medium basis-1/3 ">CARE</span>
+                            <span className="font-normal lg:font-bold basis-1/3 ">CARE</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.care}`}</div>
                         </div>
                         <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
-                            <span className="font-normal basis-1/3 lg:font-medium ">SHIPPING</span>
+                            <span className="font-normal basis-1/3 lg:font-bold ">SHIPPING</span>
                             <div className="basis-2/3 font-light text-neutral-500 lg:px-2 line-">{`${product.shippingDetails}`}</div>
                         </div>
                     </div>

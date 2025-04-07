@@ -44,12 +44,12 @@ export const CartMenu = () => {
     <>  
     <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden"></div>
     <section className="fixed flex flex-col w-screen justify-end items-center z-40 h-full">
-    <article className="text-neutral-800 backdrop-blur-3xl overscroll-none shadow-sm shadow-neutral-500 flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
+    <article className="text-neutral-800 bg-white/20 backdrop-blur-3xl overscroll-none shadow-sm shadow-neutral-500 flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
       {
         Object.keys(cartItems).length == 0 ?
           <div className="flex flex-col p-3 justify-center w-full h-full">
             <div className="flex flex-col justify-center items-center space-y-3 w-full">
-              <div className="font-medium text-xs">YOUR CART IS EMPTY</div>
+              <div className="font-bold text-xs">YOUR CART IS EMPTY</div>
               <GeneralButton 
                 className="flex bg-neutral-800 items-center justify-center rounded-md p-5 text-white text-xs font-normal" 
                 display='CONTINUE SHOPPING'
@@ -88,7 +88,7 @@ export const CartMenu = () => {
                     <div className="font-normal text-neutral-800">Size: {cartItems[+variantId].size}</div>
                     <div className="flex flex-1 flex-row justify-between text-xs pr-3">
                       <QuantitySelectButton 
-                        className="p-1 bg-white/10 text-neutral-600 rounded-sm font-medium" 
+                        className="p-1 bg-white/10 text-neutral-600 rounded-sm font-bold" 
                         selectedQuantity = {useCartItemStore.getState().cartItems[+variantId].quantity} 
                         minQuantity={+process.env.MIN_QUANTITY_TO_ORDER!} 
                         maxQuantity={+process.env.MAX_QUANTITY_TO_ORDER!} 
@@ -108,8 +108,8 @@ export const CartMenu = () => {
           {/* the total part of cart page */}
           <div className="font-normal text-xs flex flex-row justify-between pt-2 space-x-1">
             <div className="flex flex-col basis-1/2">
-              <span className="text-xs text-neutral-500">TOTAL:</span>
-              <div className="text-base text-neutral-800 font-medium"> {convertStringToINR(cartTotal.current)} </div> 
+              <span className="text-xs text-black/50">TOTAL:</span>
+              <div className="text-base text-neutral-800 font-bold"> {convertStringToINR(cartTotal.current)} </div> 
             </div>
             <div className="basis-1/2">
               <GeneralButton className=" h-full w-full font-normal" display="CHECKOUT" onClick={ handleCheckoutRedirect }/>

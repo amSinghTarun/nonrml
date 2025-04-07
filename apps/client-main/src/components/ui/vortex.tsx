@@ -1,9 +1,7 @@
-"use client"
-
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
 import { createNoise3D } from "simplex-noise";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 interface VortexProps {
   children?: any;
@@ -25,20 +23,20 @@ export const Vortex = (props: VortexProps) => {
   const particleCount = props.particleCount || 700;
   const particlePropCount = 9;
   const particlePropsLength = particleCount * particlePropCount;
-  const rangeY = props.rangeY || 200;
+  const rangeY = props.rangeY || 100;
   const baseTTL = 50;
   const rangeTTL = 150;
   const baseSpeed = props.baseSpeed || 0.0;
   const rangeSpeed = props.rangeSpeed || 1.5;
-  const baseRadius = props.baseRadius || 2;
+  const baseRadius = props.baseRadius || 1;
   const rangeRadius = props.rangeRadius || 2;
-  const baseHue = props.baseHue || 240;
-  const rangeHue = 50;
+  const baseHue = props.baseHue || 220;
+  const rangeHue = 100;
   const noiseSteps = 3;
   const xOff = 0.00125;
   const yOff = 0.00125;
   const zOff = 0.0005;
-  const backgroundColor = props.backgroundColor || "#000000";
+  const backgroundColor = props.backgroundColor || "#ffffff";
   let tick = 0;
   const noise3D = createNoise3D();
   let particleProps = new Float32Array(particlePropsLength);
@@ -174,7 +172,7 @@ export const Vortex = (props: VortexProps) => {
     ctx.save();
     ctx.lineCap = "round";
     ctx.lineWidth = radius;
-    ctx.strokeStyle = `rgba(255, 255, 255,${fadeInOut(life, ttl)})`;
+    ctx.strokeStyle = `hsla(${hue},100%,60%,${fadeInOut(life, ttl)})`;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x2, y2);
@@ -204,17 +202,17 @@ export const Vortex = (props: VortexProps) => {
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D
   ) => {
-    // ctx.save();
-    // ctx.filter = "blur(0px) brightness(600%)";
-    // ctx.globalCompositeOperation = "hard-light";
-    // ctx.drawImage(canvas, 0, 0);
-    // ctx.restore();
+    ctx.save();
+    ctx.filter = "blur(8px) brightness(200%)";
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(canvas, 0, 0);
+    ctx.restore();
 
-    // ctx.save();
-    // ctx.filter = "blur(4px) brightness(200%)";
-    // ctx.globalCompositeOperation = "lighter";
-    // ctx.drawImage(canvas, 0, 0);
-    // ctx.restore();
+    ctx.save();
+    ctx.filter = "blur(4px) brightness(200%)";
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(canvas, 0, 0);
+    ctx.restore();
   };
 
   const renderToScreen = (
@@ -244,7 +242,7 @@ export const Vortex = (props: VortexProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         ref={containerRef}
-        className="absolute h-full w-full inset-0 z-0 backdrop-blur-sm flex items-center justify-center"
+        className="absolute h-full w-full inset-0 z-0 bg-transparent flex items-center justify-center"
       >
         <canvas ref={canvasRef}></canvas>
       </motion.div>

@@ -152,7 +152,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false); setAction("ORDER") }} />
                 <div className="w-[100%] h-[100%] flex flex-col text-neutral-800">
                 { action != "ORDER" && <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
-                    <div className=" cursor-pointer text-xs font-medium">
+                    <div className=" cursor-pointer text-xs font-bold">
                         <span className={`${action == "SHOWADDRESS" && "font-bold"}`} onClick={()=>{setAction("SHOWADDRESS")}}>{`SHIPPING ADDRESS`}</span>
                     </div>
                     <div className=" font-normal w-fit h-full">
@@ -169,13 +169,13 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                     <>
                         {userAddresses.isLoading ? (
                             <article className="flex flex-row p-2 w-full h-full justify-center items-center">
-                                <div className="p-4 font-medium text-xs">
+                                <div className="p-4 font-bold text-xs">
                                     <p>FINDING YOUR ADDRESS FOR YOU .....</p>
                                 </div>
                             </article>
                         ) : userAddresses.isError ? (
                             <article className="flex flex-row p-2 w-full h-full justify-center items-center">
-                                <div className="backdrop-blur-3xl bg-white/20 p-4 font-medium rounded-xl text-sm">
+                                <div className="backdrop-blur-3xl bg-white/20 p-4 font-bold rounded-xl text-sm">
                                     <p>Error loading addresses. Please try again.</p>
                                 </div>
                             </article>
@@ -269,7 +269,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                     </article>
                 }
                 <article className="flex flex-row justify-between px-3 py-3 space-x-1 items-center">
-                    <div className=" cursor-pointer text-xs hover:font-medium text-neutral-600">
+                    <div className=" cursor-pointer text-xs hover:font-bold text-neutral-600">
                         <span className={`${action == "ORDER" && "font-bold"}`} onClick={()=>{setAction("ORDER")}}>{`ORDER SUMMARY *`}</span>
                     </div>
                     {
@@ -293,7 +293,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 {   
                     action == "ORDER" && 
                     <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center text-neutral-600">
-                        <div className=" cursor-pointer text-xs hover:font-medium">
+                        <div className=" cursor-pointer text-xs hover:font-bold">
                             <span onClick={()=>{setAction("SHOWADDRESS")}}>{`SHIPPING ADDRESS`}</span>
                         </div>
                         <div className=" font-normal w-fit h-full">
@@ -308,7 +308,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 <article className="text-sm flex flex-row justify-between px-2 pt-4 pb-2 space-x-1">
                     <div className="flex flex-col basis-1/2 justify-start">
                         <span className="text-xs text-neutral-500">TOTAL:</span>
-                        <span className="text-lg font-medium">{convertStringToINR(couponValue?.orderValue ?? totalAmount.current)}</span>
+                        <span className="text-lg font-bold">{convertStringToINR(couponValue?.orderValue ?? totalAmount.current)}</span>
                     </div>
                     <div className=" w-fit h-full">
                         <GeneralButton className=" p-2 px-6 h-full w-full" display={ initiateOrder.isLoading ? "PROCESSING..." : "PAY NOW"} onClick={handlePayment} />

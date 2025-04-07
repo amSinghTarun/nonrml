@@ -24,7 +24,7 @@ export default function Loading({ text }: {text?:string}) {
 
   return (
         <div className="relative w-full h-full overflow-hidden bg-white">
-            <div className="absolute inset-0 flex justify-center items-center z-30 text-neutral-700 font-medium">
+            <div className="absolute inset-0 flex justify-center items-center z-30 text-neutral-700 font-bold">
                 <div  className='p-4 backdrop-blur-lg rounded-lg'>
                     <div className='justify-center flex '>
 
@@ -45,7 +45,7 @@ export default function Loading({ text }: {text?:string}) {
             {positions.map(({ id, left, top }) => (
                 <div
                 key={id}
-                className="absolute text-neutral-400 text-[10px] font-medium animate-slow-fade rounded-xl"
+                className="absolute text-neutral-400 text-[10px] font-bold animate-slow-fade rounded-xl"
                 style={{
                     left: `${left}%`,
                     top: `${top}%`,

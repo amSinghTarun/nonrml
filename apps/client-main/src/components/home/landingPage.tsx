@@ -9,12 +9,20 @@ const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"];
 import { getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import NoNRMLFaceCard from "./Facecard";
-import { Permanent_Marker } from "next/font/google"
+import { TickerText } from "./TickerText";
+import {ResponsiveProductImage, ResponsiveImageGallery} from "./ScreenResponsiveImage";
+import { Footer } from "../Footer";
 
-const appFont = Permanent_Marker({subsets: ["latin"], weight:["400"]});
 
 export async function LandingPage() {
+  
   let products = await getHomepageProducts();
+  let productImages = [
+    { src: products.latestProducts[0].productImages[0].image, alt: "1"},
+    { src: products.latestProducts[0].productImages[1].image, alt: "1"},
+    { src: products.popularProducts[0].productImages[0].image, alt: "1"},
+    { src: products.popularProducts[0].productImages[1].image, alt: "1"}
+  ]
 
   return (
     <div  className="w-screen h-full">
@@ -23,35 +31,28 @@ export async function LandingPage() {
       <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
       <MaskContainer
         revealText={
-          <p className="w-fit flex
-           h-fit bg-none p-5 text-center items-center content-center justify-center">
+          <p className="w-2/5 md:w-1/6 lg:w-1/8 flex h-fit">
             <Image
                 src={logo}
                 alt="No NRML logo"
                 priority
                 width={0} height={0}
                 sizes="100vw" 
-                className='h-auto w-4/5 md:w-1/3 lg:w-1/4 bg-red-300 p-0 object-cover text-center items-center content-center justify-center'
+                className='h-auto w-fit p-0 object-cover justify-center bg-white bg-opacity-80 rounded-md'
+                // can't use backdrop-blur
             ></Image>
           </p>
         }
-        className=" w-auto text-sm fixed text-center items-center content-center justify-center"
+        className=" w-full text-sm h-full fixed text-center items-center content-center justify-center"
       >
-        <span className="text-red-500">nonrml</span> is more than just a brand; it's a movement that challenges the status quo. 
-        Built around the power of saying "no," <span className="text-red-500">nonrml</span>  defies conventions, breaks free from standards, 
-        and redefines what the world sees as normal. Throughout history, 
-        the most groundbreaking achievements have come from those who dared to reject the <span className="text-red-500">nonrml</span> —
-        those who refused to settle for the usual and pushed boundaries to create something extraordinary. 
-        <span className="text-red-500">nonrml</span>  embodies this spirit of rebellion, inspiring a community that isn't afraid to say no to norms
-        and yes to innovation, creativity, and progress. In a world full of conformity, <span className="text-red-500">nonrml</span>  stands
-        out by embracing the bold, the different, and the unapologetic pursuit of greatness.
+        <NoNRMLFaceCard />
       </MaskContainer>
 
       <div className="h-screen overscroll-auto bg-transparent w-full " />
       
       <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-black/20 pt-3 space-y-3 pb-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
+          <h1 className=" font-bold text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full px-1">
           {
@@ -83,36 +84,17 @@ export async function LandingPage() {
         </div>
       </div>
 
-      <div className={`flex z-30 ${appFont.className} relative py-4 md:py-5 text-neutral-800 bg-white justify-center w-full h-full text-center text-base sm:text-sm md:text-xl `}>
-        <h2>
-          <span>{`ALL IT TAKES IS A `} </span>
-          <span className="text-rose-500">NO</span>
-          <span>{` TO REDEFINE WHAT IS`}</span>
-          <FlipWords className="text-rose-500" words={words} />
-        </h2>
+      <div className={`flex z-30 relative py-1 md:py-1 bg-black backdrop-blur-sm justify-center w-full h-full text-center text-sm sm:text-base md:text-xl`}>
+        <TickerText text="ALL IT TAKES IS A NO TO REDEFINE WHAT IS NORMAL" textColor="white"/>
       </div>
 
       <div className="z-30 relative flex flex-col lg:flex-row">
-        <div className="bg-red-100 basis-1/2 flex">
-          <div className="h-[400px] lg:h-[600px] relative w-full">
-            {/* Modified image container to use relative positioning and proper containment */}
-            <Image 
-              src={products.popularProducts[0].productImages[0].image} 
-              alt={"Product Image"} 
-              className="object-cover w-full h-full" 
-              width={1000} 
-              height={1000}
-            />
-          </div>
-        </div>
-        <div className="text-white flex basis-1/2">
-          <NoNRMLFaceCard />
-        </div>
+          <ResponsiveProductImage products={products} />
       </div>
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
-          <h1 className=" font-medium text-xs flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
+          <h1 className=" font-bold text-xs flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
           <Link href="/store" className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2">DISCOVER MORE</Link>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full">
@@ -168,6 +150,10 @@ export async function LandingPage() {
         </div>
       </div>
 
+        <div> 
+          <ResponsiveImageGallery images={productImages}/>
+          <Footer className="z-30 relative text-white bg-black/45 backdrop-blur-md border-none"></Footer>
+        </div>
 
     </div> 
   )

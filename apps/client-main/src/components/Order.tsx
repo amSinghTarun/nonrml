@@ -61,7 +61,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
             { showReturnReplace == "EXCHANGE" &&  <MakeExchange returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
             { showReturnReplace == "ORIGINAL" && <div className="space-y-7 lg:space-y-10 h-full">
                 
-                <div className="text-sm text-start lg:text-base font-medium">
+                <div className="text-sm text-start lg:text-base font-bold">
                     <p> {orderDetails?.id} </p>
                 </div>
 
@@ -91,13 +91,13 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                                 />
                         </div>}
                         { orderDetails.orderStatus == "DELIVERED" && <div className=" text-xs flex lg:text-sm space-x-7 text-neutral-600">
-                            { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500 ) > Date.now() && <div className=" text-xs text-neutral-600">
+                            { (Number(orderDetails?.returnAcceptanceDate) || 0) > Date.now() && <div className=" text-xs text-neutral-600">
                                     <GeneralButtonTransparent className=" w-fit p-2" onClick={()=>{!orderDetails?.return.length ? setShowReturnReplace("RETURN") : toast({variant:"default", title: "You can't request a new return until the last one is processed.", duration: 4000 })}}
                                         display="RETURN"
                                     />
                                 </div>
                             }
-                            { ( (Number(orderDetails?.returnAcceptanceDate) || 0) + 1000*60*60*24*500) > Date.now() && <div className=" text-xs text-neutral-600">
+                            { (Number(orderDetails?.returnAcceptanceDate) || 0) > Date.now() && <div className=" text-xs text-neutral-600">
                                     <GeneralButtonTransparent className="w-fit p-2" onClick={()=>{!orderDetails?.replacementOrder.length ? setShowReturnReplace("EXCHANGE") : toast({variant:"default", title: "You can't request a new exchange until the last one is processed.", duration: 4000 })}}
                                         display="EXCHANGE"
                                     />

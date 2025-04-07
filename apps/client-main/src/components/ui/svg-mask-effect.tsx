@@ -2,12 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Vortex } from "./vortex";
 
 export const MaskContainer = ({
   children,
   revealText,
   size = 10,
-  revealSize = 600,
+  revealSize = 500,
   className,
 }: {
   children?: string | React.ReactNode;
@@ -57,7 +58,14 @@ export const MaskContainer = ({
           duration: 0,
         }}
       >
-        <div className="absolute inset-0 bg-black h-full w-full z-0 opacity-50" />
+        {/* <div className="absolute inset-0 bg-white h-full w-full z-0 opacity-50" /> */}
+        <div className="absolute inset-0 overflow-hidden opacity-[0.6] pointer-events-none ">
+          <Vortex
+            backgroundColor="black"
+            rangeY={800}
+            className="flex items-center flex-col justify-center px-2 md:px-10 py-4 w-full h-full"
+          ></Vortex>
+        </div>
         <div
           onMouseEnter={() => {
             setIsHovered(true);

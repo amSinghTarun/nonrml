@@ -89,7 +89,7 @@ const Signin = () => {
         <div className="fixed flex flex-col w-screen justify-center items-center z-40 h-full">
             <div className=" backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
                 <div className = " flex flex-1 flex-col mb-4">
-                    <div className='text-left text-2xl text-black font-medium mb-1 '>
+                    <div className='text-left text-2xl text-black font-bold mb-1 '>
                         WELCOME BACK!
                     </div>
                     <div className='text-left text-xs text-black font-light'>
@@ -127,7 +127,7 @@ const Signin = () => {
                         <FormSubmitButton 
                             type='submit'
                             label={otpSent ? (verifyOTP.isLoading ? "VERIFYING..." : "VERIFY OTP") : (sendOTP.isLoading ? "SENDING..." : "SEND OTP")}
-                            className="w-full p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
+                            className="w-full p-5 text-xs font-bold bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                         />
                     </Form>
                 }</div>

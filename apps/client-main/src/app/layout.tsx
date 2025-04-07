@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Ubuntu } from "next/font/google";
 import "./globals.css";
 import { Appbar } from "@/components/Appbar";
 import { Providers } from "./provider";
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/Footer";
-import { BackgroundProvider } from "@/providers/backgroundProvider";
 import { NavbarStateControlProvider } from "@/providers/navbarStateControlProvider";
+import { Ubuntu,  Albert_Sans } from "next/font/google";
 
-const appFont = Ubuntu({subsets: ["latin"], weight:["400", "500", "700"]});
+const appFont = Albert_Sans({subsets: ["latin"], weight:["200", "300", "400", "500", "600", "700", "800", "900"]});
  
 export const metadata: Metadata = {
   title: "Create Next App",

@@ -77,7 +77,7 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
                     <tr key={size}>
                       <td className="p-2 border border-white/10 text-center">{size}</td>
                       {chartData.data?.data.measurements.map((measurement) => (
-                        <td key={`${size}-${measurement.name}`} className="p-3 border border-white/10 font-medium text-center">
+                        <td key={`${size}-${measurement.name}`} className="p-3 border border-white/10 font-bold text-center">
                           {getMeasurementValue(measurement.name, size)}
                         </td>
                       ))}

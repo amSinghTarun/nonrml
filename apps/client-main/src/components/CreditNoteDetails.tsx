@@ -32,7 +32,7 @@ export const CreditNoteDetails : React.FC<CreditNoteDetailsProps> = ({creditNote
                         <p className="text-neutral-600"> {creditNoteDetails.expiryDate.toDateString()} </p>
                     </div>
             </div>
-            <h2 className="pb-2 pt-4 text-xs text-neutral-500 font-medium">CREDIT NOTE TRANSACTION(s)</h2>
+            <h2 className="pb-2 pt-4 text-xs text-neutral-500 font-bold">CREDIT NOTE TRANSACTION(s)</h2>
             <div className="space-y-2 flex justify-center">
             {
                 creditNoteDetails.creditNotesPartialUseTransactions.length ? creditNoteDetails.creditNotesPartialUseTransactions.map( (transaction, index) => {

@@ -23,7 +23,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
             {/* <div className="text-white">SHOP</div> */}
           {/* </div> */}
           <div color="white" className="flex-1 p-3 px-3 ">
-            <div className="flex-col h-full flex divide-black font-medium text-sm">
+            <div className="flex-col h-full flex divide-black font-bold text-sm">
               <Link href={"/"} className={` text-center py-2 basis-1/${categoryList.length+1} content-center rounded-md hover:underline`}>
                 <span>HOME</span>
               </Link>
@@ -37,7 +37,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
             </div>
           </div>
           <footer className="flex flex-col text-xs text-center space-y-2 divide-y divide-dotted divide-black px-2">
-            <div className="flex flex-row divide-x divide-dotted divide-black py-1 font-medium justify-evenly">
+            <div className="flex flex-row divide-x divide-dotted divide-black py-1 font-bold justify-evenly">
               { session?.user && <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/account">
                 ACCOUNT
               </Link>}

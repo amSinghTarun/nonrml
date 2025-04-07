@@ -64,7 +64,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     return (
         <div className={cn("h-[80%] w-[90%] flex flex-col items-center", creditNoteProps.className)}>
             {showCredits && <CreditNoteOTPVerification closeHandler={() => setShowCredits(false)}></CreditNoteOTPVerification> }
-            <h1 className={`flex text-neutral-800 font-medium justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
+            <h1 className={`flex text-neutral-800 font-bold justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
                 CREDIT NOTE
             </h1>
             { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-[10px] sm:text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }
@@ -94,7 +94,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                     <FormSubmitButton 
                         type="submit"
                         label="VIEW DETAILS"
-                       className="w-fit p-5 text-xs font-medium bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
+                       className="w-fit p-5 text-xs font-bold bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md"
                     />
                 </Form>
             }
@@ -103,7 +103,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
                 onClick={handleCreditShowOTP}
                 className="p-4 text-xs px-8 w-fit mt-5"
             />
-            { creditNoteDetails && <div className="w-full flex flex-1 justify-center"><GeneralButton className="p-5 w-40 font-medium rounded-md text-xs" display="Close" onClick={() => setCreditNoteDetails(undefined)} /></div>}
+            { creditNoteDetails && <div className="w-full flex flex-1 justify-center"><GeneralButton className="p-5 w-40 font-bold rounded-md text-xs" display="Close" onClick={() => setCreditNoteDetails(undefined)} /></div>}
         </div>
     )
 };

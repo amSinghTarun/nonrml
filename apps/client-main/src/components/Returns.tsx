@@ -20,14 +20,14 @@ export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => 
     console.log(returnOrders)
     return (
         <div className={cn("h-screen w-full p-2 pb-6 flex flex-col lg:flex-row", className)}>
-            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-medium p-1 lg:justify-center lg:text-center">Return Orders</h1>
+            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-bold p-1 lg:justify-center lg:text-center">Return Orders</h1>
             <div className="space-y-7 lg:space-y-10 p-2 lg:p-4 flex flex-1 flex-col overflow-y-scroll overscroll-auto scrollbar-hide">
             {
                 returnOrders.map( (order, index) => { 
                     return ( <div className="space-y-3 hover:shadow-sm w-full h-fit hover:shadow-neutral-200 shadow-sm shadow-neutral-100 p-2 text-xs rounded-md text-neutral-500">
                         <div className="flex flex-col justify-between space-y-1">
                             <div className="flex justify-between">
-                                <p className="font-medium lg:text-sm text-neutral-800"> RET-{order.id} </p>
+                                <p className="font-bold lg:text-sm text-neutral-800"> RET-{order.id} </p>
                                 <p> {order.createdAt.toDateString()}</p>
                             </div>
                             <div className="flex justify-between">
@@ -39,7 +39,7 @@ export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => 
                                     <p> Credit Code </p>
                                 </div>
                                 <div className="flex justify-between">
-                                    <p className="font-medium text-neutral-600"> {order.creditNote[0].creditCode} </p>
+                                    <p className="font-bold text-neutral-600"> {order.creditNote[0].creditCode} </p>
                                     <p> {convertStringToINR(Number(order.creditNote[0].value))} </p>
                                 </div>
                             </div> }
