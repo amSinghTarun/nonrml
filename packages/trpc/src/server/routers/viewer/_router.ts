@@ -17,6 +17,7 @@ import { returnRouter } from "./returns/_router";
 import { replacementRouter } from "./replacements/_router";
 import { creditNotesRouter } from "./creditNotes/_router";
 import { userRouter } from "./user/_router";
+import { HomeImagesRouter } from "./homeImages/_router";
 
 export const viewerRouter = router({
     auth: authRouter,
@@ -35,6 +36,7 @@ export const viewerRouter = router({
     replacement: replacementRouter,
     creditNotes: creditNotesRouter,
     user: userRouter,
+    homeImages: HomeImagesRouter,
     testAPI: publicProcedure.input(z.object({name: z.string()})).mutation(({ctx, input}) => {
         console.log(input)
         return {input: {

@@ -435,6 +435,7 @@ model HomePageImages {
   active      Boolean       @default(false)
   createdAt   DateTime      @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamp(6)
   updatedAt   DateTime?     @db.Timestamp(6)
+  imageUrl    String
 }
 
 enum HomeImageType {

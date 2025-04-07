@@ -22,6 +22,7 @@ const items = [
   { title: "Size charts", url: "/sizeChart" },
   { title: "Payments", url: "/payments" },
   { title: "Credit Notes", url: "/creditNotes" },
+  { title: "Client Home Images", url: "/homeImages" },
 ];
 
 export function AppSidebar() {
