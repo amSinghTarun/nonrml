@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@nonrml/common";
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';

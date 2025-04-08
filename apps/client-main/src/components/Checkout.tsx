@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import CanclePurchaseDialog from "@/components/dialog/CancelPurchaseDialog";
 import { AddressCard } from "@/components/cards/AddressCard"
-import { cn } from "@/lib/utils";
+import { cn } from "@nonrml/common";
 import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms";

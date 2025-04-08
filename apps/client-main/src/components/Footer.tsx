@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@nonrml/common"
 
 
 export const Footer = ({className} : {className?: string}) => {

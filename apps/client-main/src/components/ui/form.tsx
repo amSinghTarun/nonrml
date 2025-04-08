@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@nonrml/common";
 import React, { ReactNode, FormHTMLAttributes, InputHTMLAttributes, ButtonHTMLAttributes  } from "react";
 import { useFormStatus } from "react-dom";
 import { Textarea } from "./textarea";

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "@nonrml/common"
 import { trpc } from "@/app/_trpc/client";
 import { GeneralButtonTransparent } from "@/components/ui/buttons";
 import Link from "next/link";

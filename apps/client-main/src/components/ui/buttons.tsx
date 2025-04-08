@@ -1,5 +1,5 @@
 import Link, { LinkProps } from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@nonrml/common";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 

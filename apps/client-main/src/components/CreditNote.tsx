@@ -2,7 +2,7 @@
 
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { Form, FormInputField, FormSubmitButton } from "@/components/ui/form"
-import { cn } from "@/lib/utils"
+import { cn } from "@nonrml/common"
 import { useState } from "react";
 import { CreditNoteDetails } from "./CreditNoteDetails";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";

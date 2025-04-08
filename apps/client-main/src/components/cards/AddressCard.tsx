@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@nonrml/common";
 import React from "react";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteIcon from '@mui/icons-material/Delete';

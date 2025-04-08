@@ -1,52 +1,26 @@
 import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
-import { TEditInventoryItemSchema, TDeleteInventoryItemSchema, TGetInventoryItemSchema, TGetSKUDetailsSchema, TGetInventoryItemsSchema, TAddInventoryItemsSchema } from "./homeImages.schema";
-import { TRPCResponseStatus } from "@nonrml/common";
+import { TEditInventoryItemSchema, TDeleteInventoryItemSchema, TGetInventoryItemSchema, TGetSKUDetailsSchema, TGetInventoryItemsSchema, TUploadImageSchema } from "./homeImages.schema";
+import { dataURLtoFile, TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { nullable } from "zod";
 import { redis } from "@nonrml/cache";
+import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
+import { TRPCError } from "@trpc/server";
 const take = 20; // should come from env
 
 /*
 Get the inventory.
 Cursor based pagination.
 */
-export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetSKUDetailsSchema>)  => {
-    const prisma = ctx.prisma;
-    input = input!;
+export const getHomeImagesAdmin = async ({ctx, input}: TRPCRequestOptions<{}>)  => {
+    const prisma = ctx.prisma;;
     try{
-        const whereCondition = input.sku ? { productVariant: { product: { sku: input.sku } } } : {};
-        const inventory = await prisma.inventory.findMany({
-            where: whereCondition,
-            select: {
-                id: true,
-                productVariantId: true,
-                baseSkuInventoryId: true,
-                quantity: true,
-                lastRestockDate:true,
-                lastRestockQuantity: true,
-                baseSkuInventory: {
-                    select: {
-                        baseSku: true,
-                        quantity: true,
-                        color: true,
-                        size: true
-                    }
-                },
-                productVariant: {
-                    select: {
-                        size: true,
-                        product: {
-                            select: {
-                                name: true,
-                                colour: true,
-                                sku: true
-                            }
-                        }
-                    }
-                }
-            }
+        const homeImages = await prisma.homePageImages.findMany({
+            orderBy: [
+                {active: "asc"}
+            ]
         });
-        return { status: TRPCResponseStatus.SUCCESS, message: "", data: inventory};
+        return { status: TRPCResponseStatus.SUCCESS, message: "", data: homeImages};
     } catch(error) {
         //console.log("\n\n Error in getInventory----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -58,19 +32,34 @@ export const getInventory = async ({ctx, input}: TRPCRequestOptions<TGetSKUDetai
 /*
 Add item to inventory
 */
-export const addInventoryItems = async ({ctx, input}: TRPCRequestOptions<TAddInventoryItemsSchema>)  => {
+export const uploadImage = async ({ctx, input}: TRPCRequestOptions<TUploadImageSchema>)  => {
+    const prisma = ctx?.prisma!
+    input = input!;
     try{        
-        const prisma = ctx?.prisma!
-        // The prisma will autocheck, no need of extra load
-        // await prisma.productCategories.findUniqueOrThrow({
-        //     where: {
-        //         id: input.categoryId
-        //     }
-        // });
-        const inventoryRecord = await prisma.inventory.createMany({
-            data: input!
+        const imageUploaded = await uploadToBucketFolder(
+            `home/${ctx.user?.id}:${Date.now()}`,
+            dataURLtoFile(input.image, `${Date.now()}`)
+        );
+
+        if (imageUploaded.error) {
+            throw new TRPCError({ 
+                code: "UNPROCESSABLE_CONTENT", 
+                message: "Unable to upload image" 
+            });
+        }
+
+        // Get public URL
+        const { data } = await getPublicURLOfImage(imageUploaded.data.path, false);
+        let imageUrl = data;
+        const imageUplaoded = await prisma.homePageImages.create({
+            data: {
+                imageUrl: imageUrl,
+                legacyType: input.legacyType,
+                currentType: input.legacyType,
+                active: false
+            }
         })
-        return { status: TRPCResponseStatus.SUCCESS, message:"inventory record created", data: inventoryRecord};
+        return { status: TRPCResponseStatus.SUCCESS, message:"inventory record created", data: imageUplaoded};
     } catch(error) {
         //console.log("\n\n Error in addInventoryItem ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 

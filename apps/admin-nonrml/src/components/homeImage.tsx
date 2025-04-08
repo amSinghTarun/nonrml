@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 import { Trash2, Edit, Check, X } from "lucide-react";
+import { FileUpload } from "@nonrml/components";
 
-type HomePageImagesData = UseTRPCQueryResult<RouterOutput["viewer"]["homeImages"]["getAll"], unknown>;
+type HomePageImagesData = RouterOutput["viewer"]["homeImages"]["getHomeImagesAdmin"]["data"];
 
 export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }) => {
   const [editingImage, setEditingImage] = useState<number | null>(null);
@@ -20,6 +20,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   
   // Image details states
   const [imageUrl, setImageUrl] = useState("");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
   const [imageDetails, setImageDetails] = useState<{ 
     [imageId: number]: { 
@@ -29,7 +30,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   }>({});
 
   // tRPC mutations
-  const createImage = trpc.viewer.homeImages.create.useMutation();
+  const createImage = trpc.viewer.homeImages.uploadImage.useMutation();
   const updateImage = trpc.viewer.homeImages.update.useMutation();
   const deleteImage = trpc.viewer.homeImages.delete.useMutation();
 
@@ -61,16 +62,37 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     }
   };
 
+  // Handle file change from FileUpload component
+  const handleFileChange = (orderProductId: number, file: File) => {
+    setUploadedFile(file);
+    // If you have a URL creation logic for the file, you could set imageUrl here
+    // For example, if you're using URL.createObjectURL or similar:
+    // setImageUrl(URL.createObjectURL(file));
+  };
+
+  // Handle file deletion from FileUpload component
+  const handleFileDelete = (orderProductId: number) => {
+    setUploadedFile(null);
+    setImageUrl("");
+  };
+
   // Handle image upload
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setError(null);
+      
+      // Here you would typically handle the file upload to your server
+      // and then call your tRPC mutation with the resulting URL
+      
+      // For now, we'll just use the existing imageUrl state
       await createImage.mutateAsync({
         imageUrl,
         legacyType,
       });
+      
       setImageUrl("");
+      setUploadedFile(null);
       setLegacyType("TOP_MD");
       setShowUploadForm(false);
       images.refetch();
@@ -155,16 +177,32 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
           <h2 className="text-lg font-semibold mb-4">Upload New Image</h2>
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <label className="block mb-1">Image URL:</label>
+              <label className="block mb-1">Image URL (or upload below):</label>
               <input
                 type="text"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 className="w-full p-2 border rounded"
-                required
+                placeholder="Enter image URL or use the uploader below"
               />
             </div>
-            <div>
+            
+            <div className="mt-4">
+              <label className="block mb-1">Upload Image:</label>
+              <FileUpload 
+                onChange={handleFileChange}
+                onFileDelete={handleFileDelete}
+                orderProductId={1} // Using a placeholder ID since it's required
+                buttonClass="bg-blue-600 hover:bg-blue-700"
+              />
+              {uploadedFile && (
+                <p className="text-sm text-green-600 mt-2">
+                  File selected: {uploadedFile.name}
+                </p>
+              )}
+            </div>
+            
+            <div className="mt-4">
               <label className="block mb-1">Legacy Type:</label>
               <select
                 value={legacyType}
@@ -185,7 +223,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
               <button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-                disabled={createImage.isLoading}
+                disabled={createImage.isLoading || (!imageUrl && !uploadedFile)}
               >
                 {createImage.isLoading ? "Uploading..." : "Upload Image"}
               </button>
@@ -209,120 +247,114 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
           </TableRow>
         </TableHeader>
         <TableBody>
-          {images.status === "success" ? (
-            images.data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-4 text-gray-500">
-                  No images found
-                </TableCell>
-              </TableRow>
-            ) : (
-              images.data.map((image) => (
-                <TableRow key={image.id}>
-                  <TableCell className="cursor-pointer hover:bg-amber-400 hover:text-white" onClick={async () => editingImage === image.id && await updateHomeImage(image.id)}>
-                    {(updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating" : image.id}
-                  </TableCell>
-                  <TableCell>
-                    {image.imageUrl ? (
-                      <img 
-                        src={image.imageUrl} 
-                        alt="Home page image" 
-                        className="h-12 w-24 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="h-12 w-24 bg-gray-200 rounded flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{image.legacyType}</TableCell>
-                  <TableCell>
-                    {editingImage === image.id ? (
-                      <select
-                        value={imageDetails[image.id]?.currentType || image.currentType}
-                        onChange={(e) => handleImageDetailsChange({
-                          imageId: image.id,
-                          currentType: e.target.value as any
-                        })}
-                        className="bg-gray-100 p-2 border rounded"
-                      >
-                        <option value="TOP_MD">TOP_MD</option>
-                        <option value="TOP_LG">TOP_LG</option>
-                        <option value="MIDDLE_MD">MIDDLE_MD</option>
-                        <option value="MIDDLE_LG">MIDDLE_LG</option>
-                        <option value="BOTTOM">BOTTOM</option>
-                      </select>
-                    ) : (
-                      image.currentType
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingImage === image.id ? (
-                      <div className="flex items-center">
-                        <input 
-                          type="checkbox" 
-                          checked={imageDetails[image.id]?.active !== undefined ? imageDetails[image.id].active : image.active}
-                          onChange={(e) => handleImageDetailsChange({
-                            imageId: image.id,
-                            active: e.target.checked
-                          })}
-                          className="mr-2 form-checkbox h-4 w-4 text-blue-600"
-                        />
-                        <span>Active</span>
-                      </div>
-                    ) : (
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${image.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {image.active ? 'Active' : 'Inactive'}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>{new Date(image.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>{image.updatedAt ? new Date(image.updatedAt).toLocaleDateString() : '-'}</TableCell>
-                  <TableCell className="text-xs text-white flex gap-2">
-                    {editingImage === image.id ? (
-                      <>
-                        <button
-                          onClick={() => updateHomeImage(image.id)}
-                          className="p-2 bg-green-600 rounded-md hover:bg-green-500"
-                          disabled={updateImage.isLoading}
-                        >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="p-2 bg-gray-600 rounded-md hover:bg-gray-500"
-                        >
-                          <X size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => startEditing(image)}
-                          className="p-2 bg-blue-600 rounded-md hover:bg-blue-500"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(image.id)}
-                          className="p-2 bg-red-600 rounded-md hover:bg-red-500"
-                          disabled={deleteImage.isLoading && deleteImage.variables?.id === image.id}
-                        >
-                          {deleteImage.isLoading && deleteImage.variables?.id === image.id ? "..." : <Trash2 size={16} />}
-                        </button>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )
-          ) : (
+        {
+          images.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
-                {images.status === "loading" ? "Loading..." : "Error loading images"}
+              <TableCell colSpan={8} className="text-center py-4 text-gray-500">
+                No images found
               </TableCell>
             </TableRow>
-          )}
+          ) : (
+            images.map((image) => (
+              <TableRow key={image.id}>
+                <TableCell className="cursor-pointer hover:bg-amber-400 hover:text-white" onClick={async () => editingImage === image.id && await updateHomeImage(image.id)}>
+                  {(updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating" : image.id}
+                </TableCell>
+                <TableCell>
+                  {image.imageUrl ? (
+                    <img 
+                      src={image.imageUrl} 
+                      alt="Home page image" 
+                      className="h-12 w-24 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="h-12 w-24 bg-gray-200 rounded flex items-center justify-center text-gray-400">
+                      No Image
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>{image.legacyType}</TableCell>
+                <TableCell>
+                  {editingImage === image.id ? (
+                    <select
+                      value={imageDetails[image.id]?.currentType || image.currentType}
+                      onChange={(e) => handleImageDetailsChange({
+                        imageId: image.id,
+                        currentType: e.target.value as any
+                      })}
+                      className="bg-gray-100 p-2 border rounded"
+                    >
+                      <option value="TOP_MD">TOP_MD</option>
+                      <option value="TOP_LG">TOP_LG</option>
+                      <option value="MIDDLE_MD">MIDDLE_MD</option>
+                      <option value="MIDDLE_LG">MIDDLE_LG</option>
+                      <option value="BOTTOM">BOTTOM</option>
+                    </select>
+                  ) : (
+                    image.currentType
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingImage === image.id ? (
+                    <div className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={imageDetails[image.id]?.active !== undefined ? imageDetails[image.id].active : image.active}
+                        onChange={(e) => handleImageDetailsChange({
+                          imageId: image.id,
+                          active: e.target.checked
+                        })}
+                        className="mr-2 form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <span>Active</span>
+                    </div>
+                  ) : (
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${image.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {image.active ? 'Active' : 'Inactive'}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>{new Date(image.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{image.updatedAt ? new Date(image.updatedAt).toLocaleDateString() : '-'}</TableCell>
+                <TableCell className="text-xs text-white flex gap-2">
+                  {editingImage === image.id ? (
+                    <>
+                      <button
+                        onClick={() => updateHomeImage(image.id)}
+                        className="p-2 bg-green-600 rounded-md hover:bg-green-500"
+                        disabled={updateImage.isLoading}
+                      >
+                        <Check size={16} />
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="p-2 bg-gray-600 rounded-md hover:bg-gray-500"
+                      >
+                        <X size={16} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => startEditing(image)}
+                        className="p-2 bg-blue-600 rounded-md hover:bg-blue-500"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(image.id)}
+                        className="p-2 bg-red-600 rounded-md hover:bg-red-500"
+                        disabled={deleteImage.isLoading && deleteImage.variables?.id === image.id}
+                      >
+                        {deleteImage.isLoading && deleteImage.variables?.id === image.id ? "..." : <Trash2 size={16} />}
+                      </button>
+                    </>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )
+        }
         </TableBody>
       </Table>
     </div>

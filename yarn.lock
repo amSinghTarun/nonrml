@@ -2871,11 +2871,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nonrml/common@workspace:*, @nonrml/common@workspace:packages/common":
+"@nonrml/common@npm:*, @nonrml/common@workspace:*, @nonrml/common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@nonrml/common@workspace:packages/common"
   dependencies:
     zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@nonrml/components@npm:*, @nonrml/components@workspace:*, @nonrml/components@workspace:packages/components":
+  version: 0.0.0-use.local
+  resolution: "@nonrml/components@workspace:packages/components"
+  dependencies:
+    "@nonrml/common": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -7201,9 +7209,11 @@ __metadata:
 
 "admin-nonrml@file:./apps/admin-nonrml::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=80c75a&locator=nonrml%40workspace%3A."
+  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=cb1a6f&locator=nonrml%40workspace%3A."
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
+    "@nonrml/common": "npm:*"
+    "@nonrml/components": "npm:*"
     "@nonrml/configs": "npm:*"
     "@nonrml/trpc": "npm:*"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -7237,7 +7247,7 @@ __metadata:
     tailwind-merge: "npm:^2.6.0"
     tailwindcss-animate: "npm:^1.0.7"
     zod: "npm:^3.24.1"
-  checksum: 10c0/210a6990e2c6c54e2a6b7dcff886951d36db0037ea8e15f6ec64669a5d419bbfd297558ac265297e54bf7a943064682ef356bda2c323dd79e1c0e1c20e5179d5
+  checksum: 10c0/f1edf638d012ed8d62d70da10c3a592e9a6b1f626cef75b683c45f4356789835739bbfe378482833b4ab4a96bd8238c645a1ca9819644f9e10cafd02c4d5b801
   languageName: node
   linkType: hard
 
@@ -7247,6 +7257,8 @@ __metadata:
   dependencies:
     "@eslint/eslintrc": "npm:^3"
     "@hookform/resolvers": "npm:^3.9.1"
+    "@nonrml/common": "npm:*"
+    "@nonrml/components": "npm:*"
     "@nonrml/configs": "npm:*"
     "@nonrml/trpc": "npm:*"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -8043,7 +8055,7 @@ __metadata:
 
 "client-main@file:./apps/client-main::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=b9c647&locator=nonrml%40workspace%3A."
+  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=ae4636&locator=nonrml%40workspace%3A."
   dependencies:
     "@coreui/react": "npm:^5.4.1"
     "@emotion/react": "npm:^11.13.3"
@@ -8056,6 +8068,7 @@ __metadata:
     "@nextui-org/spinner": "npm:^2.2.5"
     "@nonrml/cache": "workspace:*"
     "@nonrml/common": "workspace:*"
+    "@nonrml/components": "workspace:*"
     "@nonrml/configs": "workspace:*"
     "@nonrml/trpc": "workspace:*"
     "@radix-ui/react-alert-dialog": "npm:^1.1.4"
@@ -8100,7 +8113,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     three: "npm:^0.168.0"
     zustand: "npm:^5.0.1"
-  checksum: 10c0/4cc302cd912e2fc232ef8a6fe0204ac8e6b0e57583c8f304f5feb0e507ff7f6694fd17af227b6af95ca103bdd7e16da66ff403b346b94d1533cca5524cf4723c
+  checksum: 10c0/a760e9da7851d327049eb30d0f64c0e40d7c5eec2d80851a1590ec260ba60b80469bb6aa7c7cc600b70cca7694221d451fcaa7fb216d8143b92f506969b4cb48
   languageName: node
   linkType: hard
 
@@ -8119,6 +8132,7 @@ __metadata:
     "@nextui-org/spinner": "npm:^2.2.5"
     "@nonrml/cache": "workspace:*"
     "@nonrml/common": "workspace:*"
+    "@nonrml/components": "workspace:*"
     "@nonrml/configs": "workspace:*"
     "@nonrml/trpc": "workspace:*"
     "@radix-ui/react-alert-dialog": "npm:^1.1.4"

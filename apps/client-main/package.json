@@ -20,6 +20,7 @@
     "@nextui-org/spinner": "^2.2.5",
     "@nonrml/cache": "workspace:*",
     "@nonrml/common": "workspace:*",
+    "@nonrml/components": "workspace:*",
     "@nonrml/configs": "workspace:*",
     "@nonrml/trpc": "workspace:*",
     "@radix-ui/react-alert-dialog": "^1.1.4",

@@ -1,30 +1,17 @@
 
 import { adminProcedure } from "../../../procedures/authedProcedure";
 import { router } from "../../../trpc";
-import { addInventoryItems, getInventory, deleteInventoryItem, editInventoryItem } from "./homeImages.handler";
-import { ZAddInventoryItemsSchema, ZGetSKUDetailsSchema, ZEditInventoryItemSchema, ZDeleteInventoryItemSchema } from "./homeImages.schema";
+import { uploadImage, getHomeImagesAdmin, deleteInventoryItem, editInventoryItem } from "./homeImages.handler";
+import { ZUploadImageSchema, ZEditInventoryItemSchema, ZDeleteInventoryItemSchema } from "./homeImages.schema";
 
 export const HomeImagesRouter = router({
-    getInventory: adminProcedure
+    getHomeImagesAdmin: adminProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
-        .input(ZGetSKUDetailsSchema)
-        .query( async ({ctx, input}) => await getInventory({ctx, input})),
-    // getInventoryItem: adminProcedure
-    //     .meta({ openAPI: {method: "GET", descrription: "Get a particular inventory item"}})
-    //     .input(ZGetInventoryItemSchema)
-    //     .query( async ({ctx, input}) => {
-    //     return await getInventoryItem({ctx, input});
-    // }),
-    // getSKUDetails: adminProcedure
-    //     .meta({ openAPI: {method: "GET", descrription: "Get info about a particular SKU from the inventory"}})
-    //     .input(ZGetSKUDetailsSchema)
-    //     .query( async ({ctx, input}) => {
-    //     return await getSKUDetails({ctx, input});
-    // }),
-    createInventory: adminProcedure
+        .query( async ({ctx, input}) => await getHomeImagesAdmin({ctx})),
+    uploadImage: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Create a new item in inventory"}})
-        .input(ZAddInventoryItemsSchema)
-        .mutation( async ({ctx, input}) => await addInventoryItems({ctx, input})),
+        .input(ZUploadImageSchema)
+        .mutation( async ({ctx, input}) => await uploadImage({ctx, input})),
     editInventory: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit item from the inventory"}})
         .input(ZEditInventoryItemSchema)

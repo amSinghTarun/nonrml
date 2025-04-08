@@ -1,5 +1,5 @@
 "use clinet"
-import { cn } from "@/lib/utils"
+import { cn } from "@nonrml/common"
 import { Form, FormInputField, FormSubmitButton } from "./ui/form"
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons"
 import { useState } from "react"
