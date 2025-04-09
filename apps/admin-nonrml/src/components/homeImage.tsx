@@ -10,17 +10,17 @@ import {
 } from "@/components/ui/table";
 import { Trash2, Edit, Check, X } from "lucide-react";
 import { FileUpload } from "@nonrml/components";
+import Image from "next/image";
+import { convertFileToDataURL } from "@nonrml/common";
+import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 
-type HomePageImagesData = RouterOutput["viewer"]["homeImages"]["getHomeImagesAdmin"]["data"];
+type HomePageImagesData = UseTRPCQueryResult<RouterOutput["viewer"]["homeImages"]["getHomeImagesAdmin"], unknown>;
 
 export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }) => {
   const [editingImage, setEditingImage] = useState<number | null>(null);
   const [error, setError] = useState<any>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  
-  // Image details states
-  const [imageUrl, setImageUrl] = useState("");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);  // Image details states
   const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
   const [imageDetails, setImageDetails] = useState<{ 
     [imageId: number]: { 
@@ -30,9 +30,95 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   }>({});
 
   // tRPC mutations
-  const createImage = trpc.viewer.homeImages.uploadImage.useMutation();
-  const updateImage = trpc.viewer.homeImages.update.useMutation();
-  const deleteImage = trpc.viewer.homeImages.delete.useMutation();
+  const createImage = trpc.viewer.homeImages.uploadImage.useMutation({
+    onSuccess: () => {
+      setUploadedFile(null);
+      setLegacyType("TOP_MD");
+      setShowUploadForm(false);
+      images.refetch()
+    }
+  });
+  const updateImage = trpc.viewer.homeImages.editImage.useMutation({
+    onSuccess: () => {
+      setEditingImage(null);
+      images.refetch()
+    }
+  });
+  const deleteImage = trpc.viewer.homeImages.deleteImage.useMutation({
+    onSuccess: () => {
+      images.refetch()
+    }
+  });
+
+  // Handle file change from FileUpload component
+  const handleFileChange = (orderProductId: number, file: File) => {
+    setUploadedFile(file);
+  };
+
+  // Handle file deletion from FileUpload component
+  const handleFileDelete = (orderProductId: number) => {
+    setUploadedFile(null);
+  };
+
+  // Handle image upload
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      // Here you would typically handle the file upload to your server
+      // and then call your tRPC mutation with the resulting URL
+      if(!uploadedFile){
+        throw new Error("Image is a required prop")
+      }
+      // For now, we'll just use the existing imageUrl state
+      await createImage.mutateAsync({
+        image: await convertFileToDataURL(uploadedFile),
+        legacyType,
+      });
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  // Delete image
+  const handleDelete = async (imageId: number, active: boolean) => {
+    if(active) {setError("Cannot delete an active image"); return};
+    if (!confirm('Are you sure you want to delete this image?')) return;
+    
+    try {
+      setError(null);
+      await deleteImage.mutateAsync({ id: imageId });
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  // Start editing an image
+  const startEditing = (image: any) => {
+    setEditingImage(image.id);
+    setImageDetails(() => ({
+      [image.id]: {
+        currentType: image.currentType,
+        active: image.active
+      }
+    }));
+  };
+
+  // Update image details
+  const updateHomeImage = async (imageId: number) => {
+    try {
+      setError(null);
+      if (imageDetails[imageId]) {
+        await updateImage.mutateAsync({
+          id: imageId,
+          currentType: imageDetails[imageId].currentType,
+          active: imageDetails[imageId].active
+        });
+      }
+    } catch (error) {
+      setError(error);
+    }
+  };
 
   // Handle image detail changes
   const handleImageDetailsChange = ({ 
@@ -47,7 +133,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     try {
       setError(null);
       setImageDetails((prev) => {
-        let prevImageDetails = { 
+        const prevImageDetails = { 
           [imageId]: {
             ...prev[imageId],
             ...(currentType && { "currentType": currentType }),
@@ -60,88 +146,6 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     } catch (error) {
       setError(error);
     }
-  };
-
-  // Handle file change from FileUpload component
-  const handleFileChange = (orderProductId: number, file: File) => {
-    setUploadedFile(file);
-    // If you have a URL creation logic for the file, you could set imageUrl here
-    // For example, if you're using URL.createObjectURL or similar:
-    // setImageUrl(URL.createObjectURL(file));
-  };
-
-  // Handle file deletion from FileUpload component
-  const handleFileDelete = (orderProductId: number) => {
-    setUploadedFile(null);
-    setImageUrl("");
-  };
-
-  // Handle image upload
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setError(null);
-      
-      // Here you would typically handle the file upload to your server
-      // and then call your tRPC mutation with the resulting URL
-      
-      // For now, we'll just use the existing imageUrl state
-      await createImage.mutateAsync({
-        imageUrl,
-        legacyType,
-      });
-      
-      setImageUrl("");
-      setUploadedFile(null);
-      setLegacyType("TOP_MD");
-      setShowUploadForm(false);
-      images.refetch();
-    } catch (error) {
-      setError(error);
-    }
-  };
-
-  // Update image details
-  const updateHomeImage = async (imageId: number) => {
-    try {
-      setError(null);
-      if (imageDetails[imageId]) {
-        await updateImage.mutateAsync({
-          id: imageId,
-          currentType: imageDetails[imageId].currentType,
-          active: imageDetails[imageId].active
-        });
-        setEditingImage(null);
-        images.refetch();
-      }
-    } catch (error) {
-      setError(error);
-    }
-  };
-
-  // Delete image
-  const handleDelete = async (imageId: number) => {
-    if (!confirm('Are you sure you want to delete this image?')) return;
-    
-    try {
-      setError(null);
-      await deleteImage.mutateAsync({ id: imageId });
-      images.refetch();
-    } catch (error) {
-      setError(error);
-    }
-  };
-
-  // Start editing an image
-  const startEditing = (image: any) => {
-    setEditingImage(image.id);
-    setImageDetails((prev) => ({
-      ...prev,
-      [image.id]: {
-        currentType: image.currentType,
-        active: image.active
-      }
-    }));
   };
 
   // Cancel editing
@@ -176,17 +180,6 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
         <div className="bg-gray-100 p-4 rounded-lg mb-6">
           <h2 className="text-lg font-semibold mb-4">Upload New Image</h2>
           <form onSubmit={handleUpload} className="space-y-4">
-            <div>
-              <label className="block mb-1">Image URL (or upload below):</label>
-              <input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full p-2 border rounded"
-                placeholder="Enter image URL or use the uploader below"
-              />
-            </div>
-            
             <div className="mt-4">
               <label className="block mb-1">Upload Image:</label>
               <FileUpload 
@@ -223,7 +216,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
               <button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-                disabled={createImage.isLoading || (!imageUrl && !uploadedFile)}
+                disabled={createImage.isLoading || !uploadedFile}
               >
                 {createImage.isLoading ? "Uploading..." : "Upload Image"}
               </button>
@@ -248,23 +241,25 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
         </TableHeader>
         <TableBody>
         {
-          images.length === 0 ? (
+          images.data?.data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} className="text-center py-4 text-gray-500">
                 No images found
               </TableCell>
             </TableRow>
           ) : (
-            images.map((image) => (
+            images.data?.data.map((image) => (
               <TableRow key={image.id}>
-                <TableCell className="cursor-pointer hover:bg-amber-400 hover:text-white" onClick={async () => editingImage === image.id && await updateHomeImage(image.id)}>
-                  {(updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating" : image.id}
+                <TableCell>
+                  { (updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating" : image.id }
                 </TableCell>
                 <TableCell>
                   {image.imageUrl ? (
-                    <img 
+                    <Image 
                       src={image.imageUrl} 
-                      alt="Home page image" 
+                      alt="Home page image"
+                      width={100}
+                      height={100}
                       className="h-12 w-24 object-cover rounded"
                     />
                   ) : (
@@ -342,7 +337,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(image.id)}
+                        onClick={() => handleDelete(image.id, image.active)}
                         className="p-2 bg-red-600 rounded-md hover:bg-red-500"
                         disabled={deleteImage.isLoading && deleteImage.variables?.id === image.id}
                       >

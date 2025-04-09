@@ -1,10 +1,14 @@
 
 import { adminProcedure } from "../../../procedures/authedProcedure";
+import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { uploadImage, getHomeImagesAdmin, deleteInventoryItem, editInventoryItem } from "./homeImages.handler";
-import { ZUploadImageSchema, ZEditInventoryItemSchema, ZDeleteInventoryItemSchema } from "./homeImages.schema";
+import { uploadImage, getHomeImagesAdmin, deleteImage, editImage, getHomeImages } from "./homeImages.handler";
+import { ZUploadImageSchema, ZDeleteImageSchema, ZEditImageSchema } from "./homeImages.schema";
 
 export const HomeImagesRouter = router({
+    getHomeImages: publicProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
+        .query( async ({ctx, input}) => await getHomeImages({ctx})),
     getHomeImagesAdmin: adminProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
         .query( async ({ctx, input}) => await getHomeImagesAdmin({ctx})),
@@ -12,12 +16,12 @@ export const HomeImagesRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Create a new item in inventory"}})
         .input(ZUploadImageSchema)
         .mutation( async ({ctx, input}) => await uploadImage({ctx, input})),
-    editInventory: adminProcedure
+    editImage: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit item from the inventory"}})
-        .input(ZEditInventoryItemSchema)
-        .mutation( async ({ctx, input}) => await editInventoryItem({ctx, input})),
-    deleteInventory: adminProcedure
+        .input(ZEditImageSchema)
+        .mutation( async ({ctx, input}) => await editImage({ctx, input})),
+    deleteImage: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Delete a item from the inventory"}})
-        .input(ZDeleteInventoryItemSchema)
-        .mutation( async ({ctx, input}) => await deleteInventoryItem({ctx, input}))
+        .input(ZDeleteImageSchema)
+        .mutation( async ({ctx, input}) => await deleteImage({ctx, input}))
 })

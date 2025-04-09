@@ -6,12 +6,13 @@ import { redis } from "@nonrml/cache";
 import { TRPCError } from "@trpc/server";
 
 type HomeProductsType = RouterOutput["viewer"]["product"]["getHomeProducts"]["data"];
+type HomeImages = RouterOutput["viewer"]["homeImages"]["getHomeImages"]["data"];
 
 export const getHomepageProducts = async () => {
 
-    let latestProducts    : HomeProductsType["latestProducts"]    | null = null;//await redis.redisClient.get("latestProducts");
-    let popularProducts   : HomeProductsType["popularProducts"]   | null = null;//await redis.redisClient.get("popularProducts");
-    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = null;//await redis.redisClient.get("exclusiveProducts");
+    let latestProducts    : HomeProductsType["latestProducts"]    | null = await redis.redisClient.get("latestProducts");
+    let popularProducts   : HomeProductsType["popularProducts"]   | null = await redis.redisClient.get("popularProducts");
+    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await redis.redisClient.get("exclusiveProducts");
 
     if( !latestProducts || !popularProducts || !exculsiveProducts ){
 
@@ -37,17 +38,14 @@ export const getHomepageProducts = async () => {
     return { latestProducts: latestProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
 }
 
-// export const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {
-//     // const session = await getSession();
-//     // if (!session?.user.id) throw new Error("UNAUTHORISED ACTION, you must first login");
-//     const productIdsJson : { [productId: number] : 1 }= {};
-//     const productIds : number[] = []
-//     for(let exchangeProduct of exchangeProducts){
-//         if(!productIdsJson[exchangeProduct.productVariant.productId]){
-//             productIds.push(exchangeProduct.productVariant.productId);
-//         }
-//         productIdsJson[exchangeProduct.productVariant.productId] = 1;
-//     }
-//     let { data } = await (await serverClient()).viewer.product.getProductSizes(productIds);
-//     return data;
-// };
+export const getHomePagesImages = async () => {
+    let homeImages : HomeImages | null = await redis.redisClient.get("homeImages");
+    if(!homeImages){
+        console.log("Didn't get cache")
+        const homeImagesData = await (await serverClient()).viewer.homeImages.getHomeImages()
+        if(homeImagesData?.data){
+            homeImages = homeImagesData?.data;
+        }
+    };
+    return homeImages!;
+};

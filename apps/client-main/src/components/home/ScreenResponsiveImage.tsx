@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-export const ResponsiveProductImage = ({ products }) => {
+export const ResponsiveProductImage = ({ imageMd, imageLg } : { imageMd: string, imageLg: string}) => {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   
   useEffect(() => {
@@ -26,10 +26,7 @@ export const ResponsiveProductImage = ({ products }) => {
   return (
     <div className="z-30 relative w-full">
         <Image 
-          src={isLargeScreen 
-            ? products.popularProducts[0].productImages[1]?.image || products.popularProducts[0].productImages[0].image 
-            : products.popularProducts[0].productImages[0].image
-          }
+          src={isLargeScreen ? imageLg : imageMd }
           alt={"Product Image"} 
           className="object-cover w-full h-full" 
           width={1000} 
@@ -39,7 +36,7 @@ export const ResponsiveProductImage = ({ products }) => {
   );
 };
 
-export const ResponsiveImageGallery = ({ images }) => {
+export const ResponsiveImageGallery = ({ images }: { images: string[]}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   
@@ -68,7 +65,7 @@ export const ResponsiveImageGallery = ({ images }) => {
   }, [currentImageIndex, isLargeScreen, images.length]);
   
   // Handle dot click
-  const handleDotClick = (index) => {
+  const handleDotClick = (index: number) => {
     setCurrentImageIndex(index);
   };
   
@@ -77,10 +74,10 @@ export const ResponsiveImageGallery = ({ images }) => {
     <div className="relative">
       <div className="overflow-hidden">
         <Image 
-          src={images[currentImageIndex].src} 
-          alt={images[currentImageIndex].alt || "Product Image"} 
-          className="object-cover w-full h-full transition-opacity duration-1000" 
-          width={400} 
+          src={images[currentImageIndex]}
+          alt={images[currentImageIndex] || "Product Image"}
+          className="object-cover w-full h-full transition-opacity duration-1000"
+          width={400}
           height={400}
         />
       </div>
@@ -105,8 +102,8 @@ export const ResponsiveImageGallery = ({ images }) => {
       {images.map((image, index) => (
         <div key={index} className="flex-1">
           <Image 
-            src={image.src} 
-            alt={image.alt || "Product Image"} 
+            src={image} 
+            alt={image || "Product Image"} 
             className="object-cover w-full h-auto p-1" 
             width={1000} 
             height={1000}
@@ -122,3 +119,92 @@ export const ResponsiveImageGallery = ({ images }) => {
     </div>
   );
 };
+
+interface ResponsiveImageProps {
+  images: {
+    md: string;
+    lg: string;
+  };
+  lgBreakpoint?: number;
+  alt: string;
+  className?: string;
+  fill?: boolean;
+  priority?: boolean;
+  sizes?: string;
+  quality?: number;
+}
+
+export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
+  images,
+  lgBreakpoint = 1024,
+  alt,
+  className = "",
+  fill = false,
+  priority = false,
+  sizes = "100vw",
+  quality = 80
+}) => {
+  // Default to md image initially
+  const [currentSrc, setCurrentSrc] = useState<string>(images.md);
+  const [isClient, setIsClient] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Set isClient to true when component mounts
+    setIsClient(true);
+    
+    // Set initial image based on window width
+    if (typeof window !== 'undefined') {
+      setCurrentSrc(window.innerWidth >= lgBreakpoint ? images.lg : images.md);
+    }
+
+    // Function to handle window resize
+    const handleResize = () => {
+      if (window.innerWidth >= lgBreakpoint) {
+        setCurrentSrc(images.lg);
+      } else {
+        setCurrentSrc(images.md);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up event listener
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [images.md, images.lg, lgBreakpoint]);
+
+  // If we're server-side rendering, just return the md image
+  if (!isClient) {
+    return (
+      <Image
+        src={images.md}
+        alt={alt}
+        className={className}
+        fill={fill}
+        width={100}
+        height={100}
+        priority={priority}
+        sizes={sizes}
+        quality={quality}
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={currentSrc}
+      alt={alt}
+      className={className}
+      width={100}
+      fill={fill}
+      height={100}
+      priority={priority}
+      sizes={sizes}
+      quality={quality}
+    />
+  );
+};
+
+export default ResponsiveImage;

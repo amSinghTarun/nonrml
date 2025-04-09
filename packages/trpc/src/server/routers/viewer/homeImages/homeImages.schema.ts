@@ -7,19 +7,17 @@ export const ZUploadImageSchema = z.object({
 });
 export type TUploadImageSchema = z.infer<typeof ZUploadImageSchema>;
 
-export const ZEditInventoryItemSchema = z.object({
+export const ZEditImageSchema = z.object({
     id: z.number(),
-    quantity: z.number().optional(),
-    productSize: z.string().optional(),
-    baseSkuId: z.number().optional()
+    active: z.boolean().optional(),
+    currentType: z.enum(Object.keys(prismaEnums.HomeImageType) as [keyof typeof prismaEnums.HomeImageType]).optional()
 });
-export type TEditInventoryItemSchema = z.infer<typeof ZEditInventoryItemSchema>;
+export type TEditImageSchema = z.infer<typeof ZEditImageSchema>;
 
-export const ZDeleteInventoryItemSchema = z.object({
+export const ZDeleteImageSchema = z.object({
     id: z.number(),
-    unlink: z.boolean().optional()
 });
-export type TDeleteInventoryItemSchema = z.infer<typeof ZDeleteInventoryItemSchema>;
+export type TDeleteImageSchema = z.infer<typeof ZDeleteImageSchema>;
 
 export const ZGetInventoryItemSchema = z.object({
     sku: z.string().optional()

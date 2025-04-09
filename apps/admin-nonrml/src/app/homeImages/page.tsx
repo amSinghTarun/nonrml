@@ -14,7 +14,7 @@ const SizeChartPage = () => {
                 <h1 className="text-left p-2 justify-center">Home Images</h1>
                 <button onClick={()=> redirect("/create/sizeChart")} className=" p-2 rounded-xl bg-stone-400 hover:bg-stone-200 text-stone-700 ">Add Size Chart</button>
             </div>
-            {images.data?.data && <HomePageImagesManager images={images.data.data}/>}
+            {images.data?.data && <HomePageImagesManager images={images}/>}
             {images.isLoading && <div>Loading...</div>}
             {images.error && <div>Error: {images.error?.message}</div>}
         </section>

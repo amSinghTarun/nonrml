@@ -1,4 +1,3 @@
-import { FlipWords } from "../ui/flip-words";
 import React from "react";
 import { MaskContainer } from "../ui/svg-mask-effect";
 import Image from "next/image";
@@ -6,29 +5,33 @@ import homeImage from "../../images/AMI_4024-Edit-2_1668x2500_crop_center.jpg"
 import Link from "next/link";
 import logo from "@/images/logo.png";
 const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"]; 
-import { getHomepageProducts } from "@/app/actions/product.action";
+import { getHomePagesImages, getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import NoNRMLFaceCard from "./Facecard";
-import { TickerText } from "./TickerText";
-import {ResponsiveProductImage, ResponsiveImageGallery} from "./ScreenResponsiveImage";
+import { TickerText } from "./TicketText";
+import {ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage} from "./ScreenResponsiveImage";
 import { Footer } from "../Footer";
 
 
 export async function LandingPage() {
   
   let products = await getHomepageProducts();
-  let productImages = [
-    { src: products.latestProducts[0].productImages[0].image, alt: "1"},
-    { src: products.latestProducts[0].productImages[1].image, alt: "1"},
-    { src: products.popularProducts[0].productImages[0].image, alt: "1"},
-    { src: products.popularProducts[0].productImages[1].image, alt: "1"}
-  ]
+  let homeImages = await getHomePagesImages();
 
   return (
     <div  className="w-screen h-full">
 
 
-      <Image  className=" w-screen h-screen fixed" sizes="100vh" src={homeImage} height={100} width={100} alt="homeImage" />
+      <ResponsiveImage
+        images={{
+          md: homeImages["TOP_MD"] as string,
+          lg: homeImages["TOP_LG"] as string
+        }}
+        alt="homeImage"
+        className="w-screen h-screen fixed"
+        sizes="100vw"
+        lgBreakpoint={1024} // This is the default value, can be adjusted as needed
+      />
       <MaskContainer
         revealText={
           <p className="w-2/5 md:w-1/6 lg:w-1/8 flex h-fit">
@@ -41,7 +44,7 @@ export async function LandingPage() {
                 className='h-auto w-fit p-0 object-cover justify-center bg-white bg-opacity-80 rounded-md'
                 // can't use backdrop-blur
             ></Image>
-          </p>
+          </p> 
         }
         className=" w-full text-sm h-full fixed text-center items-center content-center justify-center"
       >
@@ -89,7 +92,7 @@ export async function LandingPage() {
       </div>
 
       <div className="z-30 relative flex flex-col lg:flex-row">
-          <ResponsiveProductImage products={products} />
+          <ResponsiveProductImage imageLg={homeImages.MIDDLE_LG as string} imageMd={homeImages.MIDDLE_MD as string} />
       </div>
 
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
@@ -151,7 +154,7 @@ export async function LandingPage() {
       </div>
 
         <div> 
-          <ResponsiveImageGallery images={productImages}/>
+          <ResponsiveImageGallery images={homeImages.BOTTOM as string[]}/>
           <Footer className="z-30 relative text-white bg-black/45 backdrop-blur-md border-none"></Footer>
         </div>
 
