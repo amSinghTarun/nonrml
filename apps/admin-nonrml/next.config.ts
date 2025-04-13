@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
         {hostname:"aceternity.com"}
     ]
   },
+  transpilePackages: [
+    "@nonrml/trpc",
+    "@nonrml/configs",
+    "@nonrml/cache",
+    "@nonrml/common",
+    "@nonrml/components"
+  ],
 };
 
 export default nextConfig;

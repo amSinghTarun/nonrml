@@ -11,7 +11,8 @@ const nextConfig = {
         "@nonrml/trpc",
         "@nonrml/configs",
         "@nonrml/cache",
-        "@nonrml/common"
+        "@nonrml/common",
+        "@nonrml/components"
     ],
     env: {
         CART_EXPIRATION_TIME: 1000 * 60 * 60 * 24 * 7,

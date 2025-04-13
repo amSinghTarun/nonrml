@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import { QuantitySelectButton, GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
-import { FileUpload } from "@/components/ui/file-upload";
+import { FileUpload } from "@nonrml/components";
 import { Textarea } from "@/components/ui/textarea"
 import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';

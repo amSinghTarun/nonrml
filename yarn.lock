@@ -7209,7 +7209,7 @@ __metadata:
 
 "admin-nonrml@file:./apps/admin-nonrml::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=cb1a6f&locator=nonrml%40workspace%3A."
+  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=4ebd7f&locator=nonrml%40workspace%3A."
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@nonrml/common": "npm:*"
@@ -7247,7 +7247,7 @@ __metadata:
     tailwind-merge: "npm:^2.6.0"
     tailwindcss-animate: "npm:^1.0.7"
     zod: "npm:^3.24.1"
-  checksum: 10c0/f1edf638d012ed8d62d70da10c3a592e9a6b1f626cef75b683c45f4356789835739bbfe378482833b4ab4a96bd8238c645a1ca9819644f9e10cafd02c4d5b801
+  checksum: 10c0/e3d005068075ce0c5d52d019d05fe05b8117ed9ae1a0fdba7cd19613612a7c89f36133eb3ce181d9b5dbab394a1da68ac3c216621e4bd5d515a3bffcb010954a
   languageName: node
   linkType: hard
 
@@ -8055,7 +8055,7 @@ __metadata:
 
 "client-main@file:./apps/client-main::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=ae4636&locator=nonrml%40workspace%3A."
+  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=7c1aff&locator=nonrml%40workspace%3A."
   dependencies:
     "@coreui/react": "npm:^5.4.1"
     "@emotion/react": "npm:^11.13.3"
@@ -8113,7 +8113,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     three: "npm:^0.168.0"
     zustand: "npm:^5.0.1"
-  checksum: 10c0/a760e9da7851d327049eb30d0f64c0e40d7c5eec2d80851a1590ec260ba60b80469bb6aa7c7cc600b70cca7694221d451fcaa7fb216d8143b92f506969b4cb48
+  checksum: 10c0/2b1d05645ac3a96864d79b74c1c7507d35bbace347ce1b08490d81f9e1acbd7ef7aafc1e3c42ec607a95c7047958d4021f9b854553f0fefba4247cf12d71c1e5
   languageName: node
   linkType: hard
 

@@ -11,7 +11,7 @@ import { useState } from "react"
 import { productUpdateFormSchema as formSchema } from "@/lib/formSchema/productFormSchema.zod"
 import { RouterOutput, trpc } from "@/app/_trpc/client"
 import Image from "next/image"
-import { FileUpload } from "@/components/ui/file-upload";
+import { FileUpload } from "@nonrml/components";
 import { productImageFormSchema } from "@/lib/formSchema/uploadImageFormSchema.zod"
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
