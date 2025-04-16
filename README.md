@@ -1,26 +1,30 @@
-# Turborepo starter
+# Starter
 
-This is an official starter Turborepo.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
+This is official repository of NoNRML, a expressive streetwear clothing brand.
 
 ## What's inside?
 
-This Turborepo includes the following packages/apps:
+This is a Turborepo and it includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@nonrml/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `apps/admin-nonrml`: A [Next.js](https://nextjs.org/) application that serves as the admin panel for managing the NoNRML platform.
+- `apps/client-main`: A [Next.js](https://nextjs.org/) client-facing application — the main storefront for NoNRML customers.
+- `apps/cron`: A Node.js application that handlers the cron jobs
+- `infra`: A Terraform project for provisioning and deploying the entire infrastructure stack, including apps, DNS, and security services.
+- `@nonrml/cache`: Node utility for handling application-level caching (e.g., Redis, memory cache).
+- `@nonrml/common`: Shared utility functions, constants, and helpers reused across all apps and packages.
+- `@nonrml/components`: Shared React component library used across both `apps/client-main` and `apps/admin-nonrml` apps for UI consistency and reusability.
+- `@nonrml/configs`: Shared runtime and build-time configuration (e.g., environment config, constants) for all packages and apps.
+- `@nonrml/eslint-config`: Shared ESLint configuration to enforce consistent code style across the Turborepo.
+- `@nonrml/otp`: OTP generation, validation, and delivery logic used across authentication workflows.
+- `@nonrml/payment`: Handles payment integrations, payment session management, and transaction logic
+- `@nonrml/prisma`: Shared Prisma ORM client and schema used for database access across the backend.
+- `@nonrml/rate-limit`: Middleware and logic for handling rate-limiting across APIs
+- `@nonrml/shipping`: Handles shipping logic, providers, tracking integrations, and cost estimations.
+- `@nonrml/storage`: Abstraction over storage services like AWS S3, Supabase, and others.
+- `@nonrml/trpc`: Centralized tRPC router and server logic shared across frontend and backend layers.
+- `@nonrml/typescript-config`: Shared configuration to maintain consistent compiler behavior across packages and apps.
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
@@ -32,13 +36,18 @@ This Turborepo has some additional tools already setup for you:
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
 
+### Environment variables
+
+Each app and package that requires environment variables includes a `.env.example` file with all necessary keys.
+Make sure to create a `.env` file in the same directory and populate the values.
+
+
 ### Build
 
 To build all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-pnpm build
+turbo run build
 ```
 
 ### Develop
@@ -46,36 +55,5 @@ pnpm build
 To develop all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-pnpm dev
+turbo run dev
 ```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

@@ -17,6 +17,7 @@ import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
+import { convertFileToDataURL } from "@nonrml/common"
 
 type Product = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getAdminProduct"], unknown>;
 
@@ -173,7 +174,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                 (productProp in formSchema.shape) ? 
                                 <FormField
                                     control={form.control}
-                                    name={productProp}
+                                    name={ productProp }
                                     render={({ field } ) => (
                                         <FormItem className="basis-1/2 p-2 mb-2">
                                             <FormLabel className="text-xs font-semibold ">{productProp.toUpperCase()}</FormLabel>
@@ -206,44 +207,60 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                             <FormField
                                 control={imageUploadForm.control}
                                 name="image"
-                                render={({ field } ) => (
-                                    <FormItem className="flex-grow">
-                                        <FormLabel className="text-xs font-semibold ">Image</FormLabel>
-                                        <FormControl className=" text-white">
-                                            <FileUpload {...field}/> 
-                                        </FormControl>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
+                                render={({ field }) => {
+                                    // Create a custom onChange handler for the FileUpload component
+                                    const handleFileChange =async (orderProductId: number, file: File) => {
+                                        field.onChange(await convertFileToDataURL(file));
+                                    };
+                                    
+                                    // Create a custom onFileDelete handler
+                                    const handleFileDelete = (orderProductId: number) => {
+                                        field.onChange(undefined);
+                                    };
+                                    
+                                    return (
+                                        <FormItem className="flex-grow">
+                                            <FormLabel className="text-xs font-semibold">Image</FormLabel>
+                                            <FormControl className="text-white">
+                                                <FileUpload 
+                                                    onChange={handleFileChange}
+                                                    onFileDelete={handleFileDelete}
+                                                    orderProductId={product.id}
+                                                    buttonClass="bg-stone-700 hover:bg-stone-600"
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    );
+                                }}
                             />
                             <FormField
                                 control={imageUploadForm.control}
                                 name="priorityIndex"
-                                render={({ field } ) => (
+                                render={({ field }) => (
                                     <FormItem className="basis-1/3">
-                                        <FormLabel className="text-xs font-semibold ">Priority index</FormLabel>
+                                        <FormLabel className="text-xs font-semibold">Priority index</FormLabel>
                                         <FormControl className="bg-stone-300 text-white">
                                             <Input type="number" placeholder="Index" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
                                         </FormControl>
-                                        <FormMessage/>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
                             <FormField
                                 control={imageUploadForm.control}
                                 name="active"
-                                render={({ field } ) => (
+                                render={({ field }) => (
                                     <FormItem className="">
-                                        <FormLabel className="text-xs font-semibold ">active</FormLabel>
+                                        <FormLabel className="text-xs font-semibold">active</FormLabel>
                                         <FormControl className="bg-stone-300 text-white">
                                             <Input type="checkbox" {...field} />
                                         </FormControl>
-                                        <FormMessage/>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
                         </div>
-
                     </form>
                 </Form>
 

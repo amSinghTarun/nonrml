@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Turborepo starter</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="turborepo-starter">Turborepo starter</h1>
+<p>This is an official starter Turborepo.</p>
+<h2 id="using-this-example">Using this example</h2>
+<p>Run the following command:</p>
+<pre><code class="language-sh">npx create-turbo@latest
+</code></pre>
+<h2 id="whats-inside">What's inside?</h2>
+<p>This Turborepo includes the following packages/apps:</p>
+<h3 id="apps-and-packages">Apps and Packages</h3>
+<ul>
+<li><code>docs</code>: a <a href="https://nextjs.org/">Next.js</a> app</li>
+<li><code>web</code>: another <a href="https://nextjs.org/">Next.js</a> app</li>
+<li><code>@repo/ui</code>: a stub React component library shared by both <code>web</code> and <code>docs</code> applications</li>
+<li><code>@repo/eslint-config</code>: <code>eslint</code> configurations (includes <code>eslint-config-next</code> and <code>eslint-config-prettier</code>)</li>
+<li><code>@nonrml/typescript-config</code>: <code>tsconfig.json</code>s used throughout the monorepo</li>
+</ul>
+<p>Each package/app is 100% <a href="https://www.typescriptlang.org/">TypeScript</a>.</p>
+<h3 id="utilities">Utilities</h3>
+<p>This Turborepo has some additional tools already setup for you:</p>
+<ul>
+<li><a href="https://www.typescriptlang.org/">TypeScript</a> for static type checking</li>
+<li><a href="https://eslint.org/">ESLint</a> for code linting</li>
+<li><a href="https://prettier.io">Prettier</a> for code formatting</li>
+</ul>
+<h3 id="build">Build</h3>
+<p>To build all apps and packages, run the following command:</p>
+<pre><code>cd my-turborepo
+pnpm build
+</code></pre>
+<h3 id="develop">Develop</h3>
+<p>To develop all apps and packages, run the following command:</p>
+<pre><code>cd my-turborepo
+pnpm dev
+</code></pre>
+<h3 id="remote-caching">Remote Caching</h3>
+<p>Turborepo can use a technique known as <a href="https://turbo.build/repo/docs/core-concepts/remote-caching">Remote Caching</a> to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.</p>
+<p>By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can <a href="https://vercel.com/signup">create one</a>, then enter the following commands:</p>
+<pre><code>cd my-turborepo
+npx turbo login
+</code></pre>
+<p>This will authenticate the Turborepo CLI with your <a href="https://vercel.com/docs/concepts/personal-accounts/overview">Vercel account</a>.</p>
+<p>Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:</p>
+<pre><code>npx turbo link
+</code></pre>
+<h2 id="useful-links">Useful Links</h2>
+<p>Learn more about the power of Turborepo:</p>
+<ul>
+<li><a href="https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks">Tasks</a></li>
+<li><a href="https://turbo.build/repo/docs/core-concepts/caching">Caching</a></li>
+<li><a href="https://turbo.build/repo/docs/core-concepts/remote-caching">Remote Caching</a></li>
+<li><a href="https://turbo.build/repo/docs/core-concepts/monorepos/filtering">Filtering</a></li>
+<li><a href="https://turbo.build/repo/docs/reference/configuration">Configuration Options</a></li>
+<li><a href="https://turbo.build/repo/docs/reference/command-line-reference">CLI Usage</a></li>
+</ul>
+
+            
+            
+        </body>
+        </html>

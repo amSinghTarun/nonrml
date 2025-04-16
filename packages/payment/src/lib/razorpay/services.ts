@@ -20,7 +20,7 @@ export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : 
     onDismissHandler: () => void
 }) => {
     return {
-        "key": "rzp_test_dpM31kdWN8H58H", // process.env.RAZORPAY_KEY_ID
+        "key": process.env.RAZORPAY_KEY_ID,
         "amount": rzpOrder.amount*100,
         "currency": "INR",
         "name": "NoNRML",

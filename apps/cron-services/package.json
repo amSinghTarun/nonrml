@@ -4,7 +4,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc src/index.ts"
+    "start": "ts-node ./src/index.ts",
+    "dev": "ts-node ./src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +14,8 @@
   "dependencies": {
     "@nonrml/cache": "workspace:*",
     "@nonrml/prisma": "workspace:*",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/node-cron": "^3"

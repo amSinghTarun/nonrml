@@ -6,37 +6,39 @@ const startCronJobs = () => {
   console.log("Starting Cron Jobs...");
 
   // Example: Daily job at midnight
-  cron.schedule("0 3 * * *", async () => {
+  cron.schedule("0 2 * * *", async () => {
     
     console.log("Running daily task to update the product visit count ...");
     const productsCounts = await redis.redisClient.json.get<{[id: string]: number}[]>("VISITED");
 
-    if(!productsCounts || Object.keys(productsCounts).length === 0)
-        return;
+
+    if(!productsCounts || Object.keys(productsCounts).length === 0){
+      console.log("No product visited today, sad!")
+      return;
+    }
 
     // Create CASE statement for bulk increment
-    const cases = Object.keys(productsCounts).map(productId  => {
-        return `WHEN id = ${+productId} THEN "visitedCount" + ${productsCounts[productId as keyof typeof productsCounts]}`;
-    }).join(' ');
+    const caseSQL = Object.entries(productsCounts)
+      .map(([id, count]) => `WHEN id = ${+id} THEN "visitedCount" + ${count}`)
+      .join(' ');
 
-    const productIds = Object.keys(productsCounts);
+    const idList = Object.keys(productsCounts).map(id => +id).join(',');
 
-    // This will generate and execute SQL that looks like:
-    // UPDATE products 
-    // SET "visitedCount" = CASE 
-    //   WHEN id = 1 THEN "visitedCount" + 150 
-    //   WHEN id = 2 THEN "visitedCount" + 300 
-    //   WHEN id = 3 THEN "visitedCount" + 75 
-    // END
-    // WHERE id IN (1,2,3)
-    
-    await prisma.$executeRaw`
-        UPDATE products 
-        SET "visitedCount" = CASE ${cases} END
-        WHERE id IN (${productIds})
+    const rawQuery = `
+      UPDATE "Products" 
+      SET "visitedCount" = CASE ${caseSQL} ELSE "visitedCount" END
+      WHERE id IN (${idList});
     `;
 
-    await redis.redisClient.json.set("VISITED", "$", {});
+    console.log(rawQuery)
+    try{
+      const result = await prisma.$executeRawUnsafe(rawQuery);
+      if(result)
+        await redis.redisClient.json.set("VISITED", "$", {});
+    } catch(error){
+      console.log(error)
+    }
+
   });
   
   console.log("Cron Jobs Initialized.");
