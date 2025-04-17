@@ -1,8 +1,7 @@
-import dotenv from "dotenv"
 import { Redis } from "@upstash/redis"
-import path from "path";
+import { loadEnv } from "@nonrml/common";
 
-dotenv.config({path: path.resolve("../../packages/cache/.env")})
+loadEnv("../../packages/cache/.env.local", "INDEX CACHE");
 
 let redisConnection : Redis | null = null;
 

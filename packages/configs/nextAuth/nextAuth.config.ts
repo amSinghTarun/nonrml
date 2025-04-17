@@ -4,6 +4,9 @@ import { JWTPayload, SignJWT, importJWK } from 'jose';
 import { JWT } from "next-auth/jwt";
 import { prisma } from "@nonrml/prisma";
 import type { NextAuthOptions } from "next-auth"
+import { loadEnv } from "@nonrml/common";
+
+loadEnv("../../packages/configs/.env.local", "CONFIG ENV LOAD");
 
 export interface session extends Session {
     user: {

@@ -30,7 +30,7 @@ export default function CreditNoteOTPVerification({closeHandler}:{closeHandler: 
         }
     } catch(error:any) {
         setIsLoading(false)
-        toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:5000 })
+        toast({variant:"destructive", title: error.message ?? "Can'nt serve you right now, Sorry!", duration:3000 })
     }
 }
 
