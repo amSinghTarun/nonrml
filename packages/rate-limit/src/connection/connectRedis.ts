@@ -1,8 +1,7 @@
 import { Redis } from "@upstash/redis";
-import dotenv from "dotenv"
-import path from "path";
+import { loadEnv } from "@nonrml/common";
 
-dotenv.config({path: path.resolve("../../packages/cache/.env")})
+loadEnv("../../packages/rate-limit/.env.local", "RATE-LIMIT ENV LOAD");
 
 let redisConnection : any = null;
 

@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@nonrml/common": "workspace:*",
     "dotenv": "^16.4.5",
     "razorpay": "^2.9.4"
   }

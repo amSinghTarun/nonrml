@@ -9,7 +9,6 @@ import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import { useToast } from "@/hooks/use-toast";
 import CreditNoteOTPVerification from "./CreditNotesList";
 
-
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"];
 
 interface CreditNoteProps {
@@ -30,7 +29,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
         },
         onError: (error) => {
             console.log(error.message)
-            toast({variant:"destructive", title: error.message, duration:5000 })
+            toast({variant:"destructive", title: error.message, duration:2500 })
         }
     });
 
@@ -58,7 +57,11 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     }
 
     const handleCreditShowOTP = () => {
-        sendCreditViewOtp.mutate({});
+        try{
+            sendCreditViewOtp.mutate({});
+        }catch(error: any){
+            setError(error.message)
+        }
     }
 
     return (

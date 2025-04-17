@@ -61,7 +61,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
       },
       onError: () => {
         toast({
-            duration: 5000,
+            duration: 3000,
             title: "Something went wrong. Any payment deducted will be reimbursed",
             variant: "destructive"
         });
