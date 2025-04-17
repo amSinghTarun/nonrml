@@ -36,7 +36,7 @@ This Turborepo has some additional tools already setup for you:
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
 
-### Environment variables
+### Environment Variables
 
 Each app and package that requires environment variables includes a `.env.example` file with all necessary keys.
 Make sure to create a `.env` file in the same directory and populate the values.
