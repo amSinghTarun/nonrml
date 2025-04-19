@@ -4,6 +4,9 @@ import { JWTPayload, SignJWT, importJWK } from 'jose';
 import { JWT } from "next-auth/jwt";
 import { prisma } from "@nonrml/prisma";
 import type { NextAuthOptions } from "next-auth"
+import { loadEnv } from "@nonrml/common";
+
+loadEnv("../../packages/configs/.env.local", "CONFIG ENV LOAD");
 
 export interface session extends Session {
     user: {
@@ -17,12 +20,6 @@ export interface session extends Session {
 interface token extends JWT {
     userId: string;
     role: string;
-}
-  
-interface user {
-    id: string;
-    role: string;
-    token: string;
 }
 
 const generateJWT = async (payload: JWTPayload) => {
@@ -48,7 +45,7 @@ export const NEXT_AUTH_CONFIG = {
       authorize: async (credentials) => {
         // The id should be present and it must be a string object
         // return user object with their profile data
-        const user = await prisma.user.findUnique({where: { id: Number(credentials?.id)}});
+        const user = await prisma.user.findFirstOrThrow({where: { id: Number(credentials?.id)}});
         return {id: `${user?.id}`, role: user?.role}
       },
     }),

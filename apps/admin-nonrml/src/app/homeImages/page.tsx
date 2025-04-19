@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import HomePageImagesManager from "@/components/homeImage";
 
-const SizeChartPage = () => {
+const HomeImagePage = () => {
     const images = trpc.viewer.homeImages.getHomeImagesAdmin.useQuery();
     return (
         <section className="   flex flex-col w-screen h-screen text-black text-sm">
@@ -21,4 +21,4 @@ const SizeChartPage = () => {
     );
 };
 
-export default SizeChartPage;
+export default HomeImagePage;

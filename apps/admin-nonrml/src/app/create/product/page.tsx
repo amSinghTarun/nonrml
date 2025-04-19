@@ -2,7 +2,7 @@
 import { trpc } from "@/app/_trpc/client";
 import { CreateProduct } from "@/components/create/createProduct";
 
-export default () => {
+const ProductCreatePage = () => {
     const categories = trpc.viewer.productCategories.getProductCategories.useQuery({all: true});
     if (categories.isLoading) return <div>Loading...</div>;
     if (categories.error) return <div>Error: {categories.error.message}</div>;
@@ -13,8 +13,8 @@ export default () => {
                 <div className=" m-2 p-4 bg-stone-700 text-white flex flex-col rounded-md text-sm">
                     <span>CATEGORIES DETAILS:</span>
                     <span> { 
-                        categories.data?.adminCategories?.map( category => (
-                            ` |__ ${category.displayName} : ${category.id} __| `
+                        categories.data?.adminCategories?.map( (category: {id: number, displayName: string | null}) => (
+                            ` |__ ${category.displayName ?? 'Unnamed'} : ${category.id} __| `
                         ))
                     } </span>
                 </div>
@@ -23,3 +23,5 @@ export default () => {
         </>
     )   
 }
+
+export default ProductCreatePage

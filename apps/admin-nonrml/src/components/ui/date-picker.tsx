@@ -32,7 +32,11 @@ export function DatePicker({onSelect}: {onSelect: (date: Date) => void}) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={ (date) => {setDate(date);date && onSelect(date)}}
+          onSelect={ (date) => {
+            setDate(date); 
+            if(date)  
+              onSelect(date)
+          }}
           initialFocus
         />
       </PopoverContent>

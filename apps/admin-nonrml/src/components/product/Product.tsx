@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
  
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,7 +14,7 @@ import { RouterOutput, trpc } from "@/app/_trpc/client"
 import Image from "next/image"
 import { FileUpload } from "@nonrml/components";
 import { productImageFormSchema } from "@/lib/formSchema/uploadImageFormSchema.zod"
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
@@ -25,13 +26,14 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     console.log(productDetails.data?.data.product.ProductVariants)
     const router = useRouter();
-    const product = productDetails.data?.data.product!;
     const productSizes = productDetails.data?.data.avlSizes;
     const [ priorityIndex, setPriorityIndex ] = useState<{[imageId: number]: number}>();
+    const [ editProduct, setEditProduct ] = useState<boolean>();
+    const [ error, setError ] = useState<any>();
     const handlePriorityIndexOfImage = ({imageId, priorityIndex}: {imageId: number, priorityIndex: number}) => {
         setPriorityIndex((prev) => ({...prev, [imageId]:priorityIndex }) )
     }
-
+    
     const addVariantToInventory = trpc.viewer.inventory.createInventory.useMutation({
         onSuccess: () => {
             productDetails.refetch();
@@ -83,6 +85,10 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
         resolver: zodResolver(productImageFormSchema),
         defaultValues: {image: undefined, priorityIndex: 0, active: false}
     });
+    
+    const product = productDetails.data?.data.product;
+    if(!product)
+        return <>PRODUCT MISSING</>
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try{
@@ -114,11 +120,21 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
         }
     }
 
-    const [ editProduct, setEditProduct ] = useState<boolean>();
-    const [ error, setError ] = useState<any>();
-    
     if(productDetails.status != "success")
         return <>LOADING...</>
+
+    // Helper function to convert product values to string for the Textarea
+    const getTextareaValue = (value: any): string => {
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'number') return value.toString();
+        if (Array.isArray(value)) return value.join(',');
+        if (typeof value === 'object') {
+            if (value instanceof Date) return value.toISOString();
+            return JSON.stringify(value);
+        }
+        return String(value);
+    };
 
     return (
         <div className="text-xs">
@@ -173,13 +189,18 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                             product && Object.keys(product).map(productProp => (
                                 (productProp in formSchema.shape) ? 
                                 <FormField
+                                    key={productProp}
                                     control={form.control}
-                                    name={ productProp }
+                                    name={ productProp as keyof typeof formSchema.shape }
                                     render={({ field } ) => (
                                         <FormItem className="basis-1/2 p-2 mb-2">
                                             <FormLabel className="text-xs font-semibold ">{productProp.toUpperCase()}</FormLabel>
                                             <FormControl className="bg-stone-700 text-white">
-                                                <Textarea defaultValue={product[productProp as keyof typeof product]} {...field} onChange={(e) => (isNaN(Number(e.target.value)) ? field.onChange(e.target.value) : field.onChange(+e.target.value) )} />
+                                                <Textarea 
+                                                    defaultValue={getTextareaValue(product[productProp as keyof typeof product])} 
+                                                    {...field} 
+                                                    onChange={(e) => (isNaN(Number(e.target.value)) ? field.onChange(e.target.value) : field.onChange(+e.target.value) )}
+                                                />
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
@@ -214,7 +235,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     };
                                     
                                     // Create a custom onFileDelete handler
-                                    const handleFileDelete = (orderProductId: number) => {
+                                    const handleFileDelete = () => {
                                         field.onChange(undefined);
                                     };
                                     
@@ -254,7 +275,14 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     <FormItem className="">
                                         <FormLabel className="text-xs font-semibold">active</FormLabel>
                                         <FormControl className="bg-stone-300 text-white">
-                                            <Input type="checkbox" {...field} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={field.value}
+                                                onChange={(e) => field.onChange(e.target.checked)}
+                                                onBlur={field.onBlur}
+                                                name={field.name}
+                                                ref={field.ref}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -276,7 +304,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                     <TableBody> {
                         product?.productImages.map( image => {
                             return (
-                                <TableRow>
+                                <TableRow key={image.id}>
                                     <TableCell><Image src={image.image} alt={`${image.id}`} width={120} height={120} /></TableCell>
                                     <TableCell>
                                         <input className="bg-gray-100" min={0} type="integer" placeholder={String(image.priorityIndex)} onChange={(e) => {handlePriorityIndexOfImage({imageId: +image.id, priorityIndex: +e.target.value})}} />
@@ -307,7 +335,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     if(!product?.ProductVariants.find( variant => variant.size == size.name))
                                         return (
                                             //SKU will be the same as product just the size added in advance
-                                            <DropdownMenuItem onClick={async () => {await addVariant.mutateAsync({size: size.name, productId: product.id});}}>Add {size.name}</DropdownMenuItem>
+                                            <DropdownMenuItem key={size.name} onClick={async () => {await addVariant.mutateAsync({size: size.name, productId: product.id});}}>Add {size.name}</DropdownMenuItem>
                                         )
                                 })
                             }
@@ -315,7 +343,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                     </DropdownMenu>
                     <span onClick={()=> router.push(`/inventory?${product.sku.toUpperCase()}`)} className="bg-stone-600 p-2 flex justify-center cursor-pointer rounded-md text-white">View Inventory</span>
                 </div>
-                <span className="p-1 text-yellow-500">TO DELETE A VARIANT PLEASE ENSURE IT'S QUANTITY IS 0</span>
+                <span className="p-1 text-yellow-500">{`TO DELETE A VARIANT PLEASE ENSURE IT'S QUANTITY IS 0`}</span>
                 <div>
                     <Table>
                         <TableHeader>
@@ -329,12 +357,12 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                         <TableBody> {
                             product?.ProductVariants.map( variant => {
                                 return (
-                                    <TableRow>
+                                    <TableRow key={variant.id}>
                                         <TableCell>{variant.size}</TableCell>
                                         <TableCell>{variant.subSku}</TableCell>
                                         <TableCell>{variant.createdAt.toDateString()}</TableCell>
                                         <TableCell className="gap-2 flex text-white text-xs flex-col">
-                                            <Button disabled={variant.inventory?.quantity ? true : false} onClick={ async () => {!variant.inventory?.quantity && await deleteVariant.mutateAsync({variantId: variant.id}) } } className="p-1 bg-stone-600 rounded-md hover:bg-stone-200 hover:text-black">DELETE VARIANT</Button>
+                                            <Button disabled={variant.inventory?.quantity ? true : false} onClick={ async () => {if(!variant.inventory?.quantity) await deleteVariant.mutateAsync({variantId: variant.id}) } } className="p-1 bg-stone-600 rounded-md hover:bg-stone-200 hover:text-black">DELETE VARIANT</Button>
                                             { !variant.inventory?.id && <Button onClick={async () => {await addVariantToInventory.mutateAsync([{productVariantId: variant.id}])} } className=" bg-stone-400 hover:bg-stone-200 hover:text-black p-1 rounded-sm cursor-pointer">{addVariantToInventory.isLoading ? "POOKIE VISHAL" : "ADD TO INVENTORY"}</Button>}
                                         </TableCell>
                                     </TableRow>

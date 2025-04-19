@@ -1,8 +1,5 @@
-import dotenv from "dotenv";
-import path from "path"
+import { loadEnv } from "@nonrml/common";
 
-if(process.env.NODE_ENV !== 'production'){
-    dotenv.config({path: path.resolve("../../packages/payment/.env.local")})
-};
+loadEnv("../../packages/payment/.env.local", "INDEX PAYMENT");
 
 export * from "./lib/razorpay"

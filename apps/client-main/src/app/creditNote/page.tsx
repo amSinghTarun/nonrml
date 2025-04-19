@@ -2,7 +2,7 @@ import { CreditNote } from "@/components/CreditNote";
 import { redirectToHomeIfNotLoggedIn } from "../lib/utils";
 
 const CreditNotePage = async () => {
-    await redirectToHomeIfNotLoggedIn();
+    // await redirectToHomeIfNotLoggedIn();
     // instead it should be like, if logged in then show all the users credit note and if not then ask for search and if logged in then
     // also give a prompt to search for credit note
     return (

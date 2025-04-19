@@ -7,7 +7,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
@@ -21,7 +20,7 @@ export function LinkVariantToInventory({ children, color, size, inventoryId, aft
   if (avlBaseInventoriesQuery.isLoading) return <div>Loading...</div>;
   if (avlBaseInventoriesQuery.error) return <div>Error: {avlBaseInventoriesQuery.error.message}</div>;
 
-  let avlBaseInventories = avlBaseInventoriesQuery.data.data;
+  const avlBaseInventories = avlBaseInventoriesQuery.data.data;
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -31,7 +30,7 @@ export function LinkVariantToInventory({ children, color, size, inventoryId, aft
         <AlertDialogHeader>Avl Base Product to link</AlertDialogHeader>
         {
           avlBaseInventories.map( baseInventory => (
-              <div className="flex flex-row text-xs justify-between">
+              <div key={baseInventory.id} className="flex flex-row text-xs justify-between">
                 <div className="flex flex-col">
                   <span>Sku: {baseInventory.baseSku}</span>
                   <span>Color: {baseInventory.color}</span>

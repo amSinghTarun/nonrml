@@ -9,7 +9,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { RouterInput, RouterOutput } from "@/app/_trpc/client";
 
@@ -24,7 +23,7 @@ export function CreditNoteEditDialog({note, onSave}: {note: CreditNote, onSave: 
     // remainingValue: note.remainingValue
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await onSave(note.id, formData);
     setIsOpen(false);

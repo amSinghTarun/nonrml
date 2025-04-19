@@ -5,7 +5,8 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prisma:generate": "cd ./packages/prisma && yarn run generate"
   },
   "devDependencies": {
     "@nonrml/typescript-config": "*",
@@ -29,5 +30,5 @@
     "eslint": "^9.17.0",
     "ts-loader": "^9.5.1"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.9.1"
 }

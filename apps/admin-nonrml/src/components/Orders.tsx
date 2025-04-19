@@ -32,7 +32,7 @@ export const Orders = ({orders}:{orders: Orders}) => {
       <TableBody>
         {
           orders.data?.data.map( order => (
-            <TableRow>
+            <TableRow key={order.id}>
               <TableCell className={`font-medium cursor-pointer hover:bg-orange-400 ${order._count.return && "bg-yellow-100"}`} onClick={ () => { redirect(`/orders/${order.id}`) }}>{order.id}</TableCell>
               <TableCell className="font-medium">{+order.totalAmount}</TableCell>
               <TableCell className="font-medium">{order.creditUtilised}</TableCell>

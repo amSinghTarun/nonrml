@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
+import { loadEnv } from "@nonrml/common";
+
+loadEnv("../../packages/storage/.env.local", "STORAGE SUPABASE ENV LOAD");
 
 let supabaseClient : any = null;
 export const supabase = () => {

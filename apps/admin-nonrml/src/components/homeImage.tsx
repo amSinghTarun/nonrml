@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
 import {
@@ -56,7 +57,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   };
 
   // Handle file deletion from FileUpload component
-  const handleFileDelete = (orderProductId: number) => {
+  const handleFileDelete = () => {
     setUploadedFile(null);
   };
 
