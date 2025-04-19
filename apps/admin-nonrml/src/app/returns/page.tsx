@@ -3,7 +3,7 @@
 import Returns from "@/components/Returns";
 import { trpc } from '@/app/_trpc/client';
 
-export default () => {
+const ReturnsPage = () => {
   const returns = trpc.viewer.return.getAllReturns.useQuery({ }, {
     staleTime: Infinity,
     cacheTime: Infinity,
@@ -22,3 +22,5 @@ export default () => {
     </>
   );
 }
+
+export default ReturnsPage;

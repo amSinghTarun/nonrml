@@ -22,7 +22,7 @@ interface FileUploadProps {
   buttonClass?: string  
 }
 
-export const FileUpload : React.FC<FileUploadProps> = ({ onChange, orderProductId, onFileDelete, buttonClass }) => {
+export const FileUpload = ({ onChange , orderProductId, onFileDelete, buttonClass }: FileUploadProps) => {
 
   const [file, setFile] = useState<File>();
   const fileInputRef = useRef<HTMLInputElement>(null);

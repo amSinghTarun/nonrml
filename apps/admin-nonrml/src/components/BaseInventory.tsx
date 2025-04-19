@@ -5,7 +5,6 @@ import { RouterOutput, trpc } from "@/app/_trpc/client"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -18,7 +17,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-import { AlertDialogTrigger } from "./ui/alert-dialog"
 
 type BaseInventory = UseTRPCQueryResult<RouterOutput["viewer"]["baseSkuInventory"]["getBaseInventory"], unknown>
 
@@ -88,14 +86,14 @@ export const BaseInventory = ({inventory}: {inventory: BaseInventory}) => {
             <TableBody>
                 { inventory.status == "success" ?
                 inventory.data.data.map( item => (
-                    <TableRow  className="text-sm">
+                    <TableRow key={item.id}  className="text-sm">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <TableCell className="hover:bg-orange-400 cursor-pointer">{item.id}</TableCell>
                             </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-stone-700 text-white">
                             <DropdownMenuItem onClick={() => onItemChangeUpload(item.id) }>{(baseInventoryEdit.isLoading && baseInventoryEdit.variables?.baseSkuId == item.id) ? "Updating" : "Update"}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={async () => {item.quantity == 0 && await baseInventoryDelete.mutateAsync({id: item.id}); inventory.refetch()}}>{baseInventoryDelete.isLoading ? "Deleting" : "Delete"}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={async () => {if(item.quantity){await baseInventoryDelete.mutateAsync({id: item.id}); inventory.refetch()}}}>{baseInventoryDelete.isLoading ? "Deleting" : "Delete"}</DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
                         <TableCell>

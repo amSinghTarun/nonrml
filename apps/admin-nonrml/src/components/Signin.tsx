@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { trpc } from '@/app/_trpc/client';
 import { Form, FormInputField, FormSubmitButton } from './ui/form';
@@ -18,7 +19,7 @@ const Signin = () => {
         setError(null);
         setSendOtp(false)
         const value = e.target.value.replace(/\D/g, "");
-        value.length <= 10 && setMobileNumber(value)
+        if(value.length <= 10)  setMobileNumber(value)
     };
 
     const onMobileSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -33,7 +34,7 @@ const Signin = () => {
                 return;
             }
             console.log("OTP SEND");
-            !otpSent && await sendOTP.mutateAsync({contactNumber: mobileNumber});
+            if(!otpSent) await sendOTP.mutateAsync({contactNumber: mobileNumber});
             setSendOtp(true);
 
         } catch (error:any) {
@@ -62,7 +63,7 @@ const Signin = () => {
     const otpOnChange = (e: any) => {
         setError(null)
         const value = e.target.value.replace(/\D/g, "");
-        value.length <= 6 && setOtp(value);
+        if(value.length <= 6) setOtp(value);
     };
 
     const onOTPSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -84,7 +85,10 @@ const Signin = () => {
         } catch(error:any) {
             // for type validation we need to check for array.
             //console.log(error)
-            lengthError ?  setError("OTP should be 6 digit long") : setError(typeof error.message == "object" ? JSON.parse(error.message)[0].message : error.message);
+            if(lengthError)
+                setError("OTP should be 6 digit long")
+            else
+                setError(typeof error.message == "object" ? JSON.parse(error.message)[0].message : error.message);
         };
     };
 

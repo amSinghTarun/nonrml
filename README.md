@@ -41,6 +41,13 @@ This Turborepo has some additional tools already setup for you:
 Each app and package that requires environment variables includes a `.env.example` file with all necessary keys.
 Make sure to create a `.env` file in the same directory and populate the values.
 
+### DB client
+
+Generate the prisma client before running the server, run the following command:
+```
+yarn prisma:generate
+```
+
 
 ### Build
 

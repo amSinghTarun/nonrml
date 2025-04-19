@@ -19,7 +19,7 @@ export default function SessionProvider({
         } else {
           setShowSignIn(false)
         }
-    }, [sessionData.status])
+    }, [sessionData.status, sessionData.data?.user?.role])
 
     return (
         <>

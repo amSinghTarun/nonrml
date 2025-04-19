@@ -2,7 +2,7 @@
 import { trpc } from "@/app/_trpc/client";
 import { CreateProductCategory } from "@/components/create/createCategory";
 
-export default () => {
+const CategoryCreatePage = () => {
     const categories = trpc.viewer.productCategories.getProductCategories.useQuery({all: true});
     if (categories.isLoading) return <div>Loading...</div>;
     if (categories.error) return <div>Error: {categories.error.message}</div>;
@@ -16,3 +16,5 @@ export default () => {
         </>
     )   
 }
+
+export default CategoryCreatePage

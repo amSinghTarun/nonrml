@@ -1,8 +1,7 @@
 "use client"
-import { trpc } from "@/app/_trpc/client";
 import { SizeChartForm } from "@/components/create/createSizeChart";
 
-export default () => {
+const SizeChartCreatePage = () => {
     return (
         <>
             <section className="flex flex-col w-screen h-screen  ">
@@ -12,3 +11,5 @@ export default () => {
         </>
     )   
 }
+
+export default SizeChartCreatePage

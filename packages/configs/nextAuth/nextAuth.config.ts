@@ -21,12 +21,6 @@ interface token extends JWT {
     userId: string;
     role: string;
 }
-  
-interface user {
-    id: string;
-    role: string;
-    token: string;
-}
 
 const generateJWT = async (payload: JWTPayload) => {
     const secret = process.env.JWT_SECRET || 'secret';
@@ -51,7 +45,7 @@ export const NEXT_AUTH_CONFIG = {
       authorize: async (credentials) => {
         // The id should be present and it must be a string object
         // return user object with their profile data
-        const user = await prisma.user.findUnique({where: { id: Number(credentials?.id)}});
+        const user = await prisma.user.findFirstOrThrow({where: { id: Number(credentials?.id)}});
         return {id: `${user?.id}`, role: user?.role}
       },
     }),

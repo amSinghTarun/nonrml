@@ -1,7 +1,6 @@
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -32,7 +31,7 @@ import {
         <TableBody>
             {
               addresses.data?.data.map( address => (
-                <TableRow>
+                <TableRow key={address.id}>
                   <TableCell className="font-medium">{address.id}</TableCell>
                   <TableCell className="font-medium">{address.contactName}</TableCell>
                   <TableCell className="font-medium">{address.location}</TableCell>

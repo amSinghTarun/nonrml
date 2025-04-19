@@ -28,8 +28,7 @@ export default function UsersPage() {
             staleTime: Infinity,
             cacheTime: Infinity,
     });
-
-    const handleSearch = useCallback(async (e:any) => {
+    const handleSearch = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!phoneNumber && usersFetch.data == undefined) return;
         try {
@@ -38,7 +37,7 @@ export default function UsersPage() {
         } catch (error) {
             console.error("Error searching user:", error);
         }
-    }, [phoneNumber, searchUserQuery]);
+    }, [phoneNumber, searchUserQuery, usersFetch.data]);
 
     const handleShowAllUsers = () => {
         setShowAllUsers(true);

@@ -56,6 +56,7 @@ export const getProduct = async ({
           shippingDetails: true,
           name: true,
           description: true,
+          latest: true,
           price: true,
           id: true,
           sku: true,
@@ -346,6 +347,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       id: number;
       soldOut: boolean;
       public?: boolean,
+      latest: boolean,
       sizeChartId: number | null,
       visitedCount: number,
       exclusive: boolean,

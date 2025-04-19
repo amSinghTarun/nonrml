@@ -3,7 +3,6 @@ import { RouterOutput, trpc } from "@/app/_trpc/client"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -86,7 +85,7 @@ export const Products = ({products}: {products: Products}) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-stone-700 text-white">{
                   allSizeCharts.data?.data.map( sizeChart => (
-                    <DropdownMenuItem onClick={() => {addSizeChartToProduct.mutate({sizeChartId: sizeChart.id, productId: product.id})}}>{sizeChart.name}</DropdownMenuItem>  
+                    <DropdownMenuItem key={sizeChart.id} onClick={() => {addSizeChartToProduct.mutate({sizeChartId: sizeChart.id, productId: product.id})}}>{sizeChart.name}</DropdownMenuItem>  
                   )
                 )
               }

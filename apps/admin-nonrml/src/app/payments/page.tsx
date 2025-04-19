@@ -1,6 +1,6 @@
 import PaymentsDashboard from "@/components/Payments";
 
-export default async () => {
+const PaymentsPage = () => {
     return (
         <>
             <h1 className="text-left py-5 px-5 bg-stone-700   font-bold text-white">Payments</h1>
@@ -10,3 +10,5 @@ export default async () => {
         </>
     )
 }
+
+export default PaymentsPage
