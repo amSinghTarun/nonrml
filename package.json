@@ -2,8 +2,9 @@
   "name": "nonrml",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "yarn install && turbo run generate build",
     "dev": "turbo dev",
+    "start": "turbo start",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prisma:generate": "cd ./packages/prisma && yarn run generate"

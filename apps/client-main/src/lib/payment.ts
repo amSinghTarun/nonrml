@@ -5,7 +5,15 @@ import { createRzpConfig } from "@nonrml/payment"
 import { useCartItemStore } from "@/store/atoms"
 import { useRouter } from "next/navigation"
 
-type rzpOrder = RouterOutput["viewer"]["orders"]["initiateOrder"]["data"]
+// type rzpOrder = RouterOutput["viewer"]["orders"]["initiateOrder"]["data"]
+type InitiateOrderResponse = RouterOutput["viewer"]["orders"]["initiateOrder"];
+
+// This type represents only the successful order creation response
+type RzpOrder = Extract<
+  InitiateOrderResponse["data"], 
+  { orderId: string; amount: number; rzpOrderId: string; contact: string; name: string; email: string }
+>;
+
 type UpdatePaymentStatusInput = RouterInput["viewer"]["payment"]["updateFailedPaymentStatus"]
 
 function loadScript(src: string) {
@@ -28,7 +36,7 @@ export const displayRazorpay = async ({
   updatePaymentStatus,
   verifyOrder
 }: {
-  rzpOrder: rzpOrder, 
+  rzpOrder: RzpOrder, 
   cartOrder: boolean, 
   onDismissHandler?: () => void,
   updatePaymentStatus: (data: UpdatePaymentStatusInput ) => void,

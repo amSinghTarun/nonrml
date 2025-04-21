@@ -771,6 +771,29 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
 
             prisma.$transaction(editOrderQueries);
 
+            const remainingProductStatus = await prisma.orderProducts.aggregate({
+                where: {
+                    orderId: input.orderId
+                },
+                _sum: {
+                    quantity: true,
+                    rejectedQuantity: true
+                }
+            });
+
+            const effectiveRemainingQuantity = (remainingProductStatus._sum.quantity ?? 0) - (remainingProductStatus._sum.rejectedQuantity ?? 0)
+
+            if(effectiveRemainingQuantity == 0){
+                await prisma.orders.update({
+                    where: {
+                        id: input.orderId
+                    },
+                    data: {
+                        orderStatus:prismaEnums.OrderStatus.CANCELED_ADMIN
+                    }
+                })
+            };
+
         }
 
         if( !isNaN(Number(input.returnDateExtend)) && input.returnDateExtend && input.initialReturnDate){

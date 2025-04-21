@@ -14,12 +14,12 @@ export default function SessionProvider({
     const [showSignIn, setShowSignIn] = useState(false)
 
     useEffect(() => {
-        if (sessionData.status === 'unauthenticated' || sessionData.data?.user?.role != "ADMIN") {
+        if (sessionData.status === 'unauthenticated' || (sessionData.data?.user && "role" in sessionData.data.user && sessionData.data?.user?.role != "ADMIN")) {
           setShowSignIn(true)
         } else {
           setShowSignIn(false)
         }
-    }, [sessionData.status, sessionData.data?.user?.role])
+    }, [sessionData.status, sessionData.data?.user])
 
     return (
         <>

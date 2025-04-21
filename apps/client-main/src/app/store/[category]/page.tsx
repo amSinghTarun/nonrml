@@ -2,7 +2,7 @@ import { serverClient } from "@/app/_trpc/serverClient";
 import Products from "@/components/Products";
 
 
-const StorePage = async ({ params }: { params: { category: string } }) => {
+const StorePage = async ({ params }: { params: Promise<{ category: string }> }) => {
     const category = (await params).category;
     const { data: products, nextCursor } = await (await serverClient()).viewer.product.getProducts({categoryName: category, cursor: undefined});
 

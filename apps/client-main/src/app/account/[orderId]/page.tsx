@@ -3,7 +3,7 @@ import { redirectToHomeIfNotLoggedIn } from "@/app/lib/utils";
 import { Order } from "@/components/Order";
 import React from "react";
 
-const OrdersPage = async ({params}: {params: {orderId: string}}) => {
+const OrdersPage = async ({params}: {params: Promise<{orderId: string}>}) => {
     const { orderId } = await params;
     await redirectToHomeIfNotLoggedIn();
 

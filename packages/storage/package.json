@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -14,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
+    "@nonrml/common": "workspace:*",
     "aws-sdk": "^2.1692.0",
     "dotenv": "^16.4.5"
   }

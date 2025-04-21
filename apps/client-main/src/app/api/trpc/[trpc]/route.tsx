@@ -2,7 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createContext } from "@nonrml/trpc";
 import { getSession } from "@nonrml/configs";
 
-const handler = async (req: Request, res: Response) => { 
+const handler = async (req: Request) => { 
   // console.log("\n\REQUEST "," ----------------- \n", req);
   return fetchRequestHandler({
       endpoint: "/api/trpc",

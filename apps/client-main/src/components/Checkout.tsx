@@ -110,16 +110,19 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
                 return;
             }
-            console.log("OPEN RAZORPAY");
+            
+            if (data.orderId){
+                console.log("OPEN RAZORPAY");
+                await displayRazorpay({
+                    rzpOrder: data,
+                    cartOrder: !buyOption ? true : false,
+                    updatePaymentStatus: updatePaymentStatus.mutate,
+                    verifyOrder: verifyOrder.mutate,
+                });
+                return;
+            }
 
-            await displayRazorpay({
-                rzpOrder: data, 
-                cartOrder: !buyOption ? true : false,
-                updatePaymentStatus: updatePaymentStatus.mutate,
-                verifyOrder: verifyOrder.mutate,
-            });
-
-            return;
+            throw new Error("Something went wrong. Please try again !!")
 
         } catch(error: any) {
             toast({

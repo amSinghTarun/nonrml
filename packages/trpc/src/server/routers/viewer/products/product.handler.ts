@@ -36,7 +36,10 @@ export const getProduct = async ({
       productImages: {
         image: string;
         priorityIndex: number;
-      }[];
+      }[],
+      category: {
+        sizeChartId: number | null
+      }
     } | null
     
     
@@ -78,7 +81,7 @@ export const getProduct = async ({
               priorityIndex: "asc",
             },
           }
-        },
+        }
       });
       redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
     };

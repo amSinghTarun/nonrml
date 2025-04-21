@@ -9,6 +9,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { GeneralButtonTransparent } from "./ui/buttons";
 import { toast } from "@/hooks/use-toast";
+import { prismaTypes } from "@nonrml/prisma";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
@@ -22,7 +23,7 @@ interface OrderProps {
     orderDetails: OrderDetails
 }
 
-const getOrderProgressMessage = (status: string, date?:number) => {
+const getOrderProgressMessage = (status: prismaTypes.OrderStatus, date?:number) => {
     switch (status) {
         case "ACCEPTED":
             return "Your Order Is Being Packed With Care";
@@ -32,18 +33,22 @@ const getOrderProgressMessage = (status: string, date?:number) => {
             return `Order Delivered on ${(new Date(date!).toDateString())}`;
         case "PAYMENT_FAILED":
             return `Payment failed`;
+        case "CANCELED":
+            return `Order Canceled`;
+        case "CANCELED_ADMIN":
+            return `Order Canceled`;
         default:
             return "Order Processing";
     }
 };
 
-const getOrderPaymentStatus = (status: string) => {
+const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | undefined) => {
     switch (status) {
         case "paid":
             return "Complete";
         case "failed":
             return "Failed";
-        case "COD":
+        case "created":
             return "Pending";
         default:
             return "Failed";
@@ -79,7 +84,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                         </div>
                         <div className="flex justify-between">
                             <p>Payment</p>
-                            <p>{getOrderPaymentStatus(orderDetails.Payments?.paymentStatus ?? "")} </p>
+                            <p>{getOrderPaymentStatus(orderDetails.Payments?.paymentStatus)} </p>
                         </div>
                         <p className="text-xs font-normal text-neutral-500 lg:text-sm pt-6 lg:pt-10"> {`${getOrderProgressMessage(orderDetails?.orderStatus, Number(orderDetails.deliveryDate))}`}</p>
                     </div>

@@ -191,10 +191,10 @@ const Product: React.FC<ProductProps> = ({ product, productSizeQuantities }) => 
                     </div>
                 </div>
             </div>
-            {isModalOpen && <SizeChart 
+            {isModalOpen && ( product.sizeChartId || product.category.sizeChartId ) && <SizeChart 
                 isOpen={isModalOpen} 
                 onClose={closeModal} 
-                sizeChartCategoryNameId={product.sizeChartId ?? product.category.sizeChartId} 
+                sizeChartCategoryNameId={product.sizeChartId ?? (product.category.sizeChartId ?? 0)}
             />}
         </article>
     )
