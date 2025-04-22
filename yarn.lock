@@ -3026,6 +3026,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nonrml/storage@workspace:packages/storage"
   dependencies:
+    "@nonrml/common": "workspace:*"
     "@supabase/supabase-js": "npm:^2.45.4"
     aws-sdk: "npm:^2.1692.0"
     dotenv: "npm:^16.4.5"
@@ -7410,7 +7411,7 @@ __metadata:
 
 "admin-nonrml@file:./apps/admin-nonrml::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=575242&locator=nonrml%40workspace%3A."
+  resolution: "admin-nonrml@file:./apps/admin-nonrml#./apps/admin-nonrml::hash=204835&locator=nonrml%40workspace%3A."
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@nonrml/common": "npm:*"
@@ -7448,7 +7449,7 @@ __metadata:
     tailwind-merge: "npm:^2.6.0"
     tailwindcss-animate: "npm:^1.0.7"
     zod: "npm:^3.24.1"
-  checksum: 10c0/5f3a8d36362c7e3a4a254555beea094a6c9c419c037436063601d476d150693b413d1cdd38d09a24e2584f5584770d14aad05b9c3b70e815a753da5822ab490f
+  checksum: 10c0/f6d938b1292e308da22bf49ba2f8e0f5e726aaa93cd5430df9e534213cc6f9acb97997a4a2c86c76bf00d372be1e72a4669ee632f6b59bbfdd11eec419225ba6
   languageName: node
   linkType: hard
 
@@ -8305,7 +8306,7 @@ __metadata:
 
 "client-main@file:./apps/client-main::locator=nonrml%40workspace%3A.":
   version: 0.1.0
-  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=de7c8c&locator=nonrml%40workspace%3A."
+  resolution: "client-main@file:./apps/client-main#./apps/client-main::hash=c1fe81&locator=nonrml%40workspace%3A."
   dependencies:
     "@coreui/react": "npm:^5.4.1"
     "@emotion/react": "npm:^11.13.3"
@@ -8363,7 +8364,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     three: "npm:^0.168.0"
     zustand: "npm:^5.0.1"
-  checksum: 10c0/10f4ee02585589fedb847f5f7048234c67c20cd39a2e1585d4c4fdf826b037a215e3546b1b8b32a8e629826403918ef9fd75b2c47b32a36fc371d248aca52576
+  checksum: 10c0/3de18d1b9baae1a57e7d7172143892d934001a6ab0f8c64f5dede7e0174995a13eebd1c8aaacfaba81c2a772b4a57f5c3374f110f27a2f70020f59cfb19839a3
   languageName: node
   linkType: hard
 
