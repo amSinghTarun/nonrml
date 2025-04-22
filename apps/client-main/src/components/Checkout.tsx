@@ -114,7 +114,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             if (data.orderId){
                 console.log("OPEN RAZORPAY");
                 await displayRazorpay({
-                    rzpOrder: data,
+                    rzpOrder: { orderId: data.orderId!, amount: data.amount, email: data.email, rzpOrderId: data.rzpOrderId, contact: data.contact, name: data.name},
                     cartOrder: !buyOption ? true : false,
                     updatePaymentStatus: updatePaymentStatus.mutate,
                     verifyOrder: verifyOrder.mutate,
