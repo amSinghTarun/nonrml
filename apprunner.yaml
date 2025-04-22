@@ -8,8 +8,8 @@ build:
       - corepack prepare yarn@4.9.1 --activate
     build:
       - yarn install
-      - yarn run build
+      - cd apps/client-main && yarn build
 run:
   command: cd apps/client-main && yarn start
   network:
-    port: 3000
+    port: 8080
