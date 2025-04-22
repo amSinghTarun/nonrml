@@ -26,14 +26,6 @@ export const getHomepageProducts = async () => {
         exculsiveProducts = exculsiveProducts ?? data.exclusiveProducts
         popularProducts = popularProducts ?? data.popularProducts
     }
-    
-    let homePageNewProducts = latestProducts?.map((product) => {
-        return {
-            title: product.name,
-            link: `/products/${product.sku.toLowerCase()}`,
-            thumbnail: product?.productImages[0].image
-        }
-    });
 
     return { latestProducts: latestProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
 }
