@@ -1,8 +1,7 @@
-import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
+import { TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import {
   TAddProductSchema,
-  TDeleteProductSchema,
   TEditProductSchema,
   TGetProductSchema,
   TGetProductsSchema,
@@ -11,11 +10,11 @@ import {
   TGetProductVariantQuantitySchema,
   TGetHomeProductsSchema
 } from "./product.schema";
-import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
+import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
-import { redis } from "@nonrml/cache";
-import { late } from "zod";
+import { customCacheJSONIncr } from "@nonrml/cache";
 const take = 10;
+import { cacheServicesRedisClient } from "@nonrml/cache"
 
 /*
  Get the product details and also sizes for all the variants available
@@ -30,7 +29,7 @@ export const getProduct = async ({
     console.log("\n\n\n\n\n GET PRODUCTS");
     
     //cache tpo track number of visit on a product
-    redis.customJSONIncr({ key: "VISITED", path: input.productSku });
+    customCacheJSONIncr({ key: "VISITED", path: input.productSku });
     
     type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"|"colour"> & {
       productImages: {
@@ -44,7 +43,7 @@ export const getProduct = async ({
     
     
     //cache for less time
-    let product : ProductType = await redis.redisClient.get(`product_${input!.productSku}`);
+    let product : ProductType = await cacheServicesRedisClient().get(`product_${input!.productSku}`);
     if(!product){
       product = await prisma.products.findUniqueOrThrow({
         where: {
@@ -83,11 +82,11 @@ export const getProduct = async ({
           }
         }
       });
-      redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
+      cacheServicesRedisClient().set(`product_${product.sku}`, product, {ex:60*60*2});
     };
     
     //cache it and get from cache, delete at the time of order
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${product.id}`);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${product.id}`);
     console.log(productSizeQuantities);
     if(!productSizeQuantities) {
       productSizeQuantities = {};
@@ -127,7 +126,7 @@ export const getProduct = async ({
       }
       console.log(productSizeQuantities);
       // see how to expire this
-      await redis.redisClient.set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
+      await cacheServicesRedisClient().set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
     }
     console.log("\n\n\n\n\n -----END");
     return {
@@ -267,7 +266,7 @@ export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions
   input = input!;
   try{
     
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${input.productId}`);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${input.productId}`);
     console.log(productSizeQuantities);
     if(!productSizeQuantities) {
       productSizeQuantities = {};
@@ -307,7 +306,7 @@ export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions
       }
       console.log(productSizeQuantities);
       // see how to expire this
-      redis.redisClient.set(`productVariantQuantity_${input.productId}`, productSizeQuantities, {ex: 60*60*5})
+      cacheServicesRedisClient().set(`productVariantQuantity_${input.productId}`, productSizeQuantities, {ex: 60*60*5})
     }
 
     return {
@@ -362,7 +361,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       };
     }[] | null
 
-    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await redis.redisClient.get("latestProducts") : null;
+    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("latestProducts") : null;
 
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
@@ -408,7 +407,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           { createdAt: "desc" }
         ]
       });
-      latestProducts.length && redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+      latestProducts.length && cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*5});
     }
     console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
@@ -491,7 +490,7 @@ export const getHomeProducts = async ({
           { createdAt: "desc" }
         ]
       });
-      redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+      cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*5});
     }
 
     if(input.exclusive){
@@ -512,7 +511,7 @@ export const getHomeProducts = async ({
           }
         }
       });
-      redis.redisClient.set("exclusiveProducts", exclusiveProducts, {ex: 60*60*60*24});
+      cacheServicesRedisClient().set("exclusiveProducts", exclusiveProducts, {ex: 60*60*60*24});
     }
 
     if(input.popular){
@@ -559,7 +558,7 @@ export const getHomeProducts = async ({
           { visitedCount: "desc" }
         ]
       });
-      redis.redisClient.set("popularProducts", popularProducts, {ex: 60*60*60});
+      cacheServicesRedisClient().set("popularProducts", popularProducts, {ex: 60*60*60});
     }
 
     console.log("PRODUCT OUT ---------------------------------\n\n\n\n\n");

@@ -2,17 +2,16 @@
 
 import { serverClient } from "../_trpc/serverClient"
 import { RouterOutput } from "@/app/_trpc/client";
-import { redis } from "@nonrml/cache";
-import { TRPCError } from "@trpc/server";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 type HomeProductsType = RouterOutput["viewer"]["product"]["getHomeProducts"]["data"];
 type HomeImages = RouterOutput["viewer"]["homeImages"]["getHomeImages"]["data"];
 
 export const getHomepageProducts = async () => {
 
-    let latestProducts    : HomeProductsType["latestProducts"]    | null = await redis.redisClient.get("latestProducts");
-    let popularProducts   : HomeProductsType["popularProducts"]   | null = await redis.redisClient.get("popularProducts");
-    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await redis.redisClient.get("exclusiveProducts");
+    let latestProducts    : HomeProductsType["latestProducts"]    | null = await cacheServicesRedisClient().get("latestProducts");
+    let popularProducts   : HomeProductsType["popularProducts"]   | null = await cacheServicesRedisClient().get("popularProducts");
+    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await cacheServicesRedisClient().get("exclusiveProducts");
 
     if( !latestProducts || !popularProducts || !exculsiveProducts ){
 
@@ -31,7 +30,7 @@ export const getHomepageProducts = async () => {
 }
 
 export const getHomePagesImages = async () => {
-    let homeImages : HomeImages | null = await redis.redisClient.get("homeImages");
+    let homeImages : HomeImages | null = await cacheServicesRedisClient().get("homeImages");
     if(!homeImages){
         console.log("Didn't get cache")
         const homeImagesData = await (await serverClient()).viewer.homeImages.getHomeImages()

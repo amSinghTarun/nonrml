@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCContext } from "../../contexts";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 import { prisma } from "@nonrml/prisma";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";;
 
@@ -129,7 +129,7 @@ export const acceptOrder = async (orderId: string) => {
         for(let orderProduct of orderedProducts) {
             !products[orderProduct.productVariant.product.id]  && (
                 redisOperations.push(
-                    redis.redisClient.del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
+                    cacheServicesRedisClient().del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
                 ),
                 products[orderProduct.productVariant.product.id] = 1
             )

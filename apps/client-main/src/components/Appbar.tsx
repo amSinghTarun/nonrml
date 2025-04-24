@@ -3,7 +3,7 @@ import { MenuButton } from './buttons/MenuButton';
 import { UserButton } from './buttons/UserButton';
 import CartButton from './buttons/CartButton';
 import { Sidebar } from './Sidebar';
-import { redis } from '@nonrml/cache';
+import { cacheServicesRedisClient } from '@nonrml/cache';
 import { serverClient } from '@/app/_trpc/serverClient';
 import { CartMenu } from './Cart';
 import { UserAccessibility } from './UserAccessibility';
@@ -12,7 +12,7 @@ import logo from "@/images/logo.png";
 import Image from "next/image";
 
 export const Appbar = async () => {
-    let categoryList = await redis.redisClient.get<string[]|null>("productCategory")
+    let categoryList = await cacheServicesRedisClient().get<string[]|null>("productCategory")
     if(!categoryList || !categoryList.length){
         const { categoryNameArray } = (await (await serverClient()).viewer.productCategories.getProductCategories({})).data;
         categoryList = categoryNameArray

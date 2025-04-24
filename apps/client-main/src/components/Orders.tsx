@@ -49,7 +49,7 @@ const getOrderPaymentStatus = (status: string) => {
         case "COD":
             return "PENDING";
         default:
-            return "Order processing";
+            return "FAILED";
     }
 };
 

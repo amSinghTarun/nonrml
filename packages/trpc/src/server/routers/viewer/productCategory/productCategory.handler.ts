@@ -2,7 +2,7 @@ import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { Prisma, prisma } from "@nonrml/prisma";
 import { jsonArrayFieldsToStringArray, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TAddProductCategorySchema, TDeleteProductCategorySchema, TEditProductCategorySchema, TGetProductCategorySchema } from "./productCategory.schema";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 /*
 Get all the product categories with their size chart
@@ -18,7 +18,7 @@ export const getProductCategories = async ({ctx, input}: TRPCRequestOptions<TGet
         let categoryNameArray = jsonArrayFieldsToStringArray(productCategories, "displayName");
         //sets the cache async 
         if(!input.all){
-            redis.redisClient.set("productCategory", categoryNameArray, {ex: 60*60*24});
+            cacheServicesRedisClient().set("productCategory", categoryNameArray, {ex: 60*60*24});
         }
         
         return {status: TRPCResponseStatus.SUCCESS, message:"", data: {categoryNameArray}, adminCategories: productCategories};

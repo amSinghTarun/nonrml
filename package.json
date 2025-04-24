@@ -2,7 +2,7 @@
   "name": "nonrml",
   "private": true,
   "scripts": {
-    "build": "yarn install && turbo run generate build",
+    "build": "turbo run build",
     "dev": "turbo dev",
     "start": "turbo start",
     "lint": "turbo lint",
@@ -25,7 +25,6 @@
   ],
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.4",
-    "admin-nonrml": "./apps/admin-nonrml",
     "bcrypt": "^5.1.1",
     "client-main": "./apps/client-main",
     "eslint": "^9.17.0",

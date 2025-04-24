@@ -1,0 +1,13 @@
+# name: build-client
+
+# env:
+#   - name: NODE_ENV
+#     value: production
+
+# on: 
+#   push:
+#     paths:
+#       - './apps/client-main/**'
+#       - './packages/**'
+
+# jobs:

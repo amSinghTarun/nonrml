@@ -5,7 +5,7 @@ import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 const returnExchangeTime = 604800000; // 7 days
 /*
 Get all the orders of a user
@@ -383,7 +383,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
             if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
-                await redis.redisClient.del(`productVariantQuantity_${variant.product.id}`)
+                await cacheServicesRedisClient().del(`productVariantQuantity_${variant.product.id}`)
                 insufficientProductQuantities = {...insufficientProductQuantities, [variant.id] : { ...input.orderProducts[variant.id], quantity: 0}};
             }
             if (variant.product.price !== orderProduct!.price) {
