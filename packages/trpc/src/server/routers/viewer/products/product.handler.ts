@@ -349,10 +349,10 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       id: number;
       soldOut: boolean;
       public?: boolean,
-      latest: boolean,
-      sizeChartId: number | null,
-      visitedCount: number,
-      exclusive: boolean,
+      // latest: boolean,
+      // sizeChartId: number | null,
+      // visitedCount: number,
+      // exclusive: boolean,
       productImages: {
           image: string;
       }[];
@@ -361,7 +361,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       };
     }[] | null
 
-    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("latestProducts") : null;
+    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("allClientProducts") : null;
 
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
@@ -377,11 +377,11 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           id: true,
           soldOut: true,
           public: input.admin && true,
-          exclusive: true,
+          // exclusive: true,
           sku: true,
-          latest: true,
-          visitedCount: true,
-          sizeChartId: true,
+          // latest: true,
+          // visitedCount: true,
+          // sizeChartId: true,
           _count:{
             select: {
               ProductVariants: {
@@ -407,7 +407,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           { createdAt: "desc" }
         ]
       });
-      latestProducts.length && cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*5});
+      latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
     }
     console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;

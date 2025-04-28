@@ -12,6 +12,8 @@ export const getHomepageProducts = async () => {
     let latestProducts    : HomeProductsType["latestProducts"]    | null = await cacheServicesRedisClient().get("latestProducts");
     let popularProducts   : HomeProductsType["popularProducts"]   | null = await cacheServicesRedisClient().get("popularProducts");
     let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await cacheServicesRedisClient().get("exclusiveProducts");
+    
+    console.log("latestProducts", latestProducts?.length)
 
     if( !latestProducts || !popularProducts || !exculsiveProducts ){
 

@@ -22,4 +22,5 @@ RUN yarn build
 
 # EXPOSE 8080
 
-CMD ["yarn", "start"]
+# the single most important command for heroku
+CMD ["sh", "-c", "yarn start -- -p $PORT"]

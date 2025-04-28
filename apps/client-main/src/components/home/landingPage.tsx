@@ -88,7 +88,7 @@ export async function LandingPage() {
       </div>
 
       <div className={`flex z-30 relative py-1 md:py-1 bg-black backdrop-blur-sm justify-center w-full h-full text-center text-sm sm:text-base md:text-xl`}>
-        <TickerText text="ALL IT TAKES IS A NO TO REDEFINE WHAT IS NORMAL" textColor="white"/>
+        <TickerText />
       </div>
 
       <div className="z-30 relative flex flex-col lg:flex-row">

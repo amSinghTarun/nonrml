@@ -46,7 +46,7 @@ export const displayRazorpay = async ({
     razorpaySignature: string 
   }) => void
 }) => {
-    const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
+    const res = await loadScript('https://checkout.razorpay.com/v1/magic-checkout.js')
     if (!res){
         alert('Razropay failed to load!!')
         return 

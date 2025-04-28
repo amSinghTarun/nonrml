@@ -9,6 +9,16 @@ const handler = async (req: Request) => {
       req,
       router: appRouter,
       createContext: async () => createContext({req:req, session: await getSession()}),
+      responseMeta() {
+        return {
+          headers: {
+            'Access-Control-Allow-Origin': '*', // Or specify your frontend domain
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+          },
+        };
+      },
   })
 }
   
