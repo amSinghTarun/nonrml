@@ -362,7 +362,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     }[] | null
 
     let latestProducts : LatestProducts = ( input.cursor == 1 ) ? await cacheServicesRedisClient().get("allClientProducts") : null;
-
+    console.log(await prisma.user.findMany())
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
         take: ( input.take ?? take) + 1,
@@ -408,8 +408,9 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
         ]
       });
       latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
+      console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     }
-    console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
+
     let nextCursor: number | undefined = undefined;
     if (latestProducts && latestProducts.length >= take) {
       const nextItem = latestProducts.pop();

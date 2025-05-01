@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@upstash/ratelimit": "^2.0.5",
-    "@nonrml/common": "workspace:*"
+    "@nonrml/common": "workspace:*",
+    "@upstash/ratelimit": "^2.0.5"
   }
 }
