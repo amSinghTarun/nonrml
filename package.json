@@ -26,7 +26,6 @@
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "bcrypt": "^5.1.1",
-    "client-main": "./apps/client-main",
     "eslint": "^9.17.0",
     "ts-loader": "^9.5.1"
   },
