@@ -1,7 +1,7 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { addProduct, getProduct, getAdminProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts, editProduct } from "./product.handler";
+import { addProduct, getProduct, getAdminProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts, editProduct, getAdminProducts } from "./product.handler";
 import { ZAddProductSchema, ZGetProductSchema, ZGetProductVariantQuantitySchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema, ZGetHomeProductsSchema, ZEditProductSchema } from "./product.schema";
 
 export const productRouter = router({
@@ -17,6 +17,10 @@ export const productRouter = router({
         .meta({ openAPI: {method: "GET", descrription: "Get all the products"}})
         .input(ZGetProductsSchema)
         .query( async ({ctx, input}) => await getProducts({ctx, input})), 
+    getAdminProducts : adminProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get all the products"}})
+        .input(ZGetProductsSchema)
+        .query( async ({ctx, input}) => await getAdminProducts({ctx, input})), 
     getHomeProducts : publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get all the products"}})
         .input(ZGetHomeProductsSchema)

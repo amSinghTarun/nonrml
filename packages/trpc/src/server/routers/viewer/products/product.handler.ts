@@ -361,7 +361,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       };
     }[] | null
 
-    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("allClientProducts") : null;
+    let latestProducts : LatestProducts = ( input.cursor == 1 ) ? await cacheServicesRedisClient().get("allClientProducts") : null;
 
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
@@ -369,14 +369,14 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
         ...(input.cursor && {cursor: {id: input.cursor}}),
         where: {
           ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
-          ...( !input.admin && {public: true} )
+          public: true
         },
         select: {
           name: true,
           price: true,
           id: true,
           soldOut: true,
-          public: input.admin && true,
+          public: true,
           // exclusive: true,
           sku: true,
           // latest: true,
@@ -410,6 +410,100 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
     }
     console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
+    let nextCursor: number | undefined = undefined;
+    if (latestProducts && latestProducts.length >= take) {
+      const nextItem = latestProducts.pop();
+      nextCursor = nextItem?.id;
+    }
+
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+};
+
+
+export const getAdminProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!;
+  try {
+    
+    type LatestProducts = {
+      price: number;
+      sku: string;
+      name: string;
+      id: number;
+      soldOut: boolean;
+      public?: boolean,
+      latest: boolean,
+      sizeChartId: number | null,
+      visitedCount: number,
+      exclusive: boolean,
+      // productImages: {
+      //     image: string;
+      // }[];
+      _count: {
+          ProductVariants: number;
+      };
+    }[] | null
+
+    // let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("allClientProducts") : null;
+
+    // if(!latestProducts || !latestProducts.length){
+    let latestProducts = await prisma.products.findMany({
+      take: ( input.take ?? take) + 1,
+      ...(input.cursor && {cursor: {id: input.cursor}}),
+      where: {
+        ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
+      },
+      select: {
+        name: true,
+        price: true,
+        id: true,
+        soldOut: true,
+        public: true,
+        exclusive: true,
+        sku: true,
+        latest: true,
+        visitedCount: true,
+        sizeChartId: true,
+        _count:{
+          select: {
+            ProductVariants: {
+              where: {
+                inventory: {
+                  OR: [
+                    {baseSkuInventory: { quantity: { gte: 1} }},
+                    {quantity: {gte: 1}}
+                  ]
+                }
+              },
+            }
+          }
+        },
+        // productImages: {
+        //   where: { active: true, priorityIndex: 0 },
+        //   select: {
+        //     image: true,
+        //   }
+        // }
+      },
+      orderBy: [
+        { createdAt: "desc" }
+      ]
+    });
+      // latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
+    // }
+    // console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
     if (latestProducts && latestProducts.length >= take) {
       const nextItem = latestProducts.pop();
