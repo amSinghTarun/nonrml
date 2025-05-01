@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // Modal Size Chart component
 export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpen: boolean, onClose: () => void, sizeChartCategoryNameId : number}) => {
-  const modalRef = useRef(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const chartData = trpc.viewer.sizeChart.getProductSizeChart.useQuery({
     sizeChartCategoryNameId: sizeChartCategoryNameId
   });
@@ -13,7 +13,7 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
   // Close when clicking outside the modal
   useEffect(() => {
     const handleClickOutside = (event:any) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
     };

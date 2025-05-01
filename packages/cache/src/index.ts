@@ -1,1 +1,1 @@
-export { redis } from "./services"
+export * from "./services"

@@ -31,6 +31,8 @@ const getOrderProgressMessage = (status: prismaTypes.OrderStatus) => {
             return "Order successfully delivered";
         case "CANCELED":
             return "Order cancelled";
+        case "CANCELED_ADMIN":
+            return "Order cancelled";
         case "PAYMENT_FAILED":
             return "Payment failed";
         default:
@@ -47,7 +49,7 @@ const getOrderPaymentStatus = (status: string) => {
         case "COD":
             return "PENDING";
         default:
-            return "Order processing";
+            return "FAILED";
     }
 };
 

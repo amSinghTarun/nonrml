@@ -5,7 +5,7 @@ import { trpc } from '@/app/_trpc/client';
 import { redirect } from "next/navigation";
 
 const ProductsPage = () => {
-    const products = trpc.viewer.product.getProducts.useQuery({admin: true});
+    const products = trpc.viewer.product.getAdminProducts.useQuery({});
     return (
         <>
             <section className="   flex flex-col w-screen h-screen text-black text-sm">

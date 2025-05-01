@@ -110,16 +110,19 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
                 return;
             }
-            console.log("OPEN RAZORPAY");
+            
+            if (data.orderId){
+                console.log("OPEN RAZORPAY");
+                await displayRazorpay({
+                    rzpOrder: { orderId: data.orderId!, amount: data.amount!, email: data.email, rzpOrderId: data.rzpOrderId, contact: data.contact, name: data.name},
+                    cartOrder: !buyOption ? true : false,
+                    updatePaymentStatus: updatePaymentStatus.mutate,
+                    verifyOrder: verifyOrder.mutate,
+                });
+                return;
+            }
 
-            await displayRazorpay({
-                rzpOrder: data, 
-                cartOrder: !buyOption ? true : false,
-                updatePaymentStatus: updatePaymentStatus.mutate,
-                verifyOrder: verifyOrder.mutate,
-            });
-
-            return;
+            throw new Error("Something went wrong. Please try again !!")
 
         } catch(error: any) {
             toast({
@@ -145,7 +148,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     }
 
     return (
-        <div className={cn("h-screen w-full p-2 shadow-sm shadow-neutral-100 rounded-md", className)}>
+        <div className={cn("h-screen w-full p-2 ", className)}>
             { initiateOrder.isLoading || verifyOrder.isLoading ? 
                 <Loading  text="PROCESSING YOUR PAYMENT..."/> : 
                 <>
@@ -168,27 +171,27 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 {action == "SHOWADDRESS" && (
                     <>
                         {userAddresses.isLoading ? (
-                            <article className="flex flex-row p-2 w-full h-full justify-center items-center">
+                            <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
                                 <div className="p-4 font-bold text-xs">
                                     <p>FINDING YOUR ADDRESS FOR YOU .....</p>
                                 </div>
                             </article>
                         ) : userAddresses.isError ? (
-                            <article className="flex flex-row p-2 w-full h-full justify-center items-center">
+                            <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
                                 <div className="backdrop-blur-3xl bg-white/20 p-4 font-bold rounded-xl text-sm">
                                     <p>Error loading addresses. Please try again.</p>
                                 </div>
                             </article>
                         ) : (
                             userAddresses.data && userAddresses.data?.data.length === 0 ? (
-                                <article className="flex flex-row p-2 w-full h-full justify-center items-center">
+                                <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
                                 <div className="text-xs text-neutral-500 text-center">
                                     <p>NO ADDRESS FOUND</p>
                                     <p className="text-xs">PLEASE ADD ONE TO CONTINUE WITH PURCHASE!</p>
                                 </div>
                             </article>
                         ) :
-                            <div className="w-full h-full space-y-2 p-2 overflow-y-scroll">
+                            <div className="w-full h-[70%] space-y-2 p-2 overflow-y-scroll">
                                 {
                                     userAddresses.data?.data.map((address, index) => (
                                         <AddressCard 
@@ -216,7 +219,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                     </>
                 )}
                 {action == "ORDER" && (
-                    <div className="w-full h-full space-y-2 p-2 overflow-y-scroll">{
+                    <div className="w-full h-[70%] space-y-2 p-2 overflow-y-scroll">{
                         Object.keys(orderProducts).map((variantId, index) => (
                             <div 
                                 className=" space-x-3 flex flex-row text-[10px] md:text-xs shadow-sm shadow-neutral-100 p-1  rounded-md"

@@ -2,7 +2,7 @@ import { serverClient } from "@/app/_trpc/serverClient";
 import { redirectToHomeIfNotLoggedIn } from "@/app/lib/utils";
 import { Exchanges } from "@/components/Exchanges";
 
-const ExchangeOrders = async ({params}: {params: {orderId: string}}) => {
+const ExchangeOrders = async ({params}: {params: Promise<{orderId: string}>}) => {
     await redirectToHomeIfNotLoggedIn();
     const userExchanges = await (await serverClient()).viewer.replacement.getReplacement({orderId: (await params).orderId});
     return (

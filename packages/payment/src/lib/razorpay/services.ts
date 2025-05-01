@@ -17,7 +17,7 @@ export const getPaymentDetials = async ({rzpPaymentId} : {rzpPaymentId: string})
 export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : {
     rzpOrder: {contact: string, name: string, email: string, amount: number, rzpOrderId: string},
     callbckHandler: (data: any) => void,
-    onDismissHandler: () => void
+    onDismissHandler?: () => void
 }) => {
     return {
         "key": process.env.RAZORPAY_KEY_ID,
@@ -38,9 +38,7 @@ export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : 
             escape: false,
             handleback:false,
             confirm_case: true,
-            onDismiss: onDismissHandler
+            // onDismiss: onDismissHandler
         }
     };
 }
-
-// "callback_url":`http://localhost:3000/api/trpc/viewer.orders.verifyOrder`, //process.env.RAZORPAY_CALLBACK_URL

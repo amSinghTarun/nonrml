@@ -26,8 +26,8 @@ const CheckoutPage = () => {
 
     return (
         <>
-            <section className="flex fixed flex-row w-screen h-screen text-black justify-center items-center bg-white mb-64 lg:mb-32"> 
-                { (session || status != "loading") ? <Checkout className="h-[90%] w-[97%] xl:w-[50%]" buyOption={buyOption} userAddresses={userAddresses} /> : <></>}
+            <section className="flex absolute flex-row w-screen text-black justify-center items-center bg-white"> 
+                { (session || status != "loading") ? <Checkout className="pt-16 mb-32 w-[97%] xl:w-[50%]" buyOption={buyOption} userAddresses={userAddresses} /> : <></>}
             </section>
         </>
     )

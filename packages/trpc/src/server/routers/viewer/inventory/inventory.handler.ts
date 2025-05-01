@@ -2,8 +2,7 @@ import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
 import { TEditInventoryItemSchema, TDeleteInventoryItemSchema, TGetInventoryItemSchema, TGetSKUDetailsSchema, TGetInventoryItemsSchema, TAddInventoryItemsSchema } from "./inventory.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { nullable } from "zod";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 const take = 20; // should come from env
 
 /*
@@ -114,8 +113,8 @@ export const editInventoryItem = async ({ctx, input}: TRPCRequestOptions<TEditIn
         });
 
         if(updateData.quantity || updateData.baseSkuInventoryId){
-            await redis.redisClient.del(`product_${inventoryUpdated.productVariant.product.sku}`),
-            await redis.redisClient.del(`productVariantQuantity_${inventoryUpdated.productVariant.product.id}`)
+            await cacheServicesRedisClient().del(`product_${inventoryUpdated.productVariant.product.sku}`),
+            await cacheServicesRedisClient().del(`productVariantQuantity_${inventoryUpdated.productVariant.product.id}`)
         }
 
         input.productSize && await prisma.productVariants.update({

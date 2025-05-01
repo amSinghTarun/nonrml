@@ -2,8 +2,9 @@
   "name": "nonrml",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo run build",
     "dev": "turbo dev",
+    "start": "turbo start",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prisma:generate": "cd ./packages/prisma && yarn run generate"
@@ -24,7 +25,6 @@
   ],
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.4",
-    "admin-nonrml": "./apps/admin-nonrml",
     "bcrypt": "^5.1.1",
     "client-main": "./apps/client-main",
     "eslint": "^9.17.0",

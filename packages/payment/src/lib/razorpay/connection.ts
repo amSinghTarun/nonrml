@@ -1,23 +1,19 @@
 import Razorpay from 'razorpay';
-import dotenv from "dotenv";
-import path from "path"
+import { loadEnv } from "@nonrml/common";
 
-// console.log("\n\n\n\n\n\n\n\n\n-CONNECTION", process.env.NODE_ENV)
-// if(process.env.NODE_ENV !== 'production'){
-//     dotenv.config({path: path.resolve("../../packages/payment/.env.local")})
-//     console.log(process.env.RAZORPAY_KEY_ID)
-// };
+loadEnv("../../packages/payment/.env.local", "INDEX PAYMENT");
 
 let rzpInstance: Razorpay | null = null;
 
 const Instance = () => {
-  console.log("instance created")
+  console.log("instance created", process.env.RAZORPAY_KEY_ID, process.env.RAZORPAY_KEY_SECRET)
   if (!rzpInstance) {
     rzpInstance = new Razorpay({
         key_id: process.env.RAZORPAY_KEY_ID!,
         key_secret: process.env.RAZORPAY_KEY_SECRET
       })
   }
+  console.log(rzpInstance)
   return rzpInstance
 }
 export default Instance;

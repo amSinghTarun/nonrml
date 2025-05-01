@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { prisma } from "@nonrml/prisma";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 const startCronJobs = () => {
   console.log("Starting Cron Jobs...");
@@ -9,7 +9,7 @@ const startCronJobs = () => {
   cron.schedule("0 2 * * *", async () => {
     
     console.log("Running daily task to update the product visit count ...");
-    const productsCounts = await redis.redisClient.json.get<{[id: string]: number}[]>("VISITED");
+    const productsCounts = await cacheServicesRedisClient().json.get<{[id: string]: number}[]>("VISITED");
 
 
     if(!productsCounts || Object.keys(productsCounts).length === 0){
@@ -34,7 +34,7 @@ const startCronJobs = () => {
     try{
       const result = await prisma.$executeRawUnsafe(rawQuery);
       if(result)
-        await redis.redisClient.json.set("VISITED", "$", {});
+        await cacheServicesRedisClient().json.set("VISITED", "$", {});
     } catch(error){
       console.log(error)
     }

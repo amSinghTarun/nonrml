@@ -3,19 +3,25 @@ import Credentials from "next-auth/providers/credentials"
 import { JWTPayload, SignJWT, importJWK } from 'jose';
 import { JWT } from "next-auth/jwt";
 import { prisma } from "@nonrml/prisma";
-import type { NextAuthOptions } from "next-auth"
+import type { DefaultSession, NextAuthOptions } from "next-auth"
 import { loadEnv } from "@nonrml/common";
 
 loadEnv("../../packages/configs/.env.local", "CONFIG ENV LOAD");
 
+//  interface session extends Session {
+//     user: {
+//       token: string;
+//       name: string;
+//       id: string,
+//       role: string
+//     };
+//   }
 export interface session extends Session {
-    user: {
-      token: string;
-      name: string;
-      id: string,
-      role: string
-    };
-  }
+  user: {
+    id: string;
+    role: string;
+  } & DefaultSession["user"] ;
+}
   
 interface token extends JWT {
     userId: string;
@@ -54,15 +60,15 @@ export const NEXT_AUTH_CONFIG = {
     jwt: async ({ token, user, trigger }): Promise<JWT> => {
       const newToken: token = token as token;
       if (user && String(trigger) == "signIn") {
-        newToken.role = user?.role;
-        newToken.userId = user.id;
+        newToken.role = (user as session["user"]).role;
+        newToken.userId = (user as session["user"]).id;
       }
       // console.log("jwt callback called", trigger);
       return newToken;
     },
     session: async ({ session, token } ) => {
       // console.log(session, token) 
-      const newSession: session = session as unknown as session;
+      const newSession : session = session as session;
       if (newSession.user && token.userId && token.role) {
         newSession.user.id = token.userId as unknown as string;
         newSession.user.role = token.role as string;
@@ -77,4 +83,7 @@ export const NEXT_AUTH_CONFIG = {
 // 'headers' error, not sure about the reason and how keeping it here solves the problem, but rule
 // of thumb, if it works, it works
 // https://next-auth.js.org/configuration/nextjs#in-app-router
-export const getSession = async () => await getServerSession(NEXT_AUTH_CONFIG)
+export const getSession = async () => {
+  const session = await getServerSession(NEXT_AUTH_CONFIG)
+  return session as unknown as session
+}

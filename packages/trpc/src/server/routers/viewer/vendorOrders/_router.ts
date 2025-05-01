@@ -1,5 +1,5 @@
 import { adminProcedure } from "../../../procedures/authedProcedure";
-import { procedure, router } from "../../../trpc";
+import { router } from "../../../trpc";
 import { deleteVendorOrder, placeVendorOrder, updateVendorOrder } from "./vendorOrder.handler";
 import { ZDeleteVendorOrder, ZPlaceVendorOrder, ZUpdateVendorOrder } from "./vendorOrder.schema";
 

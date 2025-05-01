@@ -3,7 +3,7 @@ import { serverClient } from "@/app/_trpc/serverClient";
 import Loading from "@/app/loading";
 import Product from "@/components/Product";
 
-const ProductPage = async ({ params }: { params: { productSku: string } })=> {
+const ProductPage = async ({ params }: { params: Promise<{ productSku: string }> })=> {
 
     const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
  

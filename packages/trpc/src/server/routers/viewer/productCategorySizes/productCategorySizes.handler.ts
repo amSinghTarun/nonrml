@@ -2,7 +2,7 @@ import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { Prisma, prisma, prismaEnums } from "@nonrml/prisma";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TAddSizeChartSchema, TDeleteSizeChartSchema, TEditSizeChartSchema, TGetProductSizeChartSchema, TGetSizeChartSchema } from "./productCategorySizes.schema";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 export const getSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetSizeChartSchema>) => {
     const prisma = ctx.prisma;
@@ -91,7 +91,7 @@ export const getProductSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetP
     const prisma = ctx.prisma;
     input = input!;
     try{
-        let sizeChart : {chartName: string, measurements: { name: string, sizeValues: {size: string, value: string}[]}[]} | null = await redis.redisClient.get(`categorySizeChart_${input.sizeChartCategoryNameId}`);
+        let sizeChart : {chartName: string, measurements: { name: string, sizeValues: {size: string, value: string}[]}[]} | null = await cacheServicesRedisClient().get(`categorySizeChart_${input.sizeChartCategoryNameId}`);
         if (!sizeChart) {
 
             const sizeChartData = await prisma.sizeChart.findUnique({
@@ -134,7 +134,7 @@ export const getProductSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetP
                 }))
             };
 
-            redis.redisClient.set(`categorySizeChart_${input.sizeChartCategoryNameId}`, sizeChart, {ex: 60*60*5});
+            cacheServicesRedisClient().set(`categorySizeChart_${input.sizeChartCategoryNameId}`, sizeChart, {ex: 60*60*5});
         }
 
         return {status: TRPCResponseStatus.SUCCESS, message:"Record deleted", data: sizeChart}

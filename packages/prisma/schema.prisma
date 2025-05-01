@@ -545,6 +545,7 @@ enum OrderStatus {
   DELIVERED
   PAYMENT_FAILED
   CANCELED
+  CANCELED_ADMIN
 }
 
 enum UserPermissionType {
