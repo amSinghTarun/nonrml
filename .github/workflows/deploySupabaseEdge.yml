@@ -35,6 +35,7 @@ jobs:
             function_name=$(basename "$dir")
             echo "Deploying function: $function_name"
             supabase functions deploy "$function_name" --project-ref $PROJECT_ID
+            cd ../..
           done
 
       - name: Update Function URL in Database
