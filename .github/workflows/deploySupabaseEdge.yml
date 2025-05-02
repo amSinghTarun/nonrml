@@ -43,9 +43,9 @@ jobs:
               function_name=$(basename "$dir")
               FUNCTION_URL=https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/$function_name
               
-              curl -X POST "https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/dynamicConfig" \
-                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-                -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+              curl -X POST "https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/DynamicConfig" \
+                -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY_WITH_GRANTS }}" \
+                -H "apikey: ${{ secrets.SUPABASE_ANON_KEY_WITH_GRANTS }}" \
                 -H "Content-Type: application/json" \
                 -H "Prefer: resolution=merge-duplicates" \
                 -d "{\"key\": \"prod_edge_function_url\", \"value\": \"$FUNCTION_URL\"}"
