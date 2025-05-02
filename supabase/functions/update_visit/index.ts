@@ -1,7 +1,7 @@
 import { Redis } from 'https://deno.land/x/upstash_redis@v1.19.3/mod.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
-Deno.server( async (req) => {
+Deno.serve( async (req) => {
     try{
         // Create a Supabase client with the Auth context of the logged in user.
         const supabaseClient = createClient(
@@ -16,7 +16,7 @@ Deno.server( async (req) => {
             token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
         })
 
-        console.log("Running daily task to update the product visit count ...");
+        console.log("Running daily task to update the product visit count ..");
         const productsCounts = await redis.json.get<{[id: string]: number}[]>("VISITED");
 
 

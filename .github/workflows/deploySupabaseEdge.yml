@@ -28,8 +28,6 @@ jobs:
 
       - name: Deploy to supabase
         run: |
-          echo "SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}"
-          echo "PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
           cd supabase/functions
           for dir in */; do
             function_name=$(basename "$dir")
@@ -43,10 +41,11 @@ jobs:
           cd supabase/functions
             for dir in */; do
               function_name=$(basename "$dir")
-              FUNCTION_URL=https://$PROJECT_ID.supabase.co/functions/v1/$function_name
+              FUNCTION_URL=https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/$function_name
               
               curl -X POST "https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/dynamicConfig" \
                 -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+                -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
                 -H "Content-Type: application/json" \
                 -H "Prefer: resolution=merge-duplicates" \
                 -d "{\"key\": \"prod_edge_function_url\", \"value\": \"$FUNCTION_URL\"}"
