@@ -27,14 +27,24 @@ jobs:
           version: latest
 
       - name: Deploy to supabase
-        run: supabase functions deploy --project-ref $PROJECT_ID
+        run: |
+          cd supabase/functions
+          for dir in */; do
+            function_name=$(basename "$dir")
+            echo "Deploying function: $function_name"
+            supabase functions deploy "$function_name" --project-ref $PROJECT_ID
+          done
 
       - name: Update Function URL in Database
         run: |
-          FUNCTION_URL=https://$PROJECT_ID.supabase.co/functions/v1/your-function-name
-          
-          curl -X POST "https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/dynamicCnfig" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -d "{\"key\": \"prod_edge_function_url\", \"value\": \"$FUNCTION_URL\"}"
+          cd supabase/functions
+            for dir in */; do
+              function_name=$(basename "$dir")
+              FUNCTION_URL=https://$PROJECT_ID.supabase.co/functions/v1/$function_name
+              
+              curl -X POST "https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/dynamicConfig" \
+                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+                -H "Content-Type: application/json" \
+                -H "Prefer: resolution=merge-duplicates" \
+                -d "{\"key\": \"prod_edge_function_url\", \"value\": \"$FUNCTION_URL\"}"
+            done
