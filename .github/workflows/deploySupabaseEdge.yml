@@ -1,5 +1,5 @@
 # .github/workflows/deploy-supabase-function.yml
-name: Deploy Function
+name: Deploy Supabase Function
 
 on:
   push:
