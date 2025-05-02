@@ -16,7 +16,7 @@ Deno.server( async (req) => {
             token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
         })
 
-        console.log("Running daily task to update the product visit count ..");
+        console.log("Running daily task to update the product visit count ...");
         const productsCounts = await redis.json.get<{[id: string]: number}[]>("VISITED");
 
 
