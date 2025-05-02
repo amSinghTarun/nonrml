@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY! // Use service key for server-side operations
+  process.env.SUPABASE_PROJECT_URL!,
+  process.env.ANON_PUBLIC_KEY! // Use service key for server-side operations
 );
 
 export async function GET(req: NextRequest) {
@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
     const response = await fetch(config.value, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${process.env.ANON_PUBLIC_KEY}`,
+        "apikey" : `${process.env.ANON_PUBLIC_KEY}`, 
         'Content-Type': 'application/json'
       }
     });
