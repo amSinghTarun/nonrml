@@ -44,13 +44,13 @@ Deno.serve( async (_req) => {
             if(result)
                 await redis.json.set("VISITED", "$", {});
         } catch(error){
-            console.log(error)
+            console.log("error", error)
             throw error;
         }
       
         return new Response(JSON.stringify({ status: "success" }), { status: 200 })
     } catch (error) {
-        console.log("error": error)
+        console.log("error", error)
         return new Response(JSON.stringify({ error: error.message }), {
           status: 200,
         })
