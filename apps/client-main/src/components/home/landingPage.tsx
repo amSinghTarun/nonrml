@@ -11,7 +11,6 @@ import NoNRMLFaceCard from "./Facecard";
 import { TickerText } from "./TicketText";
 import {ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage} from "../ScreenResponsiveImage";
 import { Footer } from "../Footer";
-import CustomLogoParticles from "../ui/custom-logo-particle";
 
 
 export async function LandingPage() {
