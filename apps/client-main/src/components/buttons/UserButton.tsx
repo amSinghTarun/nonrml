@@ -23,7 +23,7 @@ export const UserButton = () => {
             onClick={handleOnClick}>
             {
                 appbarUtil == "USER_ACCESSIBILITY" ?
-                    <HighlightOffIcon sx={{ width: '80%', height: '90%', color:"black" }} />
+                    <HighlightOffIcon sx={{ width: 'auto', height: '90%', color:"black" }} />
                 :
                     <AccessibilityNewIcon sx={{ width: 'auto', height: '90%', color:"black" }} />    
             }

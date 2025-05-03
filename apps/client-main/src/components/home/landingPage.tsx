@@ -9,8 +9,9 @@ import { getHomePagesImages, getHomepageProducts } from "@/app/actions/product.a
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import NoNRMLFaceCard from "./Facecard";
 import { TickerText } from "./TicketText";
-import {ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage} from "./ScreenResponsiveImage";
+import {ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage} from "../ScreenResponsiveImage";
 import { Footer } from "../Footer";
+import CustomLogoParticles from "../ui/custom-logo-particle";
 
 
 export async function LandingPage() {
@@ -41,16 +42,26 @@ export async function LandingPage() {
                 priority
                 width={0} height={0}
                 sizes="100vw" 
-                className='h-auto w-fit p-0 object-cover justify-center bg-white bg-opacity-80 rounded-md'
                 // can't use backdrop-blur
+                className='h-full w-auto p-10 object-cover justify-center bg-white bg-opacity-80 rounded-md'
             ></Image>
           </p> 
         }
-        className=" w-full text-sm h-full fixed text-center items-center content-center justify-center"
+        className=" w-full text-sm h-full cursor-vertical-text fixed text-center items-center content-center justify-center"
       >
         <NoNRMLFaceCard />
       </MaskContainer>
 
+      <ResponsiveImage
+        images={{
+          md: homeImages["TOP_MD"] as string,
+          lg: homeImages["TOP_LG"] as string
+        }}
+        alt="homeImage"
+        className="w-screen h-screen z-30 relative"
+        sizes="100vw"
+        lgBreakpoint={1024} // This is the default value, can be adjusted as needed
+      />
       <div className="h-screen overscroll-auto bg-transparent w-full " />
       
       <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-black/20 pt-3 space-y-3 pb-1">
