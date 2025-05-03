@@ -6,7 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/Footer";
 import { NavbarStateControlProvider } from "@/providers/navbarStateControlProvider";
 import { Ubuntu,  Albert_Sans } from "next/font/google";
-import logo from "@/images/logo.png";
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const appFont = Albert_Sans({subsets: ["latin"], weight:["200", "300", "400", "500", "600", "700", "800", "900"]});
  
@@ -27,6 +28,8 @@ export default function RootLayout({
           <Appbar/>
               <NavbarStateControlProvider />
                 {children}
+                <Analytics />
+                <SpeedInsights />
               <Footer />
           <Toaster />
         </Providers>
