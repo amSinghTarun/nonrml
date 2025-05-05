@@ -13,16 +13,16 @@ export async function generateMetadata({ params }: Props) {
     
   return {
     // Basic metadata fields
-    title: `${productSKU.replaceAll("_", "").toUpperCase()} - Premiun Unisex Streetwear ${data.product.category.displayName?.replaceAll("_", "")} - NoNRML`,  // Browser tab title, search engine title
-    description: `Buy Premium Unisex Streetwear Oversize ${productSKU.replaceAll("_", "").toUpperCase()} ${data.product.category.displayName?.replaceAll("_", "")} online from NoNRML `,  // Meta description for SEO
-    keywords: [`premium ${productSKU.replaceAll("_", "").toUpperCase()}`, `${productSKU.replaceAll("_", "").toUpperCase()}`, `oversize ${productSKU.replaceAll("_", "").toUpperCase()}`, "Streetwear", `streetwear ${productSKU.replaceAll("_", "").toUpperCase()}`, `unisex ${productSKU.replaceAll("_", "").toUpperCase()}`],
+    title: `${productSKU.replaceAll("_", " ").toUpperCase()} - Premiun Unisex Streetwear ${data.product.category.displayName?.replaceAll("_", " ")} - NoNRML`,  // Browser tab title, search engine title
+    description: `Buy Premium Unisex Streetwear Oversize ${productSKU.replaceAll("_", " ").toUpperCase()} ${data.product.category.displayName?.replaceAll("_", " ")} online from NoNRML `,  // Meta description for SEO
+    keywords: [`premium ${productSKU.replaceAll("_", " ").toUpperCase()}`, `${productSKU.replaceAll("_", " ").toUpperCase()}`, `oversize ${productSKU.replaceAll("_", " ").toUpperCase()}`, "Streetwear", `streetwear ${productSKU.replaceAll("_", " ").toUpperCase()}`, `unisex ${productSKU.replaceAll("_", " ").toUpperCase()}`],
     robots: `index, follow`,
     // OpenGraph metadata (for social sharing - Facebook, LinkedIn, etc.)
     openGraph: {
-      title: `Premium ${productSKU.replaceAll("_", "").toUpperCase()} - Unisex Streetwear ${productSKU.replaceAll("_", "").toUpperCase()} Online - NoNRML`,  // Title when shared on social media
-      description: `Premium ${productSKU.replaceAll("_", "").toUpperCase()} `,  // Description when shared
+      title: `Premium ${productSKU.replaceAll("_", " ").toUpperCase()} - Unisex Streetwear ${productSKU.replaceAll("_", " ").toUpperCase()} Online - NoNRML`,  // Title when shared on social media
+      description: `Premium ${productSKU.replaceAll("_", " ").toUpperCase()} `,  // Description when shared
       type: `website`,  // Content type (website, article, video, etc.)
-      url: `/store/${productSKU.replaceAll("_", "").toUpperCase()}`,  // Canonical URL of the page
+      url: `/store/${productSKU.replaceAll("_", " ").toUpperCase()}`,  // Canonical URL of the page
       images: data.product.productImages && data.product.productImages[0].image ? [
         {
           url: data.product.productImages[0].image,  // Image URL to display when shared
