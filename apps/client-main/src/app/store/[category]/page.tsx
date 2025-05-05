@@ -10,9 +10,9 @@ export async function generateMetadata({ params }: Props) {
     
     return {
       // Basic metadata fields
-      title: `Premium ${category} - Unisex Streetwear ${category} Online - NoNRML`,  // Browser tab title, search engine title
+      title: `Premium ${category.replaceAll("_", "")} - Unisex Streetwear ${category.replaceAll("_", "")} Online - NoNRML`,  // Browser tab title, search engine title
       description: `Buy Premium Unisex Streetwear Oversize ${category} online from NoNRML `,  // Meta description for SEO
-      keywords: ["premium ${category}", "${category}", "oversize ${category}", "Streetwear", "streetwear ${category}", "unisex ${category}"],
+      keywords: [`premium ${category}`, `${category}`, `oversize ${category}`, `Streetwear`, `streetwear ${category}`, `unisex ${category}`],
       robots: `index, follow`,
     };
 }

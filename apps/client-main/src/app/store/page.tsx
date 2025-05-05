@@ -4,9 +4,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
     // Basic metadata fields
-    title: `ALL PRODUCTS - NoNRML`,  // Browser tab title, search engine title
-    description: `Buy Premium Unisex Streetwear clothes online from NoNRML `,  // Meta description for SEO
-    keywords: ["premium cloth", "premium", "oversize cloth", "Streetwear", "streetwear ", "unisex"],
+    title: `ALL PRODUCTS - NoNRML`,
+    description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
+    keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
     robots: 'index, follow',
 }
 

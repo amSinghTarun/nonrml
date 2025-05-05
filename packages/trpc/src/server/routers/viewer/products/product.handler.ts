@@ -37,7 +37,8 @@ export const getProduct = async ({
         priorityIndex: number;
       }[],
       category: {
-        sizeChartId: number | null
+        sizeChartId: number | null,
+        displayName: string | null
       }
     } | null
     
@@ -68,7 +69,8 @@ export const getProduct = async ({
           categoryId: true,
           category: {
             select: {
-              sizeChartId: true
+              sizeChartId: true,
+              displayName: true
             }
           },
           productImages: {
