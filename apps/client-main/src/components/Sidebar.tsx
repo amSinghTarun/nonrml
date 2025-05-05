@@ -38,9 +38,9 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
           </div>
           <footer className="flex flex-col text-xs text-center space-y-2 divide-y divide-dotted divide-black px-2">
             <div className="flex flex-row divide-x divide-dotted divide-black py-1 font-bold justify-evenly">
-              { session?.user && <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/account">
-                ACCOUNT
-              </Link>}
+              <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/account">
+                ORDERS
+              </Link>
               <Link className="text-neutral-800 flex-1 justify-center hover:underline py-2" href="/creditNote">
                 CREDIT NOTES
               </Link>

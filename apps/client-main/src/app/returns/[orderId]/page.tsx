@@ -2,6 +2,16 @@ import { serverClient } from "@/app/_trpc/serverClient";
 import { redirectToHomeIfNotLoggedIn } from "@/app/lib/utils";
 import { Returns } from "@/components/Returns";
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  // Basic metadata fields
+  title: `Return Order - NoNRML`,  // Browser tab title, search engine title
+  description: `Buy Premium Unisex Streetwear clothes online from NoNRML `,  // Meta description for SEO
+  keywords: ["premium cloth", "premium", "oversize cloth", "Streetwear", "streetwear ", "unisex"],
+  robots: 'index, follow',
+}
+
 const ReturnOrders = async ({params}: {params: Promise<{orderId: string}>}) => {
     await redirectToHomeIfNotLoggedIn();
     const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: (await params).orderId}) ;

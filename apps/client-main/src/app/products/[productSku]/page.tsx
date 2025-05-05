@@ -3,7 +3,40 @@ import { serverClient } from "@/app/_trpc/serverClient";
 import Loading from "@/app/loading";
 import Product from "@/components/Product";
 
-const ProductPage = async ({ params }: { params: Promise<{ productSku: string }> })=> {
+type Props = {
+    params: Promise<{ productSku: string }> 
+}
+
+export async function generateMetadata({ params }: Props) {
+    const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
+    const productSKU = (await params).productSku;
+    
+    return {
+      // Basic metadata fields
+      title: `${productSKU} - Premiun Unisex Streetwear ${data.product.category} - NoNRML`,  // Browser tab title, search engine title
+      description: `Buy Premium Unisex Streetwear Oversize ${productSKU} ${data.product.category} online from NoNRML `,  // Meta description for SEO
+      keywords: ["premium ${productSKU}", "${productSKU}", "oversize ${productSKU}", "Streetwear", "streetwear ${productSKU}", "unisex ${productSKU}"],
+      robots: `index, follow`,
+      // OpenGraph metadata (for social sharing - Facebook, LinkedIn, etc.)
+      openGraph: {
+        title: `Premium ${productSKU} - Unisex Streetwear ${productSKU} Online - NoNRML`,  // Title when shared on social media
+        description: `Premium ${productSKU} `,  // Description when shared
+        type: `website`,  // Content type (website, article, video, etc.)
+        url: `/store/${productSKU}`,  // Canonical URL of the page
+        images: data.product.productImages && data.product.productImages[0].image ? [
+          {
+            url: data.product.productImages[0].image,  // Image URL to display when shared
+            width: 1200,  // Recommended width for social previews
+            height: 630,  // Recommended height (1.91:1 ratio)
+            alt: `Store featured product`  // Alt text for accessibility
+          }
+        ] : undefined
+      }
+    };
+}
+
+
+const ProductPage = async ({ params }: Props)=> {
 
     const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
  

@@ -12,8 +12,7 @@ import { prismaTypes } from "@nonrml/prisma";
 import { useToast } from "@/hooks/use-toast";
 
 interface OrdersProps {
-    className?: string,
-    userContact: string
+    className?: string
 }
 
 const convertStringToINR = (currencyString: number) => {
@@ -66,7 +65,7 @@ const renderOrderStatus = (status: string) => {
     return statusEnum[status as keyof typeof statusEnum];
 };
 
-export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
+export const Orders : React.FC<OrdersProps> = ({className})  => {
 
     const { toast } = useToast();
         
@@ -91,7 +90,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
     return (
         <div className={cn("overflow-none h-screen w-full p-2 pb-6 space-y-2 flex flex-col lg:flex-row", className)}>
             <div className="flex flex-row lg:flex-col lg:text-center justify-between lg:justify-center lg:basis-5/12 p-2 text-xs lg:text-sm gap-4">
-                <span className="hover:font-bold cursor-none font-bold text-neutral-600">{userContact}</span>
+                <span className="hover:font-bold cursor-none font-bold text-neutral-600">{userOrders.data?.data.userContact}</span>
                 <span className="cursor-pointer hover:underline text-neutral-500" onClick={()=> {signOut()}}> LOGOUT</span>
             </div>
             <div className="p-2 space-y-3 lg:p-4 overflow-y-scroll overscroll-auto w-full scrollbar-hide h-full">
@@ -109,7 +108,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                 }
                 {
                     userOrders.isSuccess && (
-                        userOrders.data.data.length == 0 ? 
+                        userOrders.data.data.orders.length == 0 ? 
                         <article className="flex flex-col p-3 justify-center w-full h-full items-center space-y-3">
                             <span className="flex justify-center items-center font-normal text-xs">You Haven't Placed Any Orders Yet :(</span>
                             <GeneralButtonTransparent 
@@ -120,7 +119,7 @@ export const Orders : React.FC<OrdersProps> = ({className, userContact})  => {
                         </article>
                         :
                         <div className="flex flex-row rounded-xl flex-wrap w-full space-y-5">
-                            {userOrders.data?.data.map((order, index) => (
+                            {userOrders.data?.data.orders.map((order, index) => (
                                 <article key={index} className="relative h-auto w-full p-2 rounded-md text-sm hover:shadow-sm hover:shadow-neutral-200 transition-all duration-200 ">
                                     <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/account/${order.id}`}>
                                         <div className="flex justify-between items-center mb-2">

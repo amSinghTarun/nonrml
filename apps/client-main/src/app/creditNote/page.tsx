@@ -1,10 +1,17 @@
+import React from "react";
 import { CreditNote } from "@/components/CreditNote";
-import { redirectToHomeIfNotLoggedIn } from "../lib/utils";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  // Basic metadata fields
+  title: `Credit Notes - NoNRML`,  // Browser tab title, search engine title
+  description: `Buy Premium Unisex Streetwear clothes online from NoNRML `,  // Meta description for SEO
+  keywords: ["premium cloth", "premium", "oversize cloth", "Streetwear", "streetwear ", "unisex"],
+  robots: 'index, follow',
+}
 
 const CreditNotePage = async () => {
-    // await redirectToHomeIfNotLoggedIn();
-    // instead it should be like, if logged in then show all the users credit note and if not then ask for search and if logged in then
-    // also give a prompt to search for credit note
+    
     return (
         <>
             <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-64 lg:mb-32">

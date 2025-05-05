@@ -1,4 +1,13 @@
 import { TrackOrder } from "@/components/TrackOrder";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  // Basic metadata fields
+  title: `Track Order - NoNRML`,  // Browser tab title, search engine title
+  description: `Buy Premium Unisex Streetwear clothes online from NoNRML `,  // Meta description for SEO
+  keywords: ["premium cloth", "premium", "oversize cloth", "Streetwear", "streetwear ", "unisex"],
+  robots: 'index, follow',
+}
 
 const TrackOrderPage = async () => {
     return (

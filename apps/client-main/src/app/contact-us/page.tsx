@@ -1,6 +1,16 @@
-const mail = "info@nonorml.com";
+import React from "react";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  // Basic metadata fields
+  title: `Contact us - NoNRML`,  // Browser tab title, search engine title
+  description: `Buy Premium Unisex Streetwear clothes online from NoNRML `,  // Meta description for SEO
+  keywords: ["premium cloth", "premium", "oversize cloth", "Streetwear", "streetwear ", "unisex"],
+  robots: 'index, follow',
+}
 
 const ContactUsPage = () => {
+    const mail = "info@nonorml.com";
     return (
         <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-64 lg:mb-32">
             <article className="h-[80%] w-[90%] flex flex-col text-center">

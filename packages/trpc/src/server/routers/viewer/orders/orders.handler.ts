@@ -51,7 +51,7 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
             }]
         });
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "", data: orders};
+        return {status: TRPCResponseStatus.SUCCESS, message: "", data: { orders, userContact: ctx.user?.contactNumber }};
 
     } catch(error){
         // console.log("\n\n Error in getUserOrders ----------------");

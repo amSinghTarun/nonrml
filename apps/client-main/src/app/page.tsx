@@ -10,6 +10,6 @@ export default function Home() {
 }
 
 export const metadata = {
-  title: 'My Page',
+  title: 'NoNRML',
   description: 'Page description'
 };
