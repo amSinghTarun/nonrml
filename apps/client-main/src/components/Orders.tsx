@@ -114,14 +114,14 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                             <GeneralButtonTransparent 
                                 display="ENTER STORE" 
                                 className="flex w-[60%] items-center justify-center p-6 text-xs font-normal" 
-                                onClick={() => redirect("/store")} 
+                                onClick={() => redirect("/collections")} 
                             />
                         </article>
                         :
                         <div className="flex flex-row rounded-xl flex-wrap w-full space-y-5">
                             {userOrders.data?.data.orders.map((order, index) => (
                                 <article key={index} className="relative h-auto w-full p-2 rounded-md text-sm hover:shadow-sm hover:shadow-neutral-200 transition-all duration-200 ">
-                                    <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/account/${order.id}`}>
+                                    <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/orders/${order.id}`}>
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-sm font-bold">{order.id}</span>
                                             <span className="text-xs text-neutral-500">{order.createdAt.toDateString()}</span>

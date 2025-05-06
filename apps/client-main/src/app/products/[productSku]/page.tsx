@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
       title: `Premium ${productSKU.replaceAll("_", " ").toUpperCase()} - Unisex Streetwear ${productSKU.replaceAll("_", " ").toUpperCase()} Online - NoNRML`,  // Title when shared on social media
       description: `Premium ${productSKU.replaceAll("_", " ").toUpperCase()} `,  // Description when shared
       type: `website`,  // Content type (website, article, video, etc.)
-      url: `/store/${productSKU.replaceAll("_", " ").toUpperCase()}`,  // Canonical URL of the page
+      url: `/collections/${productSKU.replaceAll("_", " ").toUpperCase()}`,  // Canonical URL of the page
       images: data.product.productImages && data.product.productImages[0].image ? [
         {
           url: data.product.productImages[0].image,  // Image URL to display when shared
@@ -41,7 +41,7 @@ const ProductPage = async ({ params }: Props)=> {
 
   return (
       <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-y-scroll overscroll-none flex bg-white mb-64 lg:mb-32 scrollbar-hide">
-          <Product product={data.product} productSizeQuantities={data.productSizeQuantities}></Product> 
+          <Product product={data.product} sizeData={data.sizeData} ></Product> 
       </section>
   )
 }

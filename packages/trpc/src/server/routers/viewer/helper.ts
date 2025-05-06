@@ -90,6 +90,29 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY
     return errorStatusToTRPCErrorCodeMap[statusCode]!;
 }
 
+export const getSizeOrderIndex = (size: string) => {
+    // Define standard size order
+    const standardSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const index = standardSizes.indexOf(size);
+    
+    if (index !== -1) {
+      // If it's a standard size, return its index (gives priority to standard sizes)
+      return index;
+    }
+    
+    // For numeric sizes (like 30, 32, etc.)
+    const numericSize = parseInt(size);
+    if (!isNaN(numericSize)) {
+      // Return a value that ensures numeric sizes come after standard sizes
+      // Adding 1000 ensures numeric sizes come after standard letter sizes
+      return 1000 + numericSize;
+    }
+    
+    // For any other format, return a high value to push it to the end
+    // and then rely on alphabetical sorting in the actual sort function
+    return 2000;
+};
+
 export const TRPCCustomError = (error: any) => {
     console.log(process.env.DATABASE_URL)
     console.log("\n\n\n ------------------ \n ", error, "\n -----------------------------------------------")

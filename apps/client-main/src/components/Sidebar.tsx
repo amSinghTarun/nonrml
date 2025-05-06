@@ -28,7 +28,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
                 <span>HOME</span>
               </Link>
               {categoryList.map((category, index) => {
-                const href = "/store/"+category.replace(" ", "_");
+                const href = "/collections/"+category.replace(" ", "-");
                 return (
                   <Link href={href} key={index} className={`py-2 basis-1/${categoryList.length+1} content-center text-center rounded-md hover:underline`}>
                     <span>{category.toUpperCase()}</span>
@@ -38,7 +38,7 @@ export const Sidebar = ({ categoryList }: { categoryList: string[] }) => {
           </div>
           <footer className="flex flex-col text-xs text-center space-y-2 divide-y divide-dotted divide-black px-2">
             <div className="flex flex-row divide-x divide-dotted divide-black py-1 font-bold justify-evenly">
-              <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/account">
+              <Link className="text-neutral-800 flex-1 justify-center cursor-pointer hover:underline py-2" href="/orders">
                 ORDERS
               </Link>
               <Link className="text-neutral-800 flex-1 justify-center hover:underline py-2" href="/creditNote">

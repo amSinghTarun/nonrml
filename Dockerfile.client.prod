@@ -20,7 +20,7 @@ RUN yarn install
 RUN cd ./packages/prisma && DATABASE_URL=${DATABASE_URL} yarn generate && cd ../..
 RUN yarn build
 
-# EXPOSE 8080
+EXPOSE 8080
 
 # the single most important command for heroku
 CMD ["sh", "-c", "yarn start -- -p $PORT"]

@@ -57,7 +57,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
       onSuccess: (response) => {
-        router.replace(`/account/${response.data.orderId}`);
+        router.replace(`/orders/${response.data.orderId}`);
       },
       onError: () => {
         toast({
@@ -65,7 +65,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             title: "Something went wrong. Any payment deducted will be reimbursed",
             variant: "destructive"
         });
-        router.replace("/account");
+        router.replace("/orders");
       }
     });
     const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote;

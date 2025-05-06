@@ -108,7 +108,7 @@ export async function LandingPage() {
       <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
         <div className="flex flex-row w-full align-baseline">
           <h1 className=" font-bold text-xs flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
-          <Link href="/store" className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2">DISCOVER MORE</Link>
+          <Link href="/collections" className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2">DISCOVER MORE</Link>
         </div>
         <div className="flex flex-row flex-wrap w-full h-full">
           {
@@ -159,7 +159,7 @@ export async function LandingPage() {
           }
         </div>
         <div className="flex z-30 relative pb-7 md:pb-8 flex-col items-center justify-center w-full h-full">
-          <Link href="/store" className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3 ">DISCOVER MORE</Link>
+          <Link href="/collections" className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3 ">DISCOVER MORE</Link>
         </div>
       </div>
 

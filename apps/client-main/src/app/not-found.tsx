@@ -10,7 +10,7 @@ export default async function NotFound() {
         <GeneralButtonTransparent 
             display="ENTER STORE" 
             className="flex w-[60%] items-center justify-center p-6 text-xs font-normal" 
-            onClick={() => redirect("/store")} 
+            onClick={() => redirect("/collections")} 
         />
     </div>
   )

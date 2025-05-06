@@ -29,6 +29,12 @@ export const ZGetProductsSchema = z.object({
 });
 export type TGetProductsSchema = z.infer<typeof ZGetProductsSchema>;
 
+export const ZGetRelatedProductsSchema = z.object({
+    productId: z.number(),
+    categoryId: z.number()
+});
+export type TGetRelatedProductsSchema = z.infer<typeof ZGetRelatedProductsSchema>;
+
 export const ZAddProductSchema = z.object({
     name: z.string(),
     description: z.string(),

@@ -1,5 +1,5 @@
 import { TRPCResponseStatus } from "@nonrml/common";
-import { TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { getSizeOrderIndex, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import {
   TAddProductSchema,
   TEditProductSchema,
@@ -8,7 +8,8 @@ import {
   TGetProductsSizes,
   TVerifyCheckoutProductsSchema,
   TGetProductVariantQuantitySchema,
-  TGetHomeProductsSchema
+  TGetHomeProductsSchema,
+  TGetRelatedProductsSchema
 } from "./product.schema";
 import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
@@ -88,8 +89,8 @@ export const getProduct = async ({
     };
     
     //cache it and get from cache, delete at the time of order
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${product.id}`);
-    console.log(productSizeQuantities);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantty_${product.id}`);
+    console.log("cached", productSizeQuantities);
     if(!productSizeQuantities) {
       productSizeQuantities = {};
       const productInventory = await prisma.productVariants.findMany({
@@ -126,15 +127,39 @@ export const getProduct = async ({
           }
         };
       }
-      console.log(productSizeQuantities);
+      
       // see how to expire this
       await cacheServicesRedisClient().set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
     }
+    // the above cache if logic is not delete as it this cache is managed
+    // on 2-3 places so let it be rn
+
+    // Sort the inventory items by size before creating the object 
+    // and send front this for size button
+    // and they are maintained by the above cache as the logic is cache was being
+    // used previously and so now it's complicated to remove it also it is 
+    // actually effectient as we are going work of 2 places
+    const sortedInventory = Object.values(productSizeQuantities).sort((a, b) => {
+      const aIndex = getSizeOrderIndex(a.size);
+      const bIndex = getSizeOrderIndex(b.size);
+      
+      // If they have different order indices, sort by that
+      console.log(aIndex, bIndex)
+      if (aIndex !== bIndex) {
+        return aIndex - bIndex;
+      }
+      
+      // If they have the same order index (e.g., both are "other" formats),
+      // fall back to alphabetical sorting
+      return a.size.localeCompare(b.size);
+    });
+
     console.log("\n\n\n\n\n -----END");
+
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product: product!, productSizeQuantities: productSizeQuantities! },
+      data: { product: product!, sizeData: sortedInventory },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");
@@ -436,6 +461,49 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
   }
 };
 
+export const getRelatedProducts = async ({ctx, input}: TRPCRequestOptions<TGetRelatedProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!
+  try{
+    const relatedProduct = await prisma.products.findMany({
+      where: {
+        categoryId : input.categoryId,
+        soldOut: false,
+        public: true,
+        NOT: {
+          id: input.productId
+        },
+      },
+      select: {
+        sku: true,
+        name: true,
+        productImages: {
+          where: { active: true, priorityIndex: 0 },
+          select: {
+            image: true,
+          }
+        },
+        price: true,
+      },
+      orderBy: [
+        { visitedCount: "desc" },
+        { createdAt: "desc" }
+      ]
+    })
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: relatedProduct };
+  } catch(error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error); 
+  }
+}
 
 export const getAdminProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSchema>) => {
   const prisma = ctx.prisma;
