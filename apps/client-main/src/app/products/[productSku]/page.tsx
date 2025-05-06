@@ -1,7 +1,6 @@
 import { RouterOutput } from "@/app/_trpc/client";
 import { serverClient } from "@/app/_trpc/serverClient";
 import Loading from "@/app/loading";
-import { generateSitemapData } from "@/app/scripts/generate-sitemap-data";
 import Product from "@/components/Product";
 
 type Props = {
@@ -11,7 +10,6 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
   const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
   const productSKU = (await params).productSku;
-  generateSitemapData() 
   return {
     // Basic metadata fields
     title: `${productSKU.replaceAll("_", " ").toUpperCase()} - Premiun Unisex Streetwear ${data.product.category.displayName?.replaceAll("_", " ")} - NoNRML`,  // Browser tab title, search engine title
