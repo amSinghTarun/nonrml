@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://yourdomain.com/about",
+    "lastModified": "2025-05-05T20:37:06.438Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/account",
+    "lastModified": "2025-05-05T20:37:06.439Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/checkout",
+    "lastModified": "2025-05-05T20:37:06.439Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/contact-us",
+    "lastModified": "2025-05-05T20:37:06.439Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/creditNote",
+    "lastModified": "2025-05-05T20:37:06.439Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com",
+    "lastModified": "2025-05-05T20:37:06.439Z",
+    "changeFrequency": "daily",
+    "priority": 1
+  },
+  {
+    "url": "https://yourdomain.com/policies/privacy-policy",
+    "lastModified": "2025-05-05T20:37:06.440Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/policies/return-and-exchange",
+    "lastModified": "2025-05-05T20:37:06.440Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/policies/terms-and-conditions",
+    "lastModified": "2025-05-05T20:37:06.440Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/store",
+    "lastModified": "2025-05-05T20:37:06.440Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/track-order",
+    "lastModified": "2025-05-05T20:37:06.440Z",
+    "changeFrequency": "monthly",
+    "priority": 0.7
+  },
+  {
+    "url": "https://yourdomain.com/products/4",
+    "lastModified": "2025-04-01T03:11:43.425Z",
+    "changeFrequency": "weekly",
+    "priority": 0.8
+  },
+  {
+    "url": "https://yourdomain.com/products/3",
+    "lastModified": "2025-04-01T03:12:24.980Z",
+    "changeFrequency": "weekly",
+    "priority": 0.8
+  },
+  {
+    "url": "https://yourdomain.com/products/2",
+    "lastModified": "2025-04-01T08:08:20.710Z",
+    "changeFrequency": "weekly",
+    "priority": 0.8
+  },
+  {
+    "url": "https://yourdomain.com/products/1",
+    "lastModified": "2025-04-01T08:09:42.505Z",
+    "changeFrequency": "weekly",
+    "priority": 0.8
+  }
+]

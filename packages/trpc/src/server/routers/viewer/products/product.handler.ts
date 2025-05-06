@@ -361,6 +361,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       _count: {
           ProductVariants: number;
       };
+      updatedAt:Date
     }[] | null
 
     let latestProducts : LatestProducts = ( input.cursor == 1 ) ? await cacheServicesRedisClient().get("allClientProducts") : null;
@@ -381,6 +382,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           public: true,
           // exclusive: true,
           sku: true,
+          updatedAt: true,
           // latest: true,
           // visitedCount: true,
           // sizeChartId: true,

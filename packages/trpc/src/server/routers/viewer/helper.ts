@@ -91,6 +91,7 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY
 }
 
 export const TRPCCustomError = (error: any) => {
+    console.log(process.env.DATABASE_URL)
     console.log("\n\n\n ------------------ \n ", error, "\n -----------------------------------------------")
     const errorCode = error.code as TRPC_ERROR_CODE_KEY ?? "INTERNAL_SERVER_ERROR";
     const finalError = new TRPCError({

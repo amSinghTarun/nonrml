@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import { useSetAppbarUtilStore } from "@/store/atoms";
 
 const OrdersPage = () => {
-
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     const { data: session, status } = useSession({
         required: true,
