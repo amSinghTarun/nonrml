@@ -575,13 +575,14 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
-                        email: returnProductVariantDetails.order.address.email, 
+                        email: returnProductVariantDetails.order.address?.email ?? "", 
                         remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
-                        userId: returnProductVariantDetails.order.userId,
+                        userId: returnProductVariantDetails.order.userId ?? 1,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
                         creditCode: `RTN-${returnProductVariantDetails.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${returnProductVariantDetails.order.id}`
                     }
+                    // address edit
                 })
             )
 

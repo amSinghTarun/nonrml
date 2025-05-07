@@ -54,12 +54,13 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
         isReimbursementPending={isReimbursementPending} 
       />
       
-      <ShippingDetails 
+      { order?.address && <ShippingDetails 
         address={order.address}
         isEditable={!['SHIPPED', 'DELIVERED'].includes(order.orderStatus)}
         orderId={order.id}
         onAddressUpdated={() => orderQuery.refetch()}
-      />
+      />} 
+      {/* address edit */}
       
       <OrderActionsPanel
         order={order}

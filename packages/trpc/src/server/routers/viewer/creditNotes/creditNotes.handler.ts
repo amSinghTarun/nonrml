@@ -181,14 +181,15 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
             prisma.creditNotes.create({
                 data: {
                     returnOrderId: input.returnOrderId,
-                    email: orderDetail.order.address.email,
+                    email: orderDetail.order.address?.email ?? "",
                     value: orderDetail?.order.totalAmount!,
                     remainingValue: orderDetail?.order.totalAmount!,
                     creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
-                    userId: orderDetail?.order.userId,
+                    userId: orderDetail?.order.userId ?? 1,
                     expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
                     creditCode: `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
                 }
+                // address edit
             })
    
         } else if( input.userId && input.value) {
@@ -262,9 +263,9 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     data: {
                         value: refundAmount,
                         remainingValue: refundAmount,
-                        email: replacementOrderDetails.return.order.address.email,
+                        email: replacementOrderDetails.return.order.address?.email ?? "",
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.REPLACEMENT,
-                        userId: replacementOrderDetails.return.order.userId,
+                        userId: replacementOrderDetails.return.order.userId ?? 1, // address edit
                         replacementOrderId: input.replacementOrderId,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
                         creditCode: `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`

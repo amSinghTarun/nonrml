@@ -139,11 +139,12 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
 
                     <div className=" flex flex-col basis-1/2 text-xs text-neutral-500 space-y-1">
                         <p className="text-neutral-400"> SHIPPING ADDRESS </p>
-                        <p >{orderDetails?.address.contactName.toLocaleUpperCase()}</p>
+                        {/* <p >{orderDetails?.address.contactName.toLocaleUpperCase()}</p>
                         <p >{orderDetails?.address.location}, {orderDetails?.address.pincode}</p>
                         <p >{orderDetails?.address.city.toUpperCase()} {orderDetails?.address.state.toUpperCase()}</p>
                         <p>{orderDetails?.address.countryCode} {orderDetails?.address.contactNumber}</p>
-                        <p >{orderDetails?.address.email}</p>
+                        <p >{orderDetails?.address.email}</p> */}
+                        {/* address edit */}
                     </div>    
 
                     <div className="flex text-xs lg:basis-1/3 flex-col space-y-1 text-neutral-500">
