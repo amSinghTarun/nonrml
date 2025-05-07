@@ -4,13 +4,9 @@ import { RouterOutput } from "@/app/_trpc/client";
 import Image from "next/image";
 import React from "react";
 import Link from "next/link";
+import { convertStringToINR } from "@/lib/utils";
 
 type ExchangeOrders = RouterOutput["viewer"]["replacement"]["getReplacement"]["data"];
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
 
 interface ExchangesProps {
     className?: string,

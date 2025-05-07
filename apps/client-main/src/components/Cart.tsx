@@ -9,11 +9,8 @@ import { useSetAppbarUtilStore, useCartItemStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
 import { trpc } from "@/app/_trpc/client";
+import { convertStringToINR } from "@/lib/utils";
 
-const convertStringToINR = (currencyString: number) => {
-  let INR = new Intl.NumberFormat();
-  return `INR ${INR.format(currencyString)}.00`;
-}
 
 export const CartMenu = () => {
   const cartItems = useStore(useCartItemStore, (state) => state.cartItems);

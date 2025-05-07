@@ -10,6 +10,7 @@ import { convertFileToDataURL } from "@nonrml/common";
 import Checkbox from '@mui/material/Checkbox';
 import { ArrowLeft, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import { convertStringToINR } from "@/lib/utils";
 
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
@@ -18,11 +19,6 @@ interface ReturnReplaceProps {
     orderId: string,
     returnAcceptanceDate: number,
     backToOrderDetails: () => void
-}
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
 }
 
 export const MakeReturn: React.FC<ReturnReplaceProps> = ({products, orderId, returnAcceptanceDate, backToOrderDetails}) => {

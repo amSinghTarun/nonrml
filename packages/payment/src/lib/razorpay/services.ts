@@ -15,23 +15,20 @@ export const getPaymentDetials = async ({rzpPaymentId} : {rzpPaymentId: string})
 )
 
 export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : {
-    rzpOrder: {contact: string, name: string, email: string, amount: number, rzpOrderId: string},
+    rzpOrder: {amount: number, rzpOrderId: string},
+    // rzpOrder: {contact: string, name: string, email: string, amount: number, rzpOrderId: string},
     callbckHandler: (data: any) => void,
     onDismissHandler?: () => void
 }) => {
     return {
-        "key": process.env.RAZORPAY_KEY_ID,
-        "amount": rzpOrder.amount*100,
-        "currency": "INR",
-        "name": "NoNRML",
-        "order_id": rzpOrder.rzpOrderId, 
-        "handler": callbckHandler,
-        prefill: {
-            contact: rzpOrder.contact,
-            name: rzpOrder.name,
-            email: rzpOrder.email,
-        },
-        "theme": {
+        key: process.env.RAZORPAY_KEY_ID,
+        one_click_checkout: true,
+        amount: rzpOrder.amount*100,
+        currency: "INR",
+        name: "NoNRML",
+        order_id: rzpOrder.rzpOrderId,
+        handler: callbckHandler,
+        theme: {
             "color": "#000000"
         },
         modal: {
@@ -40,5 +37,10 @@ export const createRzpConfig = ( {rzpOrder, callbckHandler, onDismissHandler} : 
             confirm_case: true,
             // onDismiss: onDismissHandler
         }
+        // prefill: {
+        //     contact: rzpOrder.contact,
+        //     name: rzpOrder.name,
+        //     email: rzpOrder.email,
+        // },
     };
 }

@@ -1,12 +1,14 @@
 import { TRPCResponseStatus } from "@nonrml/common"
-import { acceptOrder, calculateRejectedQuantityRefundAmounts, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
 import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
+
 const returnExchangeTime = 604800000; // 7 days
+
 /*
 Get all the orders of a user
 No pagination required for now, as the result quantity is gonna stay small
@@ -324,14 +326,33 @@ Process:
 */
 export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOrderSchema>) => {
     input = input!;
-    const userId = ctx.user?.id!;
+    const userId = ctx.user?.id;
     const prisma = ctx.prisma;
     try{
+
+        let orderId : string = '';
+        let attempts = 0;
+        const MAX_ATTEMPTS = 5;
+        while(attempts < MAX_ATTEMPTS ){
+            orderId = generateOrderId();
+            attempts++;
+            const orderIdExist = await prisma.orders.count({
+                where: { 
+                    id: orderId
+                }
+            })
+            if(!orderIdExist){
+                break;
+            }
+            orderId = "";
+        }
+        if(orderId === "")
+            throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "failed to create orderId"}); 
 
         let cnUseableValue = 0;
         let creditNoteId = null;
         let orderTotal = 0;
-        if(input.creditNoteCode){
+        if(input.creditNoteCode && userId){
             const creditNote = await prisma.creditNotes.findFirst({
                 where: {
                     creditCode: input.creditNoteCode,
@@ -404,23 +425,17 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 }
             }
         }
-
-        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
-        const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
-        let orderId = `ORD-${date}${userId}${randomPart}`;
-
-        console.log(orderId)
         
-        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ((orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)), addressId: input.addressId }});
+        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ((orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue))}}); {/* addressId: input.addressId*/}
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 
             const order = await prisma.orders.create({
                 data: {
                     id: orderId,
-                    userId: userId,
+                    // userId: userId,
                     totalAmount: orderTotal,
-                    addressId: input.addressId,
+                    // addressId: input.addressId,
                     creditNoteId: creditNoteId,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
                     productCount: Object.values(input.orderProducts).length,
@@ -458,9 +473,9 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 orderId: orderCreated.order.id,
                 amount: +orderTotal*100, 
                 rzpOrderId: rzpPaymentCreated.data.rzpOrder.id, 
-                contact: ctx.user?.contactNumber!, 
-                name: rzpPaymentCreated.data.address.contactName, 
-                email: rzpPaymentCreated.data.address.email
+                // contact: ctx.user?.contactNumber!, 
+                // name: rzpPaymentCreated.data.address.contactName, 
+                // email: rzpPaymentCreated.data.address.email
             }
         };
     }catch(error) {

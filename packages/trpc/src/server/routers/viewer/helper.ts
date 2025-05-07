@@ -4,7 +4,8 @@ import { prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCContext } from "../../contexts";
 import { cacheServicesRedisClient } from "@nonrml/cache";
 import { prisma } from "@nonrml/prisma";
-import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";;
+import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
+import crypto from 'crypto';
 
 export const SALT_SIZE = 8;
 
@@ -88,6 +89,12 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY
     if(!(statusCode in errorStatusToTRPCErrorCodeMap))
         statusCode = "INTERNAL_SERVER_ERROR";
     return errorStatusToTRPCErrorCodeMap[statusCode]!;
+}
+
+export const generateOrderId = () : string => {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
+    const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
+    return `ORD-${date}${randomPart}`;
 }
 
 export const getSizeOrderIndex = (size: string) => {

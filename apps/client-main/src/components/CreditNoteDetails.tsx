@@ -1,10 +1,6 @@
 import { RouterOutput } from "@/app/_trpc/client"
 import React from "react"
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
+import { convertStringToINR } from "@/lib/utils";
 
 type creditNoteDetails = RouterOutput["viewer"]["creditNotes"]["getCreditNoteDetails"]["data"]
 

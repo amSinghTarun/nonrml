@@ -11,23 +11,23 @@ const CheckoutPage = () => {
     const searchParams = useSearchParams();
     const buyOption = searchParams.get('purchase');
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated: () => {
-            if(appbarUtil === "CART" || appbarUtil == "") 
-                setAppbarUtil("USER_ACCESSIBILITY") 
-        }
-    });
-    const userAddresses = trpc.viewer.address.getAddresses.useQuery(undefined, {
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        enabled: !!session
-    });
+    // const { data: session, status } = useSession({
+    //     required: true,
+    //     onUnauthenticated: () => {
+    //         if(appbarUtil === "CART" || appbarUtil == "") 
+    //             setAppbarUtil("USER_ACCESSIBILITY") 
+    //     }
+    // });
+    // const userAddresses = trpc.viewer.address.getAddresses.useQuery(undefined, {
+    //     staleTime: Infinity,
+    //     refetchOnWindowFocus: false,
+    //     enabled: !!session
+    // });
 
     return (
         <>
             <section className="flex absolute flex-row w-screen text-black justify-center items-center bg-white"> 
-                { (session || status != "loading") ? <Checkout className="pt-16 mb-32 w-[97%] xl:w-[50%]" buyOption={buyOption} userAddresses={userAddresses} /> : <></>}
+                <Checkout className="pt-16 mb-32 w-[97%] xl:w-[50%]" buyOption={buyOption} />
             </section>
         </>
     )

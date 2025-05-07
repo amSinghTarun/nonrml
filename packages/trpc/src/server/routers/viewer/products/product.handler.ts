@@ -89,10 +89,14 @@ export const getProduct = async ({
     };
     
     //cache it and get from cache, delete at the time of order
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantty_${product.id}`);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${product.id}`);
+
     console.log("cached", productSizeQuantities);
+
     if(!productSizeQuantities) {
+      
       productSizeQuantities = {};
+
       const productInventory = await prisma.productVariants.findMany({
         where: {
             productId: product.id,
@@ -129,7 +133,7 @@ export const getProduct = async ({
       }
       
       // see how to expire this
-      await cacheServicesRedisClient().set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
+      cacheServicesRedisClient().set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
     }
     // the above cache if logic is not delete as it this cache is managed
     // on 2-3 places so let it be rn
@@ -139,27 +143,25 @@ export const getProduct = async ({
     // and they are maintained by the above cache as the logic is cache was being
     // used previously and so now it's complicated to remove it also it is 
     // actually effectient as we are going work of 2 places
-    const sortedInventory = Object.values(productSizeQuantities).sort((a, b) => {
-      const aIndex = getSizeOrderIndex(a.size);
-      const bIndex = getSizeOrderIndex(b.size);
+    // const sortedInventory = Object.values(productSizeQuantities).sort((a, b) => {
+    //   const aIndex = getSizeOrderIndex(a.size);
+    //   const bIndex = getSizeOrderIndex(b.size);
       
-      // If they have different order indices, sort by that
-      console.log(aIndex, bIndex)
-      if (aIndex !== bIndex) {
-        return aIndex - bIndex;
-      }
+    //   // If they have different order indices, sort by that
+    //   console.log(aIndex, bIndex)
+    //   if (aIndex !== bIndex) {
+    //     return aIndex - bIndex;
+    //   }
       
-      // If they have the same order index (e.g., both are "other" formats),
-      // fall back to alphabetical sorting
-      return a.size.localeCompare(b.size);
-    });
+    //   return a.size.localeCompare(b.size);
+    // });
 
     console.log("\n\n\n\n\n -----END");
 
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product: product!, sizeData: sortedInventory },
+      data: { product: product!, sizeData: productSizeQuantities },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");

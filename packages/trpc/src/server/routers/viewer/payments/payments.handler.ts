@@ -6,35 +6,37 @@ import { createOrder, initiateNormalRefund } from "@nonrml/payment";
 
 export const createRZPOrder = async ({ctx, input}: TRPCRequestOptions<paymentSchemas.TCreateRzpOrderSchema>) => {
     try{
-        const address = await prisma.address.findUniqueOrThrow({
-            where: {
-                id: input!.addressId
-            }
-        })
-        console.log(input);
+        // const address = await prisma.address.findUniqueOrThrow({
+        //     where: {
+        //         id: input!.addressId
+        //     }
+        // })
+        // console.log(input);
         const rzpOrder = await createOrder({ 
             amount: input!.orderTotal*100,
+            line_items_total:input!.orderTotal*100, 
+            receipt: `${Date.now()}`,
             currency: "INR",
-            customer_details: {
-                name: address.contactName,
-                email: address.email,
-                contact: address.contactNumber,
-                billing_address: {
-                    line1: address.location,
-                    city: address.city,
-                    state: address.state,
-                },
-                shipping_address: {
-                    line1: address.location,
-                    city: address.city,
-                    state: address.state,
-                }
-            },
+            // customer_details: {
+            //     name: address.contactName,
+            //     email: address.email,
+            //     contact: address.contactNumber,
+            //     // billing_address: {
+            //     //     line1: address.location,
+            //     //     city: address.city,
+            //     //     state: address.state,
+            //     // },
+            //     // shipping_address: {
+            //     //     line1: address.location,
+            //     //     city: address.city,
+            //     //     state: address.state,
+            //     // }
+            // },
             notes: {
                 contact: ctx.user?.contactNumber!
             }
         });        
-        return { status: TRPCResponseStatus.SUCCESS, message: "Order created", data: {rzpOrder, address} };
+        return { status: TRPCResponseStatus.SUCCESS, message: "Order created", data: {rzpOrder} };
     } catch(error) {
         //console.log("\n\n Error in createpayments ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 

@@ -293,9 +293,9 @@ model Orders {
   type                  OrderType                          @default(NEW)
   creditUtilised        Int?                               @default(0)
   totalAmount           Float
-  userId                Int
+  userId                Int?
   productCount          Int
-  addressId             Int
+  addressId             Int?
   discountId            Int?
   shipmentId            Int?                               @unique
   deliveryDate          BigInt?
@@ -306,11 +306,11 @@ model Orders {
   returnAcceptanceDate  BigInt?
   creditNoteTransaction CreditNotesPartialUseTransactions?
   orderProducts         OrderProducts[]
-  address               Address                            @relation(fields: [addressId], references: [id])
+  address               Address?                           @relation(fields: [addressId], references: [id], onDelete: Restrict)
   creditNote            CreditNotes?                       @relation(fields: [creditNoteId], references: [id])
   discount              Discounts?                         @relation(fields: [discountId], references: [id])
   shipment              Shipment?                          @relation(fields: [shipmentId], references: [id])
-  user                  User                               @relation(fields: [userId], references: [id])
+  user                  User?                              @relation(fields: [userId], references: [id], onDelete: Restrict)
   Payments              Payments?
   replacementOrder      ReplacementOrder[]
   return                Returns[]
@@ -438,6 +438,13 @@ model HomePageImages {
   imageUrl    String
 }
 
+model DynamicConfig {
+  id         BigInt   @id(map: "dynamicConfig_pkey") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  key        String   @unique
+  value      String
+}
+
 enum HomeImageType {
   TOP_MD
   TOP_LG
@@ -515,8 +522,8 @@ enum ReturnItemStatus {
 
 enum PaymentStatus {
   PENDING
-  CONFIRMED
-  FAILED
+  retarted_CONFIRMED
+  COD
   created
   attempted
   paid

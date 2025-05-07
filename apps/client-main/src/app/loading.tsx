@@ -34,10 +34,9 @@ export default function Loading({ text }: {text?:string}) {
                         priority
                         width={0} height={0} 
                         sizes="100vw" 
-                        style={{ color:"white",width: 'auto', height: "100px"}}
+                        style={{ color:"white",width: 'auto', height: "40px"}}
                     ></Image>
                     </div>
-                    <span className='animate-pulse text-xs'> {text} </span>
                 </div>
             </div>
 

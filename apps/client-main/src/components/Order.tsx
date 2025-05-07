@@ -10,13 +10,9 @@ import { useRouter } from "next/navigation";
 import { GeneralButtonTransparent } from "./ui/buttons";
 import { toast } from "@/hooks/use-toast";
 import { prismaTypes } from "@nonrml/prisma";
+import { convertStringToINR } from "@/lib/utils";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
 
 interface OrderProps {
     className?: string,

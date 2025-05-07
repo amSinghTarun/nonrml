@@ -42,7 +42,7 @@ export const ZInitiateOrderSchema = z.object({
         productImage: z.string(),
         size: z.string(),
     })),
-    addressId: z.number().min(1),
+    // addressId: z.number().min(1),
     creditNoteCode: z.string().optional(),
 })
 export type TInitiateOrderSchema = z.infer<typeof ZInitiateOrderSchema>;
@@ -79,25 +79,25 @@ export const ZcancelOrderProductSchema = z.object({
 });
 export type TcancelOrderProductSchema = z.infer<typeof ZcancelOrderProductSchema>;
 
-export const ZOrderOutputSchema = z.object({
-    id : z.number(),
-    type : z.enum([prismaEnums.OrderType.NEW, prismaEnums.OrderType.REPLACEMENT]).nullable(),
-    finalPrice : z.string(),
-    originalOrderId : z.number().nullable(),
-    userId : z.number(),
-    productCount : z.number(),
-    addressId : z.number(),
-    discountId : z.number().nullable(),
-    countryCode : z.string(),
-    contactNumber : z.string(),
-    contactName : z.string(),
-    paymentStatus : z.enum([prismaEnums.PaymentStatus.PENDING, prismaEnums.PaymentStatus.CONFIRMED]).nullable(),
-    paymentId : z.number().nullable(),
-    shipmentId : z.number().nullable(),
-    createdAt : z.date(),
-    updatedAt : z.date(),
-});
-export type TOrderOutputSchema = z.infer<typeof ZOrderOutputSchema>;
+// export const ZOrderOutputSchema = z.object({
+//     id : z.number(),
+//     type : z.enum([prismaEnums.OrderType.NEW, prismaEnums.OrderType.REPLACEMENT]).nullable(),
+//     finalPrice : z.string(),
+//     originalOrderId : z.number().nullable(),
+//     userId : z.number(),
+//     productCount : z.number(),
+//     addressId : z.number(),
+//     discountId : z.number().nullable(),
+//     countryCode : z.string(),
+//     contactNumber : z.string(),
+//     contactName : z.string(),
+//     paymentStatus : z.enum([prismaEnums.PaymentStatus.PENDING, prismaEnums.PaymentStatus.CONFIRMED]).nullable(),
+//     paymentId : z.number().nullable(),
+//     shipmentId : z.number().nullable(),
+//     createdAt : z.date(),
+//     updatedAt : z.date(),
+// });
+// export type TOrderOutputSchema = z.infer<typeof ZOrderOutputSchema>;
 
 // export const ZChangeOrderStatus = z.object({
 //     status: z.enum([prismaEnums.OrderStatus.PACKING, prismaEnums.OrderStatus.SHIPPED, prismaEnums.OrderStatus.CONFIRMED, prismaEnums.OrderStatus.DELIVERED, prismaEnums.OrderStatus.PACKED]),

@@ -1,9 +1,8 @@
 "use client"
 
 import Image from "next/image";
-import React from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { GeneralButton, GeneralButtonTransparent, ProductPageActionButton, QuantitySelectButton, SizeButton } from "./ui/buttons";
-import { useState, useRef, useEffect } from "react";
 import { RouterOutput } from "@/app/_trpc/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSetAppbarUtilStore, useBuyNowItemsStore, useCartItemStore } from "@/store/atoms"
@@ -17,19 +16,35 @@ import { ProductCard } from "./cards/ProductCard";
 
 type ProductProps = RouterOutput["viewer"]["product"]["getProduct"]["data"];
 
+// Move function outside component to prevent recreation on each render
 const convertStringToINR = (currencyString: number) => {
     let INR = new Intl.NumberFormat();
     return `INR ${INR.format(currencyString)}.00`;
 }
 
-const SimilarProducts: React.FC<{ productId: number, categoryId: number }> = ({ productId, categoryId }) => {
-    const { data: relatedProducts, isLoading } = trpc.viewer.product.getRelatedProducts.useQuery(
-        { productId, categoryId },
-        { enabled: !!productId && !!categoryId }
-    );
+const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
+    const { toast } = useToast();
+    const [buyNow, setBuyNow] = useState(false);
+    const [selectedQuantity, setSelectedQuantity] = useState(1);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, productSku: string, quantity: number, productImage: string, productName: string, price: number } }>({});
+    const { setBuyNowItems } = useBuyNowItemsStore();
+    // Use the hook properly to subscribe to state changes
+    const { cartItems, setCartItems } = useCartItemStore();
+    const { setAppbarUtil } = useSetAppbarUtilStore();
+    const isScreenLg = useBreakpoint('1024px');
+    const router = useRouter();
+    const sizeSKU = useRef<number>();
 
+    // Related products component functionality
     const [isIntersecting, setIsIntersecting] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
+    const similarProductsRef = useRef<HTMLDivElement>(null);
+    
+    const { data: relatedProducts, isLoading } = trpc.viewer.product.getRelatedProducts.useQuery(
+        { productId: product.id, categoryId: product.categoryId },
+        { enabled: !!product.id && !!product.categoryId && isIntersecting }
+    );
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -39,94 +54,104 @@ const SimilarProducts: React.FC<{ productId: number, categoryId: number }> = ({ 
             { threshold: 0.1 }
         );
 
-        if (ref.current) {
-            observer.observe(ref.current);
+        if (similarProductsRef.current) {
+            observer.observe(similarProductsRef.current);
         }
 
         return () => {
-            if (ref.current) {
-                observer.unobserve(ref.current);
+            if (similarProductsRef.current) {
+                observer.unobserve(similarProductsRef.current);
             }
         };
     }, []);
 
-    if (isLoading || !isIntersecting) {
-        return <div ref={ref} className="h-60" />;
-    }
-
-    if (!relatedProducts || relatedProducts.data.length === 0) {
-        return null;
-    }
-
-    return (
-        <div ref={ref} className="w-full pt-8 pb-2 px-1">
-            <h2 className="text-left text-neutral-800 text-xs md:text-lg font-bold mb-3 px-2">YOU MAY ALSO LIKE</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-1">
-                {relatedProducts.data.map((product) => (
-                    <ProductCard
-                        key={product.sku}
-                        image={product.productImages[0]?.image}
-                        name={product.name.toUpperCase()}
-                        sku={product.sku}
-                        count={1}
-                        imageAlt={product.sku}
-                        price={+product.price}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-};
-
-const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
-    const { toast } = useToast();
-    const [buyNow, setBuyNow] = useState(false);
-    const [selectedQuantity, setSelectedQuantity] = useState(1);
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-
-    const [selectedSize, setSelectedSize] = useState<{ [variantId: number]: { size: string, productId: number, productSku: string, quantity: number, productImage: string, productName: string, price: number } }>({});
-    const { setBuyNowItems } = useBuyNowItemsStore();
-    const { cartItems, setCartItems } = useCartItemStore.getState();
-    const { setAppbarUtil } = useSetAppbarUtilStore();
-    const isScreenLg = useBreakpoint('1024px');
-    const router = useRouter();
-    const sizeSKU = useRef<number>();
-
-    const handleAddToCart = () => {
-        let variantId: number = sizeSKU.current!;
-        let variantIndex = sizeData.findIndex((item) => item.variantId === variantId);
-        if (variantId && sizeData[variantIndex]) {
-            let itemQuantity = cartItems[variantId] ? ++cartItems[variantId].quantity : 1;
-            if (itemQuantity > sizeData[variantIndex].quantity) {
-                toast({ duration: 1500, title: "Can't add more for this size" })
-            } else {
-                const cartItem = { [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } }
-                setCartItems(cartItem);
-                setAppbarUtil("CART");
-            }
+    // Memoize the handler to prevent recreation on every render
+    const handleAddToCart = useCallback(() => {
+        let variantId = sizeSKU.current!;
+        if (!variantId) return;
+        
+        // let variantIndex = sizeData.findIndex((item) => item.variantId === variantId);
+        // if (variantIndex === -1) return;
+        
+        let itemQuantity = cartItems[variantId] ? cartItems[variantId].quantity + 1 : 1;
+        if (itemQuantity > sizeData[variantId].quantity) {
+            toast({ duration: 1500, title: "Can't add more of this size" });
+            return;
         }
-    };
+        
+        const cartItem = { [variantId]: { ...selectedSize[variantId], quantity: itemQuantity, variantId: variantId } };
+        setCartItems(cartItem);
+        setAppbarUtil("CART");
+    }, [cartItems, selectedSize, sizeData, setCartItems, setAppbarUtil, toast]);
+
+    // Memoize size buttons to prevent unnecessary re-renders
+    // const sizeButtons = () => (
+        <div className="flex flex-row text-xs gap-2">
+            {Object.values(sizeData).map(({ size, variantId, quantity }, index) => (
+                <SizeButton
+                    key={index}
+                    sizeCount={Object.keys(sizeData).length}
+                    sku={product.sku}
+                    productId={product.id}
+                    display={size}
+                    price={+product.price}
+                    quantity={quantity}
+                    variantId={variantId}
+                    name={product.name}
+                    image={product.productImages[0].image}
+                    selectedSize={sizeSKU}
+                    setSelectedSize={setSelectedSize}
+                    setQuantity={setSelectedQuantity}
+                />
+            ))}
+        </div>
+    // ), [product.id, product.name, product.productImages, product.sku, sizeData]);
+
+    // Memoize product images to prevent unnecessary sorting on each render
+    const sortedProductImages = useMemo(() => 
+        [...product.productImages].sort((a, b) => a.priorityIndex - b.priorityIndex),
+        [product.productImages]
+    );
+
+    // Memoize buy now action
+    const handleBuyNow = useCallback(() => {
+        if (!sizeSKU.current) return;
+        
+        setBuyNowItems({
+            [sizeSKU.current]: { 
+                ...selectedSize[sizeSKU.current], 
+                quantity: selectedQuantity, 
+                variantId: sizeSKU.current 
+            }
+        });
+        router.push(`/checkout?purchase=1`);
+    }, [selectedSize, selectedQuantity, setBuyNowItems, router]);
+
+    // Memoize size selection validation
+    const validateSizeSelection = useCallback(() => {
+        if (!sizeSKU.current || !selectedSize[sizeSKU.current]?.quantity) {
+            toast({
+                duration: 1500,
+                title: "Please Select An Available Size"
+            });
+            return false;
+        }
+        return true;
+    }, [selectedSize, toast]);
 
     return (
         <>
             <article className="my-3 px-1 flex flex-col lg:flex-row flex-1 space-y-2 lg:space-x-3 lg:space-y-0">
                 <div className="lg:basis-1/2 2xl:basis-5/12 relative lg:min-h-screen">
+                    {/* Product Images Carousel */}
                     <Carousel
-                        plugins={[
-                            WheelGesturesPlugin("is-wheel-dragging")
-                        ]}
+                        plugins={[WheelGesturesPlugin("is-wheel-dragging")]}
                         opts={isScreenLg ? { dragFree: true, align: "start", loop: true } : { dragFree: true, align: "center", loop: true }}
                         orientation={isScreenLg ? "vertical" : "horizontal"}
                         className="lg:h-screen w-full"
                     >
-                        <CarouselContent className="w-full lg:h-screen">{
-                            product.productImages.sort((a, b) => a.priorityIndex - b.priorityIndex).map((image, key) => (
-                                // the below basis-1/2 is important to tell the carousel to keep more thn 1 item in the view point otherwise,
-                                // it keeps only one image in whole content length
+                        <CarouselContent className="w-full lg:h-screen">
+                            {sortedProductImages.map((image, key) => (
                                 <CarouselItem key={key} className="w-full lg:basis-1/2"> 
                                     <Image
                                         src={image.image}
@@ -137,15 +162,19 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                                         className="w-full h-[550px] lg:h-auto object-cover"
                                     />
                                 </CarouselItem>
-                            ))
-                        }</CarouselContent>
+                            ))}
+                        </CarouselContent>
                     </Carousel>
                     <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-1 right-0"}`}>
-                        <GeneralButtonTransparent display="Measures" className={`p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-none w-fit text-[10px] md:text-xs ${isModalOpen && "opacity-0"}`} onClick={openModal}/>
+                        <GeneralButtonTransparent 
+                            display="Measures" 
+                            className={`p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-none w-fit text-[10px] md:text-xs ${isModalOpen && "opacity-0"}`} 
+                            onClick={() => setIsModalOpen(true)}
+                        />
                     </div>
-
                 </div>
-                <div className=" lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
+                
+                <div className="lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
                     <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
                         <div className="flex flex-col pl-1 text-center space-y-2">
                             <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-bold">
@@ -158,8 +187,10 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                                 {product.inspiration}
                             </span>
                         </div>
-                        <div className="flex flex-row text-xs gap-2">{
-                            Object.values(sizeData).map(({ size, variantId, quantity }, index) => (
+                        
+                        {/* Size selection buttons */}
+                        <div className="flex flex-row text-xs gap-2">
+                            {Object.values(sizeData).map(({ size, variantId, quantity }, index) => (
                                 <SizeButton
                                     key={index}
                                     sizeCount={Object.keys(sizeData).length}
@@ -175,10 +206,12 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                                     setSelectedSize={setSelectedSize}
                                     setQuantity={setSelectedQuantity}
                                 />
-                            ))
-                        }</div>
-                        <div className="flex flex-row text-xs w-full gap-2">{
-                            buyNow 
+                            ))}
+                        </div>
+                        
+                        {/* Action buttons */}
+                        <div className="flex flex-row text-xs w-full gap-2">
+                            {buyNow 
                                 ? <div className="flex flex-col w-full space-y-2">
                                     <div className="flex flex-row w-full space-x-2">
                                         <QuantitySelectButton
@@ -191,44 +224,36 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                                         <GeneralButton
                                             className="h-full w-full bg-neutral-800 text-white font-bold"
                                             display="CHECKOUT"
-                                            onClick={() => {
-                                                setBuyNowItems({
-                                                    [sizeSKU.current!]: { ...selectedSize[sizeSKU.current!], quantity: selectedQuantity, variantId: sizeSKU.current! }
-                                                })
-                                                router.push(`/checkout?purchase=1`)
-                                            }}
+                                            onClick={handleBuyNow}
                                         />
                                     </div>
-                                    <ProductPageActionButton display="ADD TO CART" className="shadow-neutral-200 shadow-sm" onClick={() => {
-                                        selectedSize[sizeSKU.current!]?.quantity > 0 
-                                        ? handleAddToCart() 
-                                        : toast({
-                                            duration: 1500,
-                                            title: "Please Select An Available Size"
-                                        })
-                                    }} /> 
+                                    <ProductPageActionButton 
+                                        display="ADD TO CART" 
+                                        className="shadow-neutral-200 shadow-sm" 
+                                        onClick={() => {
+                                            validateSizeSelection() && handleAddToCart();
+                                        }} 
+                                    /> 
                                 </div>
                                 : <>
-                                    <ProductPageActionButton display="ADD TO CART" onClick={() => {
-                                        selectedSize[sizeSKU.current!]?.quantity > 0 ?
-                                            handleAddToCart() : toast({
-                                                duration: 1500,
-                                                title: "Please Select An Available Size"
-                                            })
-                                    }} />
+                                    <ProductPageActionButton 
+                                        display="ADD TO CART" 
+                                        onClick={() => {
+                                            validateSizeSelection() && handleAddToCart();
+                                        }} 
+                                    />
                                     <GeneralButton
                                         className="h-full w-full p-3 font-bold"
                                         display="BUY IT NOW"
                                         onClick={() => {
-                                            selectedSize[sizeSKU.current!]?.quantity > 0 ?
-                                                setBuyNow(true) : toast({
-                                                    duration: 1500,
-                                                    title: "Please Select An Available Size"
-                                                })
+                                            validateSizeSelection() && setBuyNow(true);
                                         }}
                                     />
                                 </>
-                        }</div>
+                            }
+                        </div>
+                        
+                        {/* Product Details */}
                         <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
                             <div className="flex lg:flex-col lg:text-center lg:space-y-1">
                                 <span className="font-normal lg:font-bold basis-1/3 ">DESCRIPTION</span>
@@ -251,17 +276,41 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                         </div>
                     </div>
                 </div>
-                {isModalOpen && (product.sizeChartId || product.category.sizeChartId) && <SizeChart 
-                    isOpen={isModalOpen} 
-                    onClose={closeModal} 
-                    sizeChartCategoryNameId={product.sizeChartId ?? (product.category.sizeChartId ?? 0)}
-                />}
+                
+                {/* Size Chart Modal */}
+                {isModalOpen && (product.sizeChartId || product.category.sizeChartId) && (
+                    <SizeChart 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        sizeChartCategoryNameId={product.sizeChartId ?? (product.category.sizeChartId ?? 0)}
+                    />
+                )}
             </article>
             
             {/* Similar Products Section */}
-            <SimilarProducts productId={product.id} categoryId={product.categoryId} />
+            <div ref={similarProductsRef} className="w-full pt-8 pb-2 px-1">
+                {!isLoading && isIntersecting && relatedProducts && relatedProducts.data.length > 0 && (
+                    <>
+                        <h2 className="text-left text-neutral-800 text-xs md:text-lg font-bold mb-3 px-2">YOU MAY ALSO LIKE</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-1">
+                            {relatedProducts.data.map((product) => (
+                                <ProductCard
+                                    key={product.sku}
+                                    image={product.productImages[0]?.image}
+                                    name={product.name.toUpperCase()}
+                                    sku={product.sku}
+                                    count={1}
+                                    imageAlt={product.sku}
+                                    price={+product.price}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
+                {(isLoading || !isIntersecting) && <div className="h-60" />}
+            </div>
         </>
-    )
+    );
 };
 
-export default Product;
+export default React.memo(Product);

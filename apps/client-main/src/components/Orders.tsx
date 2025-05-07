@@ -10,14 +10,10 @@ import { signOut } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { prismaTypes } from "@nonrml/prisma";
 import { useToast } from "@/hooks/use-toast";
+import { convertStringToINR } from "@/lib/utils";
 
 interface OrdersProps {
     className?: string
-}
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
 }
 
 const getOrderProgressMessage = (status: prismaTypes.OrderStatus) => {

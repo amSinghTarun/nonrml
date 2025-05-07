@@ -15,21 +15,14 @@ import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import Loading from "@/app/loading";
 import { UseTRPCQueryResult } from "@trpc/react-query/shared";
+import { convertStringToINR } from "@/lib/utils";
 
-type AddressesTRPCOutput = RouterOutput["viewer"]["address"]["getAddresses"]["data"]
-
-interface AddressProps {
+interface CheckoutProp {
     className?: string,
     buyOption: string|null,
-    userAddresses: UseTRPCQueryResult<RouterOutput["viewer"]["address"]["getAddresses"], unknown>
 }
 
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
-
-export const Checkout = ({className, buyOption, userAddresses}: AddressProps) => {
+export const Checkout = ({className, buyOption }: CheckoutProp) => {
     
     const router = useRouter();
     const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
@@ -44,16 +37,10 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     const couponCode = useRef("");
     const totalAmount = useRef(0);
     const [ quantityChange, setQuantityChange ] = useState(false);
-    const [ selectedAddress, setSelectedAddress ] = useState<AddressesTRPCOutput[number]>();
     const [ applyCoupon, setApplyCoupn ] = useState(false);
-    const [ action, setAction ] = useState<"ADDADDRESS"|"EDITADDRESS"|"ORDER"|"SHOWADDRESS">("SHOWADDRESS");
-    const couponDisplay = useRef<"HAVE COUPON" | "CLOSE" | "REMOVE">("HAVE COUPON");
+    const couponDisplay = useRef<"APPLY COUPON" | "CLOSE" | "REMOVE">("APPLY COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
-    const deleteAddress = trpc.viewer.address.removeAddress.useMutation({
-        onSuccess: () => {
-            userAddresses.refetch()
-        }
-    });
+
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
       onSuccess: (response) => {
@@ -70,41 +57,31 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
     });
     const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote;
 
-    const handleAddressEdit = (address: AddressesTRPCOutput[number]) => {
-        setSelectedAddress(address);
-        setAction("EDITADDRESS");
-    }
-
-    useEffect( () => {
+    useEffect(() => {
+        // Calculate total amount
         totalAmount.current = 0;
         Object.values(orderProducts).map((orderProduct) => {
             totalAmount.current += orderProduct.price * orderProduct.quantity;
-        })
-    });
-
-    // to end the page session after 10 mins
-    useEffect(() => {
+        });
+        
+        
+    }, [cartItems, buyNowItems]); 
+    
+    useEffect( () => {
+        // Set timeout to end page session after 10 mins
         const timer = setTimeout(() => {
-          router.back();
+            router.back();
         }, 600000);
+        
+        // Cleanup function
         return () => clearTimeout(timer);
-    }, [router]);
+    }, [router])
 
-    // const onDismissHandler = () => setOrderInProcess(false);
 
     const handlePayment = async () => {
         try{
-            if(!selectedAddress) {
-                toast({
-                    duration: 1500,
-                    title: "Please Select An Address"
-                });
-                return
-            }
-            // setOrderInProcess(true);
 
-            // const data = await initiateOrder({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current });
-            const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, addressId: selectedAddress?.id!, creditNoteCode: couponCode.current })
+            const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
                 setQuantityChange(true);
                 !buyOption ? setCartItems(data.insufficientProductQuantities) : setBuyNowItems(data.insufficientProductQuantities);
@@ -114,7 +91,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             if (data.orderId){
                 console.log("OPEN RAZORPAY");
                 await displayRazorpay({
-                    rzpOrder: { orderId: data.orderId!, amount: data.amount!, email: data.email, rzpOrderId: data.rzpOrderId, contact: data.contact, name: data.name},
+                    rzpOrder: { orderId: data.orderId!, amount: data.amount!, rzpOrderId: data.rzpOrderId },
                     cartOrder: !buyOption ? true : false,
                     updatePaymentStatus: updatePaymentStatus.mutate,
                     verifyOrder: verifyOrder.mutate,
@@ -152,73 +129,15 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
             { initiateOrder.isLoading || verifyOrder.isLoading ? 
                 <Loading  text="PROCESSING YOUR PAYMENT..."/> : 
                 <>
-                <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false); setAction("ORDER") }} />
+                <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false) }} /> {/* ; setAction("ORDER") */}
                 <div className="w-[100%] h-[100%] flex flex-col text-neutral-800">
-                { action != "ORDER" && <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
+                { <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
                     <div className=" cursor-pointer text-xs font-bold">
-                        <span className={`${action == "SHOWADDRESS" && "font-bold"}`} onClick={()=>{setAction("SHOWADDRESS")}}>{`SHIPPING ADDRESS`}</span>
+                        <span className={`${"font-bold"}`} >{`ORDER SUMMARY`}</span>
                     </div>
-                    <div className=" font-normal w-fit h-full">
-                        { action != "ADDADDRESS" && <GeneralButtonTransparent 
-                            className=" w-full h-full text-[10px] p-2 px-4 border border-neutral-200 text-neutral-400 hover:text-neutral-700"
-                            onClick={()=> {setAction("ADDADDRESS")}} 
-                            display="ADD ADDRESS"
-                        />}
-                    </div>
+
                 </article>}
-                {action == "ADDADDRESS" && <AddAddress onCancelClick={()=>{userAddresses.refetch(), setAction("SHOWADDRESS")}}/>}
-                {action =="EDITADDRESS" && selectedAddress && <EditAddress address={selectedAddress} onCancelClick={()=>{userAddresses.refetch(), setAction("SHOWADDRESS")}}/>}
-                {action == "SHOWADDRESS" && (
-                    <>
-                        {userAddresses.isLoading ? (
-                            <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
-                                <div className="p-4 font-bold text-xs">
-                                    <p>FINDING YOUR ADDRESS FOR YOU .....</p>
-                                </div>
-                            </article>
-                        ) : userAddresses.isError ? (
-                            <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
-                                <div className="backdrop-blur-3xl bg-white/20 p-4 font-bold rounded-xl text-sm">
-                                    <p>Error loading addresses. Please try again.</p>
-                                </div>
-                            </article>
-                        ) : (
-                            userAddresses.data && userAddresses.data?.data.length === 0 ? (
-                                <article className="flex flex-row p-2 w-full h-[70%] justify-center items-center">
-                                <div className="text-xs text-neutral-500 text-center">
-                                    <p>NO ADDRESS FOUND</p>
-                                    <p className="text-xs">PLEASE ADD ONE TO CONTINUE WITH PURCHASE!</p>
-                                </div>
-                            </article>
-                        ) :
-                            <div className="w-full h-[70%] space-y-2 p-2 overflow-y-scroll">
-                                {
-                                    userAddresses.data?.data.map((address, index) => (
-                                        <AddressCard 
-                                            selected={selectedAddress?.id}
-                                            key={index}
-                                            name={address.contactName} 
-                                            address={address.location}
-                                            email={address.email}
-                                            mobile={address.contactNumber}
-                                            pincode={address.pincode}
-                                            onEdit={()=>{handleAddressEdit(address)}}
-                                            onDelete={()=>{
-                                                deleteAddress.mutate({id:address.id})
-                                                userAddresses.data.data.splice(index, 1)
-                                            }}
-                                            deleting={deleteAddress.isLoading && address.id == deleteAddress.variables?.id}
-                                            id={address.id}
-                                            onSelect={() => setSelectedAddress(address)}
-                                            className={`${selectedAddress?.id == address.id && "shadow-sm text-neutral-700 shadow-neutral-400"}`}
-                                        />
-                                    ))
-                                }
-                            </div>
-                        )}
-                    </>
-                )}
-                {action == "ORDER" && (
+
                     <div className="w-full h-[70%] space-y-2 p-2 overflow-y-scroll">{
                         Object.keys(orderProducts).map((variantId, index) => (
                             <div 
@@ -242,7 +161,6 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                             </div>
                         ))
                     }</div>
-                )}
                 {
                     applyCoupon && 
                     <article className="flex flex-row justify-between px-3 py-4 gap-5 items-center">
@@ -273,7 +191,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                 }
                 <article className="flex flex-row justify-between px-3 py-3 space-x-1 items-center">
                     <div className=" cursor-pointer text-xs hover:font-bold text-neutral-600">
-                        <span className={`${action == "ORDER" && "font-bold"}`} onClick={()=>{setAction("ORDER")}}>{`ORDER SUMMARY *`}</span>
+                        <span className={`${"font-bold"}`}>{`HAVE A COUPON CODE?`}</span>
                     </div>
                     {
                         couponValue ? 
@@ -285,7 +203,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                             <GeneralButtonTransparent
                                 className=" w-full h-full text-[10px] p-2 px-4 border border-neutral-200 text-neutral-400 hover:text-neutral-700"
                                 onClick={()=> {
-                                    couponDisplay.current = applyCoupon ? "HAVE COUPON" : "CLOSE"
+                                    couponDisplay.current = applyCoupon ? "APPLY COUPON" : "CLOSE"
                                     setApplyCoupn(!applyCoupon)
                                 }} 
                                 display={couponDisplay.current} 
@@ -293,21 +211,7 @@ export const Checkout = ({className, buyOption, userAddresses}: AddressProps) =>
                         </div>
                     }
                 </article>
-                {   
-                    action == "ORDER" && 
-                    <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center text-neutral-600">
-                        <div className=" cursor-pointer text-xs hover:font-bold">
-                            <span onClick={()=>{setAction("SHOWADDRESS")}}>{`SHIPPING ADDRESS`}</span>
-                        </div>
-                        <div className=" font-normal w-fit h-full">
-                            <GeneralButtonTransparent 
-                                className=" w-full h-full text-[10px] p-2 px-4 border border-neutral-200 text-neutral-400 hover:text-neutral-700"
-                                onClick={()=> {setAction("ADDADDRESS")}} 
-                                display={"ADD ADDRESS"}
-                            />
-                        </div>
-                    </article>
-                }
+
                 <article className="text-sm flex flex-row justify-between px-2 pt-4 pb-2 space-x-1">
                     <div className="flex flex-col basis-1/2 justify-start">
                         <span className="text-xs text-neutral-500">TOTAL:</span>

@@ -18,7 +18,8 @@ const nextConfig = {
         CART_EXPIRATION_TIME: `${1000 * 60 * 60 * 24 * 7}`,
         MAX_QUANTITY_TO_ORDER : `11`,
         MIN_QUANTITY_TO_ORDER: `1`,
-        PROD_PORT: '8080'
+        PROD_PORT: '8080',
+        RAZORPAY_KEY_ID: "rzp_test_L1NMKQGuZG8QER"
     }
 };
 
