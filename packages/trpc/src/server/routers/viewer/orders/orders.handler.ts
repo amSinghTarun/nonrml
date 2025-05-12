@@ -434,7 +434,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             line_items_total: orderTotalAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
-        }); {/* addressId: input.addressId*/}
+        }); 
+        {/* addressId: input.addressId*/}
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 
