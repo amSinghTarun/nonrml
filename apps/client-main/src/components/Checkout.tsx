@@ -35,11 +35,20 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     
     const { toast } = useToast();
     const couponCode = useRef("");
-    const totalAmount = useRef(0);
     const [ quantityChange, setQuantityChange ] = useState(false);
     const [ applyCoupon, setApplyCoupn ] = useState(false);
     const couponDisplay = useRef<"APPLY COUPON" | "CLOSE" | "REMOVE">("APPLY COUPON");
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
+    
+    const [totalAmount, setTotalAmount] = useState(0);
+    useEffect(() => {
+      // Calculate total amount
+      let newTotal = 0;
+      Object.values(orderProducts).map((orderProduct) => {
+        newTotal += orderProduct.price * orderProduct.quantity;
+      });
+      setTotalAmount(newTotal);
+    }, [cartItems, buyNowItems, orderProducts]);
 
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
@@ -56,16 +65,6 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
       }
     });
     const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote;
-
-    useEffect(() => {
-        // Calculate total amount
-        totalAmount.current = 0;
-        Object.values(orderProducts).map((orderProduct) => {
-            totalAmount.current += orderProduct.price * orderProduct.quantity;
-        });
-        
-        
-    }, [cartItems, buyNowItems]); 
     
     useEffect( () => {
         // Set timeout to end page session after 10 mins
@@ -113,7 +112,7 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
 
     const handleApplyCreditNote = async () => {
         try{
-            const creditNoteApplied = await getCreditNoteDetails.fetch({creditNote:couponCode.current, orderValue:totalAmount.current});
+            const creditNoteApplied = await getCreditNoteDetails.fetch({creditNote:couponCode.current, orderValue:totalAmount});
             setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
         } catch(error:any){
             toast({
@@ -215,7 +214,7 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
                 <article className="text-sm flex flex-row justify-between px-2 pt-4 pb-2 space-x-1">
                     <div className="flex flex-col basis-1/2 justify-start">
                         <span className="text-xs text-neutral-500">TOTAL:</span>
-                        <span className="text-lg font-bold">{convertStringToINR(couponValue?.orderValue ?? totalAmount.current)}</span>
+                        <span className="text-lg font-bold">{convertStringToINR(couponValue?.orderValue ?? totalAmount)}</span>
                     </div>
                     <div className=" w-fit h-full">
                         <GeneralButton className=" p-2 px-6 h-full w-full" display={ initiateOrder.isLoading ? "PROCESSING..." : "PAY NOW"} onClick={handlePayment} />

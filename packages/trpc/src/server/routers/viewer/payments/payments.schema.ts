@@ -1,11 +1,11 @@
 import { prisma, prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
-export const ZCreateRzpOrderSchema = z.object({
-    orderTotal:z.number(),
-    addressId: z.number().optional()
-});
-export type TCreateRzpOrderSchema = z.infer<typeof ZCreateRzpOrderSchema>;
+// export const ZCreateRzpOrderSchema = z.object({
+//     orderTotal:z.number(),
+//     addressId: z.number().optional()
+// });
+// export type TCreateRzpOrderSchema = z.infer<typeof ZCreateRzpOrderSchema>;
 
 export const ZChangePaymentStatusSchema = z.object({
     orderId: z.string(),

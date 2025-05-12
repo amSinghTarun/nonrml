@@ -1,10 +1,8 @@
 import React from "react";
 import { MaskContainer } from "../ui/svg-mask-effect";
 import Image from "next/image";
-import homeImage from "../../images/AMI_4024-Edit-2_1668x2500_crop_center.jpg"
 import Link from "next/link";
 import logo from "@/images/logo.png";
-const words = ["NORMAL", "STANDARD", "USUAL", "ORDINARY", "COMMON"]; 
 import { getHomePagesImages, getHomepageProducts } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import NoNRMLFaceCard from "./Facecard";

@@ -2,7 +2,8 @@ import { TRPCResponseStatus } from "@nonrml/common"
 import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
 import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
-import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
+import { TRPCError } from "@trpc/server";
+import { createOrder } from "@nonrml/payment";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
@@ -425,8 +426,15 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 }
             }
         }
+
+        const orderTotalAmount = (orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)
         
-        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ((orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue))}}); {/* addressId: input.addressId*/}
+        const rzpPaymentCreated = await createOrder({
+            amount: orderTotalAmount*100,
+            line_items_total: orderTotalAmount*100, 
+            receipt: `${Date.now()}`,
+            currency: "INR",
+        }); {/* addressId: input.addressId*/}
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 
@@ -441,8 +449,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     productCount: Object.values(input.orderProducts).length,
                     Payments: {
                         create: {
-                            rzpOrderId: rzpPaymentCreated.data.rzpOrder.id,
-                            paymentStatus: rzpPaymentCreated.data.rzpOrder.status as prismaTypes.PaymentStatus,
+                            rzpOrderId: rzpPaymentCreated.id,
+                            paymentStatus: rzpPaymentCreated.status as prismaTypes.PaymentStatus,
                         }
                     }
                 },
@@ -472,7 +480,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             data: {
                 orderId: orderCreated.order.id,
                 amount: +orderTotal*100, 
-                rzpOrderId: rzpPaymentCreated.data.rzpOrder.id, 
+                rzpOrderId: rzpPaymentCreated.id, 
                 // contact: ctx.user?.contactNumber!, 
                 // name: rzpPaymentCreated.data.address.contactName, 
                 // email: rzpPaymentCreated.data.address.email
