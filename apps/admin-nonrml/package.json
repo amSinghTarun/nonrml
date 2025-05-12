@@ -5,15 +5,15 @@
   "scripts": {
     "dev": " PORT=3001 next dev --turbopack",
     "build": "next build",
-    "start": "PORT=3001 next start",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@nonrml/common": "*",
-    "@nonrml/components": "*",
-    "@nonrml/configs": "*",
-    "@nonrml/trpc": "*",
+    "@nonrml/common": "workspace:*",
+    "@nonrml/components": "workspace:*",
+    "@nonrml/configs": "workspace:*",
+    "@nonrml/trpc": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-checkbox": "^1.1.3",
