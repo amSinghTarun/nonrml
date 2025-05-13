@@ -1,26 +1,14 @@
 import { TRPCResponseStatus } from "@nonrml/common"
 import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
-import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
+import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
-import { createOrder } from "@nonrml/payment";
+import { Orders } from "razorpay/dist/types/orders";
 import crypto from 'crypto';
-import { getPaymentDetials } from "@nonrml/payment";
+import { createOrder, getPaymentDetials } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
-import { rateLimitLoginMiddleware } from "../../../middlewares/rateLimitMiddleware";
 
 const returnExchangeTime = 604800000; // 7 days
-
-type line_items = { 
-    sku: string, 
-    variant_id: string
-    price: number, 
-    offer_price: number,
-    tax_amount: number,
-    quantity: number,
-    name:string,
-    description: string,
-}
 
 /*
 Get all the orders of a user
@@ -393,17 +381,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                         price: true,
                         id: true,
                         name: true,
-                        sku: true,
-                        productImages: {
-                            where: {
-                                priorityIndex: {
-                                    equals: 0
-                                }
-                            },
-                            select: {
-                                image: true
-                            }
-                        }
+                        sku: true
                     }
                 },
                 inventory: {
@@ -426,7 +404,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         let insufficientProductQuantities: typeof input.orderProducts = {};
         
-        let line_items : line_items[] = []
+        let line_items : Orders.LineItems[] = []
+
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
             if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
@@ -443,12 +422,21 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             line_items.push({
                 sku: variant.product.sku,
                 name: variant.product.name,
-                price: variant.product.price*100,
+                price: `${variant.product.price*100}`,
                 quantity: orderProduct!.quantity,
-                offer_price: variant.product.price*100,
+                offer_price: `${variant.product.price*100}`,
                 variant_id: variant.product.sku,
                 description: variant.product.name,
-                tax_amount: 0
+                tax_amount: 0,
+                weight: '1',
+                type: "e-commerce",
+                image_url: "",
+                product_url: "",
+                dimensions: {
+                    length: "1",
+                    width: "1",
+                    height: "1",
+                }
             })
         }
         if(Object.keys(insufficientProductQuantities).length != 0){
