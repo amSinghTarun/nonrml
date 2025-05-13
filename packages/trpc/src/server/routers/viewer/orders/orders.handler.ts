@@ -7,8 +7,20 @@ import { createOrder } from "@nonrml/payment";
 import crypto from 'crypto';
 import { getPaymentDetials } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
+import { rateLimitLoginMiddleware } from "../../../middlewares/rateLimitMiddleware";
 
 const returnExchangeTime = 604800000; // 7 days
+
+type line_items = { 
+    sku: string, 
+    variant_id: string
+    price: number, 
+    offer_price: number,
+    tax_amount: number,
+    quantity: number,
+    name:string,
+    description: string,
+}
 
 /*
 Get all the orders of a user
@@ -380,7 +392,18 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     select:{
                         price: true,
                         id: true,
-                        name: true
+                        name: true,
+                        sku: true,
+                        productImages: {
+                            where: {
+                                priorityIndex: {
+                                    equals: 0
+                                }
+                            },
+                            select: {
+                                image: true
+                            }
+                        }
                     }
                 },
                 inventory: {
@@ -395,6 +418,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 },
             }
         });
+        console.log(" ------------------------------ ", productValidation)
 
         // Verify product variants and quantities and price
         if(productValidation.length !== Object.keys(input.orderProducts).length)
@@ -402,6 +426,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         let insufficientProductQuantities: typeof input.orderProducts = {};
         
+        let line_items : line_items[] = []
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
             if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
@@ -415,6 +440,16 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 });
             }
             orderTotal += (variant.product.price * orderProduct!.quantity);
+            line_items.push({
+                sku: variant.product.sku,
+                name: variant.product.name,
+                price: variant.product.price*100,
+                quantity: orderProduct!.quantity,
+                offer_price: variant.product.price*100,
+                variant_id: variant.product.sku,
+                description: variant.product.name,
+                tax_amount: 0
+            })
         }
         if(Object.keys(insufficientProductQuantities).length != 0){
             return {
@@ -428,12 +463,13 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         }
 
         const orderTotalAmount = (orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)
-        
+        console.log(line_items)
         const rzpPaymentCreated = await createOrder({
             amount: orderTotalAmount*100,
             line_items_total: orderTotalAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
+            line_items: line_items
         }); 
         {/* addressId: input.addressId*/}
         
@@ -473,7 +509,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             return {order, orderProducts};
         },  {timeout: 10000});
 
-        console.log(input, orderCreated.orderProducts)
+        // console.log(input, orderCreated.orderProducts)
 
         return { 
             status: TRPCResponseStatus.SUCCESS, 

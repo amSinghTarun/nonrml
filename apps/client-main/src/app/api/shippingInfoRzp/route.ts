@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
+export function POST() {
     try {
       // Parse the request body
   
@@ -49,5 +49,15 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-  }
-  
+}
+
+export async function OPTIONS(request: NextRequest) {
+return new NextResponse(null, {
+    status: 200,
+    headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+})
+}
