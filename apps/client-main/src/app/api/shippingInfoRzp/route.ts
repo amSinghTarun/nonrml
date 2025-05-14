@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export function POST() {
+export async function POST(request: NextRequest) {
     try {
       // Parse the request body
-  
+      const body = await request.json();
+      console.log(body)
       // Validate required fields
         return NextResponse.json(
             {
