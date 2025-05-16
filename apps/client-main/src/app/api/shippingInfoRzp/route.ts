@@ -1,43 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { serverClient } from "@/app/_trpc/serverClient";
 
+type RequestBody = {
+  order_id: string, 
+  razorpay_order_id: string, 
+  email: string, 
+  contact: string, 
+  addresses: {
+    id: string,
+    zipcode: string,
+    state_code: string,
+    country: string
+  }[]
+}
 export async function POST(request: NextRequest) {
     try {
-      // Parse the request body
-      const body = await request.json();
-      console.log(body)
+      const requestBody: RequestBody = await request.json();
+
+      const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
+        addresses: requestBody.addresses,
+        email: requestBody.email,
+        contact: requestBody.contact,
+        rzpOrderId: requestBody.razorpay_order_id,
+        rzpOrderReceipt: requestBody.order_id
+      });
+
       // Validate required fields
-        return NextResponse.json(
-            {
-                "addresses": [
-                  {
-                    "id": "0",
-                    "zipcode": "560000",
-                    "state_code": "KA",
-                    "country": "IN",
-                    "shipping_methods": [
-                      {
-                        "id": "1",
-                        "description": "Free shipping",
-                        "name": "Delivery within 5 days",
-                        "serviceable": true,
-                        "shipping_fee": 1000, // in paise. Here 1000 = 1000 paise, which equals to ₹10
-                        "cod": true,
-                        "cod_fee": 1000 // in paise. Here 1000 = 1000 paise, which equals to ₹10
-                      },
-                      {
-                        "id": "2",
-                        "description": "Standard Delivery",
-                        "name": "Delivered on the same day",
-                        "serviceable": true,
-                        "shipping_fee": 1000, // in paise. Here 1000 = 1000 paise, which equals to ₹10
-                        "cod": false,
-                        "cod_fee": 0 // in paise. Here 1000 = 1000 paise, which equals to ₹10
-                      }
-                    ]
-                  }
-                ]
-            }, { status: 201 }
-        )
+      return NextResponse.json( shippingDetails, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)

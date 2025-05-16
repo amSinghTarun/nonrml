@@ -12,7 +12,7 @@ type InitiateOrderResponse = RouterOutput["viewer"]["orders"]["initiateOrder"];
 type RzpOrder = Extract<
   InitiateOrderResponse["data"], 
   // { orderId: string; amount: number; rzpOrderId: string; contact: string; name: string; email: string }
-  { orderId: string; amount: number; rzpOrderId: string; }
+  { orderId: number; amount: number; rzpOrderId: string; }
 >;
 
 type UpdatePaymentStatusInput = RouterInput["viewer"]["payment"]["updateFailedPaymentStatus"]

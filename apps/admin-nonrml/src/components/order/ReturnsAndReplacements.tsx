@@ -31,7 +31,7 @@ import { prismaTypes } from '@nonrml/prisma'
 import { RouterOutput } from '@/app/_trpc/client'
 
 interface ReturnsAndReplacementsProps {
-  orderId: string
+  orderId: number 
   returnDetails: RouterOutput["viewer"]["orders"]["getOrderReturnDetails"]["data"] | undefined
   isLoading: boolean
   onReturnUpdated: () => void

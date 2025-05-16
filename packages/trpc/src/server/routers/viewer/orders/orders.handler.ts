@@ -1,12 +1,13 @@
 import { TRPCResponseStatus } from "@nonrml/common"
-import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
+import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, getOrderId, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TUpdateUserDetailAndCheckServicibilitySchema, TVerifyOrderSchema} from "./orders.schema";
 import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { Orders } from "razorpay/dist/types/orders";
 import crypto from 'crypto';
 import { createOrder, getPaymentDetials } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
+import { DelhiveryShipping } from "@nonrml/shipping"
 
 const returnExchangeTime = 604800000; // 7 days
 
@@ -26,6 +27,7 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
             select:{
                 id: true,
                 orderStatus: true,
+                idVarChar: true,
                 totalAmount: true,
                 createdAt: true,
                 productCount: true,
@@ -103,40 +105,16 @@ Get a particular order of a user
 search in the orderProducts as all the products are stored there and include the order details and product details
 in that only
 */
-export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrderSchema | TTrackOrderSchema>)  => {
+export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrderSchema>)  => {
     const prisma = ctx.prisma;
     input = input!;
     try{
-        let userIdsArray = ctx.user ? [ctx.user.id] : [];
-        if('mobile' in input){
-            // findMany because multiple related people can use same number to order in their address
-            const userIds = await prisma.address.findMany({
-                where: {
-                    contactNumber: input.mobile
-                },
-                select: {
-                    user: {
-                        select: {
-                            id: true
-                        }
-                    }
-                }
-            });
-            if(userIds.length != 0){
-                userIdsArray = [];
-                for(let user of userIds){
-                    userIdsArray.push(user.user.id);
-                }
-            } else {
-                throw new TRPCError({code:"NOT_FOUND", message: "No Order Available With Given Mobile No."})
-            }
-        }
+        let orderId = input.orderId;
+        let userId = ctx.user?.id;
         const orderDetails = await prisma.orders.findUnique({
             where: {
-                id: input.orderId!,
-                userId: {
-                    in: userIdsArray
-                } 
+                id: orderId,
+                userId: userId
             },
             include: {
                 address: true,
@@ -201,6 +179,32 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
         });
         if(!orderDetails?.id)
             throw new TRPCError({code:"NOT_FOUND", message: "No Details Available For Selected Order"})
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: orderDetails};
+    } catch(error) {
+        //console.log("\n\n Error in getUserOrder ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+};
+
+export const getTrackOrder = async ({ctx, input}: TRPCRequestOptions<TTrackOrderSchema>)  => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        let orderId = getOrderId(input.orderId);
+        const orderDetails = await prisma.orders.findUniqueOrThrow({
+            where: {
+                id: orderId,
+            },
+            include: {
+                user: true 
+            }
+        });
+
+        if( orderDetails.user && orderDetails.user.contactNumber !== input.mobile  )
+            throw new TRPCError({code:"NOT_FOUND", message: "Check Order Details Thoroughly"})
+
         return { status: TRPCResponseStatus.SUCCESS, message:"", data: orderDetails};
     } catch(error) {
         //console.log("\n\n Error in getUserOrder ----------------");
@@ -330,26 +334,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
     const userId = ctx.user?.id;
     const prisma = ctx.prisma;
     try{
-
-        let orderId : string = '';
-        let attempts = 0;
-        const MAX_ATTEMPTS = 5;
-        while(attempts < MAX_ATTEMPTS ){
-            orderId = generateOrderId();
-            attempts++;
-            const orderIdExist = await prisma.orders.count({
-                where: { 
-                    id: orderId
-                }
-            })
-            if(!orderIdExist){
-                break;
-            }
-            orderId = "";
-        }
-        if(orderId === "")
-            throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "failed to create orderId"}); 
-
         let cnUseableValue = 0;
         let creditNoteId = null;
         let orderTotal = 0;
@@ -450,25 +434,24 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             }
         }
 
+        const orderIdChar = generateOrderId();
         const orderTotalAmount = (orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)
-        console.log(line_items)
+        
         const rzpPaymentCreated = await createOrder({
             amount: orderTotalAmount*100,
             line_items_total: orderTotalAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
             line_items: line_items
-        }); 
-        {/* addressId: input.addressId*/}
+        });
+
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 
             const order = await prisma.orders.create({
                 data: {
-                    id: orderId,
-                    // userId: userId,
+                    idVarChar: orderIdChar,
                     totalAmount: orderTotal,
-                    // addressId: input.addressId,
                     creditNoteId: creditNoteId,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
                     productCount: Object.values(input.orderProducts).length,
@@ -700,89 +683,6 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
     }
 }
 
-/*
-Change the status of an order
-Process:
-    Switch between the status requested to be updated
-    all will just update the db record except the confirmed and packed
-    in confirmed, decrement the quantity form inventory
-    in packed, create the shipment order
-*/
-// export const ChangeOrderStatus = async ({ctx, input}: TRPCRequestOptions<TChangeOrderStatus>) => {
-//     try{
-//         // const order = await prisma.orders.findFirst({
-//         //     where: {
-//         //         id: input.orderId
-//         //     },
-//         //     select : {
-//         //         orderStatus: true
-//         //     }
-//         // });
-//         // if(!order)
-//         //     throw createError(404, `No such order with id: ${input.orderId}`);
-
-//         let orderUpdated = {}
-
-//         switch(input.status) {
-//             case(prismaEnums.OrderStatus.CONFIRMED):
-//                 // decrease quantity
-//                 const orderProducts = await prisma.orderProducts.findMany({
-//                     where: {
-//                         orderId: input.orderId
-//                     }
-//                 });
-//                 let queries = [];
-//                 for(let product of orderProducts) {
-//                     let query = prisma.inventory.update({
-//                         where: {
-//                             SKU: product.productSKU
-//                         },
-//                         data: {
-//                             quantity: {
-//                                 decrement: product.quantity
-//                             }
-//                         }
-//                     })
-//                     queries.push(query);
-//                 }
-
-//                 // update multiple record in 1 transaction
-//                 const [updatedOrders] = await prisma.$transaction([
-//                     ...queries,
-//                     prisma.orders.update({ where: { id: input.orderId}, data: { orderStatus: prismaEnums.OrderStatus.CONFIRMED}})
-//                 ]);
-//                 orderUpdated = updatedOrders;
-//                 break;
-//             case(prismaEnums.OrderStatus.PACKING):
-//                 orderUpdated = await prisma.orders.update({ where: { id: input.orderId}, data: { orderStatus: prismaEnums.OrderStatus.PACKING}});
-//                 break;
-//             case(prismaEnums.OrderStatus.PACKED):
-//                 // create shipment
-//                 orderUpdated = await prisma.orders.update({ where: { id: input.orderId}, data: { orderStatus: prismaEnums.OrderStatus.PACKED}});
-//                 break;
-//             case(prismaEnums.OrderStatus.SHIPPED):
-//                 orderUpdated = await prisma.orders.update({ where: { id: input.orderId}, data: { orderStatus: prismaEnums.OrderStatus.SHIPPED}});
-//                 break;
-//             case(prismaEnums.OrderStatus.DELIVERED):
-//                 orderUpdated = await prisma.orders.update({where: {id: input.orderId}, data: {orderStatus: prismaEnums.OrderStatus.DELIVERED, deliveryDate: Date.now()}})
-//                 break;
-//             default: 
-//                 break;
-//         }
-
-//         return { status: TRPCResponseStatus.SUCCESS, message: "Status updated", data: orderUpdated};
-
-//     } catch(error) {
-//         //console.log("\n\n Error in changeOrderStatus ----------------");
-//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
-//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-//         throw TRPCCustomError(error)
-//     }
-// };
-
-// not so sure about it.
-// maybe a route to confirm the payment.
-
 export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
@@ -866,3 +766,68 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
         throw TRPCCustomError(error)
     }
 };
+
+export const updateUserDetailAndCheckServicibility = async ({ctx, input}: TRPCRequestOptions<TUpdateUserDetailAndCheckServicibilitySchema>) => {
+    const prisma = ctx.prisma;
+    input = input!
+    try{
+        let email = null;
+        const orderHasUser = await prisma.orders.findFirstOrThrow({
+            where: {
+                idVarChar: input.rzpOrderReceipt,
+                Payments: {
+                    rzpOrderId:  `${input.rzpOrderId}`
+                }
+            },
+            select: {
+                id: true,
+                userId: true
+            }
+        });
+
+        const contactNumber = input.contact.search('+91') > 0 ? input.contact.split("+91")[1] : input.contact;
+
+        if(!orderHasUser.userId && input.contact.length >= 10 && contactNumber){
+            let user = await prisma.user.findUnique({ where: { contactNumber: contactNumber }});
+            
+            if(input.email.length > 0)
+                email = input.email;
+
+            if(!user){
+                user = await prisma.user.create({
+                    data: {
+                        contactNumber: contactNumber,
+                        role: "USER",
+                        ...(email && {email: email})
+                    }
+                })
+            }
+
+            await prisma.orders.update({
+                where: {
+                    id: orderHasUser.id
+                },
+                data: {
+                    userId: user.id
+                }
+            });
+        };
+
+        let shippingAddressesDetails = []
+        for( let pincode of input.addresses ){
+            let deliveryDetails = await DelhiveryShipping.checkPincodeServiceability({pincode: pincode.zipcode});
+            shippingAddressesDetails.push({
+                ...pincode,
+                shipping_methods: [deliveryDetails]
+            });
+        }
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: shippingAddressesDetails};
+
+    }catch(error){
+        //console.log("\n\n Error in editOrder ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+}

@@ -36,7 +36,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
   
   // Only fetch return details when we have an order with returns
   const returnReplacementDetails = trpc.viewer.orders.getOrderReturnDetails.useQuery(
-    { orderId: order?.id || "" },
+    { orderId: order?.id || 0 },
     { 
       enabled: !!order?.id && (order?._count?.return || 0) > 0,
       refetchOnWindowFocus: false,

@@ -3185,6 +3185,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@nonrml/shipping@workspace:*, @nonrml/shipping@workspace:packages/shipping":
+  version: 0.0.0-use.local
+  resolution: "@nonrml/shipping@workspace:packages/shipping"
+  languageName: unknown
+  linkType: soft
+
 "@nonrml/storage@workspace:*, @nonrml/storage@workspace:packages/storage":
   version: 0.0.0-use.local
   resolution: "@nonrml/storage@workspace:packages/storage"
@@ -3207,6 +3213,7 @@ __metadata:
     "@nonrml/payment": "workspace:*"
     "@nonrml/prisma": "workspace:*"
     "@nonrml/rate-limit": "workspace:*"
+    "@nonrml/shipping": "workspace:*"
     "@nonrml/storage": "workspace:*"
     "@trpc/client": "npm:^10.45.2"
     "@trpc/next": "npm:^10.45.2"
@@ -14583,12 +14590,6 @@ __metadata:
   checksum: 10c0/1dbed0726dd0e1152a92696c76c7f06084eb32a90f0528d11acd764043aacf76994b2fb30aa1291a21bd019d6699164d048286309a278855ee7bec06cf6fb690
   languageName: node
   linkType: hard
-
-"shipping@workspace:packages/shipping":
-  version: 0.0.0-use.local
-  resolution: "shipping@workspace:packages/shipping"
-  languageName: unknown
-  linkType: soft
 
 "side-channel-list@npm:^1.0.0":
   version: 1.0.0

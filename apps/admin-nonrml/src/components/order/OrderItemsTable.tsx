@@ -25,7 +25,7 @@ interface OrderItemsTableProps {
   isReimbursementPending: boolean
   onRejectedQuantityChange: (id: string, quantity: number) => void
   onUpdateRejectedItems: () => Promise<void>
-  orderId: string
+  orderId: number
   onRefundProcessed: () => void
 }
 

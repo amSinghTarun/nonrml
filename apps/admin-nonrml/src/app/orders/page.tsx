@@ -14,15 +14,15 @@ import { prismaTypes } from "@nonrml/prisma";
 interface FilterState {
   date?: Date;
   status?: prismaTypes.OrderStatus;
-  orderId: string;
-  submittedOrderId: string;
+  orderId: number;
+  submittedOrderId: number;
 }
 
 const initialFilterState: FilterState = {
   date: undefined,
   status: undefined,
-  orderId: "",
-  submittedOrderId: ""
+  orderId: 0,
+  submittedOrderId: 0
 };
 
 const OrdersPage = () => {
@@ -78,7 +78,7 @@ const OrdersPage = () => {
                 <Input
                     placeholder="Order ID"
                     value={filters.orderId}
-                    onChange={(e) => updateFilter('orderId', e.target.value)}
+                    onChange={(e) => updateFilter('orderId', +e.target.value)}
                     onKeyDown={handleKeyPress}
                     className=" bg-white rounded-r-none border-0"
                 />

@@ -14,6 +14,14 @@ export type TRPCRequestOptions<T> = {
     input?: T
 }
 
+export const getOrderId = (orderId: string) : number => {
+    if(orderId.search("ORD-") > 0){
+        return +orderId.split("-")[1]!.slice(0, -4);
+    } else {
+        throw new Error("Invalid order id");
+    }
+}
+
 export const createOTP = (len: number) : number => Number(Math.floor(100000 + Math.random() * 899999))
 
 export const createPasswordHash = async (password: string): Promise<string> => {
@@ -92,9 +100,8 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY
 }
 
 export const generateOrderId = () : string => {
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
-    const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
-    return `ORD-${date}${randomPart}`;
+    const randomPart = crypto.randomBytes(3).toString('hex').toUpperCase();
+    return `${randomPart}`;
 }
 
 export const getSizeOrderIndex = (size: string) => {
@@ -131,7 +138,7 @@ export const TRPCCustomError = (error: any) => {
     throw finalError;
 }
 
-export const acceptOrder = async (orderId: string) => {
+export const acceptOrder = async (orderId: number) => {
     try{
 
         let products : { [id: number]: number } = {};
@@ -258,7 +265,7 @@ export const acceptOrder = async (orderId: string) => {
     }
 };
 
-export const calculateRejectedQuantityRefundAmounts = async  (orderId: string, getUpdateQueries?: boolean) => {
+export const calculateRejectedQuantityRefundAmounts = async  (orderId: number, getUpdateQueries?: boolean) => {
 
     let updateOrderProductReimbursedQueries = [];
 

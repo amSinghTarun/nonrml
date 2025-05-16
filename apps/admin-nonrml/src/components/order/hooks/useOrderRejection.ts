@@ -45,7 +45,7 @@ export function useOrderRejection(order: any, onSuccess: () => void) {
     updateRejected.current = {}
   }
   
-  const initiateRefund = async (orderId: string) => {
+  const initiateRefund = async (orderId: number) => {
     await refundMutation.mutateAsync({ orderId })
   }
   

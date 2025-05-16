@@ -2,7 +2,7 @@
 import { trpc } from '@/app/_trpc/client';
 import OrderDetails from "@/components/order/Order";
 
-const OrderContainer = ({ orderId }: { orderId: string }) => {
+const OrderContainer = ({ orderId }: { orderId: number }) => {
     const orderResponse = trpc.viewer.orders.getOrder.useQuery(
         { orderId },
         {

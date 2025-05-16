@@ -2,12 +2,12 @@ import { prisma, prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
 export const ZGetReplacementOrderSchema = z.object({
-    orderId: z.string()
+    orderId: z.number()
 })
 export type TGetReplacementOrderSchema = z.infer<typeof ZGetReplacementOrderSchema>;
 
 export const ZInitiateReplacementOrderSchema = z.object({
-    orderId: z.string(),
+    orderId: z.number(),
     products: z.array(z.object({
         quantity: z.number(),
         returnReason: z.string(),

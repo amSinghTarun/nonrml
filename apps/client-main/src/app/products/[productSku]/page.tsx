@@ -1,6 +1,4 @@
-import { RouterOutput } from "@/app/_trpc/client";
 import { serverClient } from "@/app/_trpc/serverClient";
-import Loading from "@/app/loading";
 import Product from "@/components/Product";
 
 type Props = {

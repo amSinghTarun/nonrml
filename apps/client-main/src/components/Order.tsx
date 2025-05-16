@@ -63,7 +63,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
             { showReturnReplace == "ORIGINAL" && <div className="space-y-7 lg:space-y-10 h-full">
                 
                 <div className="text-sm text-start lg:text-base font-bold">
-                    <p> {orderDetails?.id} </p>
+                    <p> {`ORD-${orderDetails?.id}${orderDetails.idVarChar}`} </p>
                 </div>
 
                 

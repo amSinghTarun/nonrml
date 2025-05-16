@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 const ReturnOrders = async ({params}: {params: Promise<{orderId: string}>}) => {
     await redirectToHomeIfNotLoggedIn();
-    const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: (await params).orderId}) ;
+    const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: +(await params).orderId}) ;
 
     return (
         <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-scroll flex bg-white mb-64 lg:mb-32">

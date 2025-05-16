@@ -14,10 +14,11 @@ model User {
   contactNumber String              @unique
   role          UserPermissionRoles
   cartId        Int?                @unique
-  otp           Int
-  otpExpire     BigInt
+  otp           Int?
+  otpExpire     BigInt?
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+  email         String?             @default("")
   address       Address[]
   creditNotes   CreditNotes[]
   order         Orders[]
@@ -52,11 +53,11 @@ model CreditNotesPartialUseTransactions {
   id            Int         @id @default(autoincrement())
   creditNoteId  Int
   valueUtilised Decimal
-  orderId       String      @unique
+  orderId       Int         @unique
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   creditNotes   CreditNotes @relation(fields: [creditNoteId], references: [id])
-  order         Orders      @relation(fields: [orderId], references: [id])
+  order         Orders      @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Cart {
@@ -271,8 +272,8 @@ model Payments {
   paymentService      String               @default("Razorpay")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  orderId             String               @unique
-  Orders              Orders               @relation(fields: [orderId], references: [id])
+  orderId             Int                  @unique
+  Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   RefundTransactions  RefundTransactions[]
 }
 
@@ -289,7 +290,7 @@ model Shipment {
 }
 
 model Orders {
-  id                    String                             @id @unique
+  id                    Int                                @id @unique @default(autoincrement())
   type                  OrderType                          @default(NEW)
   creditUtilised        Int?                               @default(0)
   totalAmount           Float
@@ -304,6 +305,7 @@ model Orders {
   updatedAt             DateTime                           @updatedAt
   creditNoteId          Int?
   returnAcceptanceDate  BigInt?
+  idVarChar             String
   creditNoteTransaction CreditNotesPartialUseTransactions?
   orderProducts         OrderProducts[]
   address               Address?                           @relation(fields: [addressId], references: [id], onDelete: Restrict)
@@ -317,16 +319,16 @@ model Orders {
 }
 
 model OrderProducts {
-  id                  Int             @id @default(autoincrement())
+  id                  Int             @id @unique @default(autoincrement())
   productVariantId    Int
   price               Float
   quantity            Int
   returnQuantity      Int?
   replacementQuantity Int?
-  orderId             String
+  orderId             Int
   rejectedQuantity    Int?            @default(0)
   reimbursedQuantity  Int             @default(0)
-  order               Orders          @relation(fields: [orderId], references: [id])
+  order               Orders          @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   productVariant      ProductVariants @relation(fields: [productVariantId], references: [id])
   returnItem          ReturnItem[]
 
@@ -336,7 +338,7 @@ model OrderProducts {
 model Returns {
   id                Int               @id @default(autoincrement())
   returnReceiveDate DateTime?
-  orderId           String
+  orderId           Int
   returnShipmentId  Int?              @unique
   returnStatus      ReturnStatus      @default(PENDING)
   refundAmount      Float?
@@ -347,7 +349,7 @@ model Returns {
   creditNote        CreditNotes[]
   ReplacementOrder  ReplacementOrder?
   returnItems       ReturnItem[]
-  order             Orders            @relation(fields: [orderId], references: [id])
+  order             Orders            @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   shipment          Shipment?         @relation(fields: [returnShipmentId], references: [id])
 }
 
@@ -370,7 +372,7 @@ model ReturnItem {
 
 model ReplacementOrder {
   id               Int                    @id @default(autoincrement())
-  orderId          String
+  orderId          Int
   status           ReplacementOrderStatus @default(PENDING)
   returnOrderId    Int                    @unique
   shipmentId       Int?                   @unique
@@ -378,7 +380,7 @@ model ReplacementOrder {
   updatedAt        DateTime               @updatedAt
   CreditNotes      CreditNotes[]
   replacementItems ReplacementItem[]
-  order            Orders                 @relation(fields: [orderId], references: [id])
+  order            Orders                 @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   return           Returns                @relation(fields: [returnOrderId], references: [id])
   shipment         Shipment?              @relation(fields: [shipmentId], references: [id])
 }

@@ -27,7 +27,7 @@ export const ZDeletePermissionSchema = z.object({
 export type TDeletePermissionSchema = z.infer<typeof ZDeletePermissionSchema>;
 
 export const ZInitiateUavailibiltyRefundSchema = z.object({
-    orderId: z.string()
+    orderId: z.number()
 })
 export type TInitiateUavailibiltyRefundSchema = z.infer<typeof ZInitiateUavailibiltyRefundSchema>
 

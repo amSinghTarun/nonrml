@@ -13,7 +13,7 @@ import { prismaTypes } from '@nonrml/prisma'
 interface ShippingDetailsProps {
   address: prismaTypes.Address
   isEditable: boolean
-  orderId: string
+  orderId: number
   onAddressUpdated: () => void
 }
 

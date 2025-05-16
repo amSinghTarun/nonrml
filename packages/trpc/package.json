@@ -23,6 +23,7 @@
     "@nonrml/payment": "workspace:*",
     "@nonrml/prisma": "workspace:*",
     "@nonrml/rate-limit": "workspace:*",
+    "@nonrml/shipping": "workspace:*",
     "@nonrml/storage": "workspace:*",
     "@trpc/client": "^10.45.2",
     "@trpc/next": "^10.45.2",

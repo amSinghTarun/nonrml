@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { trpc } from '@/app/_trpc/client'
 import { prismaTypes } from '@nonrml/prisma'
 
-export function useOrderActions(orderId: string | undefined, onSuccess: () => void) {
+export function useOrderActions(orderId: number | undefined, onSuccess: () => void) {
   const [extendDays, setExtendDays] = useState<number>(0)
   
   const editOrderMutation = trpc.viewer.orders.editOrder.useMutation({

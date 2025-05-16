@@ -36,7 +36,7 @@ export type TGetAllCreditNotesSchema = z.infer<typeof ZGetAllCreditNotesSchema>;
 
 export const ZGetCreditNotesAdminSchema = z.object({
     userId: z.number().optional(),
-    orderId: z.string().optional(),
+    orderId: z.number().optional(),
     creditNoteCode: z.string().optional()
 });
 export type TGetCreditNotesAdminSchema = z.infer<typeof ZGetCreditNotesAdminSchema>;

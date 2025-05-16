@@ -2,7 +2,7 @@ import { prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
 export const ZInitiateReturnSchema = z.object({
-    orderId: z.string(),
+    orderId: z.number(),
     products: z.array(z.object({
         quantity: z.number(),
         returnReason: z.string(),
@@ -15,7 +15,7 @@ export const ZInitiateReturnSchema = z.object({
 export type TInitiateReturnSchema = z.infer<typeof ZInitiateReturnSchema>;
 
 export const ZGetReturnOrdersSchema = z.object({
-    orderId: z.string(),
+    orderId: z.number(),
 });
 export type TGetReturnOrdersSchema = z.infer<typeof ZGetReturnOrdersSchema>;
 

@@ -23,7 +23,7 @@ const CreditNotesPage = () => {
 
   const creditNotes = trpc.viewer.creditNotes.getCreditNotes.useQuery({
     ...( userIdParam && { userId: +userIdParam } ),
-    ...( orderIdParam && { orderId: orderIdParam } ),
+    ...( orderIdParam && { orderId: +orderIdParam } ),
     ...( creditNoteCodeParam && { creditNoteCode: creditNoteCodeParam } )
   }, {
     staleTime: Infinity,
