@@ -1,21 +1,21 @@
-import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
-import { TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { TRPCResponseStatus } from "@nonrml/common";
+import { getSizeOrderIndex, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import {
   TAddProductSchema,
-  TDeleteProductSchema,
   TEditProductSchema,
   TGetProductSchema,
   TGetProductsSchema,
   TGetProductsSizes,
   TVerifyCheckoutProductsSchema,
   TGetProductVariantQuantitySchema,
-  TGetHomeProductsSchema
+  TGetHomeProductsSchema,
+  TGetRelatedProductsSchema
 } from "./product.schema";
-import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
+import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
-import { redis } from "@nonrml/cache";
-import { late } from "zod";
+import { customCacheJSONIncr } from "@nonrml/cache";
 const take = 10;
+import { cacheServicesRedisClient } from "@nonrml/cache"
 
 /*
  Get the product details and also sizes for all the variants available
@@ -30,18 +30,22 @@ export const getProduct = async ({
     console.log("\n\n\n\n\n GET PRODUCTS");
     
     //cache tpo track number of visit on a product
-    redis.customJSONIncr({ key: "VISITED", path: input.productSku });
+    customCacheJSONIncr({ key: "VISITED", path: input.productSku });
     
     type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"|"colour"> & {
       productImages: {
         image: string;
         priorityIndex: number;
-      }[];
+      }[],
+      category: {
+        sizeChartId: number | null,
+        displayName: string | null
+      }
     } | null
     
     
     //cache for less time
-    let product : ProductType = await redis.redisClient.get(`product_${input!.productSku}`);
+    let product : ProductType = await cacheServicesRedisClient().get(`product_${input!.productSku}`);
     if(!product){
       product = await prisma.products.findUniqueOrThrow({
         where: {
@@ -56,6 +60,7 @@ export const getProduct = async ({
           shippingDetails: true,
           name: true,
           description: true,
+          latest: true,
           price: true,
           id: true,
           sku: true,
@@ -65,7 +70,8 @@ export const getProduct = async ({
           categoryId: true,
           category: {
             select: {
-              sizeChartId: true
+              sizeChartId: true,
+              displayName: true
             }
           },
           productImages: {
@@ -77,16 +83,20 @@ export const getProduct = async ({
               priorityIndex: "asc",
             },
           }
-        },
+        }
       });
-      redis.redisClient.set(`product_${product.sku}`, product, {ex:60*60*2});
+      cacheServicesRedisClient().set(`product_${product.sku}`, product, {ex:60*60*2});
     };
     
     //cache it and get from cache, delete at the time of order
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${product.id}`);
-    console.log(productSizeQuantities);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${product.id}`);
+
+    console.log("cached", productSizeQuantities);
+
     if(!productSizeQuantities) {
+      
       productSizeQuantities = {};
+
       const productInventory = await prisma.productVariants.findMany({
         where: {
             productId: product.id,
@@ -121,15 +131,37 @@ export const getProduct = async ({
           }
         };
       }
-      console.log(productSizeQuantities);
+      
       // see how to expire this
-      await redis.redisClient.set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
+      cacheServicesRedisClient().set(`productVariantQuantity_${product.id}`, productSizeQuantities, {ex: 60*60*5})
     }
+    // the above cache if logic is not delete as it this cache is managed
+    // on 2-3 places so let it be rn
+
+    // Sort the inventory items by size before creating the object 
+    // and send front this for size button
+    // and they are maintained by the above cache as the logic is cache was being
+    // used previously and so now it's complicated to remove it also it is 
+    // actually effectient as we are going work of 2 places
+    // const sortedInventory = Object.values(productSizeQuantities).sort((a, b) => {
+    //   const aIndex = getSizeOrderIndex(a.size);
+    //   const bIndex = getSizeOrderIndex(b.size);
+      
+    //   // If they have different order indices, sort by that
+    //   console.log(aIndex, bIndex)
+    //   if (aIndex !== bIndex) {
+    //     return aIndex - bIndex;
+    //   }
+      
+    //   return a.size.localeCompare(b.size);
+    // });
+
     console.log("\n\n\n\n\n -----END");
+
     return {
       status: TRPCResponseStatus.SUCCESS,
       message: "",
-      data: { product: product!, productSizeQuantities: productSizeQuantities! },
+      data: { product: product!, sizeData: productSizeQuantities },
     };
   } catch (error) {
     //console.log("\n\n Error in getProduct ----------------");
@@ -263,7 +295,7 @@ export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions
   input = input!;
   try{
     
-    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await redis.redisClient.get(`productVariantQuantity_${input.productId}`);
+    let productSizeQuantities : {[variantId: number]: {size: string, quantity: number, variantId: number}}|null = await cacheServicesRedisClient().get(`productVariantQuantity_${input.productId}`);
     console.log(productSizeQuantities);
     if(!productSizeQuantities) {
       productSizeQuantities = {};
@@ -303,7 +335,7 @@ export const getProductVariantQuantity = async ({ctx, input}: TRPCRequestOptions
       }
       console.log(productSizeQuantities);
       // see how to expire this
-      redis.redisClient.set(`productVariantQuantity_${input.productId}`, productSizeQuantities, {ex: 60*60*5})
+      cacheServicesRedisClient().set(`productVariantQuantity_${input.productId}`, productSizeQuantities, {ex: 60*60*5})
     }
 
     return {
@@ -346,38 +378,41 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       id: number;
       soldOut: boolean;
       public?: boolean,
-      sizeChartId: number | null,
-      visitedCount: number,
-      exclusive: boolean,
+      // latest: boolean,
+      // sizeChartId: number | null,
+      // visitedCount: number,
+      // exclusive: boolean,
       productImages: {
           image: string;
       }[];
       _count: {
           ProductVariants: number;
       };
+      updatedAt:Date
     }[] | null
 
-    let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await redis.redisClient.get("latestProducts") : null;
-
+    let latestProducts : LatestProducts = ( input.cursor == 1 ) ? await cacheServicesRedisClient().get("allClientProducts") : null;
+    console.log(await prisma.user.findMany())
     if(!latestProducts || !latestProducts.length){
       latestProducts = await prisma.products.findMany({
         take: ( input.take ?? take) + 1,
         ...(input.cursor && {cursor: {id: input.cursor}}),
         where: {
           ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
-          ...( !input.admin && {public: true} )
+          public: true
         },
         select: {
           name: true,
           price: true,
           id: true,
           soldOut: true,
-          public: input.admin && true,
-          exclusive: true,
+          public: true,
+          // exclusive: true,
           sku: true,
-          latest: true,
-          visitedCount: true,
-          sizeChartId: true,
+          updatedAt: true,
+          // latest: true,
+          // visitedCount: true,
+          // sizeChartId: true,
           _count:{
             select: {
               ProductVariants: {
@@ -403,9 +438,147 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           { createdAt: "desc" }
         ]
       });
-      latestProducts.length && redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+      latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
+      console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     }
-    console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
+
+    let nextCursor: number | undefined = undefined;
+    if (latestProducts && latestProducts.length >= take) {
+      const nextItem = latestProducts.pop();
+      nextCursor = nextItem?.id;
+    }
+
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+};
+
+export const getRelatedProducts = async ({ctx, input}: TRPCRequestOptions<TGetRelatedProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!
+  try{
+    const relatedProduct = await prisma.products.findMany({
+      where: {
+        categoryId : input.categoryId,
+        soldOut: false,
+        public: true,
+        NOT: {
+          id: input.productId
+        },
+      },
+      select: {
+        sku: true,
+        name: true,
+        productImages: {
+          where: { active: true, priorityIndex: 0 },
+          select: {
+            image: true,
+          }
+        },
+        price: true,
+      },
+      orderBy: [
+        { visitedCount: "desc" },
+        { createdAt: "desc" }
+      ]
+    })
+    return { status: TRPCResponseStatus.SUCCESS, message: "", data: relatedProduct };
+  } catch(error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error); 
+  }
+}
+
+export const getAdminProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!;
+  try {
+    
+    type LatestProducts = {
+      price: number;
+      sku: string;
+      name: string;
+      id: number;
+      soldOut: boolean;
+      public?: boolean,
+      latest: boolean,
+      sizeChartId: number | null,
+      visitedCount: number,
+      exclusive: boolean,
+      // productImages: {
+      //     image: string;
+      // }[];
+      _count: {
+          ProductVariants: number;
+      };
+    }[] | null
+
+    // let latestProducts : LatestProducts = ( input.cursor == 1 && !input?.admin )? await cacheServicesRedisClient().get("allClientProducts") : null;
+
+    // if(!latestProducts || !latestProducts.length){
+    let latestProducts = await prisma.products.findMany({
+      take: ( input.take ?? take) + 1,
+      ...(input.cursor && {cursor: {id: input.cursor}}),
+      where: {
+        ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
+      },
+      select: {
+        name: true,
+        price: true,
+        id: true,
+        soldOut: true,
+        public: true,
+        exclusive: true,
+        sku: true,
+        latest: true,
+        visitedCount: true,
+        sizeChartId: true,
+        _count:{
+          select: {
+            ProductVariants: {
+              where: {
+                inventory: {
+                  OR: [
+                    {baseSkuInventory: { quantity: { gte: 1} }},
+                    {quantity: {gte: 1}}
+                  ]
+                }
+              },
+            }
+          }
+        },
+        // productImages: {
+        //   where: { active: true, priorityIndex: 0 },
+        //   select: {
+        //     image: true,
+        //   }
+        // }
+      },
+      orderBy: [
+        { createdAt: "desc" }
+      ]
+    });
+      // latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
+    // }
+    // console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
     if (latestProducts && latestProducts.length >= take) {
       const nextItem = latestProducts.pop();
@@ -486,7 +659,7 @@ export const getHomeProducts = async ({
           { createdAt: "desc" }
         ]
       });
-      redis.redisClient.set("latestProducts", latestProducts, {ex: 60*5});
+      cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*5});
     }
 
     if(input.exclusive){
@@ -507,7 +680,7 @@ export const getHomeProducts = async ({
           }
         }
       });
-      redis.redisClient.set("exclusiveProducts", exclusiveProducts, {ex: 60*60*60*24});
+      cacheServicesRedisClient().set("exclusiveProducts", exclusiveProducts, {ex: 60*60*60*24});
     }
 
     if(input.popular){
@@ -554,7 +727,7 @@ export const getHomeProducts = async ({
           { visitedCount: "desc" }
         ]
       });
-      redis.redisClient.set("popularProducts", popularProducts, {ex: 60*60*60});
+      cacheServicesRedisClient().set("popularProducts", popularProducts, {ex: 60*60*60});
     }
 
     console.log("PRODUCT OUT ---------------------------------\n\n\n\n\n");

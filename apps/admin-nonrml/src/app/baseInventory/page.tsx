@@ -4,7 +4,7 @@ import { BaseInventory } from '@/components/BaseInventory';
 import { trpc } from '@/app/_trpc/client';
 import { redirect, useSearchParams } from "next/navigation";
 
-export default () => {
+const BaseInvetoryPage = () => {
     const baseInventorySku = useSearchParams().get('baseInventorySku');
     const searchParam = baseInventorySku ? {sku: baseInventorySku} : {}
     const inventory = trpc.viewer.baseSkuInventory.getBaseInventory.useQuery(searchParam);
@@ -18,8 +18,10 @@ export default () => {
                 <BaseInventory inventory={inventory}/>
                 {inventory.isLoading && <div>Loading...</div>}
                 {inventory.error && <div>Error: {inventory.error.message}</div>}
-                <span className=" text-center text-orange-400">To delete any inventory item, first make it's quantity 0.</span>
+                <span className=" text-center text-orange-400">To delete any inventory item, first make its quantity 0.</span>
             </section>
         </>
     )
 }
+
+export default BaseInvetoryPage

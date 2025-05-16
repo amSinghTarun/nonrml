@@ -17,7 +17,7 @@ interface TickerTextProps {
 
 export const TickerText: React.FC<TickerTextProps> = ({
   text = 'ALL IT TAKES IS A NO TO REDEFINE WHAT IS NORMAL.',
-  textColor = "black",
+  textColor = "white",
   fontSize = 15,
   backgroundColor = "transparent",
   direction = "right",
@@ -71,11 +71,12 @@ export const TickerText: React.FC<TickerTextProps> = ({
             style={{
               color: textColor,
               fontSize: `${fontSize}px`,
-              fontFamily: appFont.style.fontFamily,
-              paddingLeft: "6px"
+              // fontFamily: appFont.style.fontFamily,
+              paddingLeft: "6px",
+              fontWeight:"bold"
             }}
           >
-            ALL IT TAKES IS A <span className='text-red-400'>NO</span> TO REDEFINE WHAT IS <span className='text-red-400 pr-1'>{NonrmlWords[Number(i%NonrmlWords.length)]}</span> • 
+            ALL IT TAKES IS A <span className='text-red-500'>NO</span> TO REDEFINE WHAT IS <span className='text-red-500 pr-1'>{NonrmlWords[Number(i%NonrmlWords.length)]}</span> • 
           </span>
         ))}
       </div>

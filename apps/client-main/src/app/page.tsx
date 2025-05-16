@@ -8,3 +8,8 @@ export default function Home() {
     </main>
   );
 }
+
+export const metadata = {
+  title: 'NoNRML',
+  description: 'Page description'
+};

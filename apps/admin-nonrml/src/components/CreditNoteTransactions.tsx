@@ -19,15 +19,6 @@ import {
 import { format } from "date-fns";
 import { RouterOutput } from "@/app/_trpc/client";
 
-type Transaction = {
-  id: number;
-  creditNoteId: number;
-  valueUtilised: number;
-  orderId: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 type CreditNoteTransactionsProps = {
   transactions: RouterOutput["viewer"]["creditNotes"]["getCreditNotes"]["data"][number]["creditNotesPartialUseTransactions"];
   creditNoteId: string;

@@ -1,12 +1,15 @@
 import { TRPCResponseStatus } from "@nonrml/common"
-import { acceptOrder, calculateRejectedQuantityRefundAmounts, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TVerifyOrderSchema} from "./orders.schema";
-import { prisma, Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
-import { TRPCError } from "@trpc/server";import { createRZPOrder } from "../payments/payments.handler";
+import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
+import { TRPCError } from "@trpc/server";
+import { Orders } from "razorpay/dist/types/orders";
 import crypto from 'crypto';
-import { getPaymentDetials } from "@nonrml/payment";
-import { redis } from "@nonrml/cache";
+import { createOrder, getPaymentDetials } from "@nonrml/payment";
+import { cacheServicesRedisClient } from "@nonrml/cache";
+
 const returnExchangeTime = 604800000; // 7 days
+
 /*
 Get all the orders of a user
 No pagination required for now, as the result quantity is gonna stay small
@@ -51,7 +54,7 @@ export const getUserOrders = async ({ ctx } : TRPCRequestOptions<null>) => {
             }]
         });
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "", data: orders};
+        return {status: TRPCResponseStatus.SUCCESS, message: "", data: { orders, userContact: ctx.user?.contactNumber }};
 
     } catch(error){
         // console.log("\n\n Error in getUserOrders ----------------");
@@ -324,14 +327,33 @@ Process:
 */
 export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOrderSchema>) => {
     input = input!;
-    const userId = ctx.user?.id!;
+    const userId = ctx.user?.id;
     const prisma = ctx.prisma;
     try{
+
+        let orderId : string = '';
+        let attempts = 0;
+        const MAX_ATTEMPTS = 5;
+        while(attempts < MAX_ATTEMPTS ){
+            orderId = generateOrderId();
+            attempts++;
+            const orderIdExist = await prisma.orders.count({
+                where: { 
+                    id: orderId
+                }
+            })
+            if(!orderIdExist){
+                break;
+            }
+            orderId = "";
+        }
+        if(orderId === "")
+            throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "failed to create orderId"}); 
 
         let cnUseableValue = 0;
         let creditNoteId = null;
         let orderTotal = 0;
-        if(input.creditNoteCode){
+        if(input.creditNoteCode && userId){
             const creditNote = await prisma.creditNotes.findFirst({
                 where: {
                     creditCode: input.creditNoteCode,
@@ -358,7 +380,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     select:{
                         price: true,
                         id: true,
-                        name: true
+                        name: true,
+                        sku: true
                     }
                 },
                 inventory: {
@@ -373,6 +396,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 },
             }
         });
+        console.log(" ------------------------------ ", productValidation)
 
         // Verify product variants and quantities and price
         if(productValidation.length !== Object.keys(input.orderProducts).length)
@@ -380,10 +404,12 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         let insufficientProductQuantities: typeof input.orderProducts = {};
         
+        let line_items : Orders.LineItems[] = []
+
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
             if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
-                await redis.redisClient.del(`productVariantQuantity_${variant.product.id}`)
+                await cacheServicesRedisClient().del(`productVariantQuantity_${variant.product.id}`)
                 insufficientProductQuantities = {...insufficientProductQuantities, [variant.id] : { ...input.orderProducts[variant.id], quantity: 0}};
             }
             if (variant.product.price !== orderProduct!.price) {
@@ -393,6 +419,25 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 });
             }
             orderTotal += (variant.product.price * orderProduct!.quantity);
+            line_items.push({
+                sku: variant.product.sku,
+                name: variant.product.name,
+                price: `${variant.product.price*100}`,
+                quantity: orderProduct!.quantity,
+                offer_price: `${variant.product.price*100}`,
+                variant_id: variant.product.sku,
+                description: variant.product.name,
+                tax_amount: 0,
+                weight: '1',
+                type: "e-commerce",
+                image_url: "",
+                product_url: "",
+                dimensions: {
+                    length: "1",
+                    width: "1",
+                    height: "1",
+                }
+            })
         }
         if(Object.keys(insufficientProductQuantities).length != 0){
             return {
@@ -405,29 +450,32 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             }
         }
 
-        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
-        const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
-        let orderId = `ORD-${date}${userId}${randomPart}`;
-
-        console.log(orderId)
-        
-        const rzpPaymentCreated = await createRZPOrder({ctx, input: {orderTotal: ((orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)), addressId: input.addressId }});
+        const orderTotalAmount = (orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)
+        console.log(line_items)
+        const rzpPaymentCreated = await createOrder({
+            amount: orderTotalAmount*100,
+            line_items_total: orderTotalAmount*100, 
+            receipt: `${Date.now()}`,
+            currency: "INR",
+            line_items: line_items
+        }); 
+        {/* addressId: input.addressId*/}
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
 
             const order = await prisma.orders.create({
                 data: {
                     id: orderId,
-                    userId: userId,
+                    // userId: userId,
                     totalAmount: orderTotal,
-                    addressId: input.addressId,
+                    // addressId: input.addressId,
                     creditNoteId: creditNoteId,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
                     productCount: Object.values(input.orderProducts).length,
                     Payments: {
                         create: {
-                            rzpOrderId: rzpPaymentCreated.data.rzpOrder.id,
-                            paymentStatus: rzpPaymentCreated.data.rzpOrder.status as prismaTypes.PaymentStatus,
+                            rzpOrderId: rzpPaymentCreated.id,
+                            paymentStatus: rzpPaymentCreated.status as prismaTypes.PaymentStatus,
                         }
                     }
                 },
@@ -449,7 +497,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             return {order, orderProducts};
         },  {timeout: 10000});
 
-        console.log(input, orderCreated.orderProducts)
+        // console.log(input, orderCreated.orderProducts)
 
         return { 
             status: TRPCResponseStatus.SUCCESS, 
@@ -457,10 +505,10 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             data: {
                 orderId: orderCreated.order.id,
                 amount: +orderTotal*100, 
-                rzpOrderId: rzpPaymentCreated.data.rzpOrder.id, 
-                contact: ctx.user?.contactNumber!, 
-                name: rzpPaymentCreated.data.address.contactName, 
-                email: rzpPaymentCreated.data.address.email
+                rzpOrderId: rzpPaymentCreated.id, 
+                // contact: ctx.user?.contactNumber!, 
+                // name: rzpPaymentCreated.data.address.contactName, 
+                // email: rzpPaymentCreated.data.address.email
             }
         };
     }catch(error) {
@@ -770,6 +818,29 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
             }
 
             prisma.$transaction(editOrderQueries);
+
+            const remainingProductStatus = await prisma.orderProducts.aggregate({
+                where: {
+                    orderId: input.orderId
+                },
+                _sum: {
+                    quantity: true,
+                    rejectedQuantity: true
+                }
+            });
+
+            const effectiveRemainingQuantity = (remainingProductStatus._sum.quantity ?? 0) - (remainingProductStatus._sum.rejectedQuantity ?? 0)
+
+            if(effectiveRemainingQuantity == 0){
+                await prisma.orders.update({
+                    where: {
+                        id: input.orderId
+                    },
+                    data: {
+                        orderStatus:prismaEnums.OrderStatus.CANCELED_ADMIN
+                    }
+                })
+            };
 
         }
 

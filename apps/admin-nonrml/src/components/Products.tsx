@@ -3,7 +3,6 @@ import { RouterOutput, trpc } from "@/app/_trpc/client"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -18,7 +17,7 @@ import {
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
 import { useRouter } from "next/navigation"
 
-type Products = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getProducts"], unknown>
+type Products = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getAdminProducts"], unknown>
 
 export const Products = ({products}: {products: Products}) => {
 
@@ -36,7 +35,7 @@ export const Products = ({products}: {products: Products}) => {
           <TableHead>Name</TableHead>
           <TableHead>Public</TableHead>
           <TableHead>Latest</TableHead>
-          <TableHead>Exclusive</TableHead>
+          {/* <TableHead>Exclusive</TableHead> */}
           <TableHead>Sold out</TableHead>
           <TableHead className="bg-orange-400 text-white cursor-pointer">Sku</TableHead>
           <TableHead>Avl count</TableHead>
@@ -50,7 +49,7 @@ export const Products = ({products}: {products: Products}) => {
         { products.data?.data.length && products.data?.data?.map( product => (
             <TableRow key={product.id}>
               <TableCell>{product.id}</TableCell>
-              <TableCell className={`${product.exclusive && "bg-green-200"}`}>{product.name}</TableCell>
+              {/* <TableCell className={`${product.exclusive && "bg-green-200"}`}>{product.name}</TableCell> */}
               <TableCell>
                 <button onClick={async () => {await manageVisibility.mutateAsync({productId: product.id, public: !product?.public}); products.refetch()}} className=" text-sm p-1 bg-stone-400 cursor-pointer hover:bg-stone-300 rounded-sm">
                   {`${product.public ? "HIDE" : "SHOW"}`}
@@ -86,7 +85,7 @@ export const Products = ({products}: {products: Products}) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-stone-700 text-white">{
                   allSizeCharts.data?.data.map( sizeChart => (
-                    <DropdownMenuItem onClick={() => {addSizeChartToProduct.mutate({sizeChartId: sizeChart.id, productId: product.id})}}>{sizeChart.name}</DropdownMenuItem>  
+                    <DropdownMenuItem key={sizeChart.id} onClick={() => {addSizeChartToProduct.mutate({sizeChartId: sizeChart.id, productId: product.id})}}>{sizeChart.name}</DropdownMenuItem>  
                   )
                 )
               }

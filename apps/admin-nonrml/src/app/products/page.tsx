@@ -4,8 +4,8 @@ import { Products } from "@/components/Products";
 import { trpc } from '@/app/_trpc/client';
 import { redirect } from "next/navigation";
 
-export default () => {
-    const products = trpc.viewer.product.getProducts.useQuery({admin: true});
+const ProductsPage = () => {
+    const products = trpc.viewer.product.getAdminProducts.useQuery({});
     return (
         <>
             <section className="   flex flex-col w-screen h-screen text-black text-sm">
@@ -20,3 +20,5 @@ export default () => {
         </>
     )
 }
+
+export default ProductsPage

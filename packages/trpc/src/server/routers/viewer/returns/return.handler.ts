@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
 import { dataURLtoFile } from "@nonrml/common";
 import crypto from 'crypto';
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 /*
     Return the order
@@ -517,7 +517,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
             let redisQueries = []
 
             for( let returnProduct of returnProductVariantDetails.returnItems ){
-                redisQueries.push(redis.redisClient.del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
+                redisQueries.push(cacheServicesRedisClient().del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
                 let rejectedQuamtity = returnItemsReview && returnItemsReview[returnProduct.id]?.rejectedQuantity;
                 if(returnItemsReview && rejectedQuamtity){
                     // for every product mark the rejected and reason
@@ -575,13 +575,14 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
-                        email: returnProductVariantDetails.order.address.email, 
+                        email: returnProductVariantDetails.order.address?.email ?? "", 
                         remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
-                        userId: returnProductVariantDetails.order.userId,
+                        userId: returnProductVariantDetails.order.userId ?? 1,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
                         creditCode: `RTN-${returnProductVariantDetails.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${returnProductVariantDetails.order.id}`
                     }
+                    // address edit
                 })
             )
 

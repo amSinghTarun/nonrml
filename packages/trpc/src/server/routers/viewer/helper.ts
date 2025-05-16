@@ -2,9 +2,10 @@ import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCContext } from "../../contexts";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 import { prisma } from "@nonrml/prisma";
-import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";;
+import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
+import crypto from 'crypto';
 
 export const SALT_SIZE = 8;
 
@@ -90,7 +91,37 @@ export const convertTRPCErrorCodeToStatusCode = (statusCode: TRPC_ERROR_CODE_KEY
     return errorStatusToTRPCErrorCodeMap[statusCode]!;
 }
 
+export const generateOrderId = () : string => {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(4);
+    const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
+    return `ORD-${date}${randomPart}`;
+}
+
+export const getSizeOrderIndex = (size: string) => {
+    // Define standard size order
+    const standardSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const index = standardSizes.indexOf(size);
+    
+    if (index !== -1) {
+      // If it's a standard size, return its index (gives priority to standard sizes)
+      return index;
+    }
+    
+    // For numeric sizes (like 30, 32, etc.)
+    const numericSize = parseInt(size);
+    if (!isNaN(numericSize)) {
+      // Return a value that ensures numeric sizes come after standard sizes
+      // Adding 1000 ensures numeric sizes come after standard letter sizes
+      return 1000 + numericSize;
+    }
+    
+    // For any other format, return a high value to push it to the end
+    // and then rely on alphabetical sorting in the actual sort function
+    return 2000;
+};
+
 export const TRPCCustomError = (error: any) => {
+    console.log(process.env.DATABASE_URL)
     console.log("\n\n\n ------------------ \n ", error, "\n -----------------------------------------------")
     const errorCode = error.code as TRPC_ERROR_CODE_KEY ?? "INTERNAL_SERVER_ERROR";
     const finalError = new TRPCError({
@@ -129,7 +160,7 @@ export const acceptOrder = async (orderId: string) => {
         for(let orderProduct of orderedProducts) {
             !products[orderProduct.productVariant.product.id]  && (
                 redisOperations.push(
-                    redis.redisClient.del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
+                    cacheServicesRedisClient().del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
                 ),
                 products[orderProduct.productVariant.product.id] = 1
             )

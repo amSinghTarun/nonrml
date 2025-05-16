@@ -11,7 +11,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { useRouter } from "next/navigation";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-
+import { convertStringToINR } from "@/lib/utils";
 
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 type exchangeProduct = RouterOutput["viewer"]["product"]["getProductSizes"]["data"];
@@ -21,11 +21,6 @@ interface ExchangeProps {
     orderId: string,
     returnAcceptanceDate: number,
     backToOrderDetails: () => void
-}
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
 }
 
 export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, returnAcceptanceDate, backToOrderDetails}) => {

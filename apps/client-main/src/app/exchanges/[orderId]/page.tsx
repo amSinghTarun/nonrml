@@ -1,8 +1,17 @@
 import { serverClient } from "@/app/_trpc/serverClient";
 import { redirectToHomeIfNotLoggedIn } from "@/app/lib/utils";
 import { Exchanges } from "@/components/Exchanges";
+import { Metadata } from 'next';
 
-const ExchangeOrders = async ({params}: {params: {orderId: string}}) => {
+export const metadata: Metadata = {
+  // Basic metadata fields
+  title: `Exchange Order - NoNRML`,  // Browser tab title, search engine title
+  description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
+  keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
+  robots: 'index, follow',
+}
+
+const ExchangeOrders = async ({params}: {params: Promise<{orderId: string}>}) => {
     await redirectToHomeIfNotLoggedIn();
     const userExchanges = await (await serverClient()).viewer.replacement.getReplacement({orderId: (await params).orderId});
     return (

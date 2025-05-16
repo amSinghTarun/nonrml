@@ -1,6 +1,6 @@
 import { CreateBaseInventory } from "@/components/create/createBaseInventory"
 
-export default () => {
+const BaseInventoryCreatePage = () => {
     return (
         <>
             <section className="flex flex-col w-screen h-screen  ">
@@ -10,3 +10,5 @@ export default () => {
         </>
     )   
 }
+
+export default BaseInventoryCreatePage

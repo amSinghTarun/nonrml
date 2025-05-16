@@ -18,7 +18,7 @@ export const sessionMiddleware = middleware( async ({ctx, next}) => {
     //console.log(ctx.req?.headers.get("x-forwarded-for"), "\n", ctx.req?.headers)
     //console.log("-------------------------------------------------------")
     if( !ctx.session )
-        throw new TRPCError({code: "UNAUTHORIZED", message: "You must login to use this route"});
+        throw new TRPCError({code: "UNAUTHORIZED", message: "You must log in to use this functionality"});
     const { user } = await checkSessionUser(ctx); 
     if( !user )
         throw new TRPCError({code: "UNAUTHORIZED", message: "Invalid User, please clear cookies and try again"});

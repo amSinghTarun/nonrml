@@ -3,7 +3,7 @@ import { MenuButton } from './buttons/MenuButton';
 import { UserButton } from './buttons/UserButton';
 import CartButton from './buttons/CartButton';
 import { Sidebar } from './Sidebar';
-import { redis } from '@nonrml/cache';
+import { cacheServicesRedisClient } from '@nonrml/cache';
 import { serverClient } from '@/app/_trpc/serverClient';
 import { CartMenu } from './Cart';
 import { UserAccessibility } from './UserAccessibility';
@@ -12,7 +12,7 @@ import logo from "@/images/logo.png";
 import Image from "next/image";
 
 export const Appbar = async () => {
-    let categoryList = await redis.redisClient.get<string[]|null>("productCategory")
+    let categoryList = await cacheServicesRedisClient().get<string[]|null>("productCategory")
     if(!categoryList || !categoryList.length){
         const { categoryNameArray } = (await (await serverClient()).viewer.productCategories.getProductCategories({})).data;
         categoryList = categoryNameArray
@@ -27,9 +27,9 @@ export const Appbar = async () => {
                     <CartButton />
                 </div>
                 <div className="basis-1/2 items-center justify-end flex w-auto h-full">
-                    <Link className='cursor-pointer h-full w-full justify-end flex' href='/'>
+                    <Link className='items-center cursor-pointer h-full w-full justify-end flex pr-2' href='/'>
                         <Image
-                            className='h-auto w-4/5 md:w-1/3 lg:w-1/4 bg-none p-0 object-cover'
+                            className='h-3/4 sm:h-5/6 w-auto bg-none p-0 object-cover'
                             src={logo}
                             alt="No NRML logo"
                             priority

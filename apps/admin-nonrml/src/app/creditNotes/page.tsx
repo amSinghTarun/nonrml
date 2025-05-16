@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, ListFilter } from "lucide-react"
 
-export default () => {
+const CreditNotesPage = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -98,3 +98,5 @@ export default () => {
     </section>
   )
 }
+
+export default CreditNotesPage;

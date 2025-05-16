@@ -2,8 +2,7 @@ import { Prisma, prisma, prismaTypes } from "@nonrml/prisma";
 import { TDeleteImageSchema, TEditImageSchema, TUploadImageSchema } from "./homeImages.schema";
 import { dataURLtoFile, TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { nullable } from "zod";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
 import { TRPCError } from "@trpc/server";
 
@@ -38,7 +37,7 @@ export const getHomeImages = async ({ctx, input}: TRPCRequestOptions<{}>) => {
                 }
             }
         }
-        await redis.redisClient.set("homeImages", JSON.stringify(homeImagesJson));
+        await cacheServicesRedisClient().set("homeImages", JSON.stringify(homeImagesJson));
         return { status: TRPCResponseStatus.SUCCESS, message: "", data: homeImagesJson};
     } catch(error) {
         //console.log("\n\n Error in getInventory----------------");
@@ -162,7 +161,7 @@ export const editImage = async ({ctx, input}: TRPCRequestOptions<TEditImageSchem
             })
         }
 
-        await redis.redisClient.del("homeImages")
+        await cacheServicesRedisClient().del("homeImages")
 
         return { status:TRPCResponseStatus.SUCCESS, message:"inventory item editted", data: {} }
     } catch(error) {

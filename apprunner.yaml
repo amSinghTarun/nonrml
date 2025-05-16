@@ -1,0 +1,16 @@
+version: 1.0
+runtime: nodejs18
+build:
+  commands:
+    pre-build:
+      - npm install -g corepack
+      - corepack enable
+      - corepack prepare yarn@4.9.1 --activate
+    build:
+      - yarn install
+      - cd packages/prisma && yarn generate && cd ../..
+      - cd apps/client-main && yarn build
+run:
+  command: cd apps/client-main && yarn start
+  network:
+    port: 8080

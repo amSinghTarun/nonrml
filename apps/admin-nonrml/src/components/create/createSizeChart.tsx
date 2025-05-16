@@ -90,7 +90,6 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
       parentId: data.parentId || parentId
     };
     
-    const id = sizeChart.length + 1;
     setSizeChart((prev) => [...prev, formattedData]);
     reset({
       ...data,
@@ -177,7 +176,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
             <Controller
               name="parentId"
               control={control}
-              render={({ field }) => (
+              render={() => (
                 <div className="border p-2 rounded bg-gray-50">
                   {parentName || "Root"}
                 </div>

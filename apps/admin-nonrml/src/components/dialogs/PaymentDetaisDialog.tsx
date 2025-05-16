@@ -14,7 +14,10 @@ import { RouterOutput } from '@/app/_trpc/client';
 
 type Payments = NonNullable<NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["Payments"]>
 
-const PaymentDetailsDialog = ({ payment } : {payment: Payments}) => {
+const PaymentDetailsDialog = ({ payment } : {payment: Payments|null}) => {
+  if(!payment){
+    return <></>
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>

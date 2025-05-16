@@ -7,7 +7,7 @@ import { vendorOrderRouter } from "./vendorOrders/_router";
 import { InventoryRouter } from "./inventory/_router";
 import { productVariantRouter } from "./productVariant/_router";
 import { productCategoriesRouter } from "./productCategory/_router";
-import { sizeChartRouter } from "./productCategorySizes/_router";
+import { sizeChartRouter } from "./sizeChart/_router";
 import { productImageRouter } from "./productImages/_router";
 import { addressRouter } from "./addresses/_router";
 import { orderRouter } from "./orders/_router";

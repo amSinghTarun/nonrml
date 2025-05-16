@@ -26,9 +26,14 @@ export const ZGetProductsSchema = z.object({
     tags: z.array(string()).optional(), // the custom user input, like red oversize tshirt, black polo, hound design thsirt
     back: z.boolean().optional(),
     cursor: z.number().optional(),
-    admin: z.boolean().default(false)
 });
 export type TGetProductsSchema = z.infer<typeof ZGetProductsSchema>;
+
+export const ZGetRelatedProductsSchema = z.object({
+    productId: z.number(),
+    categoryId: z.number()
+});
+export type TGetRelatedProductsSchema = z.infer<typeof ZGetRelatedProductsSchema>;
 
 export const ZAddProductSchema = z.object({
     name: z.string(),

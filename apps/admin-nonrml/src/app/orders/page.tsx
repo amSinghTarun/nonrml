@@ -8,10 +8,12 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { prismaTypes } from "@nonrml/prisma";
+
 
 interface FilterState {
   date?: Date;
-  status?: any;
+  status?: prismaTypes.OrderStatus;
   orderId: string;
   submittedOrderId: string;
 }
@@ -23,7 +25,7 @@ const initialFilterState: FilterState = {
   submittedOrderId: ""
 };
 
-export default () => {
+const OrdersPage = () => {
   const userIdParam = useSearchParams().get('userId');
   const returnParam = useSearchParams().get('returns');
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
@@ -104,3 +106,5 @@ export default () => {
     </>
   );
 }
+
+export default OrdersPage

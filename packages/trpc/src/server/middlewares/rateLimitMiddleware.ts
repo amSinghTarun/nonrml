@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";
-import { ratelimit } from "@nonrml/rate-limit"
+import { ratelimitWithIP, ratelimitWithMobileNumber } from "@nonrml/rate-limit"
 
 export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) => {
     try{
@@ -14,8 +14,8 @@ export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) =
             throw new TRPCError({code: "BAD_REQUEST", message: "Contact number is required"})
         }
 
-        const rateLimitedIP = await ratelimit.ip.limit(`${ctx.req.headers.get("x-forwarded-for")}`);
-        const rateLimitedMobileNumber = await ratelimit.mobileNumber.limit(`${contact}`);
+        const rateLimitedIP = await ratelimitWithIP().limit(`${ctx.req.headers.get("x-forwarded-for")}`);
+        const rateLimitedMobileNumber = await ratelimitWithMobileNumber().limit(`${contact}`);
         if( !rateLimitedIP.success || !rateLimitedMobileNumber.success)
             throw new Error("Too many request, try after sometime")
         return next();

@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Download, Search, XCircle, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { prismaTypes } from '@nonrml/prisma';
 import { RefundDetailsDialog } from './dialogs/RefundDetailsDialog';
 import { redirect } from 'next/navigation';

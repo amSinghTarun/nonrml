@@ -20,7 +20,7 @@ export const orderRouter = router({
         .meta({ openAPI: {method: "GET", descrription: "Get the trackign detail of an order"}})
         .input(ZTrackOrderSchema)
         .query( async ({ctx, input}) =>  await getUserOrder({ctx, input}) ),
-    initiateOrder: publicProtectedProcedure 
+    initiateOrder: publicProcedure 
         .meta({ openAPI: {method: "POST", descrription: "Initiate a new order"}})
         .input(ZInitiateOrderSchema)
         .mutation( async ({ctx, input}) => await initiateOrder({ctx, input}) ),

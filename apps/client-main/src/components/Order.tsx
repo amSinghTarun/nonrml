@@ -9,20 +9,17 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { GeneralButtonTransparent } from "./ui/buttons";
 import { toast } from "@/hooks/use-toast";
+import { prismaTypes } from "@nonrml/prisma";
+import { convertStringToINR } from "@/lib/utils";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
 
 interface OrderProps {
     className?: string,
     orderDetails: OrderDetails
 }
 
-const getOrderProgressMessage = (status: string, date?:number) => {
+const getOrderProgressMessage = (status: prismaTypes.OrderStatus, date?:number) => {
     switch (status) {
         case "ACCEPTED":
             return "Your Order Is Being Packed With Care";
@@ -32,18 +29,22 @@ const getOrderProgressMessage = (status: string, date?:number) => {
             return `Order Delivered on ${(new Date(date!).toDateString())}`;
         case "PAYMENT_FAILED":
             return `Payment failed`;
+        case "CANCELED":
+            return `Order Canceled`;
+        case "CANCELED_ADMIN":
+            return `Order Canceled`;
         default:
             return "Order Processing";
     }
 };
 
-const getOrderPaymentStatus = (status: string) => {
+const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | undefined) => {
     switch (status) {
         case "paid":
             return "Complete";
         case "failed":
             return "Failed";
-        case "COD":
+        case "created":
             return "Pending";
         default:
             return "Failed";
@@ -79,7 +80,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
                         </div>
                         <div className="flex justify-between">
                             <p>Payment</p>
-                            <p>{getOrderPaymentStatus(orderDetails.Payments?.paymentStatus ?? "")} </p>
+                            <p>{getOrderPaymentStatus(orderDetails.Payments?.paymentStatus)} </p>
                         </div>
                         <p className="text-xs font-normal text-neutral-500 lg:text-sm pt-6 lg:pt-10"> {`${getOrderProgressMessage(orderDetails?.orderStatus, Number(orderDetails.deliveryDate))}`}</p>
                     </div>
@@ -138,11 +139,12 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className}) => {
 
                     <div className=" flex flex-col basis-1/2 text-xs text-neutral-500 space-y-1">
                         <p className="text-neutral-400"> SHIPPING ADDRESS </p>
-                        <p >{orderDetails?.address.contactName.toLocaleUpperCase()}</p>
+                        {/* <p >{orderDetails?.address.contactName.toLocaleUpperCase()}</p>
                         <p >{orderDetails?.address.location}, {orderDetails?.address.pincode}</p>
                         <p >{orderDetails?.address.city.toUpperCase()} {orderDetails?.address.state.toUpperCase()}</p>
                         <p>{orderDetails?.address.countryCode} {orderDetails?.address.contactNumber}</p>
-                        <p >{orderDetails?.address.email}</p>
+                        <p >{orderDetails?.address.email}</p> */}
+                        {/* address edit */}
                     </div>    
 
                     <div className="flex text-xs lg:basis-1/3 flex-col space-y-1 text-neutral-500">

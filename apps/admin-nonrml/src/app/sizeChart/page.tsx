@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import { SizeChartHierarchyTable } from "@/components/SizeChart";
+import { SizeChartHierarchyTable } from "@/components/sizeChart/SizeChart";
 import { redirect } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 

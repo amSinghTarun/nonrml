@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export const transformToHierarchy = (flatEntries: any[]) => {
   const map: Record<number, any> = {};

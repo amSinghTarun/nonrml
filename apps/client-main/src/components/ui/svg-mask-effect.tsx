@@ -3,12 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@nonrml/common";
 import { Vortex } from "./vortex";
+import Loading from "@/app/loading";
 
 export const MaskContainer = ({
   children,
   revealText,
   size = 10,
-  revealSize = 500,
+  revealSize = 410,
   className,
 }: {
   children?: string | React.ReactNode;
@@ -47,7 +48,7 @@ export const MaskContainer = ({
       }}
     >
       <motion.div
-        className="w-full h-full flex items-center justify-center text-6xl absolute bg-black bg-grid-white/[0.2] text-white [mask-image:url(/mask.svg)] [mask-size:40px] [mask-repeat:no-repeat]"
+        className="w-full h-full flex items-center justify-center text-6xl absolute bg-white bg-grid-white/[0.2] text-white [mask-image:url(/mask.svg)] [mask-size:40px] [mask-repeat:no-repeat]"
         animate={{
           maskPosition: `${mousePosition.x - maskSize / 2}px ${
             mousePosition.y - maskSize / 2
@@ -60,11 +61,12 @@ export const MaskContainer = ({
       >
         {/* <div className="absolute inset-0 bg-white h-full w-full z-0 opacity-50" /> */}
         <div className="absolute inset-0 overflow-hidden opacity-[0.6] pointer-events-none ">
-          <Vortex
-            backgroundColor="black"
+          {/* <Vortex
+            backgroundColor="white"
             rangeY={800}
             className="flex items-center flex-col justify-center px-2 md:px-10 py-4 w-full h-full"
-          ></Vortex>
+          ></Vortex> */}
+          <div className="bg-white"></div>
         </div>
         <div
           onMouseEnter={() => {

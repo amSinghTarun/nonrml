@@ -4,7 +4,7 @@ import { trpc } from '@/app/_trpc/client';
 import { useSearchParams } from 'next/navigation';
 import { Addresses } from '@/components/Addresses';
 
-export default () => {
+const AddressPage = () => {
     const userIdParam = useSearchParams().get('userId');
     if(!userIdParam) return <></>
     const addresses = trpc.viewer.address.getUserAddress.useQuery({userId: +userIdParam});
@@ -19,3 +19,5 @@ export default () => {
         </>
     )
 }
+
+export default AddressPage

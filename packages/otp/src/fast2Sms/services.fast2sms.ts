@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import axios from "axios"
 import path from "path";
 
-dotenv.config({path: path.resolve("../../packages/otp/.env")});
+dotenv.config({path: path.resolve("../../packages/otp/.env.local")});
 
 export const sendOTP = async (otp: number, phone: string) => {
     try{
@@ -22,7 +22,7 @@ export const sendOTP = async (otp: number, phone: string) => {
         //console.log(otpSend)
         return otpSend;
     } catch( error ) {
-        //console.log("Error in sending OTP function", error);
+        console.log("Error in sending OTP function", error);
         throw new Error("Try after some time");
     }
 };

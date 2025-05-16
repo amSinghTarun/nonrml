@@ -2,7 +2,7 @@ import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile } from "@nonrml/comm
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema, TEditReplacementOrderSchema } from "./replacement.schema";
 import { Prisma } from "@nonrml/prisma";
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 
 export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGetReplacementOrderSchema>)   => {
@@ -280,7 +280,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                 )
                 console.log("Going in treansactions", updateQueries)
                 await prisma.$transaction(updateQueries);
-                await redis.redisClient.del(`productVariantQuantity_${returnItem.orderProduct.productVariant.productId}`)
+                await cacheServicesRedisClient().del(`productVariantQuantity_${returnItem.orderProduct.productVariant.productId}`)
                 console.log("Out of treansactions")
             }
         }

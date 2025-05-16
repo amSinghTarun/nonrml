@@ -12,7 +12,7 @@ export default function TRPCProvider({ children }: { children: React.ReactNode }
       transformer: SuperJSON,
       links: [
         httpLink({
-          url: "http://localhost:3001/api/trpc"
+          url: "/api/trpc"
         }),
       ],
     })

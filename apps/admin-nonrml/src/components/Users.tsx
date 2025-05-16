@@ -5,7 +5,6 @@ import { RouterOutput, trpc } from "@/app/_trpc/client"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -87,7 +86,7 @@ export const Users = ({users}: {users: Users}) => {
         { 
             users.status == "success" 
             ? users.data.data.map( user => (
-                <TableRow className={`${user.role != "USER" && "bg-orange-700 text-white hover:bg-red-300"}`}>
+                <TableRow key={user.id} className={`${user.role != "USER" && "bg-orange-700 text-white hover:bg-red-300"}`}>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <TableCell onClick={() => router.push(`/users/${user.id}`)} className="hover:bg-orange-400 cursor-pointer">{user.id}</TableCell>

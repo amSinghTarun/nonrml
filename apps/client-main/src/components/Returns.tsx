@@ -3,13 +3,9 @@ import { cn } from "@nonrml/common";
 import { RouterOutput } from "@/app/_trpc/client";
 import Image from "next/image";
 import React from "react";
+import { convertStringToINR } from "@/lib/utils";
 
 type ReturnOrders = RouterOutput["viewer"]["return"]["getReturnOrders"]["data"];
-
-const convertStringToINR = (currencyString: number) => {
-    let INR = new Intl.NumberFormat();
-    return `INR ${INR.format(currencyString)}.00`;
-}
 
 interface ReturnProps {
     className?: string,

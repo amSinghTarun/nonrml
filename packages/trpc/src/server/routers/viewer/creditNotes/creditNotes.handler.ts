@@ -5,7 +5,7 @@ import { TRPCRequestOptions } from "../helper";
 import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TGetAllCreditNotesSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
 import { TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
-import { redis } from "@nonrml/cache";
+import { cacheServicesRedisClient } from "@nonrml/cache";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
     const prisma = ctx.prisma;
@@ -49,13 +49,13 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
     const userId = ctx.user?.id;
     input = input!;
     try{
-        const attemptNumber : string|null = await redis.redisClient.get(`${userId}`);
+        const attemptNumber : string|null = await cacheServicesRedisClient().get(`${userId}`);
         if(attemptNumber){
             if(Number(attemptNumber) > 5)
                 throw {code:"FORBIDDEN", message: "Attempt limit exceeded"};
         }else{
             const expireUserOTPAt =  172800;
-            await redis.redisClient.set(`${userId}`, '0', {ex: expireUserOTPAt})
+            await cacheServicesRedisClient().set(`${userId}`, '0', {ex: expireUserOTPAt})
         }
 
         const creditNote = await prisma.creditNotes.findFirst({
@@ -73,8 +73,8 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
         //send OTP
 
         //after otp successs
-        await redis.redisClient.incr(`${userId}`);
-        await redis.redisClient.set(`${userId}:otp`, `${otp}`, {ex: 600000})
+        await cacheServicesRedisClient().incr(`${userId}`);
+        await cacheServicesRedisClient().set(`${userId}:otp`, `${otp}`, {ex: 600000})
 
         return { status: TRPCResponseStatus.SUCCESS, message:"SUCCESS", data: {}};
     } catch(error) {
@@ -93,7 +93,7 @@ export const getAllCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetAllC
     input = input!
     const userId = ctx.user?.id!;
     try{
-        const otp = await redis.redisClient.get(`${userId}:otp`)
+        const otp = await cacheServicesRedisClient().get(`${userId}:otp`)
         
         if(!otp || otp != input.otp)
             throw {code: "FORBIDDEN", message:"INVALID_OTP"};
@@ -181,14 +181,15 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
             prisma.creditNotes.create({
                 data: {
                     returnOrderId: input.returnOrderId,
-                    email: orderDetail.order.address.email,
+                    email: orderDetail.order.address?.email ?? "",
                     value: orderDetail?.order.totalAmount!,
                     remainingValue: orderDetail?.order.totalAmount!,
                     creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
-                    userId: orderDetail?.order.userId,
+                    userId: orderDetail?.order.userId ?? 1,
                     expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
                     creditCode: `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
                 }
+                // address edit
             })
    
         } else if( input.userId && input.value) {
@@ -262,9 +263,9 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     data: {
                         value: refundAmount,
                         remainingValue: refundAmount,
-                        email: replacementOrderDetails.return.order.address.email,
+                        email: replacementOrderDetails.return.order.address?.email ?? "",
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.REPLACEMENT,
-                        userId: replacementOrderDetails.return.order.userId,
+                        userId: replacementOrderDetails.return.order.userId ?? 1, // address edit
                         replacementOrderId: input.replacementOrderId,
                         expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
                         creditCode: `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`

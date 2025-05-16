@@ -81,7 +81,7 @@ export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, pric
     }
     return (
         variantId == selectedSize.current 
-        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`flex-1 justify-center flex font-extrabold text-neutral-800 bg-white rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md hover:no-underline`} />         
+        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`flex-1 justify-center flex font-bold text-neutral-800 bg-white rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md hover:no-underline`} />         
     : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={`flex-1 bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:no-underline hover:text-neutral-800`}/>
     )
 }

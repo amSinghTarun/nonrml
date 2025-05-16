@@ -1,16 +1,18 @@
-import { Prisma, prisma } from "@nonrml/prisma";
+import { Prisma } from "@nonrml/prisma";
 import { TDeleteVendorOrder, TPlaceVendorOrder, TPlaceVendorOrderOutputSchema, TUpdateVendorOrder, TUpdateVendorOrderOutputSchema } from "./vendorOrder.schema";
 import { TRPCError } from "@trpc/server";
-import { checkAdmin, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import {  TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 
 /*
     to keep the record of the vendor orders
 */
 export const placeVendorOrder = async ({ctx, input}: TRPCRequestOptions<TPlaceVendorOrder>)  => {
+    const prisma = ctx.prisma;
+    input = input!;
     try{
         const vendorOrder = await prisma.vendorOrder.create({
-            data: input
+            data: {...input, totalPrice: input.totalPrice as unknown as number, advPayment: input.advPayment as unknown as number}
         });
     
         return { status: TRPCResponseStatus.SUCCESS, message:"vendor order cretaed", data: vendorOrder};
@@ -26,19 +28,27 @@ export const placeVendorOrder = async ({ctx, input}: TRPCRequestOptions<TPlaceVe
     update the vendor order
 */
 export const updateVendorOrder = async ({ctx, input}: TRPCRequestOptions<TUpdateVendorOrder>)  => {
+    const prisma = ctx.prisma
+    input = input!;
     try {
         const vOrder = await prisma.vendorOrder.findUnique({
             where: {
                 id: input.id
             }
         });
+
         if(!vOrder)
             throw new TRPCError({code:"NOT_FOUND", message: "No such order exist to edit"});
+
         const vOrderUpdated = await prisma.vendorOrder.update({
             where : {
                 id: vOrder.id
             }, 
-            data: input
+            data: { ...input, 
+                totalPrice: input.totalPrice as unknown as number,
+                advPayment: input.advPayment as unknown as number,
+                finalPayment: input.finalPayment as unknown as number
+            }
         })
         return {status: TRPCResponseStatus.SUCCESS, message: "Vendor order updated", data: vOrderUpdated};
     } catch(error) {
@@ -53,6 +63,8 @@ export const updateVendorOrder = async ({ctx, input}: TRPCRequestOptions<TUpdate
     Delete the vendor order
 */
 export const deleteVendorOrder = async ({ctx, input}: TRPCRequestOptions<TDeleteVendorOrder>) => {
+    const prisma = ctx.prisma
+    input = input!
     try{
         await prisma.vendorOrder.delete({
             where: {
