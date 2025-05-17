@@ -774,7 +774,6 @@ export const updateUserDetailAndCheckServicibility = async ({ctx, input}: TRPCRe
         let email = null;
         const orderHasUser = await prisma.orders.findFirstOrThrow({
             where: {
-                idVarChar: input.rzpOrderReceipt,
                 Payments: {
                     rzpOrderId:  `order_${input.rzpOrderId}`
                 }
