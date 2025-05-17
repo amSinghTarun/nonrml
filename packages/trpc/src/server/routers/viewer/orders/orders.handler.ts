@@ -776,7 +776,7 @@ export const updateUserDetailAndCheckServicibility = async ({ctx, input}: TRPCRe
             where: {
                 idVarChar: input.rzpOrderReceipt,
                 Payments: {
-                    rzpOrderId:  `${input.rzpOrderId}`
+                    rzpOrderId:  `order_${input.rzpOrderId}`
                 }
             },
             select: {
