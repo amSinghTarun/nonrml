@@ -16,7 +16,7 @@ type RequestBody = {
 export async function POST(request: NextRequest) {
     try {
       const requestBody: RequestBody = await request.json();
-
+      console.log(requestBody)
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
         email: requestBody.email,
