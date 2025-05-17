@@ -79,11 +79,11 @@ export const ZcancelOrderProductSchema = z.object({
 });
 export type TcancelOrderProductSchema = z.infer<typeof ZcancelOrderProductSchema>;
 
-export const ZUpdateUserDetailAndCheckServicibilitySchema = z.object({
-    rzpOrderReceipt: z.string(),
+export const ZCheckOrderServicibilitySchema = z.object({
+    // rzpOrderReceipt: z.string(),
     rzpOrderId: z.string(),
-    contact: z.string(),
-    email: z.string(),
+    // contact: z.string(),
+    // email: z.string(),
     addresses: z.array(z.object({
         id: z.string(),
         zipcode: z.string(),
@@ -91,4 +91,4 @@ export const ZUpdateUserDetailAndCheckServicibilitySchema = z.object({
         country: z.string()
     }))
 });
-export type TUpdateUserDetailAndCheckServicibilitySchema = z.infer<typeof ZUpdateUserDetailAndCheckServicibilitySchema>;
+export type TCheckOrderServicibilitySchema = z.infer<typeof ZCheckOrderServicibilitySchema>;

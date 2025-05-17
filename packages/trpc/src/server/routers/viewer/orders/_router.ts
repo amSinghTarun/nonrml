@@ -1,8 +1,8 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, updateUserDetailAndCheckServicibility, getTrackOrder } from "./orders.handler";
-import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZUpdateUserDetailAndCheckServicibilitySchema } from "./orders.schema";
+import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, checkOrderServicibility, getTrackOrder } from "./orders.handler";
+import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZCheckOrderServicibilitySchema } from "./orders.schema";
 
 export const orderRouter = router({
     getUserOrders: publicProtectedProcedure
@@ -46,7 +46,7 @@ export const orderRouter = router({
         .mutation( async ({ctx, input}) => await editOrder({ctx, input}) ),        
     updateUserDetailAndCheckServicibility: publicProcedure
         .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
-        .input(ZUpdateUserDetailAndCheckServicibilitySchema)
-        .mutation( async ({ctx, input}) => await updateUserDetailAndCheckServicibility({ctx, input}) ),
+        .input(ZCheckOrderServicibilitySchema)
+        .mutation( async ({ctx, input}) => await checkOrderServicibility({ctx, input}) ),
 
 })

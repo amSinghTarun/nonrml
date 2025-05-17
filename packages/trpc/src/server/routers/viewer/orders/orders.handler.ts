@@ -1,6 +1,6 @@
 import { TRPCResponseStatus } from "@nonrml/common"
 import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, getOrderId, TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TUpdateUserDetailAndCheckServicibilitySchema, TVerifyOrderSchema} from "./orders.schema";
+import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TCheckOrderServicibilitySchema, TVerifyOrderSchema} from "./orders.schema";
 import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { Orders } from "razorpay/dist/types/orders";
@@ -767,12 +767,11 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
     }
 };
 
-export const updateUserDetailAndCheckServicibility = async ({ctx, input}: TRPCRequestOptions<TUpdateUserDetailAndCheckServicibilitySchema>) => {
+export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<TCheckOrderServicibilitySchema>) => {
     const prisma = ctx.prisma;
     input = input!
     try{
-        let email = null;
-        const orderHasUser = await prisma.orders.findFirstOrThrow({
+        await prisma.orders.findFirstOrThrow({
             where: {
                 Payments: {
                     rzpOrderId:  `order_${input.rzpOrderId}`
@@ -780,39 +779,49 @@ export const updateUserDetailAndCheckServicibility = async ({ctx, input}: TRPCRe
             },
             select: {
                 id: true,
-                userId: true
             }
         });
+        
+        // let email = null;
+        // const contactNumber = input.contact.search(/\+91/) >= 0 ? input.contact.split("+91")[1] : input.contact;
 
-        const contactNumber = input.contact.search('+91') > 0 ? input.contact.split("+91")[1] : input.contact;
-
-        if(!orderHasUser.userId && input.contact.length >= 10 && contactNumber){
-            let user = await prisma.user.findUnique({ where: { contactNumber: contactNumber }});
+        // if(!orderHasUser.userId && contactNumber && contactNumber.length >= 10){
+        //     let user = await prisma.user.findUnique({ where: { contactNumber: contactNumber }});
             
-            if(input.email.length > 0)
-                email = input.email;
+        //     if(input.email.length > 0)
+        //         email = input.email;
 
-            if(!user){
-                user = await prisma.user.create({
-                    data: {
-                        contactNumber: contactNumber,
-                        role: "USER",
-                        ...(email && {email: email})
-                    }
-                })
-            }
+        //     if(!user){
+        //         user = await prisma.user.create({
+        //             data: {
+        //                 contactNumber: contactNumber,
+        //                 role: "USER",
+        //                 ...(email && {email: email})
+        //             }
+        //         })
+        //     }else if(!user.email && email) {
+        //         await prisma.user.update({
+        //             where: {
+        //                 id: user.id
+        //             },
+        //             data: {
+        //                 email: email
+        //             }
+        //         }) 
+        //     }
 
-            await prisma.orders.update({
-                where: {
-                    id: orderHasUser.id
-                },
-                data: {
-                    userId: user.id
-                }
-            });
-        };
+        //     await prisma.orders.update({
+        //         where: {
+        //             id: orderHasUser.id
+        //         },
+        //         data: {
+        //             userId: user.id
+        //         }
+        //     });
+        // };
 
         let shippingAddressesDetails = []
+
         for( let pincode of input.addresses ){
             let deliveryDetails = await DelhiveryShipping.checkPincodeServiceability({pincode: pincode.zipcode});
             shippingAddressesDetails.push({
