@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       });
 
       // Validate required fields
+      console.log("shipping DETAILS")
+      console.log(shippingDetails)
       return NextResponse.json( shippingDetails, { status: 200 })
   
     } catch (error) {
