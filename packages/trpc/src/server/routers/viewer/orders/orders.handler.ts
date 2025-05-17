@@ -825,7 +825,10 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
         for( let address of input.addresses ){
             let deliveryDetails = await DelhiveryShipping.checkPincodeServiceability({pincode: address.zipcode});
             shippingAddressesDetails.push({
-                ...address,
+                id: +address.id,
+                zipcode: address.zipcode,
+                state_code: address.state_code,
+                country: address.country,
                 "serviceable": deliveryDetails.serviceable,
                 "cod": deliveryDetails.cod, 
                 "cod_fee": deliveryDetails.cod_fee,

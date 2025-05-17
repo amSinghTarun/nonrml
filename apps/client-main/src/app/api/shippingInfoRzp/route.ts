@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       // Validate required fields
       console.log("shipping DETAILS")
       console.log({"addresses": shippingDetails})
-      return NextResponse.json( {"addresses": shippingDetails}, { status: 200 })
+      return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)
