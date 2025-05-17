@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
       console.log(requestBody)
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
-        email: requestBody.email,
-        contact: requestBody.contact,
+        // email: requestBody.email,
+        // contact: requestBody.contact,
         rzpOrderId: requestBody.razorpay_order_id,
-        rzpOrderReceipt: requestBody.order_id
+        // rzpOrderReceipt: requestBody.order_id
       });
 
       // Validate required fields
