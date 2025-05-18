@@ -19,7 +19,7 @@ const nextConfig = {
         MAX_QUANTITY_TO_ORDER : `11`,
         MIN_QUANTITY_TO_ORDER: `1`,
         PROD_PORT: '8080',
-        RAZORPAY_KEY_ID: "rzp_live_Mprt0b3ZdUcn4n"
+        RAZORPAY_KEY_ID: "rzp_live_Sg00pUDJaSERMX"
     }
 };
 
