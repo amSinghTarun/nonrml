@@ -32,7 +32,7 @@ export class DelhiveryShipping {
       // });
 
       let deliveryDetails = {
-        "id": 1,
+        "id": "1",
         "description": "Free shipping",
         "name": "Delivery in 5-7 days",
         "shipping_fee": 0,

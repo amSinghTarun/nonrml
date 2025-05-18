@@ -21,7 +21,7 @@ export const sizeChartRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Delete size"}})
         .input(ZDeleteSizeChartSchema)
         .mutation( async ({ctx, input}) => await deleteSizeChart({ctx, input})),
-    getProductSizeChart: publicProtectedProcedure
+    getProductSizeChart: publicProcedure
         .input(ZGetProductSizeChartSchema)
         .query( async ({ctx, input}) => await getProductSizeChart({ctx, input}) )
 });
