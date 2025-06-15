@@ -13,7 +13,6 @@ export const getUsers = async ({ctx, input}: TRPCRequestOptions<TGetUsersSchema>
             select: {
                 id: true,
                 contactNumber: true, 
-                countryCode: true,
                 role: true,
                 createdAt: true,
                 updatedAt: true,

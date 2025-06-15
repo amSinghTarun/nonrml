@@ -24,8 +24,11 @@ interface ExchangeProps {
 }
 
 export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, returnAcceptanceDate, backToOrderDetails}) => {
+    
     const fetchExchangeProductSizes = trpc.useUtils().viewer.product.getProductSizes;
+
     const router = useRouter();
+
     const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {
         const productIdsJson : { [productId: number] : 1 }= {};
         const productIds : number[] = []
@@ -47,16 +50,16 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
     });
 
     const [selectedProducts, setSelectedProducts] = useState<{
-        [orderProductId: number]: { exchangeVariant?:number, quantity: number, referenceImage?:File, reason?:string }
+        [orderProductId: number]: { exchangeVariant?:number, quantity: number }
     }>({});
     const [error, setError] = useState<{[productId:number]: string}>({});
     const [productExchangeSizes, setProductExchangeSizes] = useState<exchangeProduct>();
 
-    const handleImageUpload = async (orderProductId: number, image: File) => {
-        delete error[orderProductId]
-        setError(error);
-        setSelectedProducts({...selectedProducts, [orderProductId]: { ...selectedProducts[orderProductId] ,referenceImage: image}});
-    };
+    // const handleImageUpload = async (orderProductId: number, image: File) => {
+    //     delete error[orderProductId]
+    //     setError(error);
+    //     setSelectedProducts({...selectedProducts, [orderProductId]: { ...selectedProducts[orderProductId]}});
+    // };
 
     useEffect( () => {
         getExchangeProductSizes(products)
@@ -64,12 +67,12 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
             .catch(error => { throw error})
     }, []);
 
-    const deleteUploadedImage = (orderProductId: number) => {
-        delete error[orderProductId]
-        setError(error);
-        delete selectedProducts[orderProductId].referenceImage;
-        setSelectedProducts(selectedProducts);
-    }
+    // const deleteUploadedImage = (orderProductId: number) => {
+    //     delete error[orderProductId]
+    //     setError(error);
+    //     // delete selectedProducts[orderProductId].referenceImage;
+    //     setSelectedProducts(selectedProducts);
+    // }
 
     const handleOnQuantityChange = (quantity: number, orderProductId:number) => {
         if(orderProductId in selectedProducts){
@@ -93,9 +96,9 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
         );
     };
 
-    const handleReasonUpload = (text: string, orderProductId: number) => {
-        setSelectedProducts({...selectedProducts, [orderProductId]: { ...selectedProducts[orderProductId] , reason: text}});
-    }
+    // const handleReasonUpload = (text: string, orderProductId: number) => {
+    //     setSelectedProducts({...selectedProducts, [orderProductId]: { ...selectedProducts[orderProductId]}});
+    // }
 
     const handleSubmit = async () => {
         setError({});
@@ -104,26 +107,15 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
             orderId: number,
             products: { 
                 orderProductId: number, 
-                quantity:number, 
-                referenceImage?:string,
-                returnReason:string,
+                quantity:number
                 exchangeVariant: number
             }[]
         } = {orderId: orderId, products: []}
         for(let productId of Object.keys(selectedProducts)){
-            // !selectedProducts[+productId].referenceImage && (errors = {...errors, [+productId]: "PLEASE UPLOAD A RELATED IMAGE"});
-            !selectedProducts[+productId].reason ? (
-                errors[+productId] ? ( errors = {...errors, [+productId]: "PLEASE UPLOAD A RELATED IMAGE AND EXPLAIN YOUR REASON"})
-                : (errors = {...errors, [+productId]: "PLEASE EXPLAIN YOUR ISSUE( more than 15 words)"})
-            ) : (
-                selectedProducts[+productId].reason!.length < 15 && (errors = {...errors, [+productId]: "PLEASE EXPLAIN YOUR ISSUE IN MORE THAN 15 WORDS"})
-            )
             !selectedProducts[+productId].exchangeVariant && (errors = {...errors, [+productId]: "SELECT AN APPROPRIATE SIZE TO EXCHANGE WITH"});
             if(Object.keys(errors).length == 0){
                 productDetails.products.push({
                     quantity: selectedProducts[+productId].quantity,
-                    returnReason: selectedProducts[+productId].reason!,
-                    ...(selectedProducts[+productId].referenceImage && {referenceImage: await convertFileToDataURL(selectedProducts[+productId].referenceImage!)}),
                     orderProductId: +productId,
                     exchangeVariant: selectedProducts[+productId].exchangeVariant!
                 });
@@ -200,10 +192,10 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
                                             /> : <></>
                                         ))} 
                                     </div>
-                                    <div className="flex flex-col lg:flex-row lg:gap-x-4 w-full space-y-4 lg:space-y-0">
+                                    {/* <div className="flex flex-col lg:flex-row lg:gap-x-4 w-full space-y-4 lg:space-y-0">
                                         <FileUpload buttonClass="border border-neutral-200 text-neutral-400 bg-white hover:bg-white hover:text-neutral-700 " onFileDelete={deleteUploadedImage} onChange={handleImageUpload} orderProductId={product.id} /> 
                                         <Textarea className="text-xs border border-neutral-200 placeholder:text-neutral-400" onChange={(e)=>{handleReasonUpload(e.target.value, product.id)}} placeholder="Explain Your Issue In More Than 15 Words" /> 
-                                    </div>
+                                    </div> */}
                                 </div>
                             } 
                             {error[product.id] && <div key={product.id} className="text-xs text-red-600 pl-5">{error[product.id]}</div>}

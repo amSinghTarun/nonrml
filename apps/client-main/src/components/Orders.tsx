@@ -27,24 +27,24 @@ const getOrderProgressMessage = (status: prismaTypes.OrderStatus) => {
         case "CANCELED":
             return "Order cancelled";
         case "CANCELED_ADMIN":
-            return "Order cancelled";
+            return "Order cancelled by NoNRML";
         case "PAYMENT_FAILED":
             return "Payment failed";
         default:
-            return "Order processing";
+            return "Processing Confirmation";
     }
 };
 
-const getOrderPaymentStatus = (status: string) => {
+const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | "") => {
     switch (status) {
-        case "paid":
+        case "captured":
             return "COMPLETE";
         case "failed":
             return "FAILED";
-        case "COD":
-            return "PENDING";
+        case "authorized":
+            return "WAITING BANK APPROVAL";
         default:
-            return "FAILED";
+            return "PENDING";
     }
 };
 
@@ -55,6 +55,7 @@ const renderOrderStatus = (status: string) => {
         "CANCELED": "CANCELED",
         "SHIPPED": "SHIPPED",
         "DELIVERED": "DELIVERED",
+        "CANCELED_ADMIN": "CANCELED BY NoNRML",
         "PAYMENT_FAILED": "PAYMENT_FAILED"
     };
     
@@ -117,7 +118,7 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                         <div className="flex flex-row rounded-xl flex-wrap w-full space-y-5">
                             {userOrders.data?.data.orders.map((order, index) => (
                                 <article key={index} className="relative h-auto w-full p-2 rounded-md text-sm hover:shadow-sm hover:shadow-neutral-200 transition-all duration-200 ">
-                                    <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/orders/${order.id}`}>
+                                    <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/orders/ORD-${order.id}${order.idVarChar}`}>
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-sm font-bold">{`ORD-${order.id}${order.idVarChar}`}</span>
                                             <span className="text-xs text-neutral-500">{order.createdAt.toDateString()}</span>
@@ -133,7 +134,7 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                             {/* Payment Status */}
                                             <div className="flex justify-between items-center text-neutral-500">
                                                 <span>Payment</span>
-                                                <span> {getOrderPaymentStatus(order.Payments?.paymentStatus ?? "")} </span>
+                                                <span> {getOrderPaymentStatus(order.Payments?.paymentStatus || "")} </span>
                                             </div>
                         
                                             {/* Order Details */}
@@ -147,8 +148,8 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                         
                                     {/* Action Buttons */}
                                     <div className="flex justify-end gap-3 mt-2 pt-2 border-t border-neutral-100 "> 
-
-                                        {order.orderStatus === "PENDING" && (
+                                    {/* so that prepaid order that aren't accepted shouldn't get cancelled */}
+                                        {(order.orderStatus === "PENDING" && (order.Payments?.paymentStatus != "captured" && order.Payments?.paymentStatus != "authorized")) && (
                                             cancelOrder.isLoading && cancelOrder.variables?.orderId == order.id
                                             ? <p className="text-xs pl-2 text-neutral-600">Cancelling order...</p> 
                                             : <CancelOrderDialog 
@@ -161,14 +162,14 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                         {order.orderStatus === "DELIVERED" ? (
                                             (order.return.length || order.replacementOrder.length) ?
                                             <div className="flex divide-x divide-neutral-200">
-                                                {order.return.length > 0 && (
+                                                {/* {order.return.length > 0 && (
                                                     <Link
                                                         href={`/returns/${order.id}`}
                                                         className="text-xs pr-2 text-neutral-600 hover:underline transition-all duration-200"
                                                     >
                                                         View Returns
                                                     </Link>
-                                                )}
+                                                )} */}
                                                 {order.replacementOrder.length > 0 && (
                                                     <Link
                                                         href={`/exchanges/${order.id}`}

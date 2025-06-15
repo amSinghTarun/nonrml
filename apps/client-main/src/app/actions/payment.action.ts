@@ -15,7 +15,7 @@ export const verifyRzpOrder = async ({razorpayPaymentId, razorpayOrderId, razorp
 
 };
 
-export const changePaymentStatus = async ({orderId, paymentStatus}: {orderId: string, paymentStatus: 'failed'|'paid'}) => {
+export const changePaymentStatus = async ({orderId, paymentStatus}: {orderId: string, paymentStatus: 'failed'|'captured'}) => {
     // const session = await getSession();
     // if (!session?.user.id) throw new Error("UNAUTHORISED ACTION, you must first login");
     const { data } = await (await serverClient()).viewer.payment.updateFailedPaymentStatus({orderId, paymentStatus})

@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import CanclePurchaseDialog from "@/components/dialog/CancelPurchaseDialog";
 import { AddressCard } from "@/components/cards/AddressCard"
 import { cn } from "@nonrml/common";
-import { AddAddress, EditAddress } from "./Address";
+// import { AddAddress, EditAddress } from "./Address";
 import { RouterOutput, trpc } from "@/app/_trpc/client";
-import { useBuyNowItemsStore, useCartItemStore } from "@/store/atoms";
+import { useBuyNowItemsStore, useCartItemStore, useSetAppbarUtilStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
@@ -16,6 +16,7 @@ import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import Loading from "@/app/loading";
 import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 import { convertStringToINR } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 interface CheckoutProp {
     className?: string,
@@ -29,6 +30,8 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     const { cartItems, setCartItems } = useCartItemStore();
     const orderProducts = !buyOption ? cartItems : buyNowItems;
     const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
+    const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
+    const { status: loginStatus } = useSession();
     
     if(Object.keys(orderProducts).length == 0 && !initiateOrder.isLoading)
         router.back();
@@ -41,6 +44,7 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     const [couponValue, setCouponValue] = useState<{orderValue:number, couponValue: number}|null>();
     
     const [totalAmount, setTotalAmount] = useState(0);
+
     useEffect(() => {
       // Calculate total amount
       let newTotal = 0;
@@ -52,7 +56,7 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
 
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
-      onSuccess: (response) => {
+      onSuccess: ( response ) => {
         router.replace(`/orders/${response.data.orderId}`);
       },
       onError: () => {
@@ -61,10 +65,11 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
             title: "Something went wrong. Any payment deducted will be reimbursed",
             variant: "destructive"
         });
-        router.replace("/orders");
+        router.back();
       }
     });
-    const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote;
+
+    const getCreditNoteDetails = trpc.useUtils().viewer.creditNotes.getCreditNote
     
     useEffect( () => {
         // Set timeout to end page session after 10 mins
@@ -112,8 +117,11 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
 
     const handleApplyCreditNote = async () => {
         try{
-            const creditNoteApplied = await getCreditNoteDetails.fetch({creditNote:couponCode.current, orderValue:totalAmount});
-            setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
+            if(loginStatus == "authenticated"){
+                const creditNoteApplied = await getCreditNoteDetails.fetch({creditNote:couponCode.current, orderValue:totalAmount});
+                setCouponValue({orderValue: creditNoteApplied?.data.afterCnOrderValue!, couponValue:creditNoteApplied?.data.usableValue!});
+            }
+            setAppbarUtil("USER_ACCESSIBILITY")
         } catch(error:any){
             toast({
                 duration: 1500,
@@ -126,18 +134,17 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     return (
         <div className={cn("h-screen w-full p-2 ", className)}>
             { initiateOrder.isLoading || verifyOrder.isLoading ? 
-                <Loading  text="PROCESSING YOUR PAYMENT..."/> : 
+                <Loading className="h-full w-full" /> : 
                 <>
                 <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false) }} /> {/* ; setAction("ORDER") */}
                 <div className="w-[100%] h-[100%] flex flex-col text-neutral-800">
-                { <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
-                    <div className=" cursor-pointer text-xs font-bold">
-                        <span className={`${"font-bold"}`} >{`ORDER SUMMARY`}</span>
-                    </div>
+                    { <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
+                        <div className=" cursor-pointer text-xs font-bold">
+                            <span className={`${"font-bold"}`} >{`ORDER SUMMARY`}</span>
+                        </div>
+                    </article>}
 
-                </article>}
-
-                    <div className="w-full h-[70%] space-y-2 p-2 overflow-y-scroll">{
+                    <div className="w-full h-full space-y-2 p-2 overflow-y-scroll">{
                         Object.keys(orderProducts).map((variantId, index) => (
                             <div 
                                 className=" space-x-3 flex flex-row text-[10px] md:text-xs shadow-sm shadow-neutral-100 p-1  rounded-md"

@@ -6,6 +6,9 @@ import { cacheServicesRedisClient } from "@nonrml/cache";
 import { prisma } from "@nonrml/prisma";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
 import crypto from 'crypto';
+import { emitWarning } from "process";
+import { generateOrderConfirmationEmail } from "@nonrml/common";
+import { sendSMTPMail } from "@nonrml/mailing";
 
 export const SALT_SIZE = 8;
 
@@ -15,8 +18,9 @@ export type TRPCRequestOptions<T> = {
 }
 
 export const getOrderId = (orderId: string) : number => {
-    if(orderId.search("ORD-") > 0){
-        return +orderId.split("-")[1]!.slice(0, -4);
+    console.log(orderId.search(/\ORD-/))
+    if(orderId.search(/\ORD-/) == 0){
+        return +orderId.split("-")[1]!.slice(0, -6);
     } else {
         throw new Error("Invalid order id");
     }
@@ -144,27 +148,56 @@ export const acceptOrder = async (orderId: number) => {
         let products : { [id: number]: number } = {};
         const redisOperations: Promise<any>[] = []
 
-        const orderedProducts = await prisma.orderProducts.findMany({
+        const orderDetails = await prisma.orders.findUnique({
             where:{
-                orderId: orderId
+                id: orderId
             }, 
             select: {
-                productVariant: {
+                id: true,
+                createdAt: true,
+                idVarChar: true,
+                address: true,
+                totalAmount: true,
+                creditUtilised: true,
+                Payments: {
                     select: {
-                        id: true,
-                        product: {
+                        paymentMethod: true
+                    }
+                },
+                orderProducts:{
+                    select: {
+                        quantity: true,
+                        productVariant: {
                             select: {
+                                size: true,
                                 id: true,
-                                sku: true
+                                product: {
+                                    select: {
+                                        id: true,
+                                        sku: true,
+                                        price: true,
+                                        productImages: {
+                                            where: {
+                                                priorityIndex: {
+                                                    equals: 0
+                                                }
+                                            },
+                                            select: {
+                                                image: true
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                },
-                quantity: true
+                }
             }
         });
+
+        if(!orderDetails?.orderProducts.length) throw {code: "BAD_REQUEST", message: "Order with 0 itemds not allowed"}
         
-        for(let orderProduct of orderedProducts) {
+        for(let orderProduct of orderDetails?.orderProducts) {
             !products[orderProduct.productVariant.product.id]  && (
                 redisOperations.push(
                     cacheServicesRedisClient().del(`productVariantQuantity_${orderProduct.productVariant.product.id}`)
@@ -246,6 +279,27 @@ export const acceptOrder = async (orderId: number) => {
             success && redisOperations.length && await Promise.all(redisOperations);
         }
 
+        let mailProducts = orderDetails?.orderProducts.map((product => ({sku: product.productVariant.product.sku, size: product.productVariant.size, image: product.productVariant.product.productImages[0]!.image, price: product.productVariant.product.price, quantity: product.quantity })))
+        const emailHTML = generateOrderConfirmationEmail({
+            customerName: orderDetails?.address?.contactName!,
+            customerNumber: orderDetails?.address?.contactNumber!,
+            orderId: `ORD-${orderDetails?.id}${orderDetails?.idVarChar}`,
+            orderDate: (new Date(orderDetails?.createdAt!)).toDateString(),
+            products: mailProducts!,
+            credit: orderDetails?.creditUtilised!,
+            total: orderDetails?.totalAmount!,
+            shippingAddress: {
+                name: orderDetails?.address?.contactName!,
+                state: orderDetails?.address?.state!,
+                street: orderDetails?.address?.location!,
+                city: orderDetails?.address?.city!,
+                country: "INDIA",
+                zip: orderDetails?.address?.pincode!
+            },
+            paymentMethod: orderDetails?.Payments?.paymentMethod!,
+        })
+        sendSMTPMail({userEmail: "tarunsingh2118@gmail.com", emailBody: emailHTML})
+
         await prisma.orders.update({
             where: {
                 id: orderId
@@ -255,10 +309,7 @@ export const acceptOrder = async (orderId: number) => {
             }
         });
 
-        
-        if(!orderedProducts.length) throw {code: "BAD_REQUEST", message: "Order with 0 itemds not allowed"}
-
-        return {orderedProducts}
+        return {orderedProducts : orderDetails.orderProducts}
     } catch(error) {
         console.log(error)
         throw new Error("ERROR_ACCEPTING_ORDER");

@@ -3,9 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { createOTP, TRPCCustomError } from "../helper";
 import { TRPCRequestOptions } from "../helper";
 import { TAddCreditNoteSchema, TDeleteCreditNoteItem, TGetCreditNotesAdminSchema, TGetAllCreditNotesSchema, TEditCreditNoteSchema, TGetCreditNoteSchema, TGetCreditNoteDetailsSchema } from "./creditNotes.schema";
-import { TRPCResponseStatus } from "@nonrml/common";
+import { generateCreditNoteEmail, TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
 import { cacheServicesRedisClient } from "@nonrml/cache";
+import { sendSMTPMail } from "@nonrml/mailing";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
     const prisma = ctx.prisma;
@@ -148,7 +149,7 @@ export const getCreditNoteDetails = async ({ctx, input}: TRPCRequestOptions<TGet
 };
 
 /*
-add discount in the db. Can only be done by ADMIN
+add credit note in the db. Can only be done by ADMIN
 */
 export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditNoteSchema>) => {
     const prisma = ctx.prisma;
@@ -156,6 +157,18 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
     try{
         console.log(`-----Input of create credit note, ${JSON.stringify(input)}, -----------that's it`)
         let prismaUpdateQueries = []
+        
+        let userMailId : string = ""
+        let userId : null|number = null; 
+        
+        let creditNoteMailData = {
+            creditNoteId: "",
+            creditAmount: 0,
+            creditNoteExpiry: new Date( new Date().setMonth( new Date().getMonth() + Number(process.env.CREDIT_NOTE_EXPIRY) ) ),
+            originalOrderNumber: "",
+            customerMobile: ""
+        }
+        
 
         if(input.returnOrderId){
             const orderDetail = await prisma.returns.findUnique({
@@ -165,7 +178,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 include: {
                     order: {
                         include: {
-                            address: {
+                            user: {
                                 select: {
                                     email: true
                                 }
@@ -175,34 +188,47 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 }
             })
 
-            if(!orderDetail)
+            if(!orderDetail || !orderDetail.order.userId)
                 throw ({code: "BAD_REQUEST", message: "The order for which you are creating CN is invalid"});
     
-            prisma.creditNotes.create({
-                data: {
-                    returnOrderId: input.returnOrderId,
-                    email: orderDetail.order.address?.email ?? "",
-                    value: orderDetail?.order.totalAmount!,
-                    remainingValue: orderDetail?.order.totalAmount!,
-                    creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
-                    userId: orderDetail?.order.userId ?? 1,
-                    expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
-                    creditCode: `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
-                }
-                // address edit
-            })
-   
-        } else if( input.userId && input.value) {
+            userMailId = orderDetail.order.user?.email ?? "" 
+            userId = orderDetail.order.userId;
+            creditNoteMailData.creditNoteId = `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
+            creditNoteMailData.creditAmount = orderDetail?.order.totalAmount!
+            creditNoteMailData.originalOrderNumber = `ORD-${orderDetail.order.id}${orderDetail.order.idVarChar}`
+
             prismaUpdateQueries.push(
                 prisma.creditNotes.create({
                     data: {
-                        value: input.value,
+                        returnOrderId: input.returnOrderId,
+                        email: userMailId,
+                        value: creditNoteMailData.creditAmount,
+                        remainingValue: creditNoteMailData.creditAmount,
+                        creditNoteOrigin: prismaEnums.CreditNotePurpose.RETURN,
+                        userId: userId,
+                        expiryDate: creditNoteMailData.creditNoteExpiry,
+                        creditCode: creditNoteMailData.creditNoteId
+                    }
+                })
+            )
+   
+        } else if( input.userId && input.value) {
+            
+            userMailId = input.email ?? ""
+            creditNoteMailData.creditNoteId = `GIFT-${input.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${(new Date()).toISOString().split('T')[0]!.replaceAll('-', "").slice(2)}`
+            creditNoteMailData.creditAmount = input.value;
+            userId = input.userId;
+
+            prismaUpdateQueries.push(
+                prisma.creditNotes.create({
+                    data: {
+                        value: creditNoteMailData.creditAmount,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.GIFT,
-                        email: input.email,
-                        userId: input.userId,
-                        remainingValue: input.value,
-                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
-                        creditCode: `GIFT-${input.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${(new Date()).toISOString().split('T')[0]!.replaceAll('-', "").slice(2)}`
+                        email: userMailId,
+                        userId: userId,
+                        remainingValue: creditNoteMailData.creditAmount,
+                        expiryDate: creditNoteMailData.creditNoteExpiry,
+                        creditCode: creditNoteMailData.creditNoteId
                     }
                 })
             )
@@ -219,9 +245,15 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                         select: {
                             order: {
                                 select: {
+                                    Payments: {
+                                        select: {
+                                            rzpPaymentId: true
+                                        }
+                                    },
                                     userId: true,
+                                    idVarChar: true,
                                     id: true,
-                                    address: {
+                                    user: {
                                         select: {
                                             email: true
                                         }
@@ -252,23 +284,34 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                 }
             })
 
-            if(!replacementOrderDetails || !replacementOrderDetails.replacementItems.length)
+            if(!replacementOrderDetails || !replacementOrderDetails.replacementItems.length || !replacementOrderDetails.return.order.userId)
                 throw ({code: "BAD_REQUEST", message: "The order for which you are creating CN is invalid"});
 
             let refundAmount = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.nonReplacableQuantity * product.returnOrderItem.orderProduct.price), 0 );
             let replaceQuantity = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.returnOrderItem.quantity - (product.nonReplacableQuantity + (product.returnOrderItem.rejectedQuantity??0) )), 0 );
             
+            userMailId = replacementOrderDetails.return.order.user?.email ?? ""
+            creditNoteMailData.creditNoteId = `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`
+            creditNoteMailData.creditAmount = refundAmount + (input.extraAmount ?? 0)
+            creditNoteMailData.originalOrderNumber = `ORD-${replacementOrderDetails.return.order.id}${replacementOrderDetails.return.order.idVarChar}`
+            userId = replacementOrderDetails.return.order.userId 
+
             prismaUpdateQueries.push( 
                 prisma.creditNotes.create({
                     data: {
-                        value: refundAmount,
-                        remainingValue: refundAmount,
-                        email: replacementOrderDetails.return.order.address?.email ?? "",
+                        value: creditNoteMailData.creditAmount,
+                        remainingValue: creditNoteMailData.creditAmount,
+                        email: userMailId,
+                        RefundTransactions: {
+                            create: {
+                                rzpPaymentId: replacementOrderDetails.return.order.Payments!.rzpPaymentId!,
+                            }
+                        },
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.REPLACEMENT,
-                        userId: replacementOrderDetails.return.order.userId ?? 1, // address edit
+                        userId: userId, // address edit
                         replacementOrderId: input.replacementOrderId,
-                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 3 ) ),
-                        creditCode: `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`
+                        expiryDate: creditNoteMailData.creditNoteExpiry,
+                        creditCode: creditNoteMailData.creditNoteId,
                     }
                 }),
                 prisma.replacementItem.updateMany({
@@ -295,9 +338,27 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
             )
         }
 
+        const userDetails = await prisma.user.findUniqueOrThrow({
+            where: {
+                id: userId!
+            },
+            select: {
+                contactNumber: true
+            }
+        });
+
         const creditNote = await prisma.$transaction(prismaUpdateQueries);
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "Discount added", data: creditNote};
+        if(creditNote.at(0) && userMailId != "" && userId){
+            const creditNoteMail = generateCreditNoteEmail({
+                ...creditNoteMailData,
+                creditNoteExpiry: `${creditNoteMailData.creditNoteExpiry}`,
+                customerMobile: userDetails.contactNumber
+            })
+            await sendSMTPMail({userEmail: userMailId, emailBody: creditNoteMail})
+        }
+
+        return {status: TRPCResponseStatus.SUCCESS, message: "Credit Note", data: creditNote};
 
     } catch(error) {
         //console.log("\n\n Error in addDiscount ----------------");

@@ -1,8 +1,9 @@
-import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile } from "@nonrml/common";
+import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile, generateReplacementShippingNotificationEmail } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema, TEditReplacementOrderSchema } from "./replacement.schema";
+import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema, TEditReplacementOrderSchema, TShipReplacementSchema } from "./replacement.schema";
 import { Prisma } from "@nonrml/prisma";
 import { cacheServicesRedisClient } from "@nonrml/cache";
+import { sendSMTPMail } from "@nonrml/mailing";
 
 
 export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGetReplacementOrderSchema>)   => {
@@ -21,11 +22,18 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
                 id: true,
                 status: true,
                 createdAt: true,
-                shipmentId: true,
+                shipment: true,
+                order: {
+                    select: {
+                        id: true, 
+                        idVarChar: true,
+                    }
+                },
                 return: {
                     select:{
                         returnStatus: true,
-                        returnReceiveDate: true
+                        returnReceiveDate: true,
+                        shipment: true
                     }
                 },
                 CreditNotes: {
@@ -76,8 +84,20 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
                     }
                 }
             }
-        })
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementOrder};
+        });
+
+        const bankRefunds = await prisma.refundTransactions.count({
+            where: {
+                Payments: {
+                    orderId: input.orderId
+                },
+                bankRefundValue: {
+                    gte: 1
+                }
+            }
+        });
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: {replacementOrder, bankRefunds}};
     }  catch(error) {
         //console.log("\n\n Error in Initiate Return ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -304,5 +324,43 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
         if (error instanceof Prisma.PrismaClientKnownRequestError)
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error);
+    }
+}
+
+export const shipReplacementOrder = async ({ctx, input}: TRPCRequestOptions<TShipReplacementSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+
+        const orderDetail = await prisma.replacementOrder.findUnique({
+            where: {
+                id: input.replcaementOrderId
+            },
+            select: {
+                id: true,
+                order: {
+                    select: {
+                        user: {
+                            select: {
+                                email: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        // send confirmation mail
+        if(orderDetail?.order.user?.email){
+            sendSMTPMail({
+                userEmail: orderDetail?.order.user?.email,
+                emailBody: generateReplacementShippingNotificationEmail({orderId: `${orderDetail.id}`, waybillNumber: "hadfiuheu", trackingLink: "https://www.delhivery.com/tracking"})
+            })
+        }
+
+    } catch(error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError)
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error); 
     }
 }

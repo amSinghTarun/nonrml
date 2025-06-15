@@ -62,11 +62,7 @@ const ShippingDetails: React.FC<ShippingDetailsProps> = ({
             </div>
             <div>
               <h3 className="font-medium text-sm text-gray-500">Mobile</h3>
-              <p>{`${address.countryCode} - ${address.contactNumber}`}</p>
-            </div>
-            <div>
-              <h3 className="font-medium text-sm text-gray-500">Email</h3>
-              <p>{address.email}</p>
+              <p>{`${address.contactNumber}`}</p>
             </div>
           </>
         ) : (
@@ -116,28 +112,12 @@ const ShippingDetails: React.FC<ShippingDetailsProps> = ({
                 <label htmlFor="contact" className="font-medium text-sm text-gray-500 mb-1 block">Contact Number</label>
                 <div className="flex gap-2">
                   <Input
-                    id="countryCode"
-                    className="w-20"
-                    value={editedAddress?.countryCode || ''}
-                    onChange={(e) => handleChange('countryCode', e.target.value)}
-                    aria-label="Country code"
-                  />
-                  <Input
                     id="contactNumber"
                     value={editedAddress?.contactNumber || ''}
                     onChange={(e) => handleChange('contactNumber', e.target.value)}
                     aria-label="Contact number"
                   />
                 </div>
-              </div>
-              <div>
-                <label htmlFor="email" className="font-medium text-sm text-gray-500 mb-1 block">Email</label>
-                <Input
-                  id="email"
-                  value={editedAddress?.email || ''}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  type="email"
-                />
               </div>
             </div>
             <div className="flex justify-end gap-2">

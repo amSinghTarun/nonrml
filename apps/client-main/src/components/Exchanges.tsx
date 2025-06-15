@@ -5,21 +5,26 @@ import Image from "next/image";
 import React from "react";
 import Link from "next/link";
 import { convertStringToINR } from "@/lib/utils";
+import { Info } from "lucide-react";
 
-type ExchangeOrders = RouterOutput["viewer"]["replacement"]["getReplacement"]["data"];
+type ExchangeOrders = RouterOutput["viewer"]["replacement"]["getReplacement"]["data"]["replacementOrder"];
 
 interface ExchangesProps {
     className?: string,
-    exchangeOrders: ExchangeOrders
+    exchangeOrders: ExchangeOrders,
+    refund: number
 }
 
-export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders }) => {
+export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders, refund }) => {
     return (
         <div className={cn("h-screen w-full p-2 pb-6 flex flex-col lg:flex-row", className)}>
-            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-bold p-1 lg:justify-center lg:text-center">Replacement Orders</h1>
+            <div className="flex flex-row lg:flex-col lg:text-center justify-between lg:justify-center lg:basis-5/12 p-2 text-sm lg:text-sm gap-4">
+                <span className="hover:font-bold cursor-none font-bold text-neutral-600">Replacement Orders</span>
+                <span className="hover:font-bold cursor-none font-bold text-neutral-600">{`ORD-${exchangeOrders[0].order.id}${exchangeOrders[0].order.idVarChar}`}</span>
+            </div>
             <div className="space-y-7 lg:space-y-10 p-2 lg:p-4 flex flex-col flex-1 overflow-y-scroll overscroll-auto scrollbar-hide">
-            {
-                exchangeOrders.map((order, index) => {
+                
+                {exchangeOrders.map((order, index) => {
                     return (
                         <div key={index} className="space-y-2 hover:shadow-sm w-full h-fit hover:shadow-neutral-200 shadow-sm shadow-neutral-100 p-2 text-xs rounded-md text-neutral-500">
                             <div className="flex flex-col justify-between space-y-1 relative">
@@ -27,21 +32,35 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                                     <p className="font-bold text-neutral-800">REPL-{order.id}</p>
                                     <p >{order.createdAt.toDateString()}</p>
                                 </div>
-                                <div className="flex justify-between ">
-                                    <p className="">Exchange Status</p>
-                                    <p>{order.status != "PENDING" ? order.status.replaceAll("_", " ") : order.return.returnStatus.replaceAll("_", " ")}</p>
-                                </div>
+                                {order.status != "PENDING" && <div className="flex justify-between ">
+                                    <p className="">Replacement Product(s) Status</p>
+                                    <p>{order.status.replaceAll("_", " ")}</p>
+                                </div>}
+                                {order.status == "PENDING" && <div className="flex justify-between ">
+                                    <p className="">Returned Product(s) Status</p>
+                                    <p>{order.return.returnStatus.replaceAll("_", " ")}</p>
+                                </div>}
                                 {order.return.returnReceiveDate ? <div className="flex justify-between ">
                                     <p className="">Return Received On</p>
                                     <p>{order.return.returnReceiveDate.toDateString()}</p>
                                 </div> : <></>}
-                                {order.shipmentId && order.status != "DELIVERED" && (
+                                {order.shipment?.shipmentOrderId && order.status != "DELIVERED" && (
                                     <div className="flex justify-end mt-1">
                                         <Link 
-                                            href={`/orderId=${order.shipmentId}`} 
+                                            href={``} 
                                             className="text-xs text-neutral-600 underline"
                                         >
-                                            Track Order
+                                            Track Replacement 
+                                        </Link>
+                                    </div>
+                                )}
+                                {order.return.shipment?.shipmentOrderId && !order.return.returnReceiveDate && (
+                                    <div className="flex justify-end mt-1">
+                                        <Link 
+                                            href={``} 
+                                            className="text-xs text-neutral-600 underline"
+                                        >
+                                            Track Return 
                                         </Link>
                                     </div>
                                 )}
@@ -83,6 +102,19 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                                     </div>
                                 ))}
                             </div>
+                            {/* Refund Banner */}
+                            {refund >= 0 && (
+                                <div className="flex items-center gap-2 p-3 bg-neutral-100 rounded-md text-[10px] text-neutral-600">
+                                    <Info className="w-4 h-4 flex-shrink-0" />
+                                    <p>
+                                        A refund has been processed for this order.
+                                        For more details, please contact us at{' '}
+                                        <a href="mailto:support@nonrml.com" className="text-neutral-800 underline">
+                                            support@nonrml.com
+                                        </a>
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )
                 })

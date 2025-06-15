@@ -42,21 +42,15 @@ export const sendLoginOTP = async ({ctx, input}: TRPCRequestOptions<TSendOTPSche
 export const verifyOTP = async ({ctx, input}:TRPCRequestOptions<TVerifyOTPSchema>) => {
     input = input!;
     try{
-
-        if(input.contactNumber !== "9191919191" && input.otp !== 473917){
-            throw new TRPCError({code:"FORBIDDEN", message: "Invalid OTP"});
-        }
         const otpVerifiedUser = await ctx!.prisma.user.findFirst({
             where: {
                 contactNumber: `${input.contactNumber}`,
-                // uncomment them when removing line 46
-                // otp: Number(input.otp),
-                // otpExpire: {
-                //     gte: Date.now()
-                // }
+                otp: Number(input.otp),
+                otpExpire: {
+                    gte: Date.now()
+                }
             }
         });
-        //console.log("user from verify OTP", otpVerifiedUser);
         if(!otpVerifiedUser)
             throw new TRPCError({code:"FORBIDDEN", message: "Invalid OTP"});
         return { status: TRPCResponseStatus.SUCCESS, message: "OTP Verified", data: {id: otpVerifiedUser.id}};

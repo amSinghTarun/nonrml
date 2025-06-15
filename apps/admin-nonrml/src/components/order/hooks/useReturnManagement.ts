@@ -36,6 +36,7 @@ export function useReturnManagement() {
   const updateNonReplaceQuantityMutation = trpc.viewer.replacement.updateNonReplaceQuantity.useMutation()
   
   const createCreditNoteMutation = trpc.viewer.creditNotes.createCreditNote.useMutation()
+  const initiateBankRefundMutation = trpc.viewer.payment.issueReturnReplacementBankRefund.useMutation()
   
   const editReplacementOrderMutation = trpc.viewer.replacement.editReplacementOrder.useMutation()
   
@@ -82,8 +83,12 @@ export function useReturnManagement() {
     })
   }
   
-  const handleCreateCreditNote = async (replacementOrderId: number) => {
-    await createCreditNoteMutation.mutateAsync({ replacementOrderId })
+  const handleCreateCreditNote = async (replacementOrderId: number, extraAmount: number) => {
+    await createCreditNoteMutation.mutateAsync({ replacementOrderId, extraAmount })
+  }
+
+  const handleInitiateBankRefund = async ( replacementOrderId: number ) => {
+    await initiateBankRefundMutation.mutateAsync({ replacementOrderId })
   }
   
   const handleReplacementOrderStatusChange = async (replacementId: number, status: prismaTypes.ReplacementOrderStatus) => {
@@ -106,6 +111,7 @@ export function useReturnManagement() {
     handleReturnReviewChange,
     handleReturnStatusChange,
     handleReturnReviewSubmit,
+    handleInitiateBankRefund,
     handleReplacementReviewSubmit,
     handleCancelReturn,
     handleNonReplace,

@@ -13,7 +13,7 @@ const appFont = Albert_Sans({subsets: ["latin"], weight:["200", "300", "400", "5
  
 export const metadata: Metadata = {
   title: "NoNRML",
-  description: "NoNRML Streetwear Clothing Brand",
+  description: "NoNRML(pronounced as no normal) Streetwear Clothing Brand",
 };
 
 export default function RootLayout({

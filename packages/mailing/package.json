@@ -1,0 +1,22 @@
+{
+    "name": "@nonrml/mailing",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@nonrml/common": "workspace:*",
+        "nodemailer": "^7.0.3"
+    },
+    "devDependencies": {
+        "@types/nodemailer": "^6.4.17"
+    }
+}

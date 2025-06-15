@@ -7,6 +7,8 @@ import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
 import { dataURLtoFile } from "@nonrml/common";
 import crypto from 'crypto';
 import { cacheServicesRedisClient } from "@nonrml/cache";
+import { sendSMTPMail } from "@nonrml/mailing";
+import { generateReplacementConfirmationEmail } from "@nonrml/common";
 
 /*
     Return the order
@@ -20,18 +22,21 @@ import { cacheServicesRedisClient } from "@nonrml/cache";
 */
 export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateReturnSchema>) => {
     const prisma = ctx.prisma;
+    input = input!;
     try {
-        console.log(input)
-        if (!input || input.products.length === 0)
-            throw { code: "BAD_REQUEST", message: "Invalid return input" }
+        
+        console.log(input);
+
+        // Process return images and prepare return items data
+        if(input.returnType == "RETURN" && !input.referenceImages && !input.returnReason)
+            throw { code: "BAD_REQUEST", message: "Image and explanation is required"}
 
         // Fetch return item IDs and prepare return products mapping
         const returnItemIds = input.products.map(product => product.orderProductId);
         const orderProductsToReturn: {[orderId: number]: typeof input.products[number]} = {};
 
-        for( let product of input.products){
+        for( let product of input.products)
             orderProductsToReturn[product.orderProductId] = product;
-        }
 
         // Fetch and validate order products
         const orderProducts = await prisma.orderProducts.findMany({
@@ -40,7 +45,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     in: returnItemIds 
                 },
                 order: {
-                    userId: ctx.user!.id,
+                    ...( ctx.user?.role != "ADMIN" && {userId: ctx.user!.id}),
                     id: input.orderId
                 }
             },
@@ -48,25 +53,45 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
         });
 
         // Validate order products
-        if (!orderProducts || orderProducts.length !== returnItemIds.length) {
+        if (!orderProducts || orderProducts.length !== returnItemIds.length)
             throw new TRPCError({ code: "NOT_FOUND", message: "Cannot return order" });
-        }
 
         // Check return time limit
-        if (Date.now() > Number(orderProducts[0]!.order.returnAcceptanceDate!)) {
+        if (Date.now() > Number(orderProducts[0]!.order.returnAcceptanceDate!))
             throw new TRPCError({ code: "FORBIDDEN", message: "Cannot return order after allotted time" });
+
+        let imageUrls = null;
+        let damageExplanation = null
+        if(input.returnType == "RETURN"){
+            imageUrls = [];
+            damageExplanation = input.returnReason;
+            let i = 0
+            for(let image of input.referenceImages!){
+                const imageUploaded = await uploadToBucketFolder(
+                    `return/${ctx.user?.id}${input.orderId}:${Date.now()}`,
+                    dataURLtoFile(image, `${input.orderId}:${i++}:${Date.now()}`)
+                );
+    
+                if (imageUploaded.error) {
+                    console.log(imageUploaded.error)
+                    throw new TRPCError({ 
+                        code: "UNPROCESSABLE_CONTENT", 
+                        message: "Unable to upload image" 
+                    });
+                }
+    
+                // Get public URL
+                const { data } = await getPublicURLOfImage(imageUploaded.data.path, false);
+                imageUrls.push(data.publicUrl);
+            }
         }
 
-        // Process return images and prepare return items data
         const returnItemsData: {
-            referenceImage : string | null,
-            returnReason : string,
             orderProductId : number,
             quantity : number,
         }[] = []
 
-        //upload images and store links in returnItemsData
-        let imageUrl = null;
+        // check return quantity
         for (let orderProduct of orderProducts) {
             const productToReturn = orderProductsToReturn[orderProduct.id];
             
@@ -78,49 +103,41 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                 });
             }
 
-            // Upload image
-            if(productToReturn.referenceImage){
-                const imageUploaded = await uploadToBucketFolder(
-                    `return/${ctx.user?.id}:${orderProduct.id}:${productToReturn.quantity}:${Date.now()}`,
-                    dataURLtoFile(productToReturn.referenceImage, `${input.orderId}:${Date.now()}`)
-                );
-    
-                if (imageUploaded.error) {
-                    throw new TRPCError({ 
-                        code: "UNPROCESSABLE_CONTENT", 
-                        message: "Unable to upload image" 
-                    });
-                }
-    
-                // Get public URL
-                const { data } = await getPublicURLOfImage(imageUploaded.data.path, false);
-                imageUrl = data;
-            }
-
             returnItemsData.push({
-                ...(imageUrl && {referenceImage: imageUrl.publicUrl}),
-                returnReason: productToReturn.returnReason,
                 orderProductId: productToReturn.orderProductId,
                 quantity: productToReturn.quantity,
             });
         }
 
         // If no return items, return empty response
-        if (returnItemsData.length === 0) {
+        if (returnItemsData.length === 0) 
             return { status: TRPCResponseStatus.SUCCESS, message: "", data: {} };
-        }
 
         // Execute main transaction
-        const returnOrder = await prisma.$transaction(async (tx) => {
+        const returnOrder = await prisma.$transaction(async ( tx ) => {
             // Create return order
             const returnOrderCreated = await tx.returns.create({
                 data: {
                     orderId: input.orderId,
                     returnType: input.returnType,
+                    ...( input.returnType == "REPLACEMENT" && {returnStatus: "ALLOWED"}),
+                    ...(input.returnType == "RETURN" && {
+                        imagese: imageUrls,
+                        explanation: damageExplanation
+                    }),
                     returnItems:  {createMany: {data: returnItemsData }}
                 },
                 select: {
                     id: true,
+                    order: {
+                        select: {
+                            user: {
+                                select: {
+                                    email: true
+                                }
+                            }
+                        }
+                    },
                     returnItems: {
                         select: {
                             orderProductId: true,
@@ -129,7 +146,8 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     }
                 }
             });
-
+            
+            let replacementOrder : {id: number} | null = null;
             // Handle replacement order if applicable
             if (input.returnType == prismaEnums.ReturnType.REPLACEMENT) {
 
@@ -141,16 +159,19 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     })
                 }
 
-                await tx.replacementOrder.create({
+                replacementOrder = await tx.replacementOrder.create({
                     data: {
                         returnOrderId: returnOrderCreated.id,
                         orderId: input.orderId,
                         replacementItems: {createMany: {data: replacementItemsData}}
+                    },
+                    select: {
+                        id: true
                     }
                 });
             }
 
-            return { returnOrderCreated };
+            return { returnOrderCreated, replacementOrder };
         }, { timeout: 10000 });
 
         // Update order product replacement/return quantities
@@ -164,6 +185,15 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                 })
             )
             await prisma.$transaction(quantityUpdates)
+
+            // mail to confirm the replacement order and explain the process
+            if(returnOrder.returnOrderCreated.order.user?.email && returnOrder.replacementOrder?.id){
+                sendSMTPMail({
+                    userEmail: returnOrder.returnOrderCreated.order.user.email,
+                    emailBody: generateReplacementConfirmationEmail(`${returnOrder.replacementOrder.id}`)
+                });
+            }
+
         }
 
         return { 
@@ -474,7 +504,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                         select: {
                             userId: true,
                             id: true,
-                            address: {
+                            user: {
                                 select: {
                                     email: true
                                 }
@@ -508,7 +538,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                 }
             });
 
-            if(!returnProductVariantDetails || !returnProductVariantDetails.returnItems)
+            if(!returnProductVariantDetails || !returnProductVariantDetails.returnItems || !returnProductVariantDetails.order.userId)
                 throw { code: "BAD_REQUEST", message: "RETURN ID INVALID"}
             
             let refundAmount = 0;
@@ -575,11 +605,11 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
-                        email: returnProductVariantDetails.order.address?.email ?? "", 
+                        email: returnProductVariantDetails.order.user?.email ?? "", 
                         remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
-                        userId: returnProductVariantDetails.order.userId ?? 1,
-                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + 6 ) ),
+                        userId: returnProductVariantDetails.order.userId,
+                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + Number(process.env.CREDIT_NOTE_EXPIRY) ) ),
                         creditCode: `RTN-${returnProductVariantDetails.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${returnProductVariantDetails.order.id}`
                     }
                     // address edit

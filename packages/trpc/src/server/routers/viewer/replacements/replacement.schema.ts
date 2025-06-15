@@ -37,3 +37,8 @@ export const ZUpdateNonReplaceQuantitySchema =  z.object({
     nonReplacementQuantity: z.number()
 });
 export type TUpdateNonReplaceQuantitySchema = z.infer<typeof ZUpdateNonReplaceQuantitySchema>;
+
+export const ZShipReplacementSchema =  z.object({
+    replcaementOrderId : z.number(),
+});
+export type TShipReplacementSchema = z.infer<typeof ZShipReplacementSchema>;

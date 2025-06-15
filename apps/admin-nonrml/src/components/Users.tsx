@@ -101,7 +101,7 @@ export const Users = ({users}: {users: Users}) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                <TableCell>{`${user.countryCode}_${user.contactNumber}`}</TableCell>
+                <TableCell>{`${user.contactNumber}`}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>{user._count.order}</TableCell>
                 <TableCell>{user.createdAt.toDateString()}</TableCell>

@@ -12,7 +12,7 @@ const config: Config = {
   	extend: {
   		boxShadow: {
   			dropdown: '0 35px 40px -30px rgba(0, 0, 0)',
-  			productPage: '0px 0px 3px 0.2px rgba(38, 38, 38, 1) '
+  			productPage: '0px 0px 3px 0.2px rgba(50, 38, 38, 0.1) '
   		},
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

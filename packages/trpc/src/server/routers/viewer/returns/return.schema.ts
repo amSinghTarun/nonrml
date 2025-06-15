@@ -3,11 +3,11 @@ import { z } from "zod";
 
 export const ZInitiateReturnSchema = z.object({
     orderId: z.number(),
+    returnReason: z.string().optional(),
+    referenceImages: z.array(z.string()).optional(),
     products: z.array(z.object({
         quantity: z.number(),
-        returnReason: z.string(),
         orderProductId: z.number(),
-        referenceImage: z.string().optional(),
         exchangeVariant: z.number().optional()
     })),
     returnType: z.enum(Object.keys(prismaEnums.ReturnType) as [keyof typeof prismaEnums.ReturnType]).default("RETURN")

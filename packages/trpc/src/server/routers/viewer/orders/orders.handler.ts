@@ -1,15 +1,103 @@
-import { TRPCResponseStatus } from "@nonrml/common"
-import { acceptOrder, calculateRejectedQuantityRefundAmounts, generateOrderId, getDateRangeForQuery, getOrderId, TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TCheckOrderServicibilitySchema, TVerifyOrderSchema} from "./orders.schema";
+import { generateOrderConfirmationEmail, generateOrderCancellationEmail, generateOrderQuantityUpdateEmail, TRPCResponseStatus, generateShippingNotificationEmail } from "@nonrml/common"
+import { acceptOrder, generateOrderId, getDateRangeForQuery, getOrderId, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TCheckOrderServicibilitySchema, TVerifyOrderSchema, TGetOrderReturnSchema, TCancelAcceptedOrderSchema, TShipOrderrSchema, TUpdateShipmentSchema} from "./orders.schema";
 import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { Orders } from "razorpay/dist/types/orders";
 import crypto from 'crypto';
-import { createOrder, getPaymentDetials } from "@nonrml/payment";
+import { createOrder, getOrderDetials, getPaymentDetials, initiateNormalRefund } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
 import { DelhiveryShipping } from "@nonrml/shipping"
+import { sendSMTPMail } from "@nonrml/mailing";
 
-const returnExchangeTime = 604800000; // 7 days
+const returnExchangeTime = 432000000; // 5 days
+
+export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderId: string}>) => {
+    const prisma = ctx.prisma;
+    const orderDetails = await prisma.orders.findUnique({
+        where: {
+            id: getOrderId(input?.orderId!)
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            idVarChar: true,
+            address: true,
+            totalAmount: true,
+            user: {
+                select: {
+                    contactNumber: true,
+                    email: true
+                }
+            },
+            creditUtilised: true,
+            Payments: {
+                select: {
+                    paymentMethod: true
+                }
+            },
+            orderProducts: {
+                select:{
+                    quantity: true,
+                    productVariant: {
+                        select: {
+                            size: true,
+                            product: {
+                                select: {
+                                    sku: true,
+                                    price: true,
+                                    productImages: {
+                                        where: {
+                                            priorityIndex: {
+                                                equals: 0
+                                            }
+                                        },
+                                        select: {
+                                            image: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    let products = orderDetails?.orderProducts.map((product => ({sku: product.productVariant.product.sku, size: product.productVariant.size, image: product.productVariant.product.productImages[0]!.image, price: product.productVariant.product.price, quantity: product.quantity })))
+    
+    const emailHTML = generateOrderConfirmationEmail({
+        customerName: orderDetails?.address?.contactName!,
+        customerNumber: orderDetails?.user?.contactNumber!,
+        orderId: `ORD-${orderDetails?.id}${orderDetails?.idVarChar}`,
+        orderDate: (new Date(orderDetails?.createdAt!)).toDateString(),
+        products: products!,
+        credit: orderDetails?.creditUtilised!,
+        total: orderDetails?.totalAmount!,
+        shippingAddress: {
+            name: orderDetails?.address?.contactName!,
+            state: orderDetails?.address?.state!,
+            street: orderDetails?.address?.location!,
+            city: orderDetails?.address?.city!,
+            country: "INDIA",
+            zip: orderDetails?.address?.pincode!
+        },
+        paymentMethod: orderDetails?.Payments?.paymentMethod!,
+    });
+    
+    // let creditNoteMailData = {
+    //     creditNoteId: "CN-bfew8ccsdkjbc",
+    //     originalOrderNumber: "ORD-324hbc3c",
+    //     creditAmount: 2900,
+    //     customerMobile: "+916265176187",
+    //     creditNoteExpiry: "2025-05-17 06:30:59.083"
+    // }
+    // const creditNoteMail = generateCreditNoteEmail(creditNoteMailData)
+
+    if(orderDetails?.user?.email)
+        await sendSMTPMail({userEmail: orderDetails?.user?.email, emailBody: emailHTML})
+}
 
 /*
 Get all the orders of a user
@@ -78,18 +166,21 @@ export const cancelOrder = async ({ ctx, input } : TRPCRequestOptions<TCancelOrd
         const cancelledOrder = await prisma.orders.update({
             where: {
                 id: input.orderId,
-                orderStatus: "PENDING"
-            },
-            data: {
-                orderStatus: prismaEnums.OrderStatus.CANCELED,
-                Payments: {
-                    update: {
-                        paymentStatus: prismaEnums.PaymentStatus.failed
+                orderStatus: "PENDING",
+                Payments:{
+                    paymentStatus: {
+                        // so that prepaid order that aren't accepted shouldn't get cancelled
+                        notIn: ["authorized", "captured"]
                     }
                 }
+            },
+            data: {
+                orderStatus: prismaEnums.OrderStatus.CANCELED
             }
-        })
+        });
+
         console.log(cancelledOrder);
+
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: cancelledOrder};
 
     } catch(error){
@@ -109,12 +200,13 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
     const prisma = ctx.prisma;
     input = input!;
     try{
-        let orderId = input.orderId;
-        let userId = ctx.user?.id;
-        const orderDetails = await prisma.orders.findUnique({
+        let orderId = getOrderId(input.orderId);
+        let idVarChar = input.orderId.slice(-6);
+
+        let orderDetails = await prisma.orders.findUnique({
             where: {
                 id: orderId,
-                userId: userId
+                idVarChar: idVarChar
             },
             include: {
                 address: true,
@@ -123,9 +215,16 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                         creditCode: true
                     }
                 },
+                shipment: {
+                    select: {
+                        shipmentOrderId: true
+                    }
+                },
                 Payments:{
                     select:{
-                        paymentStatus: true
+                        paymentStatus: true,
+                        rzpOrderId: true,
+                        rzpPaymentId: true
                     }
                 },
                 return: { //so that I can show that you can make another return once the prev one is accept to ship
@@ -177,9 +276,108 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                 }
             }
         });
+
         if(!orderDetails?.id)
             throw new TRPCError({code:"NOT_FOUND", message: "No Details Available For Selected Order"})
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data: orderDetails};
+
+        // it's almost impossible that a user will stumble upon this without going through address phase
+        // the first time it will run, it will save whatever razorpay has so address user whatever we have will
+        // not run again, so check for both can be used
+        if( !orderDetails.userId && !orderDetails.addressId && orderDetails.Payments ){
+            
+            const rzpOrderData = await getOrderDetials({rzpOrderId: orderDetails.Payments.rzpOrderId});
+
+            if(rzpOrderData && rzpOrderData.customer_details && rzpOrderData.customer_details.contact){
+                let contactNumber = `${rzpOrderData.customer_details.contact}`
+                let addressDetails = {
+                    contactName: rzpOrderData.customer_details.shipping_address.name || rzpOrderData.customer_details.name,
+                    contactNumber: rzpOrderData.customer_details.shipping_address.contact || contactNumber,
+                    location: rzpOrderData.customer_details.shipping_address.line1?.trim() + ", " + rzpOrderData.customer_details.shipping_address.line2?.trim(),
+                    city: rzpOrderData.customer_details.shipping_address.city ?? 0,
+                    state: rzpOrderData.customer_details.shipping_address.state ?? 0,
+                    pincode: rzpOrderData.customer_details.shipping_address.zipcode ?? 0,
+                }
+
+                let addressId = null;
+                let user : {id: number} | null = orderDetails.userId ? {id: orderDetails.userId} : null
+
+                if(!user){
+                    user = await prisma.user.findUnique({
+                        where: {
+                            contactNumber: contactNumber
+                        },
+                        select: {
+                            id: true
+                        }
+                    })
+    
+                    if(!user){
+                        user = await prisma.user.create({
+                            data:{
+                                contactNumber: contactNumber,
+                                email: rzpOrderData.customer_details.email ?? "",
+                                role: prismaEnums.UserPermissionRoles.USER
+                            }
+                        });            
+                    }
+                }
+
+
+                if(addressDetails.pincode && addressDetails.city && addressDetails.state){
+                    let address = await prisma.address.findFirst({
+                        where: {
+                            userId: user.id,
+                            location: addressDetails.location,
+                            pincode: addressDetails.pincode.toString()
+                        }
+                    });
+                    if(!address){
+                        address = await prisma.address.create({
+                            data: {
+                                userId: user.id,
+                                ...addressDetails,
+                                pincode: addressDetails.pincode.toString(),
+                                city: addressDetails.city.toString(),
+                                state: addressDetails.state.toString()
+                            }
+                        })
+                    }
+                    addressId = address.id;
+                    orderDetails.address = address
+                }
+
+                const updateData = {
+                    ...( !orderDetails.userId && {userId: user.id}),
+                    ...( addressId && {addressId: addressId} )
+                }
+
+                if(updateData.addressId || updateData.userId)
+                    await prisma.orders.update({
+                        where: {
+                            id: orderDetails.id
+                        },
+                        data: updateData
+                    })
+
+                if(orderDetails.Payments.paymentStatus == "captured" && orderDetails.orderStatus !== "ACCEPTED") {
+                    await acceptOrder(orderDetails.id);
+                }
+            }
+        }
+
+        let bankRefunds = 0;
+        if(orderDetails.Payments?.rzpPaymentId){
+            const bankRefunds = await prisma.refundTransactions.count({
+                where: {
+                    rzpPaymentId: orderDetails.Payments?.rzpPaymentId,
+                    bankRefundValue: {
+                        gte: 1
+                    }
+                }
+            });
+        }
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: {orderDetails, bankRefunds }};
     } catch(error) {
         //console.log("\n\n Error in getUserOrder ----------------");
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
@@ -198,11 +396,14 @@ export const getTrackOrder = async ({ctx, input}: TRPCRequestOptions<TTrackOrder
                 id: orderId,
             },
             include: {
-                user: true 
+                user: true,
+                shipment: true 
             }
         });
 
-        if( orderDetails.user && orderDetails.user.contactNumber !== input.mobile  )
+        console.log(orderDetails, "/n/n/n/n/n/", input)
+
+        if( orderDetails.user && orderDetails.user.contactNumber !== `+91${input.mobile}`  )
             throw new TRPCError({code:"NOT_FOUND", message: "Check Order Details Thoroughly"})
 
         return { status: TRPCResponseStatus.SUCCESS, message:"", data: orderDetails};
@@ -228,20 +429,20 @@ export const getTrackOrder = async ({ctx, input}: TRPCRequestOptions<TTrackOrder
 export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
-    const userId = ctx.user?.id!;
+    // const userId = ctx.user?.id!;
     try{
 
-        console.log(input, userId)
+        console.log(input)
         
         const orderDetails = await prisma.payments.findUnique({
             where: {
                 rzpOrderId: input.razorpayOrderId,
-                Orders: { userId: userId }
+                // Orders: { userId: userId }
             },
             include: {
                 Orders: {
                     include: {
-                        creditNote: true
+                        creditNote: true,
                     }
                 }
             }
@@ -250,58 +451,107 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         if(!orderDetails || !orderDetails.Orders || !orderDetails.orderId)
             throw new TRPCError({code: "BAD_REQUEST", message: "Order not found"});
 
-        const generated_signature = crypto.createHmac('sha256', "vQ3zPC5d2jh0USeUhsOd0jbe")
+        console.log(process.env.RAZORPAY_KEY_SECRET);
+
+        const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
             .update(orderDetails.rzpOrderId + "|" + input.razorpayPaymentId)
             .digest('hex');
         if (generated_signature != input.razorpaySignature) 
             throw new TRPCError({code: "BAD_REQUEST", message: "Payment signature verification failed"});
 
-        const {method: paymentMethod} = await getPaymentDetials({rzpPaymentId: input.razorpayPaymentId})
+        const rzpPaymentData = await getPaymentDetials({rzpPaymentId: input.razorpayPaymentId});
+        // const rzpOrderData = await getOrderDetials({rzpOrderId: rzpPaymentData.order_id});
 
-        await prisma.payments.update({
-            where: {
-                rzpOrderId: input.razorpayOrderId
-            },
-            data: {
-                paymentStatus: prismaEnums.PaymentStatus.paid,
-                rzpPaymentId: input.razorpayPaymentId,
-                rzpPaymentSignature: input.razorpaySignature
-            }
-        });
+        // let contactNumber = `${rzpPaymentData.contact}`;
+        // let addressId = 0;
+        
+        // let user = await prisma.user.findUnique({
+        //     where: {
+        //         contactNumber: contactNumber
+        //     },
+        //     select: {
+        //         id: true
+        //     }
+        // })
 
-        //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
-        orderDetails.Orders.creditNote && (
-            await prisma.creditNotesPartialUseTransactions.create({
-                data : {
-                    creditNoteId: orderDetails.Orders.creditNote.id,
-                    orderId: orderDetails.Orders.id,
-                    valueUtilised: orderDetails.Orders.creditUtilised!
-                }
-            }) ,
-            await prisma.creditNotes.update({
-                where:{
-                    id: orderDetails.Orders.creditNote.id
-                },
-                data : {
-                    remainingValue: orderDetails.Orders.creditNote.remainingValue - orderDetails.Orders.creditUtilised!
-                }
-            })
-        )
+        // if(!user){
+        //     user = await prisma.user.create({
+        //         data:{
+        //             contactNumber: contactNumber,
+        //             email: rzpPaymentData.email,
+        //             role: prismaEnums.UserPermissionRoles.USER
+        //         }
+        //     });            
+        // }
 
-        if(paymentMethod == "Cash on Delivery"){
+        // if(rzpOrderData.customer_details){
+        //     const location = rzpOrderData.customer_details?.shipping_address.line1?.trim() + ", " + rzpOrderData.customer_details?.shipping_address.line2?.trim();
+        //     let address = await prisma.address.findFirst({
+        //         where: {
+        //             userId: user.id,
+        //             location: location
+        //         }
+        //     });
+        //     if(!address){
+        //         address = await prisma.address.create({
+        //             data: {
+        //                 userId: user.id,
+        //                 location: location,
+        //                 contactName: rzpOrderData.customer_details?.shipping_address.name || "",
+        //                 contactNumber: rzpOrderData.customer_details?.shipping_address.contact || "",
+        //                 city: rzpOrderData.customer_details?.shipping_address.city || "",
+        //                 state: rzpOrderData.customer_details?.shipping_address.state || "",
+        //                 pincode: `${rzpOrderData.customer_details?.shipping_address.zipcode}` || "",
+        //             }
+        //         })
+        //     }
+        //     addressId = address.id;
+        // }
+
+        await prisma.$transaction( async prisma => {
             await prisma.orders.update({
                 where: {
-                    id: orderDetails.Orders.id
+                    id: orderDetails.orderId
                 },
                 data: {
-                    orderStatus: prismaEnums.OrderStatus.PENDING
+                    // userId: user.id,
+                    // ...( addressId && { addressId: addressId} ),
+                    Payments: {
+                        update: {
+                            paymentStatus: rzpPaymentData.status,
+                            rzpPaymentId: input.razorpayPaymentId,
+                            rzpPaymentSignature: input.razorpaySignature,
+                            paymentMethod: rzpPaymentData.method
+                        }
+                    }
                 }
             });
-        } else {
-            await acceptOrder(orderDetails.Orders.id);
-        }
+    
+            //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
+            orderDetails.Orders.creditNote && (
+                await prisma.creditNotesPartialUseTransactions.create({
+                    data : {
+                        creditNoteId: orderDetails.Orders.creditNote.id,
+                        orderId: orderDetails.Orders.id,
+                        valueUtilised: orderDetails.Orders.creditUtilised!
+                    }
+                }) ,
+                await prisma.creditNotes.update({
+                    where:{
+                        id: orderDetails.Orders.creditNote.id
+                    },
+                    data : {
+                        remainingValue: orderDetails.Orders.creditNote.remainingValue - orderDetails.Orders.creditUtilised!
+                    }
+                })
+            )
+        }, { timeout: 10000 });
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: orderDetails.orderId}};
+        // if(rzpPaymentData.captured) {
+        //     await acceptOrder(orderDetails.Orders.id);
+        // }
+
+        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: `ORD-${orderDetails.orderId}${orderDetails.Orders.idVarChar}`}};
     }catch(error){  
         //console.log("\n\n Error in verifyOrder ----------------");
         // if(error.message == "ERROR_ACCEPTING_ORDER"){
@@ -380,7 +630,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                 },
             }
         });
-        console.log(" ------------------------------ ", productValidation)
 
         // Verify product variants and quantities and price
         if(productValidation.length !== Object.keys(input.orderProducts).length)
@@ -435,11 +684,11 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
         }
 
         const orderIdChar = generateOrderId();
-        const orderTotalAmount = (orderTotal <= cnUseableValue) ? 0 : (orderTotal - cnUseableValue)
-        
+        const orderPaidAmount = (orderTotal <= cnUseableValue) ? 1 : (orderTotal - cnUseableValue)
+
         const rzpPaymentCreated = await createOrder({
-            amount: orderTotalAmount*100,
-            line_items_total: orderTotalAmount*100, 
+            amount: orderPaidAmount*100,
+            line_items_total: orderPaidAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
             line_items: line_items
@@ -453,6 +702,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     idVarChar: orderIdChar,
                     totalAmount: orderTotal,
                     creditNoteId: creditNoteId,
+                    processingRefundAmount: (orderTotal <= cnUseableValue) ? 1 : 0 ,
+                    orderStatus: prismaEnums.OrderStatus.PENDING,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
                     productCount: Object.values(input.orderProducts).length,
                     Payments: {
@@ -487,7 +738,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             message:"", 
             data: {
                 orderId: orderCreated.order.id,
-                amount: +orderTotal*100, 
+                amount: +orderPaidAmount*100, 
                 rzpOrderId: rzpPaymentCreated.id, 
                 // contact: ctx.user?.contactNumber!, 
                 // name: rzpPaymentCreated.data.address.contactName, 
@@ -556,7 +807,7 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
     }
 }
 
-export const getOrderReturnDetails = async( {ctx, input}: TRPCRequestOptions<TGetUserOrderSchema>) => {
+export const getOrderReturnDetails = async( {ctx, input}: TRPCRequestOptions<TGetOrderReturnSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
     try{
@@ -619,6 +870,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
             },
             select: {
                 id: true,
+                idVarChar: true,
                 totalAmount: true,
                 productCount: true,
                 creditUtilised: true,
@@ -688,6 +940,7 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
     input = input!;
     try{
         let editOrderQueries = []
+
         switch(input.status){
             case "ACCEPTED":
                 await acceptOrder(input.orderId);
@@ -696,7 +949,7 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
                 editOrderQueries.push(prisma.orders.update({where: {id: input.orderId}, data: {orderStatus: "DELIVERED", deliveryDate: Date.now(), returnAcceptanceDate: ( Date.now() + returnExchangeTime ) }}))
                 break;
             case "CANCELED": // this is for pending order, coz at pending state the quantities are not deducted
-                editOrderQueries.push(prisma.orders.update({where: {id: input.orderId}, data: {orderStatus:"CANCELED"}}));
+                editOrderQueries.push(prisma.orders.update({where: {id: input.orderId, orderStatus: "PENDING"}, data: {orderStatus:"CANCELED"}}));
             default:
                 break;
         }
@@ -732,14 +985,29 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
             const effectiveRemainingQuantity = (remainingProductStatus._sum.quantity ?? 0) - (remainingProductStatus._sum.rejectedQuantity ?? 0)
 
             if(effectiveRemainingQuantity == 0){
-                await prisma.orders.update({
+                editOrderQueries.push(prisma.orders.update({
                     where: {
                         id: input.orderId
                     },
                     data: {
-                        orderStatus:prismaEnums.OrderStatus.CANCELED_ADMIN
+                        orderStatus:prismaEnums.OrderStatus.CANCELED_ADMIN,
+                        // // i guess it shouldn't be here and should only be updated by the initite unavailtity refind
+                        // Payments: {
+                        //     update: {
+                        //         paymentStatus: "refunded"
+                        //     }
+                        // }
+                    },
+                    select: {
+                        id: true,
+                        idVarChar: true,
+                        user: {
+                            select: {
+                                email: true
+                            }
+                        }
                     }
-                })
+                }))
             };
 
         }
@@ -755,7 +1023,40 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
             }))
         }
 
-        prisma.$transaction(editOrderQueries)
+        editOrderQueries.length && await prisma.$transaction(editOrderQueries)
+
+        if(input.productRejectStatus){
+            const orderDetails = await prisma.orders.findUnique({
+                where: {
+                    id: input.orderId
+                },
+                select: {
+                    id: true,
+                    idVarChar: true,
+                    orderStatus: true,
+                    user: {
+                        select: {
+                            email: true
+                        }
+                    }
+                }
+            });
+            if(!orderDetails || !orderDetails.user?.email){
+                return { status: TRPCResponseStatus.SUCCESS, message:"", data: "User doesn't have an email address linked to the account"};
+            } else{
+                if(orderDetails.orderStatus == "CANCELED_ADMIN"){
+                    await sendSMTPMail({
+                        userEmail: orderDetails.user.email, 
+                        emailBody: generateOrderCancellationEmail(`${orderDetails.id}`, orderDetails.idVarChar, "UNAVAILABILITY")
+                    })
+                } else {
+                    await sendSMTPMail({
+                        userEmail: orderDetails.user.email, 
+                        emailBody: generateOrderQuantityUpdateEmail(`${orderDetails.id}`, orderDetails.idVarChar)
+                    });
+                }
+            }
+        }
 
         return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
 
@@ -781,44 +1082,6 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
                 id: true,
             }
         });
-        
-        // let email = null;
-        // const contactNumber = input.contact.search(/\+91/) >= 0 ? input.contact.split("+91")[1] : input.contact;
-
-        // if(!orderHasUser.userId && contactNumber && contactNumber.length >= 10){
-        //     let user = await prisma.user.findUnique({ where: { contactNumber: contactNumber }});
-            
-        //     if(input.email.length > 0)
-        //         email = input.email;
-
-        //     if(!user){
-        //         user = await prisma.user.create({
-        //             data: {
-        //                 contactNumber: contactNumber,
-        //                 role: "USER",
-        //                 ...(email && {email: email})
-        //             }
-        //         })
-        //     }else if(!user.email && email) {
-        //         await prisma.user.update({
-        //             where: {
-        //                 id: user.id
-        //             },
-        //             data: {
-        //                 email: email
-        //             }
-        //         }) 
-        //     }
-
-        //     await prisma.orders.update({
-        //         where: {
-        //             id: orderHasUser.id
-        //         },
-        //         data: {
-        //             userId: user.id
-        //         }
-        //     });
-        // };
 
         let shippingAddressesDetails = []
 
@@ -846,3 +1109,255 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
         throw TRPCCustomError(error)
     }
 }
+
+export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!
+    try{
+
+        const orderDetails = await prisma.orders.findFirstOrThrow({
+            where: {
+                id: input.orderId,
+                orderStatus: "ACCEPTED"
+            },
+            include: {
+                Payments: true,
+                user: true,
+            }
+        });
+
+        if(orderDetails.processingRefundAmount == 1 && orderDetails.Payments?.rzpPaymentId){
+            const refunded = await initiateNormalRefund( orderDetails.Payments.rzpPaymentId, { amount: orderDetails.processingRefundAmount, speed: "normal"} )
+            if(refunded.status == "processed"){
+                await prisma.orders.update({
+                    where: {id: orderDetails.id},
+                    data: {
+                        processingRefundAmount: -1
+                    }
+                });
+            }
+        }
+
+        // what happens here is still pending
+
+        // store tracking id in the shipment table
+
+        // send the product shipped mail with tracking details tracking mail and has info  of processingRefundAmount
+        if(orderDetails.user?.email){
+            await sendSMTPMail({
+                userEmail: orderDetails.user.email, 
+                emailBody: generateShippingNotificationEmail({  
+                    orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
+                    refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
+                    
+                    
+                    
+                    
+                    
+                    waybillNumber: "waybillNumber",
+
+
+
+
+                    trackingLink: "https://www.delhivery.com/tracking"
+                })
+            })
+        }
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
+
+    }catch(error){
+        //console.log("\n\n Error in editOrder ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error)
+    }
+}
+
+/**
+ * Cancel an accepted order
+ * Mode of refund can be Credit note or money, as required
+ * Steps:
+ *  Admin has to update the product quantity back in the inventory manually depending it's printed or not
+ *  Refund
+ *      Credit note.
+ *      OR
+ *      Bank refund.
+ *  Status cancel to cancel
+*/
+export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCancelAcceptedOrderSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        const orderDetails = await prisma.orders.findUniqueOrThrow({
+            where: {
+                id : input?.orderId
+            },
+            include: {
+                Payments: {
+                    select: {
+                        paymentMethod: true,
+                        rzpPaymentId: true,
+                        paymentStatus: true
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        contactNumber: true,
+                        email: true
+                    }
+                }
+            }
+        });
+
+        if( !orderDetails.Payments || !orderDetails.user )
+            throw { code: "BAD_REQUEST", message: "Order missing Payment OR user details"}
+
+        if(orderDetails.Payments?.paymentMethod == "cod"){
+            if(orderDetails.creditNoteId && orderDetails.creditUtilised){
+                await prisma.creditNotes.update({
+                    where: {
+                        id: orderDetails.creditNoteId
+                    },
+                    data: {
+                        remainingValue: {
+                            increment: orderDetails.creditUtilised
+                        }
+                    }
+                })
+            }
+            await prisma.orders.update({
+                where: {
+                    id: orderDetails.id
+                },
+                data: {
+                    orderStatus: "CANCELED"
+                }
+            })
+            return { status: TRPCResponseStatus.SUCCESS, message:"COD order cancelled", data: {}};
+        }
+
+        if(!orderDetails.Payments.rzpPaymentId || orderDetails.Payments.paymentStatus != "captured")
+            throw { code: "BAD_REQUEST", message: "Payment hasn't been received yet"};
+
+        let cancelQueries = [];
+        let creditNoteRefund = orderDetails.creditUtilised ?? 0;
+        let bankRefund = orderDetails.totalAmount - creditNoteRefund;
+
+        if(input.refundMode == "CREDIT"){
+            // if the refund is credit then the whole amount just get refunded as credit note
+            cancelQueries.push(
+                prisma.creditNotes.create({
+                    data: {
+                        value: orderDetails.totalAmount,
+                        remainingValue: orderDetails.totalAmount,
+                        email: orderDetails.user.email!,
+                        creditNoteOrigin: prismaEnums.CreditNotePurpose.ORDER,
+                        userId: orderDetails.user.id,
+                        orderId: input.orderId,
+                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + Number(process.env.CREDIT_NOTE_EXPIRY) ) ),
+                        creditCode: `GIFT-${orderDetails.user.id}${crypto.randomBytes(1).toString('hex').toUpperCase()}${(new Date()).toISOString().split('T')[0]!.replaceAll('-', "").slice(2)}`
+                    }
+                })
+            ) 
+        } else if( input.refundMode ==  "BANK") {
+            // if the refund is bank then the split that came from the bank goes to bank and the split that came from credit note goes to back to the prev credit note
+            if( orderDetails.creditNoteId && creditNoteRefund){
+                cancelQueries.push(
+                    prisma.creditNotes.update({
+                        where: {
+                            id: orderDetails.creditNoteId
+                        },
+                        data: {
+                            remainingValue: {
+                                increment: creditNoteRefund
+                            }
+                        }
+                    })
+                )
+            }
+            const refunded = await initiateNormalRefund( orderDetails.Payments.rzpPaymentId, { amount: bankRefund, speed: "normal"} )
+            cancelQueries.push(
+                prisma.refundTransactions.create({
+                    data: {
+                        rzpRefundId: refunded.id,
+                        rzpPaymentId: refunded.payment_id,
+                        bankRefundValue: refunded.amount,
+                        rzpRefundStatus: refunded.status
+                    }
+                })
+            )
+        }
+
+        cancelQueries.push(
+            prisma.orders.update({
+                where: {
+                    id: orderDetails.id
+                },
+                data: {
+                    orderStatus: "CANCELED",
+                    Payments:{
+                        update:{
+                            paymentStatus: "refunded"
+                        }
+                    }
+                }
+            })
+        );
+
+        await prisma.$transaction(cancelQueries)
+        
+        //send accepted order cancel confirmation mail
+        if(orderDetails.user.email)
+            await sendSMTPMail({
+                userEmail: orderDetails.user.email,
+                emailBody: generateOrderCancellationEmail(`${orderDetails.id}`, orderDetails.idVarChar, "ACCEPTED_ORDER")
+            })
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"Order cancelled", data: {}};
+
+    } catch(error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error) 
+    }
+};
+
+/**
+    * Update Shipment Status
+*/
+export const updateShipment = async ({ctx, input} : TRPCRequestOptions<TUpdateShipmentSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+
+        const delhiveryStatusToNoNRMLOrderStatusMap = {
+            "In Transit": prismaEnums.OrderStatus.SHIPPED,
+            "Dispatched": prismaEnums.OrderStatus.IN_TRANSIT,
+            "Delivered": prismaEnums.OrderStatus.DELIVERED
+        }
+
+        if(input.shipmentStatus in delhiveryStatusToNoNRMLOrderStatusMap){
+            const orderDetails = await prisma.shipment.update({
+                where: {
+                    AWB: input.shipmentId
+                },
+                data: {
+                    order: {
+                        update: {
+                            orderStatus: delhiveryStatusToNoNRMLOrderStatusMap[input.shipmentStatus as keyof typeof delhiveryStatusToNoNRMLOrderStatusMap]
+                        }
+                    }
+                }
+            });    
+        }
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"Order Status Updated", data: `Non updateable status received: ${input.shipmentStatus}`};
+
+    } catch(error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error) 
+    }
+};

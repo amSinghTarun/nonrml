@@ -76,7 +76,8 @@ export const displayRazorpay = async ({
   paymentObject.on('payment.failed', (response: any) => {
     updatePaymentStatus({
       orderId: response.error.metadata.order_id, 
-      paymentStatus: "failed"
+      paymentStatus: "failed",
+      secret: process.env.RZP_PAYMENT_FAIL_CALL_SECRET ?? ""
     });
   });
   

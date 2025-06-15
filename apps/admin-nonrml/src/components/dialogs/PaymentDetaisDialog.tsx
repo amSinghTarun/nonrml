@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { CreditCard, ArrowDown } from "lucide-react";
 import { RouterOutput } from '@/app/_trpc/client';
+import { prismaEnums } from '@nonrml/prisma';
 
 type Payments = NonNullable<NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["Payments"]>
 
@@ -39,7 +40,8 @@ const PaymentDetailsDialog = ({ payment } : {payment: Payments|null}) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Payment ID</TableHead>
+                      <TableHead>RZP Payment ID</TableHead>
+                      <TableHead>RZP Order ID</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Service</TableHead>
                       <TableHead>On</TableHead>
@@ -48,9 +50,10 @@ const PaymentDetailsDialog = ({ payment } : {payment: Payments|null}) => {
                   <TableBody>
                     <TableRow>
                       <TableCell>{payment.rzpPaymentId || '-'}</TableCell>
+                      <TableCell>{payment.rzpOrderId || '-'}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          payment.paymentStatus === 'paid' 
+                          payment.paymentStatus == prismaEnums.PaymentStatus.captured 
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>

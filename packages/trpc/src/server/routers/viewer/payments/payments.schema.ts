@@ -1,17 +1,20 @@
 import { prisma, prismaEnums } from "@nonrml/prisma";
 import { z } from "zod";
 
-// export const ZCreateRzpOrderSchema = z.object({
-//     orderTotal:z.number(),
-//     addressId: z.number().optional()
-// });
-// export type TCreateRzpOrderSchema = z.infer<typeof ZCreateRzpOrderSchema>;
-
 export const ZChangePaymentStatusSchema = z.object({
     orderId: z.string(),
-    paymentStatus: z.enum(["failed", "paid"])
+    paymentStatus: z.enum(Object.keys(prismaEnums.PaymentStatus) as [keyof typeof prismaEnums.PaymentStatus]),
+    secret: z.string()
 });
 export type TChangePaymentStatusSchema = z.infer<typeof ZChangePaymentStatusSchema>;
+
+export const ZRzpPaymentUpdateWebhookSchema = z.object({
+    rzpOrderId: z.string(),
+    paymentStatus: z.string(),
+    refundId: z.string().optional(),
+    refundStatus: z.string().optional()
+});
+export type TRzpPaymentUpdateWebhookSchema = z.infer<typeof ZRzpPaymentUpdateWebhookSchema>;
 
 export const ZEditPermissionSchema = z.object({
     permissionId: z.number(),
@@ -30,6 +33,11 @@ export const ZInitiateUavailibiltyRefundSchema = z.object({
     orderId: z.number()
 })
 export type TInitiateUavailibiltyRefundSchema = z.infer<typeof ZInitiateUavailibiltyRefundSchema>
+
+export const ZIssueReturnReplacementBankRefundSchema = z.object({
+    replacementOrderId: z.number()
+})
+export type TIssueReturnReplacementBankRefundSchema = z.infer<typeof ZIssueReturnReplacementBankRefundSchema>
 
 export const ZGetPaymentsSchema = z.object({ 
     search: z.string().optional(),

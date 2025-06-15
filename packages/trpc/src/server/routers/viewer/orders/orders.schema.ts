@@ -2,14 +2,36 @@ import { prismaEnums } from "@nonrml/prisma";
 import { number, object, string, z } from "zod";
 
 export const ZGetUserOrderSchema = z.object({
-    orderId: z.number(),   
+    orderId: z.string(),   
 })
 export type TGetUserOrderSchema = z.infer<typeof ZGetUserOrderSchema>;
+
+export const ZCancelAcceptedOrderSchema = z.object({
+    refundMode: z.enum(["CREDIT", "BANK"]).default("CREDIT"),
+    orderId: z.number(),   
+})
+export type TCancelAcceptedOrderSchema = z.infer<typeof ZCancelAcceptedOrderSchema>;
+
+export const ZUpdateShipmentSchema = z.object({
+    shipmentId: z.string(),
+    shipmentStatus: z.string(),
+})
+export type TUpdateShipmentSchema = z.infer<typeof ZUpdateShipmentSchema>;
+
+export const ZGetOrderReturnSchema = z.object({
+    orderId: z.number(),   
+})
+export type TGetOrderReturnSchema = z.infer<typeof ZGetOrderReturnSchema>;
 
 export const ZCancelOrderSchema = z.object({
     orderId: z.number(),   
 })
 export type TCancelOrderSchema = z.infer<typeof ZCancelOrderSchema>;
+
+export const ZShipOrderrSchema = z.object({
+    orderId: z.number(),   
+})
+export type TShipOrderrSchema = z.infer<typeof ZShipOrderrSchema>;
 
 export const ZTrackOrderSchema = z.object({
     orderId: z.string(),
@@ -80,10 +102,8 @@ export const ZcancelOrderProductSchema = z.object({
 export type TcancelOrderProductSchema = z.infer<typeof ZcancelOrderProductSchema>;
 
 export const ZCheckOrderServicibilitySchema = z.object({
-    // rzpOrderReceipt: z.string(),
+    // orderId: z.string()
     rzpOrderId: z.string(),
-    // contact: z.string(),
-    // email: z.string(),
     addresses: z.array(z.object({
         id: z.string(),
         zipcode: z.string(),

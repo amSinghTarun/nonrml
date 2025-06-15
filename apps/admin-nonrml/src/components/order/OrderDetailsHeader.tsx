@@ -28,7 +28,7 @@ const OrderDetailsHeader: React.FC<OrderDetailsHeaderProps> = ({ order }) => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Order : {order.id}</CardTitle>
+            <CardTitle>ORD-{order.id}{order.idVarChar}</CardTitle>
             <CardDescription>Created on {new Date(order.createdAt).toDateString()}</CardDescription>
           </div>
           <Badge 

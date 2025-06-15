@@ -6,7 +6,7 @@ import { addCreditNote, deleteCreditNote, editCreditNote, getAllCreditNote, getC
 import { ZAddCreditNoteSchema, ZGetCreditNoteSchema, ZDeleteCreditNoteSchema, ZEditCreditNoteSchema, ZGetCreditNoteDetailsSchema, ZGetCreditNotesAdminSchema, ZGetAllCreditNotesSchema } from "./creditNotes.schema";
 
 export const creditNotesRouter = router({
-    getCreditNote: publicProcedure
+    getCreditNote: publicProtectedProcedure
         .meta({ openAPI: {method: "POST", descrription: "Use the credit Note"}})
         .input(ZGetCreditNoteSchema)
         .query( async ({ctx, input}) => await getCreditNote({ctx, input}) ),

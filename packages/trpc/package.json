@@ -19,6 +19,7 @@
     "@nonrml/cache": "workspace:*",
     "@nonrml/common": "workspace:*",
     "@nonrml/configs": "workspace:*",
+    "@nonrml/mailing": "workspace:*",
     "@nonrml/otp": "workspace:*",
     "@nonrml/payment": "workspace:*",
     "@nonrml/prisma": "workspace:*",

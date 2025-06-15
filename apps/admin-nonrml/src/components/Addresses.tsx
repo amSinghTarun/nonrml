@@ -22,7 +22,6 @@ import {
             <TableHead>Pincode</TableHead>
             <TableHead>City</TableHead>
             <TableHead>State</TableHead>
-            <TableHead>Email</TableHead>
             <TableHead>Mobile</TableHead>
             <TableHead>Created At</TableHead>
           </TableRow>
@@ -38,8 +37,7 @@ import {
                   <TableCell className="font-medium">{address.pincode}</TableCell>
                   <TableCell className="font-medium">{address.city}</TableCell>
                   <TableCell className="font-medium">{address.state}</TableCell>
-                  <TableCell className="font-medium">{address.email}</TableCell>
-                  <TableCell className="font-medium">{address.countryCode + address.contactNumber}</TableCell>
+                  <TableCell className="font-medium">{address.contactNumber}</TableCell>
                   <TableCell className="font-medium">{address.createdAt.toDateString()}</TableCell>
                 </TableRow>
               ))

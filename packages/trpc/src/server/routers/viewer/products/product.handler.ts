@@ -1,5 +1,5 @@
 import { TRPCResponseStatus } from "@nonrml/common";
-import { getSizeOrderIndex, TRPCCustomError, TRPCRequestOptions } from "../helper";
+import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import {
   TAddProductSchema,
   TEditProductSchema,

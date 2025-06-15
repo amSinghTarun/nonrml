@@ -10,7 +10,6 @@ datasource db {
 
 model User {
   id            Int                 @id @default(autoincrement())
-  countryCode   String              @default("+91")
   contactNumber String              @unique
   role          UserPermissionRoles
   cartId        Int?                @unique
@@ -29,24 +28,26 @@ model User {
 }
 
 model CreditNotes {
-  id                                Int                                 @id @default(autoincrement())
-  userId                            Int
-  creditCode                        String
-  value                             Float
-  returnOrderId                     Int?
-  expiryDate                        DateTime
-  createdAt                         DateTime                            @default(now())
-  updatedAt                         DateTime                            @updatedAt
-  creditNoteOrigin                  CreditNotePurpose?
-  remainingValue                    Float
-  replacementOrderId                Int?
-  email                             String                              @default("tarunsingh2118@gmail.com")
-  replacementOrder                  ReplacementOrder?                   @relation(fields: [replacementOrderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  returnOrder                       Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
-  user                              User                                @relation(fields: [userId], references: [id])
-  creditNotesPartialUseTransactions CreditNotesPartialUseTransactions[]
-  orders                            Orders[]
-  RefundTransactions                RefundTransactions[]
+  id                                 Int                                 @id @default(autoincrement())
+  userId                             Int
+  creditCode                         String
+  value                              Float
+  returnOrderId                      Int?
+  expiryDate                         DateTime
+  createdAt                          DateTime                            @default(now())
+  updatedAt                          DateTime                            @updatedAt
+  creditNoteOrigin                   CreditNotePurpose?
+  remainingValue                     Float
+  replacementOrderId                 Int?
+  email                              String                              @default("tarunsingh2118@gmail.com")
+  orderId                            Int?
+  Orders_CreditNotes_orderIdToOrders Orders?                             @relation("CreditNotes_orderIdToOrders", fields: [orderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  replacementOrder                   ReplacementOrder?                   @relation(fields: [replacementOrderId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  returnOrder                        Returns?                            @relation(fields: [returnOrderId], references: [id], onDelete: Restrict)
+  user                               User                                @relation(fields: [userId], references: [id])
+  creditNotesPartialUseTransactions  CreditNotesPartialUseTransactions[]
+  orders                             Orders[]
+  RefundTransactions                 RefundTransactions[]
 }
 
 model CreditNotesPartialUseTransactions {
@@ -87,8 +88,6 @@ model Address {
   pincode       String
   city          String
   state         String
-  email         String
-  countryCode   String      @default("+91")
   contactNumber String
   userId        Int
   updatedAt     DateTime    @updatedAt
@@ -268,11 +267,13 @@ model Payments {
   rzpOrderId          String               @unique
   rzpPaymentId        String?              @unique
   rzpPaymentSignature String?
-  paymentStatus       PaymentStatus        @default(PENDING)
+  paymentStatus       PaymentStatus        @default(created)
   paymentService      String               @default("Razorpay")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   orderId             Int                  @unique
+  paymentMethod       String?
+  conflict            String?
   Orders              Orders               @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   RefundTransactions  RefundTransactions[]
 }
@@ -284,38 +285,41 @@ model Shipment {
   shipmentTrackingLink String
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+  AWB                  String            @unique
   order                Orders?
   ReplacementOrder     ReplacementOrder?
   return               Returns?
 }
 
 model Orders {
-  id                    Int                                @id @unique @default(autoincrement())
-  type                  OrderType                          @default(NEW)
-  creditUtilised        Int?                               @default(0)
-  totalAmount           Float
-  userId                Int?
-  productCount          Int
-  addressId             Int?
-  discountId            Int?
-  shipmentId            Int?                               @unique
-  deliveryDate          BigInt?
-  orderStatus           OrderStatus                        @default(PENDING)
-  createdAt             DateTime                           @default(now())
-  updatedAt             DateTime                           @updatedAt
-  creditNoteId          Int?
-  returnAcceptanceDate  BigInt?
-  idVarChar             String
-  creditNoteTransaction CreditNotesPartialUseTransactions?
-  orderProducts         OrderProducts[]
-  address               Address?                           @relation(fields: [addressId], references: [id], onDelete: Restrict)
-  creditNote            CreditNotes?                       @relation(fields: [creditNoteId], references: [id])
-  discount              Discounts?                         @relation(fields: [discountId], references: [id])
-  shipment              Shipment?                          @relation(fields: [shipmentId], references: [id])
-  user                  User?                              @relation(fields: [userId], references: [id], onDelete: Restrict)
-  Payments              Payments?
-  replacementOrder      ReplacementOrder[]
-  return                Returns[]
+  id                                      Int                                @id @unique @default(autoincrement())
+  type                                    OrderType                          @default(NEW)
+  creditUtilised                          Int?                               @default(0)
+  totalAmount                             Float
+  userId                                  Int?
+  productCount                            Int
+  addressId                               Int?
+  discountId                              Int?
+  shipmentId                              Int?                               @unique
+  deliveryDate                            BigInt?
+  orderStatus                             OrderStatus                        @default(PENDING)
+  createdAt                               DateTime                           @default(now())
+  updatedAt                               DateTime                           @updatedAt
+  creditNoteId                            Int?
+  returnAcceptanceDate                    BigInt?
+  idVarChar                               String
+  processingRefundAmount                  Int                                @default(0)
+  CreditNotes_CreditNotes_orderIdToOrders CreditNotes[]                      @relation("CreditNotes_orderIdToOrders")
+  creditNoteTransaction                   CreditNotesPartialUseTransactions?
+  orderProducts                           OrderProducts[]
+  address                                 Address?                           @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  creditNote                              CreditNotes?                       @relation(fields: [creditNoteId], references: [id])
+  discount                                Discounts?                         @relation(fields: [discountId], references: [id])
+  shipment                                Shipment?                          @relation(fields: [shipmentId], references: [id])
+  user                                    User?                              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  Payments                                Payments?
+  replacementOrder                        ReplacementOrder[]
+  return                                  Returns[]
 }
 
 model OrderProducts {
@@ -346,6 +350,8 @@ model Returns {
   updatedAt         DateTime          @updatedAt
   refundMode        ReturnRefundMode  @default(CREDIT)
   returnType        ReturnType        @default(RETURN)
+  explanation       String?
+  images            String[]
   creditNote        CreditNotes[]
   ReplacementOrder  ReplacementOrder?
   returnItems       ReturnItem[]
@@ -362,8 +368,6 @@ model ReturnItem {
   rejectReason     String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  referenceImage   String?
-  returnReason     String?
   rejectedQuantity Int?             @default(0)
   ReplacementItem  ReplacementItem?
   orderProduct     OrderProducts    @relation(fields: [orderProductId], references: [id])
@@ -523,13 +527,12 @@ enum ReturnItemStatus {
 }
 
 enum PaymentStatus {
-  PENDING
-  retarted_CONFIRMED
-  COD
   created
-  attempted
-  paid
+  authorized
+  captured
+  refunded
   failed
+  pending
 }
 
 enum ReplacementOrderStatus {
@@ -586,4 +589,15 @@ enum CreditNotePurpose {
   RETURN
   REPLACEMENT
   GIFT
+  ORDER
+}
+
+enum PaymentStatusOld {
+  PENDING
+  retarted_CONFIRMED
+  COD
+  created
+  attempted
+  paid
+  failed
 }

@@ -1,20 +1,24 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, checkOrderServicibility, getTrackOrder } from "./orders.handler";
-import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZCheckOrderServicibilitySchema } from "./orders.schema";
+import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, checkOrderServicibility, getTrackOrder, sendOrderConfMail, cancelAcceptedOrder, updateShipmentStatus } from "./orders.handler";
+import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZCheckOrderServicibilitySchema, ZGetOrderReturnSchema, ZCancelAcceptedOrderSchema, ZUpdateShipmentSchema } from "./orders.schema";
 
 export const orderRouter = router({
+    sendOrderConfMail: adminProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get the orders of a user"}})
+        .input(ZGetUserOrderSchema)
+        .mutation( async ({ctx, input}) => await sendOrderConfMail({ ctx, input })),
     getUserOrders: publicProtectedProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get the orders of a user"}})
         .query( async ({ctx}) => await getUserOrders({ ctx })),
-    getUserOrder: publicProtectedProcedure
+    getUserOrder: publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get a particular order from the user"}})
         .input(ZGetUserOrderSchema)
         .query( async ({ctx, input}) => await getUserOrder({ctx, input})),
     getOrderReturnDetails: publicProtectedProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get a particular order from the user"}})
-        .input(ZGetUserOrderSchema)  // keeping it same as only orderId is needed
+        .input(ZGetOrderReturnSchema)  // keeping it same as only orderId is needed
         .query( async ({ctx, input}) => await getOrderReturnDetails({ctx, input})),
     trackOrder: publicProcedure
         .meta({ openAPI: {method: "GET", descrription: "Get the trackign detail of an order"}})
@@ -24,7 +28,7 @@ export const orderRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Initiate a new order"}})
         .input(ZInitiateOrderSchema)
         .mutation( async ({ctx, input}) => await initiateOrder({ctx, input}) ),
-    verifyOrder: publicProtectedProcedure
+    verifyOrder: publicProcedure
         .meta({ openAPI: {method: "POST", descrription: "Verify the order"}})
         .input(ZVerifyOrderSchema)
         .mutation( async ({ctx, input}) => await verifyOrder({ctx, input})),
@@ -48,5 +52,16 @@ export const orderRouter = router({
         .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
         .input(ZCheckOrderServicibilitySchema)
         .mutation( async ({ctx, input}) => await checkOrderServicibility({ctx, input}) ),
-
+    cancelAcceptedOrder: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
+        .input(ZCancelAcceptedOrderSchema)
+        .mutation( async ({ctx, input}) => await cancelAcceptedOrder({ctx, input}) ),
+    shipOrder: adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
+        .input(ZCancelAcceptedOrderSchema)
+        .mutation( async ({ctx, input}) => await cancelAcceptedOrder({ctx, input}) ),
+    updateShipmentStatus: publicProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
+        .input(ZUpdateShipmentSchema)
+        .mutation( async ({ctx, input}) => await updateShipmentStatus({ctx, input}) ),      
 })
