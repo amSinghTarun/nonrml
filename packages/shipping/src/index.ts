@@ -1,1 +1,1 @@
-export * from "./delhivery";
+export * from "./shiprocket";
