@@ -12,7 +12,8 @@ const nextConfig = {
         "@nonrml/configs",
         "@nonrml/cache",
         "@nonrml/common",
-        "@nonrml/components"
+        "@nonrml/components",
+        "@nonrml/shipping"
     ],
     env: {
         CART_EXPIRATION_TIME: `${1000 * 60 * 60 * 24 * 7}`,
@@ -20,7 +21,7 @@ const nextConfig = {
         MIN_QUANTITY_TO_ORDER: `1`,
         PROD_PORT: '8080',
         DAMAGE_PARCEL_RETURN_ALLOWED_TIME: 86400000,
-        RAZORPAY_KEY_ID: "rzp_test_af3DlwWOk9dkem"
+        RAZORPAY_KEY_ID: "rzp_test_R9SQjZbOCiHgpp"
     }
 };
 

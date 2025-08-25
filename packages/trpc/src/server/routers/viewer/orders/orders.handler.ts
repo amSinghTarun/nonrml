@@ -7,10 +7,10 @@ import { Orders } from "razorpay/dist/types/orders";
 import crypto from 'crypto';
 import { createOrder, getOrderDetials, getPaymentDetials, initiateNormalRefund } from "@nonrml/payment";
 import { cacheServicesRedisClient } from "@nonrml/cache";
-import { DelhiveryShipping } from "@nonrml/shipping"
+import { ShiprocketShipping } from "@nonrml/shipping"
 import { sendSMTPMail } from "@nonrml/mailing";
-
 const returnExchangeTime = 432000000; // 5 days
+const WAREHOUSE_PINCODE=495004
 
 export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderId: string}>) => {
     const prisma = ctx.prisma;
@@ -165,7 +165,7 @@ export const cancelOrder = async ({ ctx, input } : TRPCRequestOptions<TCancelOrd
 
         const cancelledOrder = await prisma.orders.update({
             where: {
-                id: input.orderId,
+                id: Number(input.orderId),
                 orderStatus: "PENDING",
                 Payments:{
                     paymentStatus: {
@@ -182,6 +182,41 @@ export const cancelOrder = async ({ ctx, input } : TRPCRequestOptions<TCancelOrd
         console.log(cancelledOrder);
 
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: cancelledOrder};
+
+    } catch(error){
+        // console.log("\n\n Error in getUserOrders ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error) 
+    }
+};
+
+export const updateShipmentStatus = async ({ ctx, input } : TRPCRequestOptions<TUpdateShipmentSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+
+        // import from the shipping package
+
+        // const cancelledOrder = await prisma.orders.update({
+        //     where: {
+        //         id: Number(input.orderId),
+        //         orderStatus: "PENDING",
+        //         Payments:{
+        //             paymentStatus: {
+        //                 // so that prepaid order that aren't accepted shouldn't get cancelled
+        //                 notIn: ["authorized", "captured"]
+        //             }
+        //         }
+        //     },
+        //     data: {
+        //         orderStatus: prismaEnums.OrderStatus.CANCELED
+        //     }
+        // });
+
+        // console.log(cancelledOrder);
+
+        return {status: TRPCResponseStatus.SUCCESS, message: "", data: "updateShipmentStatus"};
 
     } catch(error){
         // console.log("\n\n Error in getUserOrders ----------------");
@@ -295,7 +330,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                     location: rzpOrderData.customer_details.shipping_address.line1?.trim() + ", " + rzpOrderData.customer_details.shipping_address.line2?.trim(),
                     city: rzpOrderData.customer_details.shipping_address.city ?? 0,
                     state: rzpOrderData.customer_details.shipping_address.state ?? 0,
-                    pincode: rzpOrderData.customer_details.shipping_address.zipcode ?? 0,
+                    pincode: rzpOrderData.customer_details.shipping_address.zipcode ?? 0
                 }
 
                 let addressId = null;
@@ -641,7 +676,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         for (const variant of productValidation) {
             const orderProduct = input.orderProducts[variant.id];
-            if ( (variant.inventory!.quantity + variant.inventory!.baseSkuInventory!.quantity) < orderProduct!.quantity ) {
+            // console.log(variant.inventory!, variant.inventory!.baseSkuInventory?.quantity, orderProduct!.quantity)
+            if ( (variant.inventory!.quantity + (variant.inventory!.baseSkuInventory?.quantity || 0)) < orderProduct!.quantity ) {
                 await cacheServicesRedisClient().del(`productVariantQuantity_${variant.product.id}`)
                 insufficientProductQuantities = {...insufficientProductQuantities, [variant.id] : { ...input.orderProducts[variant.id], quantity: 0}};
             }
@@ -688,6 +724,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         const rzpPaymentCreated = await createOrder({
             amount: orderPaidAmount*100,
+            partial_payment: true,
             line_items_total: orderPaidAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
@@ -887,7 +924,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
                 Payments: {
                     include: {
                         RefundTransactions : {
-                            include: {
+                            select: {
                                 CreditNotes: true
                             }
                         }
@@ -1072,21 +1109,21 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     const prisma = ctx.prisma;
     input = input!
     try{
-        await prisma.orders.findFirstOrThrow({
-            where: {
-                Payments: {
-                    rzpOrderId:  `order_${input.rzpOrderId}`
-                }
-            },
-            select: {
-                id: true,
-            }
-        });
+        // await prisma.orders.findFirstOrThrow({
+        //     where: {
+        //         Payments: {
+        //             rzpOrderId:  `order_${input.rzpOrderId}`
+        //         }
+        //     },
+        //     select: {
+        //         id: true,
+        //     }
+        // });
 
         let shippingAddressesDetails = []
 
         for( let address of input.addresses ){
-            let deliveryDetails = await DelhiveryShipping.checkPincodeServiceability({pincode: address.zipcode});
+            let deliveryDetails = await ShiprocketShipping.ShiprocketShipping.checkServiceability({pickupPostcode: WAREHOUSE_PINCODE, deliveryPostcode: Number(address.zipcode)});
             shippingAddressesDetails.push({
                 id: address.id,
                 zipcode: address.zipcode,

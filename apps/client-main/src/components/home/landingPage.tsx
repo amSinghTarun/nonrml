@@ -30,24 +30,25 @@ export async function LandingPage() {
         sizes="100vw"
         lgBreakpoint={1024} // This is the default value, can be adjusted as needed
       />
-      <MaskContainer
-        revealText={
-          <p className="w-2/5 md:w-1/6 lg:w-1/8 flex h-fit">
-            <Image
-                src={logo}
-                alt="No NRML logo"
-                priority
-                width={0} height={0}
-                sizes="100vw" 
-                // can't use backdrop-blur
-                className='h-full w-auto p-10 object-cover justify-center bg-white bg-opacity-80 rounded-md'
-            ></Image>
-          </p> 
-        }
-        className=" w-full text-sm h-full cursor-vertical-text fixed text-center items-center content-center justify-center"
-      >
-        <NoNRMLFaceCard />
-      </MaskContainer>
+
+     <div className="fixed inset-0 z-20 flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl h-3/4 max-h-[600px]">
+          <iframe
+            allowTransparency={true}
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "transparent",
+            }}
+            src="https://app.endlesstools.io/embed/d06218b1-9b71-4531-a0ae-0487bd79ff5e"
+            title="Endless Tools Editor"
+            frameBorder="0"
+            allow="clipboard-write; encrypted-media; gyroscope; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+      </div>
 
       <ResponsiveImage
         images={{
@@ -95,11 +96,29 @@ export async function LandingPage() {
         </div>
       </div>
 
-      <div className={`flex z-30 relative py-1 md:py-1 bg-black backdrop-blur-sm justify-center w-full h-full text-center text-sm sm:text-base md:text-xl`}>
+      <div className={`flex z-30 relative bg-black justify-center w-full h-full text-center text-sm sm:text-base md:text-xl`}>
         <TickerText />
       </div>
 
-      <div className="z-30 relative flex flex-col lg:flex-row">
+      <div className="z-30 relative flex flex-col lg:flex-col">
+          {/* <MaskContainer
+            revealText={
+              <p className="w-2/5 md:w-1/6 lg:w-1/8 flex h-fit">
+                <Image
+                    src={logo}
+                    alt="No NRML logo"
+                    priority
+                    width={0} height={0}
+                    sizes="100vw" 
+                    // can't use backdrop-blur
+                    className='h-full w-auto p-10 object-cover justify-center bg-white bg-opacity-80 rounded-md'
+                ></Image>
+              </p> 
+            }
+            className=" w-full text-sm h-full cursor-vertical-text fixed text-center items-center content-center justify-center"
+          >
+            <NoNRMLFaceCard />
+          </MaskContainer> */}
           <ResponsiveProductImage imageLg={homeImages.MIDDLE_LG as string} imageMd={homeImages.MIDDLE_MD as string} />
       </div>
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { serverClient } from "@/app/_trpc/serverClient";
-import { DelhiveryShipping, DelhiveryTypes } from '@nonrml/shipping';
+import { serverClient } from "@/app/_trpc/serverClient"
+import { ShiprocketTypes, ShiprocketShipping } from "@nonrml/shipping"
 
 type RequestBody = {
   order_id: string, 
@@ -16,19 +16,21 @@ type RequestBody = {
 }
 export async function POST(request: NextRequest) {
     try {
-      const requestBody: DelhiveryTypes.ShipmentData = await request.json();
+      const requestBody: ShiprocketTypes.ShipmentData = await request.json();
       // console.log(requestBody)
   
-      const createDelivery = await DelhiveryShipping.createShipment(requestBody)
-      return NextResponse.json({"addresses": createDelivery}, { status: 200 })
+      // const createDelivery = await ShiprocketShipping.createShipment(requestBody)
+      // return NextResponse.json({"addresses": createDelivery}, { status: 200 })
       
       // await (await serverClient()).viewer.orders.sendOrderConfMail({orderId: requestBody.order_id})
-      // const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
-      //   addresses: requestBody.addresses,
-      //   rzpOrderId: requestBody.razorpay_order_id,
-      // });
 
-      // return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
+      console.log(request);
+      const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
+        addresses: requestBody.addresses,
+        rzpOrderId: requestBody.razorpay_order_id,
+      });
+
+      return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)

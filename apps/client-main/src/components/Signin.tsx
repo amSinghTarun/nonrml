@@ -33,11 +33,11 @@ const Signin = () => {
             if(sendOTP.isLoading)
                 return
             if(mobileNumber.length != 10){
-                setError("Mobile number should be 10 digits long");
-                return;
+                setError("Mobile number should be 10 digits long")
+                return
             }
-            !otpSent && await sendOTP.mutateAsync({contactNumber: getFullMobileNumber()});
-            setSendOtp(true);
+            !otpSent && await sendOTP.mutateAsync({contactNumber: getFullMobileNumber()})
+            setSendOtp(true)
         } catch (error: any) {
             setError(error.message ? error.message : "Having some trouble, try after sometime")
         };

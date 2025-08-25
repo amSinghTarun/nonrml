@@ -87,6 +87,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
       
       {order._count.return > 0 && (
         <ReturnsAndReplacements
+          order={order}
           orderId={order.id}
           returnDetails={returnReplacementDetails.data?.data}
           isLoading={returnReplacementDetails.isLoading}

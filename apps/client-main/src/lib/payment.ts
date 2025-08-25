@@ -3,7 +3,6 @@
 import { RouterInput, RouterOutput, trpc } from "@/app/_trpc/client"
 import { createRzpConfig } from "@nonrml/payment"
 import { useCartItemStore } from "@/store/atoms"
-import { useRouter } from "next/navigation"
 
 // type rzpOrder = RouterOutput["viewer"]["orders"]["initiateOrder"]["data"]
 type InitiateOrderResponse = RouterOutput["viewer"]["orders"]["initiateOrder"];

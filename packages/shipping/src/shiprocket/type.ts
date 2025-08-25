@@ -347,3 +347,27 @@ export interface CreateReturnOrderExample {
   };
   weight: number; // 1
 }
+
+export interface ShipmentData {
+  waybill?: string;
+  shipmentId?: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  pincode: string;
+  phone: string;
+  email?: string;
+  weight: number; // Weight in kg
+  productValue: number; // Value in INR
+  productDescription: string;
+  orderReference: string;
+  paymentMode: 'COD' | 'PREPAID';
+  codAmount?: number; // Required if paymentMode is COD
+  dimensions?: {
+    length: number; // Length in cm
+    breadth: number; // Breadth in cm
+    height: number; // Height in cm
+  };
+}

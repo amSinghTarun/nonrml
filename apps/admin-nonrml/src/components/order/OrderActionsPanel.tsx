@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
   CardHeader
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,9 +15,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { prismaTypes } from '@nonrml/prisma'
-import {RouterOutput } from '@/app/_trpc/client'
+} from '@/components/ui/alert-dialog';
+import { prismaTypes } from '@nonrml/prisma';
+import { RouterOutput } from '@/app/_trpc/client';
+import { ShiprocketShipping, ShiprocketTypes } from '@nonrml/shipping';
 
 interface OrderActionsPanelProps {
   order: RouterOutput["viewer"]["orders"]["getOrder"]["data"]
@@ -38,10 +39,17 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
 }) => {
   const [extendDays, setExtendDays] = useState<number>(0)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
-  if(!order)
-    return <></>
-    
+  const [isShipping, setIsShipping] = useState(false)
+
+  // New state for shipping dialog
+  const [isShipDialogOpen, setIsShipDialogOpen] = useState(false)
+  const [length, setLength] = useState<number>(10)
+  const [breadth, setBreadth] = useState<number>(10)
+  const [height, setHeight] = useState<number>(5)
+  const [weight, setWeight] = useState<number>(0.5)
+
+  if (!order) return <></>
+
   const handleExtendReturnDate = () => {
     if (extendDays > 0 && order.returnAcceptanceDate) {
       onExtendReturnDate(extendDays, Number(order.returnAcceptanceDate))
@@ -52,7 +60,59 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
     setIsDialogOpen(false)
     await handleCancelAcceptedOrder(refundMode)
   }
-  
+
+  // Ship Order Handler
+  const handleShipOrder = async () => {
+    try {
+      setIsShipping(true)
+
+      const shiprocketOrder: ShiprocketTypes.OrderData = {
+        orderId: `ORD-${order.id}${order.idVarChar}`,
+        orderDate: new Date(order.createdAt).toISOString(),
+        pickupLocation: "Primary",
+        billing: {
+          customerName: order.address!.contactName!,
+          address: order.address!.location!,
+          city: order.address!.city,
+          pincode: Number(order.address!.pincode!),
+          state: order.address!.state,
+          country: "India",
+          phone: Number(order.address!.contactNumber.replace(/\D/g, "").slice(-10))
+        },
+        shippingIsBilling: true,
+        orderItems: order.orderProducts.map(item => ({
+          name: item.productVariant.product.sku,
+          sku: item.productVariant.product.sku,
+          units: item.quantity,
+          sellingPrice: item.price,
+        })),
+        paymentMethod: order.Payments?.paymentMethod === "COD" ? "COD" : "Prepaid",
+        subTotal: order.totalAmount,
+        dimensions: {
+          length,
+          breadth,
+          height
+        },
+        weight
+      }
+
+      const response = await ShiprocketShipping.ShiprocketShipping.createOrder(shiprocketOrder)
+
+      if (response.success) {
+        alert(`Shipment Created! Order ID: ${response.orderId}`)
+        await onStatusChange("SHIPPED")
+      } else {
+        alert(`Failed to create shipment: ${response.error}`)
+      }
+    } catch (err) {
+      console.error("Error creating shipment:", err)
+      alert("Something went wrong while creating shipment.")
+    } finally {
+      setIsShipping(false)
+      setIsShipDialogOpen(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="font-bold">Order Actions</CardHeader>
@@ -77,17 +137,69 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
             </Button>
           </>
         )}
-        
+
         {order.orderStatus === "ACCEPTED" && (
           <>
-            <Button
-              className="text-black"
-              variant="secondary"
-              onClick={() => console.log("ship order")} // This is a placeholder for shipping functionality
-              disabled={isLoading}
-            >
-              Ship Order
-            </Button>
+            {/* Ship Order Dialog */}
+            <AlertDialog open={isShipDialogOpen} onOpenChange={setIsShipDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  className="text-black"
+                  variant="secondary"
+                  disabled={isLoading || isShipping}
+                >
+                  Ship Order
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Enter Package Details</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please provide the package dimensions and weight before shipping.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex flex-col gap-2 mt-2">
+                  <input
+                    type="number"
+                    placeholder="Length (cm)"
+                    value={length}
+                    onChange={(e) => setLength(Number(e.target.value))}
+                    className="border p-1 rounded"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Breadth (cm)"
+                    value={breadth}
+                    onChange={(e) => setBreadth(Number(e.target.value))}
+                    className="border p-1 rounded"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Height (cm)"
+                    value={height}
+                    onChange={(e) => setHeight(Number(e.target.value))}
+                    className="border p-1 rounded"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Weight (kg)"
+                    value={weight}
+                    onChange={(e) => setWeight(Number(e.target.value))}
+                    className="border p-1 rounded"
+                  />
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isShipping}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleShipOrder}
+                    disabled={isShipping}
+                  >
+                    {isShipping ? 'Creating Shipment...' : 'Confirm & Ship'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
             <Button
               variant="secondary"
               className="text-black"
@@ -96,6 +208,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
             >
               {isLoading ? 'Processing...' : 'Send Confirmation Mail'}
             </Button>
+
             <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button
@@ -136,7 +249,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
             </AlertDialog>
           </>
         )}
-        
+
         {(order.orderStatus === "SHIPPED" || order.orderStatus === "ACCEPTED") && (
           <Button
             variant="secondary"
@@ -147,7 +260,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
             {isLoading ? 'Processing...' : 'Mark Delivered'}
           </Button>
         )}
-        
+
         {order.deliveryDate && (
           <div className='flex flex-row space-x-5'>
             <div className="flex items-center gap-2 bg-black p-1 rounded-sm">
@@ -166,7 +279,6 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
               >
                 {isLoading ? 'Extending...' : 'Extend Return Date'}
               </Button>
-
             </div>
           </div>
         )}

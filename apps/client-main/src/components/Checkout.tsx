@@ -5,7 +5,7 @@ import CanclePurchaseDialog from "@/components/dialog/CancelPurchaseDialog";
 import { AddressCard } from "@/components/cards/AddressCard"
 import { cn } from "@nonrml/common";
 // import { AddAddress, EditAddress } from "./Address";
-import { RouterOutput, trpc } from "@/app/_trpc/client";
+import { trpc } from "@/app/_trpc/client";
 import { useBuyNowItemsStore, useCartItemStore, useSetAppbarUtilStore } from "@/store/atoms";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
 import Loading from "@/app/loading";
-import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 import { convertStringToINR } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 

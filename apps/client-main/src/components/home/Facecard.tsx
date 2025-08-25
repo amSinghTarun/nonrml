@@ -29,7 +29,7 @@ const NoNRMLFaceCard: React.FC = () => {
   }, []);
 
   return (
-    <div className={`h-[400px] font-semibold  text-black w-full  overflow-hidden pt-5`}>
+    <div className={`h-[400px] font-semibold  text-white w-full  overflow-hidden pt-5`}>
       <p className='mb-0'>They Told Me To Blend In,</p>
       <p className='mb-0'>I Chose To Break Form.</p>
       <p className='mb-0'>To Speak In Chaos,</p>

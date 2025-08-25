@@ -23,6 +23,7 @@
     "@nonrml/common": "workspace:*",
     "@nonrml/components": "workspace:*",
     "@nonrml/configs": "workspace:*",
+    "@nonrml/shipping": "workspace:*",
     "@nonrml/trpc": "workspace:*",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.1",

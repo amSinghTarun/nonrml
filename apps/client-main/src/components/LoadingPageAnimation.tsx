@@ -1,7 +1,7 @@
 // Create this file: components/AnimatedLoadingClient.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import logo from "@/images/logo.png";
+import logo from "@/images/SYMBOL.png";
 import Image from "next/image";
 import { cn } from '@nonrml/common';
 
@@ -31,7 +31,7 @@ export default function AnimatedLoadingClient({ text, className }: AnimatedLoadi
   return (
     <div className={cn("relative w-screen h-screen overflow-hidden bg-white", className)}>
       <div className="absolute inset-0 flex justify-center items-center z-30 text-neutral-700 font-bold">
-        <div className='p-4 backdrop-blur-lg rounded-lg'>
+        <div className='p-4'>
           <div className='justify-center flex '>
             <Image
               src={logo}
@@ -40,7 +40,7 @@ export default function AnimatedLoadingClient({ text, className }: AnimatedLoadi
               width={0} 
               height={0} 
               sizes="100vw" 
-              style={{ color:"white", width: 'auto', height: "40px"}}
+              style={{ color:"white", width: 'auto', height: "90px"}}
             />
           </div>
           {text && (

@@ -1,2 +1,2 @@
-export * from './service.shiprocket';
-export * as DelhiveryTypes from "./type";
+export * as ShiprocketShipping from './service.shiprocket';
+export * as ShiprocketTypes from "./type";

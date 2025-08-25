@@ -14,7 +14,7 @@ export const sendLoginOTP = async ({ctx, input}: TRPCRequestOptions<TSendOTPSche
         const otpExpiry = Date.now() + 900000 //15 mins
         
         console.log(otp)
-        // sendOTP(otp, input.contactNumber); 
+        sendOTP(otp, input.contactNumber); 
         
         await prisma.user.upsert({
             where: {

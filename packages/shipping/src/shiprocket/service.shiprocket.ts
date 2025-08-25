@@ -1,38 +1,41 @@
 // packages/shipping/src/shiprocket.ts
-import axios, { AxiosInstance, AxiosRequestConfig, type AxiosHeaders } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import type * as ShiprocketTypes from "./type";
 
 export class ShiprocketShipping {
-  private client: AxiosInstance;
-  private apiToken: string;
-  private baseUrl: string;
+  private static client: AxiosInstance;
+  private static initialized = false;
 
-  constructor(config: ShiprocketTypes.ShiprocketConfig) {
-    this.apiToken = config.apiToken;
-    const isProduction = config.isProduction ?? true;
-    this.baseUrl = config.baseUrl || (isProduction ? 'https://apiv2.shiprocket.in' : 'https://staging-apiv2.shiprocket.in');
-    const timeout = config.timeout || 30000;
+  // Static initialization method
+  private static init() {
+    if (this.initialized) return;
+
+    const apiToken = process.env.SHIPROCKET_API_TOKEN || "";
+    const baseUrl = "https://apiv2.shiprocket.in";
 
     this.client = axios.create({
-      baseURL: this.baseUrl,
-      timeout,
+      baseURL: baseUrl,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiToken}`
+        'Authorization': `Bearer ${apiToken}`
       }
     });
     
     // Add request interceptor to ensure headers are set correctly for all requests
     this.client.interceptors.request.use((config) => {
-      // Set the required headers directly
       config.headers['Content-Type'] = 'application/json';
-      config.headers['Authorization'] = `Bearer ${this.apiToken}`;
+      config.headers['Authorization'] = `Bearer ${apiToken}`;
       
       return config;
     });
+
+    this.initialized = true;
   }
 
-  async createOrder(data: ShiprocketTypes.OrderData): Promise<ShiprocketTypes.OrderResponse> {
+  static async createOrder(data: ShiprocketTypes.OrderData): Promise<ShiprocketTypes.OrderResponse> {
+    this.init(); // Ensure initialization
+
     try {
       // Format the data as required by Shiprocket API
       const formattedData = this.formatOrderData(data);
@@ -83,86 +86,119 @@ export class ShiprocketShipping {
     }
   }
 
-  async checkServiceability(params: ShiprocketTypes.ServiceabilityParams): Promise<ShiprocketTypes.ServiceabilityResponse> {
+  static async checkServiceability(params: ShiprocketTypes.ServiceabilityParams): Promise<any> {
+    this.init(); // Ensure initialization
+
+    // Prepare query parameters
+    const queryParams: any = {
+      pickup_postcode: params.pickupPostcode,
+      delivery_postcode: params.deliveryPostcode,
+      weight: 0.5,
+      cod: 1
+    };
+
+    // Add optional parameters if provided
+    if (params.orderId !== undefined) queryParams.order_id = params.orderId;
+    if (params.cod !== undefined) queryParams.cod = params.cod ? 1 : 0;
+    if (params.weight !== undefined) queryParams.weight = params.weight;
+    if (params.length !== undefined) queryParams.length = params.length;
+    if (params.breadth !== undefined) queryParams.breadth = params.breadth;
+    if (params.height !== undefined) queryParams.height = params.height;
+    if (params.declaredValue !== undefined) queryParams.declared_value = params.declaredValue;
+    if (params.mode) queryParams.mode = params.mode;
+    if (params.isReturn !== undefined) queryParams.is_return = params.isReturn ? 1 : 0;
+    if (params.couriersType !== undefined) queryParams.couriers_type = params.couriersType;
+    if (params.onlyLocal !== undefined) queryParams.only_local = params.onlyLocal;
+    if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
+
     try {
-      // Validate required parameters
-      if (!params.pickupPostcode || !params.deliveryPostcode) {
-        return {
-          success: false,
-          error: 'Pickup and delivery postcodes are required',
-          couriers: [],
-          pickupPostcode: params.pickupPostcode || 0,
-          deliveryPostcode: params.deliveryPostcode || 0
-        };
-      }
-
-      // Prepare query parameters
-      const queryParams: any = {
-        pickup_postcode: params.pickupPostcode,
-        delivery_postcode: params.deliveryPostcode
-      };
-
-      // Add optional parameters if provided
-      if (params.orderId !== undefined) queryParams.order_id = params.orderId;
-      if (params.cod !== undefined) queryParams.cod = params.cod ? 1 : 0;
-      if (params.weight !== undefined) queryParams.weight = params.weight;
-      if (params.length !== undefined) queryParams.length = params.length;
-      if (params.breadth !== undefined) queryParams.breadth = params.breadth;
-      if (params.height !== undefined) queryParams.height = params.height;
-      if (params.declaredValue !== undefined) queryParams.declared_value = params.declaredValue;
-      if (params.mode) queryParams.mode = params.mode;
-      if (params.isReturn !== undefined) queryParams.is_return = params.isReturn ? 1 : 0;
-      if (params.couriersType !== undefined) queryParams.couriers_type = params.couriersType;
-      if (params.onlyLocal !== undefined) queryParams.only_local = params.onlyLocal;
-      if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
-
       // Using the Shiprocket API endpoint for serviceability check
       const response = await this.client.get('/v1/external/courier/serviceability/', {
         params: queryParams
       });
 
-      if (response.data && response.data.data) {
-        const couriers = response.data.data.available_courier_companies || [];
-        
-        return {
-          success: true,
-          couriers: couriers,
-          pickupPostcode: params.pickupPostcode,
-          deliveryPostcode: params.deliveryPostcode,
-          message: response.data.message || 'Serviceability checked successfully'
-        };
-      } else {
-        return {
-          success: false,
-          error: response.data?.message || 'No courier serviceability data found',
-          couriers: [],
-          pickupPostcode: params.pickupPostcode,
-          deliveryPostcode: params.deliveryPostcode
-        };
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
-        return {
-          success: false,
-          error: errorData?.message || errorData?.error || error.message,
-          couriers: [],
-          pickupPostcode: params.pickupPostcode,
-          deliveryPostcode: params.deliveryPostcode,
-          details: errorData?.errors || undefined
-        };
-      }
-      return {
-        success: false,
-        error: 'Unknown error occurred while checking serviceability',
-        couriers: [],
-        pickupPostcode: params.pickupPostcode,
-        deliveryPostcode: params.deliveryPostcode
+      let deliveryDetails = {
+        "id": "1",
+        "description": "Free shipping",
+        "name": "Delivery in 5-7 days",
+        "shipping_fee": 0,
+        "cod_fee": 0,
+        "serviceable": false,
+        "cod": false
       };
+      
+      if (response.data && response.data.data && response.data.data.available_courier_companies.length) {
+        console.log(response.data.delivery_codes?.[0]?.postal_code);
+        deliveryDetails.serviceable = true;
+        deliveryDetails.cod = true;
+      }
+
+      return deliveryDetails;  
+      
+    } catch (error) {
+      console.log("Error in shipping Serviceability api", error);
+      throw new Error("Something went wrong, try after some time");
+    }
+  }
+  
+  static async updateShipmentStatus(params: ShiprocketTypes.ServiceabilityParams): Promise<any> {
+    this.init(); // Ensure initialization
+
+    // Prepare query parameters
+    const queryParams: any = {
+      pickup_postcode: params.pickupPostcode,
+      delivery_postcode: params.deliveryPostcode,
+      weight: 0.5,
+      cod: 1
+    };
+
+    // Add optional parameters if provided
+    if (params.orderId !== undefined) queryParams.order_id = params.orderId;
+    if (params.cod !== undefined) queryParams.cod = params.cod ? 1 : 0;
+    if (params.weight !== undefined) queryParams.weight = params.weight;
+    if (params.length !== undefined) queryParams.length = params.length;
+    if (params.breadth !== undefined) queryParams.breadth = params.breadth;
+    if (params.height !== undefined) queryParams.height = params.height;
+    if (params.declaredValue !== undefined) queryParams.declared_value = params.declaredValue;
+    if (params.mode) queryParams.mode = params.mode;
+    if (params.isReturn !== undefined) queryParams.is_return = params.isReturn ? 1 : 0;
+    if (params.couriersType !== undefined) queryParams.couriers_type = params.couriersType;
+    if (params.onlyLocal !== undefined) queryParams.only_local = params.onlyLocal;
+    if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
+
+    try {
+      // Using the Shiprocket API endpoint for serviceability check
+      const response = await this.client.get('/v1/external/courier/serviceability/', {
+        params: queryParams
+      });
+
+      let deliveryDetails = {
+        "id": "1",
+        "description": "Free shipping",
+        "name": "Delivery in 5-7 days",
+        "shipping_fee": 0,
+        "cod_fee": 0,
+        "serviceable": false,
+        "cod": false
+      };
+      
+      if (response.data && response.data.data && response.data.data.available_courier_companies.length) {
+        console.log(response.data.delivery_codes?.[0]?.postal_code);
+        deliveryDetails.serviceable = true;
+        deliveryDetails.cod = true;
+      }
+
+      return deliveryDetails;  
+      
+    } catch (error) {
+      console.log("Error in shipping Serviceability api", error);
+      throw new Error("Something went wrong, try after some time");
     }
   }
 
-  async createReturnOrder(data: ShiprocketTypes.ReturnOrderData): Promise<ShiprocketTypes.ReturnOrderResponse> {
+  static async createReturnOrder(data: ShiprocketTypes.ReturnOrderData): Promise<ShiprocketTypes.ReturnOrderResponse> {
+    this.init(); // Ensure initialization
+
     try {
       // Validate required parameters
       if (!data.orderId || !data.orderDate) {
@@ -247,7 +283,7 @@ export class ShiprocketShipping {
     }
   }
 
-  private formatOrderData(data: ShiprocketTypes.OrderData): any {
+  private static formatOrderData(data: ShiprocketTypes.OrderData): any {
     const formattedData: any = {
       order_id: data.orderId,
       order_date: data.orderDate,
@@ -327,7 +363,7 @@ export class ShiprocketShipping {
     return formattedData;
   }
 
-  private formatReturnOrderData(data: ShiprocketTypes.ReturnOrderData): any {
+  private static formatReturnOrderData(data: ShiprocketTypes.ReturnOrderData): any {
     const formattedData: any = {
       order_id: data.orderId,
       order_date: data.orderDate,

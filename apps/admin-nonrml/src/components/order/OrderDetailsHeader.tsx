@@ -22,6 +22,8 @@ const OrderDetailsHeader: React.FC<OrderDetailsHeaderProps> = ({ order }) => {
       redirect(`/creditNotes?creditNoteIdParam=${order.creditNoteId}`)
     }
   }
+
+  console.log(order)
   
   return (
     <Card>
@@ -62,7 +64,7 @@ const OrderDetailsHeader: React.FC<OrderDetailsHeaderProps> = ({ order }) => {
         </div>
         <div>
           <h3 className="font-medium text-sm text-gray-500">Account Contact</h3>
-          <p className="text-lg">{order.user.contactNumber}</p>
+          <p className="text-lg">{order.user?.contactNumber}</p>
         </div>
         {order.deliveryDate && (
           <div className="gap-2">

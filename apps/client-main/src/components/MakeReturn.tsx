@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 
 interface ReturnReplaceProps {
-    products: NonNullable<OrderProduct>["orderProducts"],
+    products: NonNullable<OrderProduct>["orderDetails"]["orderProducts"],
     orderId: number,
     returnAcceptanceDate: number,
     backToOrderDetails: () => void
