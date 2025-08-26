@@ -17,7 +17,6 @@ model User {
   otpExpire     BigInt?
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
-  email         String?             @default("")
   address       Address[]
   creditNotes   CreditNotes[]
   order         Orders[]
@@ -309,6 +308,7 @@ model Orders {
   returnAcceptanceDate                    BigInt?
   idVarChar                               String
   processingRefundAmount                  Int                                @default(0)
+  email                                   String
   CreditNotes_CreditNotes_orderIdToOrders CreditNotes[]                      @relation("CreditNotes_orderIdToOrders")
   creditNoteTransaction                   CreditNotesPartialUseTransactions?
   orderProducts                           OrderProducts[]

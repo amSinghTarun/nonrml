@@ -141,7 +141,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds})
                     })} 
                 </div>
 
-                {refunds >= 0  && (
+                {refunds > 0  && (
                     <div className="flex items-center w-fit gap-2 p-3 bg-neutral-100 rounded-md text-[10px] text-neutral-600">
                         <Info className="w-4 h-4 flex-shrink-0" />
                         <p>

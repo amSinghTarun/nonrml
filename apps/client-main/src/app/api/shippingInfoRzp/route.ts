@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
       // console.log(request);
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
-        rzpOrderId: requestBody.razorpay_order_id,
+        contactNumber: requestBody.contact,
+        orderId: <number><unknown>requestBody.order_id,
       });
 
       return NextResponse.json({"addresses": shippingDetails}, { status: 200 })

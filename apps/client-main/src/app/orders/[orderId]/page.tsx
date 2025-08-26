@@ -17,6 +17,7 @@ const OrdersPage = async ({params, searchParams}: {params: Promise<{orderId: str
     // const verifyParam = (await searchParams);
 
     const {data: orderDetals} = await ( await serverClient()).viewer.orders.getUserOrder({orderId: orderId});
+    console.log(orderDetals.bankRefunds)
     return (
         <section className="pt-14 pb-5 z-30 scrollbar-hide flex flex-row min-h-screen h-auto w-screen overflow-y-scroll overscroll-none bg-white text-black justify-center mb-64 lg:mb-32">
             <Order orderDetails={orderDetals.orderDetails} refunds={orderDetals.bankRefunds} /> 

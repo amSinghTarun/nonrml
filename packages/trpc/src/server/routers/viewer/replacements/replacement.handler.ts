@@ -340,20 +340,16 @@ export const shipReplacementOrder = async ({ctx, input}: TRPCRequestOptions<TShi
                 id: true,
                 order: {
                     select: {
-                        user: {
-                            select: {
-                                email: true
-                            }
-                        }
+                        email: true
                     }
                 }
             }
         })
 
         // send confirmation mail
-        if(orderDetail?.order.user?.email){
+        if(orderDetail?.order.email){
             sendSMTPMail({
-                userEmail: orderDetail?.order.user?.email,
+                userEmail: orderDetail?.order.email,
                 emailBody: generateReplacementShippingNotificationEmail({orderId: `${orderDetail.id}`, waybillNumber: "hadfiuheu", trackingLink: "https://www.delhivery.com/tracking"})
             })
         }

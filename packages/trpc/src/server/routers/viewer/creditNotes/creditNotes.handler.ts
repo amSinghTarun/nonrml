@@ -176,22 +176,14 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                     id: input.returnOrderId
                 },
                 include: {
-                    order: {
-                        include: {
-                            user: {
-                                select: {
-                                    email: true
-                                }
-                            }
-                        }
-                    }
+                    order: true
                 }
             })
 
             if(!orderDetail || !orderDetail.order.userId)
                 throw ({code: "BAD_REQUEST", message: "The order for which you are creating CN is invalid"});
     
-            userMailId = orderDetail.order.user?.email ?? "" 
+            userMailId = orderDetail.order.email
             userId = orderDetail.order.userId;
             creditNoteMailData.creditNoteId = `RTN-${orderDetail.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${orderDetail.orderId}`
             creditNoteMailData.creditAmount = orderDetail?.order.totalAmount!
@@ -253,11 +245,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
                                     userId: true,
                                     idVarChar: true,
                                     id: true,
-                                    user: {
-                                        select: {
-                                            email: true
-                                        }
-                                    }
+                                    email: true
                                 }
                             }
                         }
@@ -290,7 +278,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
             let refundAmount = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.nonReplacableQuantity * product.returnOrderItem.orderProduct.price), 0 );
             let replaceQuantity = replacementOrderDetails.replacementItems.reduce( (total, product) => total + (product.returnOrderItem.quantity - (product.nonReplacableQuantity + (product.returnOrderItem.rejectedQuantity??0) )), 0 );
             
-            userMailId = replacementOrderDetails.return.order.user?.email ?? ""
+            userMailId = replacementOrderDetails.return.order.email
             creditNoteMailData.creditNoteId = `RPL-${replacementOrderDetails.return.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${replacementOrderDetails.return.order.id}`
             creditNoteMailData.creditAmount = refundAmount + (input.extraAmount ?? 0)
             creditNoteMailData.originalOrderNumber = `ORD-${replacementOrderDetails.return.order.id}${replacementOrderDetails.return.order.idVarChar}`

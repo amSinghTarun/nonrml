@@ -131,11 +131,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     id: true,
                     order: {
                         select: {
-                            user: {
-                                select: {
-                                    email: true
-                                }
-                            }
+                            email: true
                         }
                     },
                     returnItems: {
@@ -187,9 +183,9 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
             await prisma.$transaction(quantityUpdates)
 
             // mail to confirm the replacement order and explain the process
-            if(returnOrder.returnOrderCreated.order.user?.email && returnOrder.replacementOrder?.id){
+            if(returnOrder.returnOrderCreated.order.email && returnOrder.replacementOrder?.id){
                 sendSMTPMail({
-                    userEmail: returnOrder.returnOrderCreated.order.user.email,
+                    userEmail: returnOrder.returnOrderCreated.order.email,
                     emailBody: generateReplacementConfirmationEmail(`${returnOrder.replacementOrder.id}`)
                 });
             }
@@ -504,11 +500,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                         select: {
                             userId: true,
                             id: true,
-                            user: {
-                                select: {
-                                    email: true
-                                }
-                            }
+                            email: true
                         }
                     },
                     refundAmount: true,
@@ -605,7 +597,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                     data: {
                         returnOrderId: input.returnId,
                         value: refundAmount,
-                        email: returnProductVariantDetails.order.user?.email ?? "", 
+                        email: returnProductVariantDetails.order.email, 
                         remainingValue: refundAmount,
                         creditNoteOrigin: returnProductVariantDetails.returnType,
                         userId: returnProductVariantDetails.order.userId,

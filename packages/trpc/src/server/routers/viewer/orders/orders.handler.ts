@@ -24,10 +24,10 @@ export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderI
             idVarChar: true,
             address: true,
             totalAmount: true,
+            email: true,
             user: {
                 select: {
                     contactNumber: true,
-                    email: true
                 }
             },
             creditUtilised: true,
@@ -95,8 +95,8 @@ export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderI
     // }
     // const creditNoteMail = generateCreditNoteEmail(creditNoteMailData)
 
-    if(orderDetails?.user?.email)
-        await sendSMTPMail({userEmail: orderDetails?.user?.email, emailBody: emailHTML})
+    if(orderDetails?.email)
+        await sendSMTPMail({userEmail: orderDetails?.email, emailBody: emailHTML})
 }
 
 /*
@@ -318,7 +318,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
         // it's almost impossible that a user will stumble upon this without going through address phase
         // the first time it will run, it will save whatever razorpay has so address user whatever we have will
         // not run again, so check for both can be used
-        if( !orderDetails.userId && !orderDetails.addressId && orderDetails.Payments ){
+        if(!orderDetails.addressId && orderDetails.Payments ){
             
             const rzpOrderData = await getOrderDetials({rzpOrderId: orderDetails.Payments.rzpOrderId});
 
@@ -334,29 +334,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                 }
 
                 let addressId : null | number = null;
-                let user : {id: number} | null = orderDetails.userId ? {id: orderDetails.userId} : null
-
-                if(!user){
-                    user = await prisma.user.findUnique({
-                        where: {
-                            contactNumber: contactNumber
-                        },
-                        select: {
-                            id: true
-                        }
-                    })
-    
-                    if(!user){
-                        user = await prisma.user.create({
-                            data:{
-                                contactNumber: contactNumber,
-                                email: rzpOrderData.customer_details.email ?? "",
-                                role: prismaEnums.UserPermissionRoles.USER
-                            }
-                        });            
-                    }
-                }
-
+                let user : {id: number} = {id: orderDetails.userId!}
 
                 if(addressDetails.pincode && addressDetails.city && addressDetails.state){
                     let address = await prisma.address.findFirst({
@@ -724,7 +702,6 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
 
         const rzpPaymentCreated = await createOrder({
             amount: orderPaidAmount*100,
-            partial_payment: true,
             line_items_total: orderPaidAmount*100, 
             receipt: `${Date.now()}`,
             currency: "INR",
@@ -739,6 +716,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
                     idVarChar: orderIdChar,
                     totalAmount: orderTotal,
                     creditNoteId: creditNoteId,
+                    email: "",
                     processingRefundAmount: (orderTotal <= cnUseableValue) ? 1 : 0 ,
                     orderStatus: prismaEnums.OrderStatus.PENDING,
                     creditUtilised: orderTotal <= cnUseableValue ? orderTotal : cnUseableValue,
@@ -1038,11 +1016,7 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
                     select: {
                         id: true,
                         idVarChar: true,
-                        user: {
-                            select: {
-                                email: true
-                            }
-                        }
+                        email: true
                     }
                 }))
             };
@@ -1071,24 +1045,20 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
                     id: true,
                     idVarChar: true,
                     orderStatus: true,
-                    user: {
-                        select: {
-                            email: true
-                        }
-                    }
+                    email: true
                 }
             });
-            if(!orderDetails || !orderDetails.user?.email){
+            if(!orderDetails || !orderDetails.email){
                 return { status: TRPCResponseStatus.SUCCESS, message:"", data: "User doesn't have an email address linked to the account"};
             } else{
                 if(orderDetails.orderStatus == "CANCELED_ADMIN"){
                     await sendSMTPMail({
-                        userEmail: orderDetails.user.email, 
+                        userEmail: orderDetails.email, 
                         emailBody: generateOrderCancellationEmail(`${orderDetails.id}`, orderDetails.idVarChar, "UNAVAILABILITY")
                     })
                 } else {
                     await sendSMTPMail({
-                        userEmail: orderDetails.user.email, 
+                        userEmail: orderDetails.email, 
                         emailBody: generateOrderQuantityUpdateEmail(`${orderDetails.id}`, orderDetails.idVarChar)
                     });
                 }
@@ -1109,16 +1079,30 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     const prisma = ctx.prisma;
     input = input!
     try{
-        // await prisma.orders.findFirstOrThrow({
-        //     where: {
-        //         Payments: {
-        //             rzpOrderId:  `order_${input.rzpOrderId}`
-        //         }
-        //     },
-        //     select: {
-        //         id: true,
-        //     }
-        // });
+
+        let user = await prisma.user.findUnique({
+            where: {
+                contactNumber: input.contactNumber
+            }
+        })
+
+        if(!user){
+            user = await prisma.user.create({
+                data:{
+                    contactNumber: input.contactNumber,
+                    role: prismaEnums.UserPermissionRoles.USER
+                },
+            });            
+        }
+
+        await prisma.orders.update({
+            where: {
+                id:  input.orderId
+            },
+            data: {
+                userId: user.id
+            }
+        });
 
         let shippingAddressesDetails = <any>[]
 
@@ -1180,9 +1164,9 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
         // store tracking id in the shipment table
 
         // send the product shipped mail with tracking details tracking mail and has info  of processingRefundAmount
-        if(orderDetails.user?.email){
+        // if(orderDetails.email){
             await sendSMTPMail({
-                userEmail: orderDetails.user.email, 
+                userEmail: orderDetails.email, 
                 emailBody: generateShippingNotificationEmail({  
                     orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
                     refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
@@ -1199,7 +1183,7 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
                     trackingLink: "https://www.delhivery.com/tracking"
                 })
             })
-        }
+        // }
 
         return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
 
@@ -1241,8 +1225,7 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
                 user: {
                     select: {
                         id: true,
-                        contactNumber: true,
-                        email: true
+                        contactNumber: true
                     }
                 }
             }
@@ -1289,7 +1272,7 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
                     data: {
                         value: orderDetails.totalAmount,
                         remainingValue: orderDetails.totalAmount,
-                        email: orderDetails.user.email!,
+                        email: orderDetails.email,
                         creditNoteOrigin: prismaEnums.CreditNotePurpose.ORDER,
                         userId: orderDetails.user.id,
                         orderId: input.orderId,
@@ -1346,9 +1329,9 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
         await prisma.$transaction(cancelQueries)
         
         //send accepted order cancel confirmation mail
-        if(orderDetails.user.email)
+        if(orderDetails.email)
             await sendSMTPMail({
-                userEmail: orderDetails.user.email,
+                userEmail: orderDetails.email,
                 emailBody: generateOrderCancellationEmail(`${orderDetails.id}`, orderDetails.idVarChar, "ACCEPTED_ORDER")
             })
 

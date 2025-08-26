@@ -359,9 +359,9 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
         ]);
 
         // refund mail
-        if(razorpayPaymentDetails.Orders.user?.email){
+        if(razorpayPaymentDetails.Orders.email){
             await sendSMTPMail({
-                userEmail: razorpayPaymentDetails.Orders.user?.email,
+                userEmail: razorpayPaymentDetails.Orders.email,
                 emailBody: generateRefundNotificationEmail({
                     orderId: `${razorpayPaymentDetails.Orders.id}`,
                     orderIdVarChar: razorpayPaymentDetails.Orders.idVarChar,
@@ -374,7 +374,7 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
             });
         }
 
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data:razorpayPaymentDetails.Orders.user?.email ? "Sucessful" : "User email not present"};
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data:razorpayPaymentDetails.Orders.email ? "Sucessful" : "User email not present"};
 
     } catch(error) {
         //console.log("\n\n Error in editOrder ----------------");
@@ -406,14 +406,10 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
                                 creditUtilised: true,
                                 totalAmount: true,
                                 id: true,
+                                email: true,
                                 Payments: {
                                     select: {
                                         rzpPaymentId: true
-                                    }
-                                },
-                                user: {
-                                    select: {
-                                        email: true
                                     }
                                 }
                             }
@@ -454,12 +450,9 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
         let bankRefund = refundAmount > orderTotal - creditUtilized ? orderTotal - creditUtilized : refundAmount;
         let creditNoteRefund = refundAmount < orderTotal - creditUtilized ? 0 : refundAmount - orderTotal + creditUtilized ;
 
-        if(creditNoteRefund > 0 && (  !replacementOrderDetails.return.order.user || !replacementOrderDetails.return.order.user.email))
-            throw { code: "BAD_REQUEEST", message: "User email id is missing"}
-
         let creditNoteCreated : {id: number} | null = null
         let creditNoteInput =  {
-            email: replacementOrderDetails.return.order.user!.email!,
+            email: replacementOrderDetails.return.order.email,
             replacementOrderId: replacementOrderDetails.id,
             value: creditNoteRefund,
             remainingValue: creditNoteRefund,
@@ -547,9 +540,9 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
         if(!creditNoteCreated)  
             creditNoteCreated = {id: 0}; 
 
-        if(replacementOrderDetails.return.order.user?.email)
+        if(replacementOrderDetails.return.order.email)
             await sendSMTPMail({
-                userEmail: replacementOrderDetails.return.order.user?.email, 
+                userEmail: replacementOrderDetails.return.order.email, 
                 emailBody: generateRefundNotificationEmail({
                     orderId: `${replacementOrderDetails.return.order.id}`,
                     orderIdVarChar: replacementOrderDetails.return.order.idVarChar,
@@ -562,7 +555,7 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
                 })
             });
 
-            return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementOrderDetails.return.order.user?.email ? "Sucessful" : "User email not present"};
+            return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementOrderDetails.return.order.email ? "Sucessful" : "User email not present"};
 
 
     } catch(error) {
