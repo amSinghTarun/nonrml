@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/accordion'
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
@@ -35,7 +34,6 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
   isLoading
 }) => {
   const {
-    isStatusChangeLoading,
     handleReplacementOrderStatusChange
   } = useReturnManagement()
 

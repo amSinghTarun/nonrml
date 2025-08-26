@@ -156,7 +156,7 @@ export const addCreditNote = async ({ctx, input}: TRPCRequestOptions<TAddCreditN
     input = input!;
     try{
         console.log(`-----Input of create credit note, ${JSON.stringify(input)}, -----------that's it`)
-        let prismaUpdateQueries = []
+        let prismaUpdateQueries = <any>[]
         
         let userMailId : string = ""
         let userId : null|number = null; 

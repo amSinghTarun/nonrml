@@ -333,7 +333,7 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
                     pincode: rzpOrderData.customer_details.shipping_address.zipcode ?? 0
                 }
 
-                let addressId = null;
+                let addressId : null | number = null;
                 let user : {id: number} | null = orderDetails.userId ? {id: orderDetails.userId} : null
 
                 if(!user){
@@ -620,7 +620,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
     const prisma = ctx.prisma;
     try{
         let cnUseableValue = 0;
-        let creditNoteId = null;
+        let creditNoteId : null|number = null;
         let orderTotal = 0;
         if(input.creditNoteCode && userId){
             const creditNote = await prisma.creditNotes.findFirst({
@@ -924,7 +924,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
                 Payments: {
                     include: {
                         RefundTransactions : {
-                            select: {
+                            include: {
                                 CreditNotes: true
                             }
                         }
@@ -976,7 +976,7 @@ export const editOrder = async ({ctx, input}: TRPCRequestOptions<TEditOrderSchem
     const prisma = ctx.prisma;
     input = input!;
     try{
-        let editOrderQueries = []
+        let editOrderQueries = <any>[]
 
         switch(input.status){
             case "ACCEPTED":
@@ -1120,7 +1120,7 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
         //     }
         // });
 
-        let shippingAddressesDetails = []
+        let shippingAddressesDetails = <any>[]
 
         for( let address of input.addresses ){
             let deliveryDetails = await ShiprocketShipping.ShiprocketShipping.checkServiceability({pickupPostcode: WAREHOUSE_PINCODE, deliveryPostcode: Number(address.zipcode)});
@@ -1278,7 +1278,7 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
         if(!orderDetails.Payments.rzpPaymentId || orderDetails.Payments.paymentStatus != "captured")
             throw { code: "BAD_REQUEST", message: "Payment hasn't been received yet"};
 
-        let cancelQueries = [];
+        let cancelQueries = <any>[];
         let creditNoteRefund = orderDetails.creditUtilised ?? 0;
         let bankRefund = orderDetails.totalAmount - creditNoteRefund;
 

@@ -229,13 +229,15 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                 control={imageUploadForm.control}
                                 name="image"
                                 render={({ field }) => {
-                                    // Create a custom onChange handler for the FileUpload component
-                                    const handleFileChange =async (orderProductId: number, file: File) => {
-                                        field.onChange(await convertFileToDataURL(file));
+                                    // Create a custom onUpload handler for the FileUpload component
+                                    const handleFileUpload = async (files: File[]) => {
+                                        if (files.length > 0) {
+                                            field.onChange(await convertFileToDataURL(files[0]));
+                                        }
                                     };
                                     
                                     // Create a custom onFileDelete handler
-                                    const handleFileDelete = () => {
+                                    const handleFileDelete = (index: number) => {
                                         field.onChange(undefined);
                                     };
                                     
@@ -244,10 +246,10 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                             <FormLabel className="text-xs font-semibold">Image</FormLabel>
                                             <FormControl className="text-white">
                                                 <FileUpload 
-                                                    onChange={handleFileChange}
+                                                    onUpload={handleFileUpload}
                                                     onFileDelete={handleFileDelete}
-                                                    orderProductId={product.id}
                                                     buttonClass="bg-stone-700 hover:bg-stone-600"
+                                                    maxFiles={1}
                                                 />
                                             </FormControl>
                                             <FormMessage />

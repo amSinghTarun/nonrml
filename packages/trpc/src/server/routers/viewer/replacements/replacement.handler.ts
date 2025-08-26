@@ -220,7 +220,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
         
         let replaceAllowedItems = 0;
         for( let returnItem of dataForReplacement.returnItems){
-            let updateQueries = [];
+            let updateQueries = <any>[];
             
             console.log("In the finalize method loop", returnItem);
             // A way to figure out the processed deeds

@@ -21,7 +21,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   const [editingImage, setEditingImage] = useState<number | null>(null);
   const [error, setError] = useState<any>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);  // Image details states
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);  // Changed to array
   const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
   const [imageDetails, setImageDetails] = useState<{ 
     [imageId: number]: { 
@@ -33,7 +33,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   // tRPC mutations
   const createImage = trpc.viewer.homeImages.uploadImage.useMutation({
     onSuccess: () => {
-      setUploadedFile(null);
+      setUploadedFiles([]);  // Reset to empty array
       setLegacyType("TOP_MD");
       setShowUploadForm(false);
       images.refetch()
@@ -51,14 +51,15 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     }
   });
 
-  // Handle file change from FileUpload component
-  const handleFileChange = (orderProductId: number, file: File) => {
-    setUploadedFile(file);
+  // Handle file uploads from FileUpload component
+  const handleFileUpload = (files: File[]) => {
+    setUploadedFiles(files);
   };
 
   // Handle file deletion from FileUpload component
-  const handleFileDelete = () => {
-    setUploadedFile(null);
+  const handleFileDelete = (index: number) => {
+    // The FileUpload component handles the file removal internally
+    // and calls onUpload with the updated files array
   };
 
   // Handle image upload
@@ -66,14 +67,16 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     e.preventDefault();
     try {
       setError(null);
-      // Here you would typically handle the file upload to your server
-      // and then call your tRPC mutation with the resulting URL
-      if(!uploadedFile){
-        throw new Error("Image is a required prop")
+      
+      if (uploadedFiles.length === 0) {
+        throw new Error("Image is a required prop");
       }
-      // For now, we'll just use the existing imageUrl state
+      
+      // Use the first file from the uploaded files array
+      const fileToUpload = uploadedFiles[0];
+      
       await createImage.mutateAsync({
-        image: await convertFileToDataURL(uploadedFile),
+        image: await convertFileToDataURL(fileToUpload),
         legacyType,
       });
     } catch (error) {
@@ -184,14 +187,14 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
             <div className="mt-4">
               <label className="block mb-1">Upload Image:</label>
               <FileUpload 
-                onChange={handleFileChange}
+                onUpload={handleFileUpload}
                 onFileDelete={handleFileDelete}
-                orderProductId={1} // Using a placeholder ID since it's required
                 buttonClass="bg-blue-600 hover:bg-blue-700"
+                maxFiles={1}  // Limit to 1 file since we only process one image
               />
-              {uploadedFile && (
+              {uploadedFiles.length > 0 && (
                 <p className="text-sm text-green-600 mt-2">
-                  File selected: {uploadedFile.name}
+                  File selected: {uploadedFiles[0].name}
                 </p>
               )}
             </div>
@@ -217,7 +220,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
               <button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-                disabled={createImage.isLoading || !uploadedFile}
+                disabled={createImage.isLoading || uploadedFiles.length === 0}
               >
                 {createImage.isLoading ? "Uploading..." : "Upload Image"}
               </button>

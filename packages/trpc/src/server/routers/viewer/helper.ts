@@ -318,7 +318,7 @@ export const acceptOrder = async (orderId: number) => {
 
 export const calculateRejectedQuantityRefundAmounts = async  (orderId: number, getUpdateQueries?: boolean) => {
 
-    let updateOrderProductReimbursedQueries = [];
+    let updateOrderProductReimbursedQueries = <any>[];
 
     let orderDetails = await prisma.orders.findUnique({
         where: {

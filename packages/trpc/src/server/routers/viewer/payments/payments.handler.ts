@@ -247,7 +247,7 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
     input = input!;
     try{
 
-        let refundTransactionId = null;
+        let refundTransactionId : null|number = null;
 
         let razorpayPaymentDetails = await prisma.payments.findFirst({
             where: {
@@ -312,9 +312,9 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
 
                 return refundTransaction;
             });
-            refundTransactionId = refundTransaction.id;
+            refundTransactionId = <number><unknown>refundTransaction.id;
         } else {
-            refundTransactionId = existingRefundTransactionDetails.id;
+            refundTransactionId = <number><unknown>existingRefundTransactionDetails.id;
         }
 
         if(!refundTransactionId)
@@ -389,7 +389,7 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
     input = input!;
     try{
         
-        let refundTransactionId = null;
+        let refundTransactionId : null|number = null;
 
         const replacementOrderDetails = await prisma.replacementOrder.findFirst({
             where: {
@@ -500,9 +500,9 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
 
                 return refundTransaction;
             });
-            refundTransactionId = refundTransaction.id;
+            refundTransactionId = <number><unknown>refundTransaction.id;
         } else {
-            refundTransactionId = existingRefundTransactionDetails.id;
+            refundTransactionId = <number><unknown>existingRefundTransactionDetails.id;
         }
 
         if(!refundTransactionId)

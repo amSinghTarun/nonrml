@@ -60,11 +60,11 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
         if (Date.now() > Number(orderProducts[0]!.order.returnAcceptanceDate!))
             throw new TRPCError({ code: "FORBIDDEN", message: "Cannot return order after allotted time" });
 
-        let imageUrls = null;
-        let damageExplanation = null
+        let imageUrls: string[] = [];
+        let damageExplanation : null|string = null
         if(input.returnType == "RETURN"){
-            imageUrls = [];
-            damageExplanation = input.returnReason;
+            imageUrls = <any>[];
+            damageExplanation = input.returnReason ? input.returnReason : null;
             let i = 0
             for(let image of input.referenceImages!){
                 const imageUploaded = await uploadToBucketFolder(
@@ -151,7 +151,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
             // Handle replacement order if applicable
             if (input.returnType == prismaEnums.ReturnType.REPLACEMENT) {
 
-                let replacementItemsData = []
+                let replacementItemsData = <any>[]
                 for( let returnItem of returnOrderCreated.returnItems){
                     replacementItemsData.push({
                         returnItemId: returnItem.id,
@@ -446,7 +446,7 @@ export const cancelReturn = async ({ctx, input} : TRPCRequestOptions<TCancelRetu
             }
         });
 
-        let orderProductsUpdateQuantity = [];
+        let orderProductsUpdateQuantity = <any>[];
 
         orderProductsUpdateQuantity.push(
             prisma.returns.update({
@@ -542,9 +542,9 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
                 throw { code: "BAD_REQUEST", message: "RETURN ID INVALID"}
             
             let refundAmount = 0;
-            let returnItemsQueries = [];
-            let restockQueries = [];
-            let redisQueries = []
+            let returnItemsQueries = <any>[];
+            let restockQueries = <any>[];
+            let redisQueries = <any>[]
 
             for( let returnProduct of returnProductVariantDetails.returnItems ){
                 redisQueries.push(cacheServicesRedisClient().del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
@@ -584,7 +584,7 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
 
             }
             
-            let refundQueries = [];
+            let refundQueries = <any>[];
             // update the refund amount
             // The check in this and in 1 below it are precautionary so that if the process is running again, they don't perform the steps again
             !returnProductVariantDetails.refundAmount && refundQueries.push(

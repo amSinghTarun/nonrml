@@ -17,6 +17,7 @@ type RequestBody = {
 export async function POST(request: NextRequest) {
     try {
       const requestBody: ShiprocketTypes.ShipmentData = await request.json();
+      console.log(requestBody)
       // console.log(requestBody)
   
       // const createDelivery = await ShiprocketShipping.createShipment(requestBody)
@@ -24,13 +25,13 @@ export async function POST(request: NextRequest) {
       
       // await (await serverClient()).viewer.orders.sendOrderConfMail({orderId: requestBody.order_id})
 
-      console.log(request);
-      const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
-        addresses: requestBody.addresses,
-        rzpOrderId: requestBody.razorpay_order_id,
-      });
+      // console.log(request);
+      // const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
+      //   addresses: requestBody.address,
+      //   rzpOrderId: requestBody.razorpay_order_id,
+      // });
 
-      return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
+      return NextResponse.json({"addresses": "shippingDetails"}, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)

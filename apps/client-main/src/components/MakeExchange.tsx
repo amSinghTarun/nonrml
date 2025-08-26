@@ -17,7 +17,7 @@ type OrderProduct = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"];
 type exchangeProduct = RouterOutput["viewer"]["product"]["getProductSizes"]["data"];
 
 interface ExchangeProps {
-    products: NonNullable<OrderProduct>["orderProducts"],
+    products: NonNullable<OrderProduct>["orderDetails"]["orderProducts"],
     orderId: number,
     returnAcceptanceDate: number,
     backToOrderDetails: () => void
@@ -29,7 +29,7 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
 
     const router = useRouter();
 
-    const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderProducts"] ) => {
+    const getExchangeProductSizes = async ( exchangeProducts: NonNullable<OrderProduct>["orderDetails"]["orderProducts"] ) => {
         const productIdsJson : { [productId: number] : 1 }= {};
         const productIds : number[] = []
         for(let exchangeProduct of exchangeProducts){
