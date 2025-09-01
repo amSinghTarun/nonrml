@@ -30,10 +30,10 @@ export async function POST(request: NextRequest) {
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
         contactNumber: requestBody.contact,
-        orderId: <number><unknown>requestBody.order_id,
+        orderId: Number(requestBody.order_id),
       });
 
-      return NextResponse.json({"addresses": "shippingDetails"}, { status: 400 })
+      return NextResponse.json({"addresses": shippingDetails}, { status: 400 })
   
     } catch (error) {
       console.error('Shipping API error:', error)

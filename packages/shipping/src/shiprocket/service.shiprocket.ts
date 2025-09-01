@@ -1,47 +1,29 @@
 // packages/shipping/src/shiprocket.ts
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 import type * as ShiprocketTypes from "./type";
 
 export class ShiprocketShipping {
-  private static client: AxiosInstance;
-  private static initialized = false;
+  private static baseUrl = "https://apiv2.shiprocket.in";
+  private static apiToken = process.env.SHIPROCKET_API_TOKEN || "";
 
-  // Static initialization method
-  private static init() {
-    if (this.initialized) return;
-
-    const apiToken = process.env.SHIPROCKET_API_TOKEN || "";
-    const baseUrl = "https://apiv2.shiprocket.in";
-
-    this.client = axios.create({
-      baseURL: baseUrl,
-      timeout: 30000,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiToken}`
-      }
-    });
-    
-    // Add request interceptor to ensure headers are set correctly for all requests
-    this.client.interceptors.request.use((config) => {
-      config.headers['Content-Type'] = 'application/json';
-      config.headers['Authorization'] = `Bearer ${apiToken}`;
-      
-      return config;
-    });
-
-    this.initialized = true;
-  }
-
-  static async createOrder(data: ShiprocketTypes.OrderData): Promise<ShiprocketTypes.OrderResponse> {
-    this.init(); // Ensure initialization
-
+  // ---------------- CREATE ORDER ----------------
+  static async createOrder(
+    data: ShiprocketTypes.OrderData
+  ): Promise<ShiprocketTypes.OrderResponse> {
     try {
-      // Format the data as required by Shiprocket API
       const formattedData = this.formatOrderData(data);
-      
-      // Using the Shiprocket API endpoint for order creation
-      const response = await this.client.post('/v1/external/orders/create/adhoc', formattedData);
+
+      const response = await axios.post(
+        `${this.baseUrl}/v1/external/orders/create/adhoc`,
+        formattedData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiToken}`
+          },
+          timeout: 30000
+        }
+      );
 
       if (response.data && response.data.order_id) {
         return {
@@ -59,10 +41,13 @@ export class ShiprocketShipping {
           channelOrderId: '',
           status: 'Failed',
           success: false,
-          error: response.data?.message || response.data?.error || 'Failed to create order'
+          error:
+            response.data?.message ||
+            response.data?.error ||
+            'Failed to create order'
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data;
         return {
@@ -86,121 +71,75 @@ export class ShiprocketShipping {
     }
   }
 
-  static async checkServiceability(params: ShiprocketTypes.ServiceabilityParams): Promise<any> {
-    this.init(); // Ensure initialization
-
-    // Prepare query parameters
+  // ---------------- CHECK SERVICEABILITY ----------------
+  static async checkServiceability(
+    params: ShiprocketTypes.ServiceabilityParams
+  ): Promise<any> {
     const queryParams: any = {
       pickup_postcode: params.pickupPostcode,
       delivery_postcode: params.deliveryPostcode,
-      weight: 0.5,
-      cod: 1
+      weight: params.weight || 0.5,
+      cod: params.cod ? 1 : 0
     };
 
-    // Add optional parameters if provided
     if (params.orderId !== undefined) queryParams.order_id = params.orderId;
-    if (params.cod !== undefined) queryParams.cod = params.cod ? 1 : 0;
-    if (params.weight !== undefined) queryParams.weight = params.weight;
     if (params.length !== undefined) queryParams.length = params.length;
     if (params.breadth !== undefined) queryParams.breadth = params.breadth;
     if (params.height !== undefined) queryParams.height = params.height;
-    if (params.declaredValue !== undefined) queryParams.declared_value = params.declaredValue;
+    if (params.declaredValue !== undefined)
+      queryParams.declared_value = params.declaredValue;
     if (params.mode) queryParams.mode = params.mode;
-    if (params.isReturn !== undefined) queryParams.is_return = params.isReturn ? 1 : 0;
-    if (params.couriersType !== undefined) queryParams.couriers_type = params.couriersType;
-    if (params.onlyLocal !== undefined) queryParams.only_local = params.onlyLocal;
+    if (params.isReturn !== undefined)
+      queryParams.is_return = params.isReturn ? 1 : 0;
+    if (params.couriersType !== undefined)
+      queryParams.couriers_type = params.couriersType;
+    if (params.onlyLocal !== undefined)
+      queryParams.only_local = params.onlyLocal;
     if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
 
     try {
-      // Using the Shiprocket API endpoint for serviceability check
-      const response = await this.client.get('/v1/external/courier/serviceability/', {
-        params: queryParams
-      });
+      const response = await axios.get(
+        `${this.baseUrl}/v1/external/courier/serviceability/`,
+        {
+          params: queryParams,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiToken}`
+          }
+        }
+      );
 
       let deliveryDetails = {
-        "id": "1",
-        "description": "Free shipping",
-        "name": "Delivery in 5-7 days",
-        "shipping_fee": 0,
-        "cod_fee": 0,
-        "serviceable": false,
-        "cod": false
+        id: '1',
+        description: 'Free shipping',
+        name: 'Delivery in 5-7 days',
+        shipping_fee: 0,
+        cod_fee: 0,
+        serviceable: false,
+        cod: false
       };
-      
-      if (response.data && response.data.data && response.data.data.available_courier_companies.length) {
-        console.log(response.data.delivery_codes?.[0]?.postal_code);
+
+      if (
+        response.data &&
+        response.data.data &&
+        response.data.data.available_courier_companies.length
+      ) {
         deliveryDetails.serviceable = true;
         deliveryDetails.cod = true;
       }
 
-      return deliveryDetails;  
-      
+      return deliveryDetails;
     } catch (error) {
-      console.log("Error in shipping Serviceability api", error);
-      throw new Error("Something went wrong, try after some time");
-    }
-  }
-  
-  static async updateShipmentStatus(params: ShiprocketTypes.ServiceabilityParams): Promise<any> {
-    this.init(); // Ensure initialization
-
-    // Prepare query parameters
-    const queryParams: any = {
-      pickup_postcode: params.pickupPostcode,
-      delivery_postcode: params.deliveryPostcode,
-      weight: 0.5,
-      cod: 1
-    };
-
-    // Add optional parameters if provided
-    if (params.orderId !== undefined) queryParams.order_id = params.orderId;
-    if (params.cod !== undefined) queryParams.cod = params.cod ? 1 : 0;
-    if (params.weight !== undefined) queryParams.weight = params.weight;
-    if (params.length !== undefined) queryParams.length = params.length;
-    if (params.breadth !== undefined) queryParams.breadth = params.breadth;
-    if (params.height !== undefined) queryParams.height = params.height;
-    if (params.declaredValue !== undefined) queryParams.declared_value = params.declaredValue;
-    if (params.mode) queryParams.mode = params.mode;
-    if (params.isReturn !== undefined) queryParams.is_return = params.isReturn ? 1 : 0;
-    if (params.couriersType !== undefined) queryParams.couriers_type = params.couriersType;
-    if (params.onlyLocal !== undefined) queryParams.only_local = params.onlyLocal;
-    if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
-
-    try {
-      // Using the Shiprocket API endpoint for serviceability check
-      const response = await this.client.get('/v1/external/courier/serviceability/', {
-        params: queryParams
-      });
-
-      let deliveryDetails = {
-        "id": "1",
-        "description": "Free shipping",
-        "name": "Delivery in 5-7 days",
-        "shipping_fee": 0,
-        "cod_fee": 0,
-        "serviceable": false,
-        "cod": false
-      };
-      
-      if (response.data && response.data.data && response.data.data.available_courier_companies.length) {
-        console.log(response.data.delivery_codes?.[0]?.postal_code);
-        deliveryDetails.serviceable = true;
-        deliveryDetails.cod = true;
-      }
-
-      return deliveryDetails;  
-      
-    } catch (error) {
-      console.log("Error in shipping Serviceability api", error);
-      throw new Error("Something went wrong, try after some time");
+      console.log('Error in shipping Serviceability api', error);
+      throw new Error('Something went wrong, try after some time');
     }
   }
 
-  static async createReturnOrder(data: ShiprocketTypes.ReturnOrderData): Promise<ShiprocketTypes.ReturnOrderResponse> {
-    this.init(); // Ensure initialization
-
+  // ---------------- CREATE RETURN ORDER ----------------
+  static async createReturnOrder(
+    data: ShiprocketTypes.ReturnOrderData
+  ): Promise<ShiprocketTypes.ReturnOrderResponse> {
     try {
-      // Validate required parameters
       if (!data.orderId || !data.orderDate) {
         return {
           orderId: '',
@@ -234,11 +173,19 @@ export class ShiprocketShipping {
         };
       }
 
-      // Format the data as required by Shiprocket API
       const formattedData = this.formatReturnOrderData(data);
-      
-      // Using the Shiprocket API endpoint for return order creation
-      const response = await this.client.post('/v1/external/orders/create/return', formattedData);
+
+      const response = await axios.post(
+        `${this.baseUrl}/v1/external/orders/create/return`,
+        formattedData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiToken}`
+          },
+          timeout: 30000
+        }
+      );
 
       if (response.data && response.data.order_id) {
         return {
@@ -256,10 +203,13 @@ export class ShiprocketShipping {
           channelOrderId: '',
           status: 'Failed',
           success: false,
-          error: response.data?.message || response.data?.error || 'Failed to create return order'
+          error:
+            response.data?.message ||
+            response.data?.error ||
+            'Failed to create return order'
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data;
         return {
@@ -283,6 +233,7 @@ export class ShiprocketShipping {
     }
   }
 
+  // ---------------- FORMAT HELPERS ----------------
   private static formatOrderData(data: ShiprocketTypes.OrderData): any {
     const formattedData: any = {
       order_id: data.orderId,
@@ -314,7 +265,6 @@ export class ShiprocketShipping {
       weight: data.weight
     };
 
-    // Add optional fields if provided
     if (data.channelId) formattedData.channel_id = data.channelId;
     if (data.comment) formattedData.comment = data.comment;
     if (data.resellerName) formattedData.reseller_name = data.resellerName;
@@ -324,7 +274,6 @@ export class ShiprocketShipping {
     if (data.billing.alternatePhone) formattedData.billing_alternate_phone = data.billing.alternatePhone;
     if (data.billing.isdCode) formattedData.billing_isd_code = data.billing.isdCode;
 
-    // Add shipping details if shipping is not same as billing
     if (!data.shippingIsBilling && data.shipping) {
       formattedData.shipping_customer_name = data.shipping.customerName;
       formattedData.shipping_address = data.shipping.address;
@@ -339,17 +288,14 @@ export class ShiprocketShipping {
       if (data.shipping.email) formattedData.shipping_email = data.shipping.email;
     }
 
-    // Add optional charges and fees
     if (data.shippingCharges !== undefined) formattedData.shipping_charges = data.shippingCharges;
     if (data.giftwrapCharges !== undefined) formattedData.giftwrap_charges = data.giftwrapCharges;
     if (data.transactionCharges !== undefined) formattedData.transaction_charges = data.transactionCharges;
     if (data.totalDiscount !== undefined) formattedData.total_discount = data.totalDiscount;
 
-    // Add optional location data
     if (data.longitude !== undefined) formattedData.longitude = data.longitude;
     if (data.latitude !== undefined) formattedData.latitude = data.latitude;
 
-    // Add optional business fields
     if (data.ewaybillNo) formattedData.ewaybill_no = data.ewaybillNo;
     if (data.customerGstin) formattedData.customer_gstin = data.customerGstin;
     if (data.invoiceNumber) formattedData.invoice_number = data.invoiceNumber;
@@ -375,10 +321,8 @@ export class ShiprocketShipping {
       weight: data.weight
     };
 
-    // Add optional channel ID
     if (data.channelId) formattedData.channel_id = data.channelId;
 
-    // Add pickup address (customer's location)
     formattedData.pickup_customer_name = data.pickup.customerName;
     formattedData.pickup_address = data.pickup.address;
     formattedData.pickup_city = data.pickup.city;
@@ -388,12 +332,10 @@ export class ShiprocketShipping {
     formattedData.pickup_email = data.pickup.email;
     formattedData.pickup_phone = data.pickup.phone;
 
-    // Add optional pickup address fields
     if (data.pickup.lastName) formattedData.pickup_last_name = data.pickup.lastName;
     if (data.pickup.address2) formattedData.pickup_address_2 = data.pickup.address2;
     if (data.pickup.isdCode) formattedData.pickup_isd_code = data.pickup.isdCode;
 
-    // Add shipping address (your warehouse/store)
     formattedData.shipping_customer_name = data.shipping.customerName;
     formattedData.shipping_address = data.shipping.address;
     formattedData.shipping_city = data.shipping.city;
@@ -402,13 +344,11 @@ export class ShiprocketShipping {
     formattedData.shipping_state = data.shipping.state;
     formattedData.shipping_phone = data.shipping.phone;
 
-    // Add optional shipping address fields
     if (data.shipping.lastName) formattedData.shipping_last_name = data.shipping.lastName;
     if (data.shipping.address2) formattedData.shipping_address_2 = data.shipping.address2;
     if (data.shipping.email) formattedData.shipping_email = data.shipping.email;
     if (data.shipping.isdCode) formattedData.shipping_isd_code = data.shipping.isdCode;
 
-    // Add order items
     formattedData.order_items = data.orderItems.map(item => {
       const formattedItem: any = {
         name: item.name,
@@ -417,12 +357,10 @@ export class ShiprocketShipping {
         selling_price: item.sellingPrice
       };
 
-      // Add optional item fields
       if (item.discount !== undefined) formattedItem.discount = item.discount;
       if (item.hsn) formattedItem.hsn = item.hsn;
       if (item.returnReason) formattedItem.return_reason = item.returnReason;
 
-      // Add QC (Quality Check) fields
       if (item.qcEnable !== undefined) formattedItem.qc_enable = item.qcEnable ? 'true' : 'false';
       if (item.qcColor) formattedItem.qc_color = item.qcColor;
       if (item.qcBrand) formattedItem.qc_brand = item.qcBrand;
@@ -440,7 +378,6 @@ export class ShiprocketShipping {
       return formattedItem;
     });
 
-    // Add optional total discount
     if (data.totalDiscount !== undefined) formattedData.total_discount = data.totalDiscount;
 
     return formattedData;

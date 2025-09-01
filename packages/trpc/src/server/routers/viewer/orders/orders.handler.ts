@@ -1080,7 +1080,6 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     input = input!
     try{
         
-        console.log("input", input)
         let user = await prisma.user.findUnique({
             where: {
                 contactNumber: input.contactNumber
@@ -1095,19 +1094,19 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
                     role: prismaEnums.UserPermissionRoles.USER
                 },
             });            
+            console.log("User Created", user);
         }
-        console.log("User 2", user);
 
-        const order = await prisma.orders.update({
-            where: {
-                id:  input.orderId
-            },
-            data: {
-                userId: user.id
-            }
-        });
+        // const order = await prisma.orders.update({
+        //     where: {
+        //         id:  input.orderId
+        //     },
+        //     data: {
+        //         userId: user.id
+        //     }
+        // });
 
-        console.log("order", order)
+        // console.log("order", order)
 
         let shippingAddressesDetails = <any>[]
 

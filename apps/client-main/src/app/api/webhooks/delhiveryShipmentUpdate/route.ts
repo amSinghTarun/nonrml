@@ -1,6 +1,5 @@
 import { serverClient } from '@/app/_trpc/serverClient';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from "jsonwebtoken";
 
 // Helper function to validate webhook headers
 const validateHeaders = (request: NextRequest) => {
@@ -10,52 +9,69 @@ const validateHeaders = (request: NextRequest) => {
     return { valid: false, error: 'Invalid content type. Expected application/json' };
   }
 
-  // Example: Validate custom authentication header
-  const apiKey = request.headers.get('authorization');
-  if ( !apiKey || !apiKey.search("Token ") ) {
-    return { valid: false, error: 'Missing authentication header' };
-  }
-
-  try{
-    jwt.verify(apiKey.split("Token ")[1], process.env.DELHIVERY_WEBHOOK_JWT!)
-  } catch(error){
-    return { valid: false, error: "JWT verification failed: Invalid JWT token"}
+  // Validate x-api-key header for Shiprocket
+  const apiKey = request.headers.get('x-api-key');
+  if (!apiKey) {
+    return { valid: false, error: 'Missing x-api-key header' };
   }
 
   // Validate API key against environment variable
-  const expectedApiKey = process.env.DELHIVERY_WEBHOOK_API_KEY;
-  if (expectedApiKey && apiKey !== expectedApiKey) {
+  const expectedApiKey = process.env.SHIPROCKET_WEBHOOK_API_KEY;
+  if (!expectedApiKey || apiKey !== expectedApiKey) {
     return { valid: false, error: 'Invalid API key' };
   }
 
   return { valid: true };
 }
 
-// Helper function to validate webhook payload structure
-const validatePayload = (payload:{[x: string]: string}) => {
+// Helper function to validate Shiprocket webhook payload structure
+const validatePayload = (payload: {[x: string]: any}) => {
   if (!payload || typeof payload !== 'object') {
     return false;
   }
 
-  const { Shipment } = payload;
-  if (!Shipment || typeof Shipment !== 'object') {
-    return false;
-  }
-
-  const { Status, AWB } = Shipment;
-  if (!Status || !AWB) {
-    return false;
-  }
-
-  const { Status: statusValue, StatusDateTime, StatusType } = Status;
-  if (!statusValue || !StatusDateTime || !StatusType) {
+  const { awb, current_status, order_id } = payload;
+  if (!awb || !current_status || !order_id) {
     return false;
   }
 
   return true;
 }
 
-// POST handler for webhook
+// Helper function to fetch order details for security validation
+const fetchOrderDetails = async (orderId: string) => {
+  try {
+    const response = await fetch(`${process.env.SHIPROCKET_API_URL}/v1/external/orders/show/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SHIPROCKET_API_TOKEN}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch order details: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    throw error;
+  }
+}
+
+// Helper function to map Shiprocket status to our system status
+const mapShiprocketStatus = (shiprocketStatus: string): string | null => {
+  const statusMap: {[key: string]: string} = {
+    'IN TRANSIT': 'InTransit',
+    'SHIPPED': 'Shipped',
+    'DELIVERED': 'Delivered'
+  };
+
+  return statusMap[shiprocketStatus.toUpperCase()] || null;
+}
+
+// POST handler for Shiprocket webhook
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
@@ -63,15 +79,15 @@ export async function POST(request: NextRequest) {
     // Validate request headers
     const headerValidation = validateHeaders(request);
     if (!headerValidation.valid) {
-      console.warn(`Header validation failed: ${headerValidation.error}`, {
+      console.warn(`Shiprocket header validation failed: ${headerValidation.error}`, {
         timestamp: new Date().toISOString()
       });
       return NextResponse.json(
         { 
-          error: 'Unauthorized',
-          message: headerValidation.error
+          success: false,
+          message: 'Unauthorized'
         },
-        { status: 401 }
+        { status: 200 }
       );
     }
 
@@ -80,58 +96,97 @@ export async function POST(request: NextRequest) {
 
     // Validate payload structure
     if (!validatePayload(body)) {
+      console.warn('Invalid Shiprocket payload structure:', body);
       return NextResponse.json(
         {
-          error: 'Bad Request',
+          success: false,
           message: 'Invalid payload structure'
         },
-        { status: 400 }
+        { status: 200 }
       );
     }
 
-    const { Shipment } = body;
-    const { Status, AWB, ReferenceNo } = Shipment;
+    const { awb, current_status, order_id } = body;
+
+    // Map Shiprocket status to our system status
+    const mappedStatus = mapShiprocketStatus(current_status);
+    
+    // Only process if status is one of the allowed statuses
+    if (!mappedStatus) {
+      console.log(`Shiprocket webhook ignored - status not tracked: ${current_status} for AWB: ${awb}`);
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Webhook received but status not tracked'
+        },
+        { status: 200 }
+      );
+    }
+
+    // Fetch order details for security validation
+    let orderDetails;
+    try {
+      orderDetails = await fetchOrderDetails(order_id);
+    } catch (error) {
+      console.error(`Failed to fetch order details for order_id: ${order_id}`, error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Failed to validate order details'
+        },
+        { status: 200 }
+      );
+    }
 
     // Log the webhook data for debugging
-    console.log( 'Delhivery Webhook Received:', {
+    console.log('Shiprocket Webhook Received (Processing):', {
       timestamp: new Date().toISOString(),
-      awb: AWB,
-      status: Status.Status,
-      statusType: Status.StatusType,
-      statusDateTime: Status.StatusDateTime,
-      referenceNo: ReferenceNo
+      awb: awb,
+      originalStatus: current_status,
+      mappedStatus: mappedStatus,
+      orderId: order_id,
+      orderValidated: !!orderDetails
     });
 
-    // Process the shipment scan based on status
-    const webhookResponse = await (await serverClient()).viewer.orders.updateShipmentStatus({ shipmentId: AWB, shipmentStatus: Status.status });
+    // Process the shipment status update
+    const webhookResponse = await (await serverClient()).viewer.orders.updateShipmentStatus({ 
+      shipmentId: awb, 
+      shipmentStatus: mappedStatus 
+    });
 
     // Calculate response time
     const responseTime = Date.now() - startTime;
     
     // Log successful processing
-    console.log(`Webhook processed successfully in ${responseTime}ms for AWB: ${AWB}`);
+    console.log(`Shiprocket webhook processed successfully in ${responseTime}ms for AWB: ${awb}, Status: ${mappedStatus}`);
     
-    // Return 200 OK as required by Delhivery
+    // Always return 200 OK as required by Shiprocket
     return NextResponse.json(
-      { success: true, message: 'Webhook processed successfully', body: { data: webhookResponse, responseTime: `${responseTime}ms` }},
+      { 
+        success: true, 
+        message: 'Webhook processed successfully', 
+        data: { 
+          awb,
+          status: mappedStatus,
+          responseTime: `${responseTime}ms` 
+        }
+      },
       { status: 200 }
     );
 
   } catch (error) {
     const responseTime = Date.now() - startTime;
     
-    console.error('Webhook processing error:', {
+    console.error('Shiprocket webhook processing error:', {
         responseTime: `${responseTime}ms`,
         error: error
     });
 
-    // Return 200 OK even on error to prevent Delhivery retries
-    // Log the error internally but don't expose it to Delhivery
+    // Always return 200 OK to prevent Shiprocket retries
     return NextResponse.json(
       { 
         success: false,
-        message: 'Webhook received but processing failed',
-        error: error
+        message: 'Webhook received but processing failed'
       },
       { status: 200 }
     );
