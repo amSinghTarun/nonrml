@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
                 "state_code": requestBody.addresses[0].state_code,
                 "country": requestBody.addresses[0].country,
                 "serviceable": true,
-                "cod": true,
+                "cod": false,
                 "cod_fee": 0,
                 "shipping_fee": 0,
                 "shipping_methods": [
