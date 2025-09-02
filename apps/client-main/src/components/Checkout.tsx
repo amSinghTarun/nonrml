@@ -83,7 +83,6 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
 
     const handlePayment = async () => {
         try{
-
             const {data: data} = await initiateOrder.mutateAsync({orderProducts: orderProducts, creditNoteCode: couponCode.current })
             if(data.updateQuantity){
                 setQuantityChange(true);

@@ -597,6 +597,7 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
     const userId = ctx.user?.id;
     const prisma = ctx.prisma;
     try{
+        console.log("initiateOrder")
         let cnUseableValue = 0;
         let creditNoteId : null|number = null;
         let orderTotal = 0;
@@ -707,6 +708,8 @@ export const initiateOrder = async ({ctx, input}: TRPCRequestOptions<TInitiateOr
             currency: "INR",
             line_items: line_items
         });
+
+        console.log("calling RZP --------------------------------------------------")
 
         
         const orderCreated = await prisma.$transaction(async (prisma) => {
