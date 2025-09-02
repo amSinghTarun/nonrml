@@ -1100,16 +1100,16 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             console.log("User Created", user);
         }
 
-        // const order = await prisma.orders.update({
-        //     where: {
-        //         id:  input.orderId
-        //     },
-        //     data: {
-        //         userId: user.id
-        //     }
-        // });
+        const order = await prisma.orders.update({
+            where: {
+                id:  input.orderId
+            },
+            data: {
+                userId: user.id
+            }
+        });
 
-        // console.log("order", order)
+        console.log("order", order)
 
         let shippingAddressesDetails = <any>[]
 
