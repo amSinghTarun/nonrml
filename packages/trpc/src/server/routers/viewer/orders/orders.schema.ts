@@ -103,7 +103,7 @@ export type TcancelOrderProductSchema = z.infer<typeof ZcancelOrderProductSchema
 
 export const ZCheckOrderServicibilitySchema = z.object({
     // orderId: z.string()
-    orderId: z.number(),
+    rzpOrderId: z.string(),
     contactNumber: z.string(),
     addresses: z.array(z.object({
         id: z.string(),

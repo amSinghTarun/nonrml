@@ -1100,12 +1100,16 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             console.log("User Created", user);
         }
 
-        const order = await prisma.orders.update({
+        const order = await prisma.payments.update({
             where: {
-                id:  input.orderId
+                rzpOrderId: input.rzpOrderId
             },
             data: {
-                userId: user.id
+                Orders: {
+                    update: {
+                        userId: user.id
+                    }
+                }
             }
         });
 

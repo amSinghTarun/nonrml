@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
       // return NextResponse.json({"addresses": createDelivery}, { status: 200 })
       
       // await (await serverClient()).viewer.orders.sendOrderConfMail({orderId: requestBody.order_id})
-      
+
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
         contactNumber: requestBody.contact,
-        orderId: Number(requestBody.order_id),
+        rzpOrderId: requestBody.razorpay_order_id,
       });
 
       
