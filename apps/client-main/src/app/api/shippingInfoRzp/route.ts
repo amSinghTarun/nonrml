@@ -33,7 +33,33 @@ export async function POST(request: NextRequest) {
         orderId: Number(requestBody.order_id),
       });
 
-      return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
+      
+      // return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
+      return NextResponse.json({"addresses": {
+        "addresses": [
+            {
+                "id": "0",
+                "zipcode": requestBody.addresses[0].zipcode,
+                "state_code": requestBody.addresses[0].state_code,
+                "country": requestBody.addresses[0].country,
+                "serviceable": true,
+                "cod": true,
+                "cod_fee": 0,
+                "shipping_fee": 0,
+                "shipping_methods": [
+                    {
+                        "id": "1",
+                        "description": "Free shipping",
+                        "name": "Delivery in 5-7 days",
+                        "shipping_fee": 0,
+                        "cod_fee": 0,
+                        "serviceable": true,
+                        "cod": true
+                    }
+                ]
+            }
+        ]
+    }}, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)
