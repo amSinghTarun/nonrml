@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
       
       // return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
-      return NextResponse.json({"addresses": {
+      return NextResponse.json({
         "addresses": [
             {
                 "id": "0",
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
                 ]
             }
         ]
-    }}, { status: 200 })
+    }, { status: 200 })
   
     } catch (error) {
       console.error('Shipping API error:', error)
