@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
       // await (await serverClient()).viewer.orders.sendOrderConfMail({orderId: requestBody.order_id})
 
       // console.log(request);
-      const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
-        addresses: requestBody.addresses,
-        contactNumber: requestBody.contact,
-        orderId: Number(requestBody.order_id),
-      });
+      // const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
+      //   addresses: requestBody.addresses,
+      //   contactNumber: requestBody.contact,
+      //   orderId: Number(requestBody.order_id),
+      // });
 
       
       // return NextResponse.json({"addresses": shippingDetails}, { status: 200 })
