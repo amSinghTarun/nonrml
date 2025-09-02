@@ -21,7 +21,7 @@ const nextConfig = {
         MIN_QUANTITY_TO_ORDER: `1`,
         PROD_PORT: '8080',
         DAMAGE_PARCEL_RETURN_ALLOWED_TIME: 86400000,
-        RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID
+        RAZORPAY_KEY_ID: "rzp_test_RCfPP2NtvEnYs4"
     }
 };
 
