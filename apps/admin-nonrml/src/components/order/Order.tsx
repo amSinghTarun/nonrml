@@ -32,6 +32,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
     handleStatusChange,
     extendReturnDate,
     handleCancelAcceptedOrder,
+    shipOrder,
     isActionLoading,
     sendOrderAcceptanceMail,
     createDamageReplacement
@@ -72,6 +73,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
         handleCancelAcceptedOrder={handleCancelAcceptedOrder}
         sendOrderAcceptanceMail={sendOrderAcceptanceMail}
         isLoading={isActionLoading}
+        shipOrder={shipOrder}
         />
       
       <OrderItemsTable

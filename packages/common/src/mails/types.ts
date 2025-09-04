@@ -29,7 +29,7 @@ export interface OrderConfirmationData {
 
 export interface ShippingNotificationData {
     orderId: string;
-    waybillNumber: string;
+    waybillNumber?: string;
     trackingLink?: string;
 }
 

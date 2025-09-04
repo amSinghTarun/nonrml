@@ -17,8 +17,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { prismaTypes } from '@nonrml/prisma';
-import { RouterOutput } from '@/app/_trpc/client';
-import { ShiprocketShipping, ShiprocketTypes } from '@nonrml/shipping';
+import { RouterOutput, trpc } from '@/app/_trpc/client';
+import { ShiprocketTypes } from '@nonrml/shipping';
+import { TRPCResponseStatus } from '@nonrml/common';
 
 interface OrderActionsPanelProps {
   order: RouterOutput["viewer"]["orders"]["getOrder"]["data"]
@@ -26,12 +27,14 @@ interface OrderActionsPanelProps {
   handleCancelAcceptedOrder: (refundMode: "CREDIT"|"BANK") => Promise<void>
   sendOrderAcceptanceMail: (orderId: string) => Promise<void>
   onExtendReturnDate: (days: number, initialDate: number) => Promise<void>
-  isLoading: boolean
+  isLoading: boolean,
+  shipOrder: (shippingDetails: ShiprocketTypes.OrderData) => Promise<{status: TRPCResponseStatus, message: string, data: string }>
 }
 
 const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
   order,
   onStatusChange,
+  shipOrder,
   onExtendReturnDate,
   sendOrderAcceptanceMail,
   handleCancelAcceptedOrder,
@@ -96,9 +99,11 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
         weight
       }
 
-      const response = await ShiprocketShipping.ShiprocketShipping.createOrder(shiprocketOrder)
+      const response = await shipOrder(shiprocketOrder);
+      // ShiprocketShipping.ShiprocketShipping.createOrder(shiprocketOrder)
+      // here is response
 
-      if (response.success) {
+      if (response.data) {
         alert(`Shipment Created! Order ID: ${response.orderId}`)
         await onStatusChange("SHIPPED")
       } else {

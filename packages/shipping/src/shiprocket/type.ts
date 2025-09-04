@@ -1,4 +1,7 @@
 // packages/shipping/src/type.ts - Complete and fixed file
+
+import { z } from "zod";
+
 export interface ShiprocketConfig {
   apiToken: string;
   isProduction?: boolean;
@@ -147,6 +150,73 @@ export interface OrderData {
   isDocument?: number; // 1 or 0
   orderTag?: string;
 }
+
+export const ZAddress = z.object({
+  customerName: z.string(),
+  lastName: z.string().optional(),
+  address: z.string(),
+  address2: z.string().optional(),
+  city: z.string(),
+  pincode: z.number(),
+  state: z.string(),
+  country: z.string(),
+  email: z.string().email().optional(),
+  phone: z.number(),
+  alternatePhone: z.number().optional(),
+  isdCode: z.string().optional(),
+});
+
+export const ZOrderItem = z.object({
+  name: z.string(),
+  sku: z.string(),
+  units: z.number().int().positive(),
+  sellingPrice: z.number(),
+  discount: z.union([z.number(), z.string()]).optional(),
+  tax: z.union([z.number(), z.string()]).optional(),
+  hsn: z.union([z.number(), z.string()]).optional(),
+});
+
+// Dimensions
+export const ZDimensions = z.object({
+  length: z.number(),
+  breadth: z.number(),
+  height: z.number(),
+});
+
+export const ZOrderData = z.object({
+  orderId: z.string(),
+  orderDate: z.string(), // "YYYY-MM-DD HH:MM"
+  pickupLocation: z.string(),
+  channelId: z.number().optional(),
+  comment: z.string().optional(),
+  resellerName: z.string().optional(),
+  companyName: z.string().optional(),
+  billing: ZAddress,
+  shippingIsBilling: z.boolean(),
+  shipping: ZAddress.optional(),
+  orderItems: z.array(ZOrderItem).min(1),
+  paymentMethod: z.enum(["COD", "Prepaid"]),
+  shippingCharges: z.number().optional(),
+  giftwrapCharges: z.number().optional(),
+  transactionCharges: z.number().optional(),
+  totalDiscount: z.number().optional(),
+  subTotal: z.number(),
+  dimensions: ZDimensions,
+  weight: z.number(),
+  longitude: z.number().optional(),
+  latitude: z.number().optional(),
+  ewaybillNo: z.string().optional(),
+  customerGstin: z.string().optional(),
+  invoiceNumber: z.string().optional(),
+  orderType: z.enum(["ESSENTIALS", "NON ESSENTIALS"]).optional(),
+  checkoutShippingMethod: z
+    .enum(["SR_RUSH", "SR_STANDARD", "SR_EXPRESS", "SR_QUICK"])
+    .optional(),
+  what3wordsAddress: z.string().optional(),
+  isInsuranceOpt: z.boolean().optional(),
+  isDocument: z.number().optional(),
+  orderTag: z.string().optional(),
+});
 
 export interface OrderResponse {
   orderId: string;

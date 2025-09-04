@@ -1,8 +1,8 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, checkOrderServicibility, getTrackOrder, sendOrderConfMail, cancelAcceptedOrder, updateShipmentStatus } from "./orders.handler";
-import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZCheckOrderServicibilitySchema, ZGetOrderReturnSchema, ZCancelAcceptedOrderSchema, ZUpdateShipmentSchema } from "./orders.schema";
+import { getUserOrder, editOrder, getAllOrders, cancelOrder, getOrderReturnDetails, getOrder, getUserOrders, initiateOrder, verifyOrder, checkOrderServicibility, getTrackOrder, sendOrderConfMail, cancelAcceptedOrder, updateShipmentStatus, shipOrder } from "./orders.handler";
+import { ZEditOrderSchema, ZCancelOrderSchema, ZGetOrderSchema, ZGetUserOrderSchema, ZInitiateOrderSchema, ZTrackOrderSchema, ZVerifyOrderSchema, ZGetAllOrdersSchema, ZCheckOrderServicibilitySchema, ZGetOrderReturnSchema, ZCancelAcceptedOrderSchema, ZUpdateShipmentSchema, ZShipOrderrSchema } from "./orders.schema";
 
 export const orderRouter = router({
     sendOrderConfMail: adminProcedure
@@ -58,8 +58,8 @@ export const orderRouter = router({
         .mutation( async ({ctx, input}) => await cancelAcceptedOrder({ctx, input}) ),
     shipOrder: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
-        .input(ZCancelAcceptedOrderSchema)
-        .mutation( async ({ctx, input}) => await cancelAcceptedOrder({ctx, input}) ),
+        .input(ZShipOrderrSchema)
+        .mutation( async ({ctx, input}) => await shipOrder({ctx, input}) ),
     updateShipmentStatus: publicProcedure
         .meta({ openAPI: {method: "POST", descrription: "Depends on the razorpay integration"}})
         .input(ZUpdateShipmentSchema)

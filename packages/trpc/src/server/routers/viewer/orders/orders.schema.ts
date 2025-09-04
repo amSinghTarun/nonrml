@@ -1,5 +1,6 @@
 import { prismaEnums } from "@nonrml/prisma";
-import { number, object, string, z } from "zod";
+import { z } from "zod";
+import { ShiprocketTypes } from "@nonrml/shipping"
 
 export const ZGetUserOrderSchema = z.object({
     orderId: z.string(),   
@@ -29,7 +30,8 @@ export const ZCancelOrderSchema = z.object({
 export type TCancelOrderSchema = z.infer<typeof ZCancelOrderSchema>;
 
 export const ZShipOrderrSchema = z.object({
-    orderId: z.number(),   
+    orderId: z.number(),
+    shiprocketOrderData: ShiprocketTypes.ZOrderData
 })
 export type TShipOrderrSchema = z.infer<typeof ZShipOrderrSchema>;
 
@@ -105,6 +107,7 @@ export const ZCheckOrderServicibilitySchema = z.object({
     // orderId: z.string()
     rzpOrderId: z.string(),
     contactNumber: z.string(),
+    email: z.string(),
     addresses: z.array(z.object({
         id: z.string(),
         zipcode: z.string(),

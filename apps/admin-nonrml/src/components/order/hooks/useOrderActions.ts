@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { RouterInput, trpc } from '@/app/_trpc/client'
 import { prismaTypes } from '@nonrml/prisma'
+import { ShiprocketShipping, ShiprocketTypes } from '@nonrml/shipping';
 
 export function useOrderActions(orderId: number | undefined, onSuccess: () => void) {
   const [extendDays, setExtendDays] = useState<number>(0)
@@ -58,12 +59,30 @@ export function useOrderActions(orderId: number | undefined, onSuccess: () => vo
       initialReturnDate
     })
   }
+
+  const shipOrder = async (shippingDetails : ShiprocketTypes.OrderData) => {
+    if (!orderId) return
+
+    const shipOrderDetails = trpc.viewer.orders.shipOrder.useMutation();
+
+    const orderShipped = await shipOrderDetails.mutateAsync({
+      orderId,
+      shiprocketOrderData: shippingDetails
+    }, {
+      onSuccess: () => {
+        onSuccess()
+      }
+    })
+
+    return orderShipped
+  }
   
   return {
     handleStatusChange,
     extendReturnDate,
     handleCancelAcceptedOrder,
     extendDays,
+    shipOrder,
     createDamageReplacement,
     setExtendDays,
     sendOrderAcceptanceMail,

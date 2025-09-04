@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
       const {data: shippingDetails} = await (await serverClient()).viewer.orders.updateUserDetailAndCheckServicibility({
         addresses: requestBody.addresses,
         contactNumber: requestBody.contact,
-        rzpOrderId: requestBody.razorpay_order_id,
+        rzpOrderId: `order_${requestBody.razorpay_order_id}`,
+        email: requestBody.email
       });
 
       

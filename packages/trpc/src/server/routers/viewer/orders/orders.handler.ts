@@ -1094,12 +1094,13 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             user = await prisma.user.create({
                 data:{
                     contactNumber: input.contactNumber,
-                    role: prismaEnums.UserPermissionRoles.USER
+                    role: prismaEnums.UserPermissionRoles.USER,
                 },
             });            
             console.log("User Created", user);
         }
 
+        // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
         const order = await prisma.payments.update({
             where: {
                 rzpOrderId: input.rzpOrderId
@@ -1107,7 +1108,8 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             data: {
                 Orders: {
                     update: {
-                        userId: user.id
+                        userId: user.id,
+                        email: input.email
                     }
                 }
             }
@@ -1155,6 +1157,8 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
             include: {
                 Payments: true,
                 user: true,
+                address: true,
+                orderProducts: true,
             }
         });
 
@@ -1170,33 +1174,37 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
             }
         }
 
-        // what happens here is still pending
-
         // store tracking id in the shipment table
+        const response = await ShiprocketShipping.ShiprocketShipping.createOrder(input.shiprocketOrderData)
 
-        // send the product shipped mail with tracking details tracking mail and has info  of processingRefundAmount
-        // if(orderDetails.email){
-            await sendSMTPMail({
-                userEmail: orderDetails.email, 
-                emailBody: generateShippingNotificationEmail({  
-                    orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
-                    refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
-                    
-                    
-                    
-                    
-                    
-                    waybillNumber: "waybillNumber",
+        await prisma.orders.update({
+            where: {
+                id: input.orderId
+            },
+            data: {
+                shipment: {
+                    create: {
+                        shipmentOrderId: response.shipmentId,
+                        shipmentServiceName: "Shiprocket",
+                        shipmentTrackingLink: "",
+                        AWB: ""
+                    }
+                }
+            }
+        });    
 
-
-
-
-                    trackingLink: "https://www.delhivery.com/tracking"
-                })
+        // send the product shipped mail with tracking details tracking mail and has info of processingRefundAmount 
+        // no need to check for the mail, it will be present in the orderDetails
+        await sendSMTPMail({
+            userEmail: orderDetails.email, 
+            emailBody: generateShippingNotificationEmail({  
+                orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
+                refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
+                trackingLink: "https://www.nonorml.com/track-order/"
             })
-        // }
+        })
 
-        return { status: TRPCResponseStatus.SUCCESS, message:"", data: ""};
+        return { status: TRPCResponseStatus.SUCCESS, message:"Shipped Successfully", data: ""};
 
     }catch(error){
         //console.log("\n\n Error in editOrder ----------------");
