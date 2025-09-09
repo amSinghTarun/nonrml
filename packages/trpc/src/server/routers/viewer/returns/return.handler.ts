@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { cacheServicesRedisClient } from "@nonrml/cache";
 import { sendSMTPMail } from "@nonrml/mailing";
 import { generateReplacementConfirmationEmail } from "@nonrml/common";
+import { ShiprocketShipping } from "@nonrml/shipping";
 
 /*
     Return the order
@@ -49,7 +50,30 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     id: input.orderId
                 }
             },
-            include: { order: true }
+            include: { 
+                productVariant: {
+                    select: {
+                        subSku: true,
+                        product: {
+                            select: {
+                                productImages: {
+                                    where: { active: true, priorityIndex: 0 },
+                                    select: {
+                                        image: true
+                                    }
+                                },
+                                sku: true,
+                            }
+                        }
+                    }
+                },
+                order: {
+                    include: {
+                        address: true,
+                        shipment: true
+                    }
+                },
+            }
         });
 
         // Validate order products
@@ -189,8 +213,54 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                     emailBody: generateReplacementConfirmationEmail(`${returnOrder.replacementOrder.id}`)
                 });
             }
-
         }
+
+        // create the return shipment
+        // store the shipment details in the shipment table.
+        const dimension : {length: number, breadth: number, height: number, weight: number} = JSON.parse(orderProducts[0]!.order.shipment!.dimensions)
+        const company_warehouse_address = await prisma.address.findFirst({where: {type: "COMPANY_WAREHOURSE"}})
+        let subTotal = 0;
+        await ShiprocketShipping.ShiprocketShipping.createReturnOrder({
+            order_id: `RTN-${returnOrder.returnOrderCreated.id}`,
+            order_date: new Date().toISOString(),
+            payment_method: "Prepaid",
+            ...dimension,
+             // pickup (required fields)
+            pickup_customer_name: orderProducts[0]!.order.address!.contactName,
+            pickup_address: orderProducts[0]!.order.address!.location,
+            pickup_city: orderProducts[0]!.order.address!.city,
+            pickup_state: orderProducts[0]!.order.address!.state,
+            pickup_country: "INDIA",
+            pickup_pincode: Number(orderProducts[0]!.order.address!.pincode),
+            pickup_email: orderProducts[0]!.order.email,
+            pickup_phone: orderProducts[0]!.order.address!.contactNumber.replace(/\D/g, "").slice(-10),
+
+            // shipping (required fields) - Address of company warehouse
+            shipping_customer_name: company_warehouse_address!.contactName,
+            shipping_address: company_warehouse_address!.location,
+            shipping_city: company_warehouse_address!.city,
+            shipping_state: company_warehouse_address!.state,
+            shipping_country: "INDIA",
+            shipping_pincode: Number(company_warehouse_address!.pincode),
+            shipping_phone: company_warehouse_address!.contactNumber.replace(/\D/g, "").slice(-10),
+
+            // order items
+            order_items: orderProducts.map(item => {
+                const { quantity } = returnItemsData.find( returnItem => returnItem.orderProductId == item.id)!
+                subTotal += item.price * quantity
+                return {
+                    name: item.productVariant.product.sku,
+                    sku: item.productVariant.subSku,
+                    units: quantity,
+                    selling_price: item.price,
+                    qc_product_image: item.productVariant.product.productImages[0]?.image,
+                    qc_product_name: item.productVariant.product.sku,
+                    qc_enable: true,
+                } 
+            }),
+            sub_total: subTotal,
+
+        })
 
         return { 
             status: TRPCResponseStatus.SUCCESS, 
@@ -488,134 +558,136 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
     input = input!;
     try{
         console.log(input)
-        if( input.returnStatus == "ASSESSED" ){
-            let returnItemsReview = input.reviewData; 
+        // this is not to be used as it uses the old credit note logic and it's the older version
+        // if( input.returnStatus == "ASSESSED" ){
+        //     let returnItemsReview = input.reviewData; 
 
-            const returnProductVariantDetails = await prisma.returns.findUnique({
-                where: {
-                    id: input.returnId
-                },
-                select: {
-                    order: {
-                        select: {
-                            userId: true,
-                            id: true,
-                            email: true
-                        }
-                    },
-                    refundAmount: true,
-                    creditNote: {
-                        select: {
-                            id: true
-                        }
-                    },
-                    returnType: true,
-                    returnItems: {
-                        select: {
-                            id:true,
-                            quantity: true,
-                            orderProduct: {
-                                select: {
-                                    price: true,
-                                    productVariantId: true,
-                                    productVariant: {
-                                        select: {
-                                            productId: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+        //     const returnProductVariantDetails = await prisma.returns.findUnique({
+        //         where: {
+        //             id: input.returnId
+        //         },
+        //         select: {
+        //             order: {
+        //                 select: {
+        //                     userId: true,
+        //                     id: true,
+        //                     email: true
+        //                 }
+        //             },
+        //             refundAmount: true,
+        //             creditNote: {
+        //                 select: {
+        //                     id: true
+        //                 }
+        //             },
+        //             returnType: true,
+        //             returnItems: {
+        //                 select: {
+        //                     id:true,
+        //                     quantity: true,
+        //                     orderProduct: {
+        //                         select: {
+        //                             price: true,
+        //                             productVariantId: true,
+        //                             productVariant: {
+        //                                 select: {
+        //                                     productId: true
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     });
 
-            if(!returnProductVariantDetails || !returnProductVariantDetails.returnItems || !returnProductVariantDetails.order.userId)
-                throw { code: "BAD_REQUEST", message: "RETURN ID INVALID"}
+        //     if(!returnProductVariantDetails || !returnProductVariantDetails.returnItems || !returnProductVariantDetails.order.userId)
+        //         throw { code: "BAD_REQUEST", message: "RETURN ID INVALID"}
             
-            let refundAmount = 0;
-            let returnItemsQueries = <any>[];
-            let restockQueries = <any>[];
-            let redisQueries = <any>[]
+        //     let refundAmount = 0;
+        //     let returnItemsQueries = <any>[];
+        //     let restockQueries = <any>[];
+        //     let redisQueries = <any>[]
 
-            for( let returnProduct of returnProductVariantDetails.returnItems ){
-                redisQueries.push(cacheServicesRedisClient().del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
-                let rejectedQuamtity = returnItemsReview && returnItemsReview[returnProduct.id]?.rejectedQuantity;
-                if(returnItemsReview && rejectedQuamtity){
-                    // for every product mark the rejected and reason
-                    if(!returnItemsReview[returnProduct.id]?.rejectReason)
-                        throw { code: "BAD_REQUEST", message: "MUST SPECIFY REJECT REASON"}
+        //     for( let returnProduct of returnProductVariantDetails.returnItems ){
+        //         redisQueries.push(cacheServicesRedisClient().del(`productVariantQuantity_${returnProduct.orderProduct.productVariant.productId}`))
+        //         let rejectedQuamtity = returnItemsReview && returnItemsReview[returnProduct.id]?.rejectedQuantity;
+        //         if(returnItemsReview && rejectedQuamtity){
+        //             // for every product mark the rejected and reason
+        //             if(!returnItemsReview[returnProduct.id]?.rejectReason)
+        //                 throw { code: "BAD_REQUEST", message: "MUST SPECIFY REJECT REASON"}
 
-                    returnItemsQueries.push(
-                        prisma.returnItem.update({
-                            where: {
-                                id: +returnProduct.id
-                            },
-                            data: {
-                                rejectReason: returnItemsReview[returnProduct.id]?.rejectReason,
-                                rejectedQuantity: rejectedQuamtity
-                            }
-                        })
-                    )
-                }
-                refundAmount += ( returnProduct.quantity - ( rejectedQuamtity || 0 )) * ( +returnProduct.orderProduct.price )
+        //             returnItemsQueries.push(
+        //                 prisma.returnItem.update({
+        //                     where: {
+        //                         id: +returnProduct.id
+        //                     },
+        //                     data: {
+        //                         rejectReason: returnItemsReview[returnProduct.id]?.rejectReason,
+        //                         rejectedQuantity: rejectedQuamtity
+        //                     }
+        //                 })
+        //             )
+        //         }
+        //         refundAmount += ( returnProduct.quantity - ( rejectedQuamtity || 0 )) * ( +returnProduct.orderProduct.price )
                 
-                // Increment the accepted returned product in the inventory
-                restockQueries.push(
-                    prisma.inventory.update({
-                        where: {
-                            productVariantId: returnProduct.orderProduct.productVariantId
-                        },
-                        data: {
-                            quantity: {
-                                increment: returnProduct.quantity - ( rejectedQuamtity || 0 )
-                            }
-                        }
-                    })
-                )
+        //         // Increment the accepted returned product in the inventory
+        //         restockQueries.push(
+        //             prisma.inventory.update({
+        //                 where: {
+        //                     productVariantId: returnProduct.orderProduct.productVariantId
+        //                 },
+        //                 data: {
+        //                     quantity: {
+        //                         increment: returnProduct.quantity - ( rejectedQuamtity || 0 )
+        //                     }
+        //                 }
+        //             })
+        //         )
 
-            }
+        //     }
             
-            let refundQueries = <any>[];
-            // update the refund amount
-            // The check in this and in 1 below it are precautionary so that if the process is running again, they don't perform the steps again
-            !returnProductVariantDetails.refundAmount && refundQueries.push(
-                prisma.returns.update({
-                    where: {
-                        id: input.returnId
-                    },
-                    data: {
-                        refundAmount: refundAmount
-                    }
-                }),
-            );
+        //     let refundQueries = <any>[];
+        //     // update the refund amount
+        //     // The check in this and in 1 below it are precautionary so that if the process is running again, they don't perform the steps again
+        //     !returnProductVariantDetails.refundAmount && refundQueries.push(
+        //         prisma.returns.update({
+        //             where: {
+        //                 id: input.returnId
+        //             },
+        //             data: {
+        //                 refundAmount: refundAmount
+        //             }
+        //         }),
+        //     );
 
-            // create the credit note
-            // TO-DO : Add functionality to send it over mail 
-            refundAmount != 0 && !returnProductVariantDetails.creditNote.length && refundQueries.push(
-                prisma.creditNotes.create({
-                    data: {
-                        returnOrderId: input.returnId,
-                        value: refundAmount,
-                        email: returnProductVariantDetails.order.email, 
-                        remainingValue: refundAmount,
-                        creditNoteOrigin: returnProductVariantDetails.returnType,
-                        userId: returnProductVariantDetails.order.userId,
-                        expiryDate: new Date( new Date().setMonth( new Date().getMonth() + Number(process.env.CREDIT_NOTE_EXPIRY) ) ),
-                        creditCode: `RTN-${returnProductVariantDetails.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${returnProductVariantDetails.order.id}`
-                    }
-                    // address edit
-                })
-            )
+        //     // create the credit note
+        //     // TO-DO : Add functionality to send it over mail 
+        //     refundAmount != 0 && !returnProductVariantDetails.creditNote.length && refundQueries.push(
+        //         prisma.creditNotes.create({
+        //             data: {
+        //                 returnOrderId: input.returnId,
+        //                 value: refundAmount,
+        //                 email: returnProductVariantDetails.order.email, 
+        //                 remainingValue: refundAmount,
+        //                 creditNoteOrigin: returnProductVariantDetails.returnType,
+        //                 userId: returnProductVariantDetails.order.userId,
+        //                 expiryDate: new Date( new Date().setMonth( new Date().getMonth() + Number(process.env.CREDIT_NOTE_EXPIRY) ) ),
+        //                 creditCode: `RTN-${returnProductVariantDetails.order.userId}${crypto.randomBytes(1).toString('hex').toUpperCase()}${returnProductVariantDetails.order.id}`
+        //             }
+        //             // address edit
+        //         })
+        //     )
 
-            await prisma.$transaction(refundQueries);
-            await prisma.$transaction(returnItemsQueries);            
-            await prisma.$transaction(restockQueries); 
-            await Promise.all(redisQueries);
-        }
+        //     await prisma.$transaction(refundQueries);
+        //     await prisma.$transaction(returnItemsQueries);            
+        //     await prisma.$transaction(restockQueries); 
+        //     await Promise.all(redisQueries);
+        // }
 
 
         // delete the cache whatever
+        
         const replacementOrderDetails = await prisma.returns.update({
             where: {
                 id: input.returnId,

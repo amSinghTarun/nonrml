@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { RouterInput, trpc } from '@/app/_trpc/client'
 import { prismaTypes } from '@nonrml/prisma'
-import { ShiprocketShipping, ShiprocketTypes } from '@nonrml/shipping';
+import { ShiprocketTypes } from '@nonrml/shipping';
+import { TRPCResponseStatus } from '@nonrml/common';
 
 export function useOrderActions(orderId: number | undefined, onSuccess: () => void) {
   const [extendDays, setExtendDays] = useState<number>(0)
@@ -9,8 +10,16 @@ export function useOrderActions(orderId: number | undefined, onSuccess: () => vo
   const editOrderMutation = trpc.viewer.orders.editOrder.useMutation({
     onSuccess
   })
-
   const cancelAcceptedOrderMutation = trpc.viewer.orders.cancelAcceptedOrder.useMutation({
+    onSuccess
+  });
+  const initiateDamageProductReplacement = trpc.viewer.return.initiateReturn.useMutation({
+    onSuccess
+  });
+  const sendOrderAcceptanceMailMutation = trpc.viewer.orders.sendOrderConfMail.useMutation({
+    onSuccess
+  })
+  const shipOrderDetails = trpc.viewer.orders.shipOrder.useMutation({
     onSuccess
   });
 
@@ -22,11 +31,6 @@ export function useOrderActions(orderId: number | undefined, onSuccess: () => vo
       refundMode: refundMode
     })
   }
-  
-  const sendOrderAcceptanceMailMutation = trpc.viewer.orders.sendOrderConfMail.useMutation({
-    onSuccess
-  })
-
 
   const sendOrderAcceptanceMail = async (orderId: string) => {
     if (!orderId) return
@@ -45,7 +49,6 @@ export function useOrderActions(orderId: number | undefined, onSuccess: () => vo
     })
   }
 
-  const initiateDamageProductReplacement = trpc.viewer.return.initiateReturn.useMutation();
   const createDamageReplacement = async ({orderId, returnType, products}: RouterInput["viewer"]["return"]["initiateReturn"] ) => {
     await initiateDamageProductReplacement.mutateAsync({ orderId: orderId, returnType: returnType, products: products })
   };
@@ -61,19 +64,11 @@ export function useOrderActions(orderId: number | undefined, onSuccess: () => vo
   }
 
   const shipOrder = async (shippingDetails : ShiprocketTypes.OrderData) => {
-    if (!orderId) return
-
-    const shipOrderDetails = trpc.viewer.orders.shipOrder.useMutation();
-
+    if (!orderId) return { status: TRPCResponseStatus.SUCCESS, message:"Shipped Successfully", data: ""}
     const orderShipped = await shipOrderDetails.mutateAsync({
       orderId,
       shiprocketOrderData: shippingDetails
-    }, {
-      onSuccess: () => {
-        onSuccess()
-      }
     })
-
     return orderShipped
   }
   

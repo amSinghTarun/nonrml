@@ -294,6 +294,7 @@ export const initiateUavailibiltyRefund = async ({ctx, input}: TRPCRequestOption
                 const refundTransaction = await prisma.refundTransactions.create({
                     data: {
                         rzpPaymentId: razorpayPaymentDetails.rzpPaymentId!,
+                        trigger: "order",
                         ...(refundDetails.refundToBank && {bankRefundValue: refundDetails.refundToBank}),
                         ...(refundDetails.creditNoteId && {creditNoteId: refundDetails.creditNoteId}),
                     }
@@ -465,7 +466,8 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
         // to check for last refund process
         let existingRefundTransactionDetails = await prisma.refundTransactions.findFirst({
             where: {
-                rzpPaymentId: replacementOrderDetails.return.order.Payments.rzpPaymentId
+                rzpPaymentId: replacementOrderDetails.return.order.Payments.rzpPaymentId,
+                trigger: "replacement"
             },
             orderBy: [{
                 "createdAt" : "desc"
@@ -473,6 +475,7 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
         });
 
         if(!existingRefundTransactionDetails){
+
             // create refund record update the credit note and amounts, as a precautionary to failures
             const refundTransaction = await prisma.$transaction( async prisma => {
                 if(creditNoteRefund > 0){
@@ -487,6 +490,7 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
                     data: {
                         rzpPaymentId: replacementOrderDetails.return.order.Payments!.rzpPaymentId!,
                         bankRefundValue: bankRefund,
+                        trigger: "replacement",
                         ...(creditNoteCreated && {creditNoteId: creditNoteCreated.id}),
                     }
                 });
@@ -519,12 +523,21 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
                     },
                     data: {
                         rzpRefundId: rzpRefundDetails.id,
-                        rzpRefundStatus: rzpRefundDetails.status
+                        rzpRefundStatus: rzpRefundDetails.status,
                     }
                 })
             }
-    
         }
+
+        prisma.replacementItem.updateMany({
+            where: {
+                replacementOrderId: input.replacementOrderId,
+                nonReplacableQuantity: { gt: 0 } // to filter the item which actually are non replacable
+            },
+            data: {
+                nonReplaceAction: prismaEnums.NonReplaceQantityAction.CREDIT
+            }
+        })
 
         // if no replacement quantity is avl then the order should be assessed
         !replaceQuantity && prisma.replacementOrder.update({

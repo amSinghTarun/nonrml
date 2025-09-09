@@ -59,6 +59,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
       />
       
       { order?.address && <ShippingDetails 
+        shipment={order.shipment}
         address={order.address}
         isEditable={!['SHIPPED', 'DELIVERED'].includes(order.orderStatus)}
         orderId={order.id}

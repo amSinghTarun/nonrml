@@ -156,6 +156,7 @@ export const acceptOrder = async (orderId: number) => {
                 id: true,
                 createdAt: true,
                 idVarChar: true,
+                email: true,
                 address: true,
                 totalAmount: true,
                 creditUtilised: true,
@@ -298,7 +299,7 @@ export const acceptOrder = async (orderId: number) => {
             },
             paymentMethod: orderDetails?.Payments?.paymentMethod!,
         })
-        sendSMTPMail({userEmail: "tarunsingh2118@gmail.com", emailBody: emailHTML})
+        sendSMTPMail({userEmail: orderDetails.email, emailBody: emailHTML})
 
         await prisma.orders.update({
             where: {

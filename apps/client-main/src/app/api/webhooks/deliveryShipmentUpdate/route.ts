@@ -68,6 +68,8 @@ const mapShiprocketStatus = (shiprocketStatus: string): string | null => {
     'DELIVERED': 'Delivered'
   };
 
+  // there should be a failed delviery type thing
+
   return statusMap[shiprocketStatus.toUpperCase()] || null;
 }
 
@@ -150,7 +152,8 @@ export async function POST(request: NextRequest) {
 
     // Process the shipment status update
     const webhookResponse = await (await serverClient()).viewer.orders.updateShipmentStatus({ 
-      shipmentId: awb, 
+      awb: awb,
+      orderId: order_id,
       shipmentStatus: mappedStatus 
     });
 

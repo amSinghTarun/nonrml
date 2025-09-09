@@ -3,7 +3,7 @@ import axios from 'axios';
 import type * as ShiprocketTypes from "./type";
 
 export class ShiprocketShipping {
-  private static baseUrl = "https://apiv2.shiprocket.in";
+  private static baseUrl = process.env.SHIPROCKET_API_URL;
   private static apiToken = process.env.SHIPROCKET_API_TOKEN || "";
 
   // ---------------- CREATE ORDER ----------------
@@ -24,6 +24,8 @@ export class ShiprocketShipping {
           timeout: 30000
         }
       );
+
+      console.log("shiprocket response", response.data.data)
 
       if (response.data && response.data.order_id) {
         return {
@@ -136,45 +138,9 @@ export class ShiprocketShipping {
   }
 
   // ---------------- CREATE RETURN ORDER ----------------
-  static async createReturnOrder(
-    data: ShiprocketTypes.ReturnOrderData
-  ): Promise<ShiprocketTypes.ReturnOrderResponse> {
+  static async createReturnOrder( data: ShiprocketTypes.ShiprocketReturnOrderPayload ): Promise<ShiprocketTypes.ReturnOrderResponse> {
     try {
-      if (!data.orderId || !data.orderDate) {
-        return {
-          orderId: '',
-          shipmentId: '',
-          channelOrderId: '',
-          status: 'Failed',
-          success: false,
-          error: 'Order ID and order date are required'
-        };
-      }
-
-      if (!data.pickup || !data.shipping) {
-        return {
-          orderId: '',
-          shipmentId: '',
-          channelOrderId: '',
-          status: 'Failed',
-          success: false,
-          error: 'Both pickup and shipping addresses are required'
-        };
-      }
-
-      if (!data.orderItems || data.orderItems.length === 0) {
-        return {
-          orderId: '',
-          shipmentId: '',
-          channelOrderId: '',
-          status: 'Failed',
-          success: false,
-          error: 'At least one order item is required'
-        };
-      }
-
       const formattedData = this.formatReturnOrderData(data);
-
       const response = await axios.post(
         `${this.baseUrl}/v1/external/orders/create/return`,
         formattedData,
@@ -236,7 +202,7 @@ export class ShiprocketShipping {
   // ---------------- FORMAT HELPERS ----------------
   private static formatOrderData(data: ShiprocketTypes.OrderData): any {
     const formattedData: any = {
-      order_id: data.orderId,
+      order_id: `ORD-${data.orderId}`,
       order_date: data.orderDate,
       pickup_location: data.pickupLocation,
       billing_customer_name: data.billing.customerName,
@@ -248,6 +214,7 @@ export class ShiprocketShipping {
       billing_email: data.billing.email,
       billing_phone: data.billing.phone,
       shipping_is_billing: data.shippingIsBilling,
+      billing_last_name: "",
       order_items: data.orderItems.map(item => ({
         name: item.name,
         sku: item.sku,
@@ -269,7 +236,6 @@ export class ShiprocketShipping {
     if (data.comment) formattedData.comment = data.comment;
     if (data.resellerName) formattedData.reseller_name = data.resellerName;
     if (data.companyName) formattedData.company_name = data.companyName;
-    if (data.billing.lastName) formattedData.billing_last_name = data.billing.lastName;
     if (data.billing.address2) formattedData.billing_address_2 = data.billing.address2;
     if (data.billing.alternatePhone) formattedData.billing_alternate_phone = data.billing.alternatePhone;
     if (data.billing.isdCode) formattedData.billing_isd_code = data.billing.isdCode;
@@ -309,77 +275,90 @@ export class ShiprocketShipping {
     return formattedData;
   }
 
-  private static formatReturnOrderData(data: ShiprocketTypes.ReturnOrderData): any {
-    const formattedData: any = {
-      order_id: data.orderId,
-      order_date: data.orderDate,
-      payment_method: data.paymentMethod,
-      sub_total: data.subTotal,
-      length: data.dimensions.length,
-      breadth: data.dimensions.breadth,
-      height: data.dimensions.height,
-      weight: data.weight
-    };
+private static formatReturnOrderData( data: ShiprocketTypes.ShiprocketReturnOrderPayload ): ShiprocketTypes.ShiprocketReturnOrderPayload {
+  const formatted: ShiprocketTypes.ShiprocketReturnOrderPayload = {
+    // required top-level
+    order_id: data.order_id,
+    order_date: data.order_date,
+    payment_method: 'Prepaid',
+    sub_total: data.sub_total,
+    length: data.length,
+    breadth: data.breadth,
+    height: data.height,
+    weight: data.weight,
 
-    if (data.channelId) formattedData.channel_id = data.channelId;
+    // pickup (required fields)
+    pickup_customer_name: data.pickup_customer_name,
+    pickup_address: data.pickup_address,
+    pickup_city: data.pickup_city,
+    pickup_state: data.pickup_state,
+    pickup_country: data.pickup_country,
+    pickup_pincode: data.pickup_pincode,
+    pickup_email: data.pickup_email,
+    pickup_phone: data.pickup_phone,
 
-    formattedData.pickup_customer_name = data.pickup.customerName;
-    formattedData.pickup_address = data.pickup.address;
-    formattedData.pickup_city = data.pickup.city;
-    formattedData.pickup_state = data.pickup.state;
-    formattedData.pickup_country = data.pickup.country;
-    formattedData.pickup_pincode = data.pickup.pincode;
-    formattedData.pickup_email = data.pickup.email;
-    formattedData.pickup_phone = data.pickup.phone;
+    // shipping (required fields)
+    shipping_customer_name: data.shipping_customer_name,
+    shipping_address: data.shipping_address,
+    shipping_city: data.shipping_city,
+    shipping_state: data.shipping_state,
+    shipping_country: data.shipping_country,
+    shipping_pincode: data.shipping_pincode,
+    shipping_phone: data.shipping_phone,
 
-    if (data.pickup.lastName) formattedData.pickup_last_name = data.pickup.lastName;
-    if (data.pickup.address2) formattedData.pickup_address_2 = data.pickup.address2;
-    if (data.pickup.isdCode) formattedData.pickup_isd_code = data.pickup.isdCode;
-
-    formattedData.shipping_customer_name = data.shipping.customerName;
-    formattedData.shipping_address = data.shipping.address;
-    formattedData.shipping_city = data.shipping.city;
-    formattedData.shipping_country = data.shipping.country;
-    formattedData.shipping_pincode = data.shipping.pincode;
-    formattedData.shipping_state = data.shipping.state;
-    formattedData.shipping_phone = data.shipping.phone;
-
-    if (data.shipping.lastName) formattedData.shipping_last_name = data.shipping.lastName;
-    if (data.shipping.address2) formattedData.shipping_address_2 = data.shipping.address2;
-    if (data.shipping.email) formattedData.shipping_email = data.shipping.email;
-    if (data.shipping.isdCode) formattedData.shipping_isd_code = data.shipping.isdCode;
-
-    formattedData.order_items = data.orderItems.map(item => {
-      const formattedItem: any = {
+    // items
+    order_items: data.order_items.map((item) => {
+      const out: ShiprocketTypes.ShiprocketReturnOrderItem = {
         name: item.name,
         sku: item.sku,
         units: item.units,
-        selling_price: item.sellingPrice
+        selling_price: item.selling_price,
       };
 
-      if (item.discount !== undefined) formattedItem.discount = item.discount;
-      if (item.hsn) formattedItem.hsn = item.hsn;
-      if (item.returnReason) formattedItem.return_reason = item.returnReason;
+      // optional/conditional fields (only copy if provided)
+      if (item.discount !== undefined) out.discount = item.discount;
+      if (item.hsn) out.hsn = item.hsn;
+      if (item.return_reason) out.return_reason = item.return_reason;
 
-      if (item.qcEnable !== undefined) formattedItem.qc_enable = item.qcEnable ? 'true' : 'false';
-      if (item.qcColor) formattedItem.qc_color = item.qcColor;
-      if (item.qcBrand) formattedItem.qc_brand = item.qcBrand;
-      if (item.qcSerialNo) formattedItem.qc_serial_no = item.qcSerialNo;
-      if (item.qcEanBarcode) formattedItem.qc_ean_barcode = item.qcEanBarcode;
-      if (item.qcSize) formattedItem.qc_size = item.qcSize;
-      if (item.qcProductName) formattedItem.qc_product_name = item.qcProductName;
-      if (item.qcProductImage) formattedItem.qc_product_image = item.qcProductImage;
-      if (item.qcProductImei) formattedItem.qc_product_imei = item.qcProductImei;
-      if (item.qcBrandTag !== undefined) formattedItem.qc_brand_tag = item.qcBrandTag;
-      if (item.qcUsedCheck !== undefined) formattedItem.qc_used_check = item.qcUsedCheck;
-      if (item.qcSealtagCheck !== undefined) formattedItem.qc_sealtag_check = item.qcSealtagCheck;
-      if (item.qcCheckDamagedProduct) formattedItem.qc_check_damaged_product = item.qcCheckDamagedProduct;
+      if (item.qc_enable) out.qc_enable = item.qc_enable;
+      if (item.qc_color) out.qc_color = item.qc_color;
+      if (item.qc_brand) out.qc_brand = item.qc_brand;
+      if (item.qc_serial_no) out.qc_serial_no = item.qc_serial_no;
+      if (item.qc_ean_barcode) out.qc_ean_barcode = item.qc_ean_barcode;
+      if (item.qc_size) out.qc_size = item.qc_size;
+      if (item.qc_product_name) out.qc_product_name = item.qc_product_name;
+      if (item.qc_product_image) out.qc_product_image = item.qc_product_image;
+      if (item.qc_product_imei) out.qc_product_imei = item.qc_product_imei;
+      if (item.qc_brand_tag !== undefined) out.qc_brand_tag = item.qc_brand_tag;
+      if (item.qc_used_check !== undefined) out.qc_used_check = item.qc_used_check;
+      if (item.qc_sealtag_check !== undefined)
+        out.qc_sealtag_check = item.qc_sealtag_check;
+      if (item.qc_check_damaged_product)
+        out.qc_check_damaged_product = item.qc_check_damaged_product;
 
-      return formattedItem;
-    });
+      return out;
+    }),
+  };
 
-    if (data.totalDiscount !== undefined) formattedData.total_discount = data.totalDiscount;
+  // optional top-level
+  if (data.channel_id !== undefined) formatted.channel_id = data.channel_id;
+  if (data.total_discount !== undefined)
+    formatted.total_discount = data.total_discount;
 
-    return formattedData;
+  // optional pickup fields
+  if (data.pickup_last_name) formatted.pickup_last_name = data.pickup_last_name;
+  if (data.pickup_address_2) formatted.pickup_address_2 = data.pickup_address_2;
+  if (data.pickup_isd_code) formatted.pickup_isd_code = data.pickup_isd_code;
+
+  // optional shipping fields
+  if (data.shipping_last_name)
+    formatted.shipping_last_name = data.shipping_last_name;
+  if (data.shipping_address_2)
+    formatted.shipping_address_2 = data.shipping_address_2;
+  if (data.shipping_email) formatted.shipping_email = data.shipping_email;
+  if (data.shipping_isd_code)
+    formatted.shipping_isd_code = data.shipping_isd_code;
+
+  return formatted;
   }
 }

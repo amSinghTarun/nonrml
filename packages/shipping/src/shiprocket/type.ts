@@ -18,7 +18,7 @@ export interface Address {
   pincode: number;
   state: string;
   country: string;
-  email?: string;
+  email: string;
   phone: number;
   alternatePhone?: number;
   isdCode?: string;
@@ -160,7 +160,7 @@ export const ZAddress = z.object({
   pincode: z.number(),
   state: z.string(),
   country: z.string(),
-  email: z.string().email().optional(),
+  email: z.string().email(),
   phone: z.number(),
   alternatePhone: z.number().optional(),
   isdCode: z.string().optional(),
@@ -230,70 +230,6 @@ export interface OrderResponse {
 }
 
 // Return Order Interfaces
-export interface ReturnOrderAddress {
-  customerName: string;
-  lastName?: string;
-  address: string;
-  address2?: string;
-  city: string;
-  state: string;
-  country: string;
-  pincode: number;
-  email: string;
-  phone: string;
-  isdCode?: string;
-}
-
-export interface ReturnOrderItem {
-  name: string;
-  sku: string;
-  units: number;
-  sellingPrice: number;
-  discount?: number;
-  hsn?: string;
-  returnReason?: string;
-  // QC (Quality Check) fields
-  qcEnable?: boolean;
-  qcColor?: string;
-  qcBrand?: string;
-  qcSerialNo?: string;
-  qcEanBarcode?: string;
-  qcSize?: string;
-  qcProductName?: string;
-  qcProductImage?: string;
-  qcProductImei?: string;
-  qcBrandTag?: boolean;
-  qcUsedCheck?: boolean;
-  qcSealtagCheck?: boolean;
-  qcCheckDamagedProduct?: 'yes' | 'no';
-}
-
-export interface ReturnOrderData {
-  orderId: string;
-  orderDate: string; // Format: "YYYY-MM-DD"
-  channelId?: number;
-  
-  // Pickup details (where the package is picked up from - customer's location)
-  pickup: ReturnOrderAddress;
-  
-  // Shipping details (where the package is shipped to - your warehouse/store)
-  shipping: ReturnOrderAddress;
-  
-  // Order items being returned
-  orderItems: ReturnOrderItem[];
-  
-  // Payment method - should always be "Prepaid" for returns
-  paymentMethod: 'Prepaid';
-  
-  // Pricing details
-  totalDiscount?: number;
-  subTotal: number;
-  
-  // Package dimensions and weight
-  dimensions: Dimensions;
-  weight: number;
-}
-
 export interface ReturnOrderResponse {
   orderId: string;
   shipmentId: string;
@@ -305,23 +241,80 @@ export interface ReturnOrderResponse {
   details?: any;
 }
 
-// Possible return reason values as per Shiprocket documentation
-export type ReturnReason = 
-  | 'Bought by Mistake'
-  | 'Both product and shipping box damaged'
-  | 'Defective Product'
-  | 'Wrong Product'
-  | 'Size Issue'
-  | 'Color Issue'
-  | 'Quality Issue'
-  | 'Not as described'
-  | 'Delayed Delivery'
-  | 'Changed Mind'
-  | 'Better Price Available'
-  | 'Accidental Order'
-  | 'Missing Parts'
-  | 'Packaging Issue'
-  | 'Other';
+// Flat payload exactly as Shiprocket Return Order API expects
+export interface ShiprocketReturnOrderPayload {
+  // Top-level required
+  order_id: string;              // <= 50 chars
+  order_date: string;            // yyyy-mm-dd (time optional)
+  payment_method: 'Prepaid';
+  sub_total: number;
+  length: number;                // cm
+  breadth: number;               // cm
+  height: number;                // cm
+  weight: number;                // kg
+
+  // Optional top-level
+  channel_id?: number;
+  total_discount?: number;
+
+  // Pickup (customer) – all required per docs
+  pickup_customer_name: string;
+  pickup_last_name?: string;
+  pickup_address: string;
+  pickup_address_2?: string;
+  pickup_city: string;
+  pickup_state: string;
+  pickup_country: string;
+  pickup_pincode: number;
+  pickup_email: string;          // required by Shiprocket
+  pickup_phone: string;          // string to preserve leading 0s
+  pickup_isd_code?: string;
+
+  // Shipping (your warehouse) – all required except last_name/address_2/email/isd_code
+  shipping_customer_name: string;
+  shipping_last_name?: string;
+  shipping_address: string;
+  shipping_address_2?: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_country: string;
+  shipping_pincode: number;
+  shipping_phone: string;
+  shipping_email?: string;
+  shipping_isd_code?: string;
+
+  // Items
+  order_items: ShiprocketReturnOrderItem[];
+}
+
+// Per-item payload
+export interface ShiprocketReturnOrderItem {
+  // Required
+  name: string;
+  sku: string;
+  units: number;
+  selling_price: number;
+
+  // Optional
+  discount?: number;
+  hsn?: string;
+  return_reason?: string;
+
+  // QC – conditional if qc_enable === "true"
+  qc_enable?: true | false;
+  qc_color?: string;
+  qc_brand?: string;
+  qc_serial_no?: string;
+  qc_ean_barcode?: string;
+  qc_size?: string;
+  qc_product_name?: string;      // REQUIRED if qc_enable = "true"
+  qc_product_image?: string;     // REQUIRED if qc_enable = "true" (png/jpg URL)
+  qc_product_imei?: string;
+  qc_brand_tag?: 0 | 1;
+  qc_used_check?: 0 | 1;
+  qc_sealtag_check?: 0 | 1;
+  qc_check_damaged_product?: 'yes' | 'no';
+}
 
 // Example usage interface for better developer experience
 export interface CreateOrderExample {

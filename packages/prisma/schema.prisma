@@ -278,16 +278,17 @@ model Payments {
 }
 
 model Shipment {
-  id                   Int               @id @default(autoincrement())
-  shipmentOrderId      String            @unique
-  shipmentServiceName  String
-  shipmentTrackingLink String
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  AWB                  String            @unique
-  order                Orders?
-  ReplacementOrder     ReplacementOrder?
-  return               Returns?
+  id                  Int               @id @default(autoincrement())
+  shipmentOrderId     String            @unique
+  shipmentServiceName String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  AWB                 String?           @default("")
+  dimensions          String            @default("")
+  shipmentId          String?
+  order               Orders?
+  ReplacementOrder    ReplacementOrder?
+  return              Returns?
 }
 
 model Orders {
@@ -430,6 +431,7 @@ model RefundTransactions {
   rzpPaymentId    String
   bankRefundValue Int          @default(0)
   creditNoteId    Int?
+  trigger         String       @default("")
   Payments        Payments     @relation(fields: [rzpPaymentId], references: [rzpPaymentId], onDelete: NoAction, map: "BankRefunds_rzpPaymentId_fkey")
   CreditNotes     CreditNotes? @relation(fields: [creditNoteId], references: [id], onDelete: NoAction)
 }

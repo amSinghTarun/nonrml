@@ -14,7 +14,8 @@ export const ZCancelAcceptedOrderSchema = z.object({
 export type TCancelAcceptedOrderSchema = z.infer<typeof ZCancelAcceptedOrderSchema>;
 
 export const ZUpdateShipmentSchema = z.object({
-    shipmentId: z.string(),
+    awb: z.number(),
+    orderId: z.string(),
     shipmentStatus: z.string(),
 })
 export type TUpdateShipmentSchema = z.infer<typeof ZUpdateShipmentSchema>;

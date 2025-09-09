@@ -9,16 +9,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Edit2, Check, X } from 'lucide-react'
 import { prismaTypes } from '@nonrml/prisma'
+import { UseTRPCQueryResult } from '@trpc/react-query/shared'
+import { RouterOutput } from '@/app/_trpc/client'
 
 interface ShippingDetailsProps {
   address: prismaTypes.Address
   isEditable: boolean
   orderId: number
   onAddressUpdated: () => void
+  shipment: NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["shipment"]
 }
 
 const ShippingDetails: React.FC<ShippingDetailsProps> = ({ 
   address, 
+  shipment,
   isEditable,
 }) => {
   const {
@@ -42,6 +46,7 @@ const ShippingDetails: React.FC<ShippingDetailsProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleEdit}
+            disabled={(shipment?.shipmentOrderId ? true : false)}
             className="h-8 w-8 p-0"
             aria-label="Edit shipping details"
           >
@@ -63,6 +68,22 @@ const ShippingDetails: React.FC<ShippingDetailsProps> = ({
             <div>
               <h3 className="font-medium text-sm text-gray-500">Mobile</h3>
               <p>{`${address.contactNumber}`}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-gray-500">Shipment ID</h3>
+              <p>{`${shipment?.shipmentOrderId}`}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-gray-500">Shipment Service</h3>
+              <p>{`${shipment?.shipmentServiceName}`}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-gray-500">shipment Order Date</h3>
+              <p>{`${shipment?.createdAt.toDateString()}`}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-gray-500">AWB</h3>
+              <p>{`${shipment?.AWB}`}</p>
             </div>
           </>
         ) : (

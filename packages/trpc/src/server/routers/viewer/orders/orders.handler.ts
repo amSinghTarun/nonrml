@@ -196,25 +196,7 @@ export const updateShipmentStatus = async ({ ctx, input } : TRPCRequestOptions<T
     input = input!;
     try{
 
-        // import from the shipping package
-
-        // const cancelledOrder = await prisma.orders.update({
-        //     where: {
-        //         id: Number(input.orderId),
-        //         orderStatus: "PENDING",
-        //         Payments:{
-        //             paymentStatus: {
-        //                 // so that prepaid order that aren't accepted shouldn't get cancelled
-        //                 notIn: ["authorized", "captured"]
-        //             }
-        //         }
-        //     },
-        //     data: {
-        //         orderStatus: prismaEnums.OrderStatus.CANCELED
-        //     }
-        // });
-
-        // console.log(cancelledOrder);
+    //   update the shipping details here
 
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: "updateShipmentStatus"};
 
@@ -839,6 +821,7 @@ export const getOrderReturnDetails = async( {ctx, input}: TRPCRequestOptions<TGe
                 returnShipmentId: true,
                 createdAt: true,
                 returnType: true,
+                shipment: true,
                 returnItems: {
                     include: {
                         ReplacementItem: {
@@ -891,6 +874,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
                 idVarChar: true,
                 totalAmount: true,
                 productCount: true,
+                email: true,
                 creditUtilised: true,
                 creditNoteId: true,
                 deliveryDate: true,
@@ -911,7 +895,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
                         }
                     }
                 },
-                // shipment: true,
+                shipment: true,
                 user: { 
                     select : {
                         contactNumber: true
@@ -923,6 +907,7 @@ export const getOrder = async ({ctx, input}: TRPCRequestOptions<TGetOrderSchema>
                         productVariant: {
                             select: {
                                 size: true,
+                                subSku: true,
                                 product: {
                                     select: {
                                         sku: true,
@@ -1174,35 +1159,47 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
             }
         }
 
+        console.log(input.shiprocketOrderData)
+
         // store tracking id in the shipment table
         const response = await ShiprocketShipping.ShiprocketShipping.createOrder(input.shiprocketOrderData)
+        console.log(response)
 
-        await prisma.orders.update({
-            where: {
-                id: input.orderId
-            },
-            data: {
-                shipment: {
-                    create: {
-                        shipmentOrderId: response.shipmentId,
-                        shipmentServiceName: "Shiprocket",
-                        shipmentTrackingLink: "",
-                        AWB: ""
+        if(response.orderId){
+            await prisma.orders.update({
+                where: {
+                    id: input.orderId
+                },
+                data: {
+                    shipment: {
+                        create: {
+                            shipmentOrderId: `${response.orderId}`,
+                            shipmentId: `${response.shipmentId}`,
+                            shipmentServiceName: "Shiprocket",
+                            dimensions: JSON.stringify({
+                                "weight": input.shiprocketOrderData.weight,
+                                "length": input.shiprocketOrderData.dimensions.length,
+                                "height": input.shiprocketOrderData.dimensions.height,
+                                "breadth": input.shiprocketOrderData.dimensions.breadth 
+                            })
+                        }
                     }
                 }
-            }
-        });    
-
-        // send the product shipped mail with tracking details tracking mail and has info of processingRefundAmount 
-        // no need to check for the mail, it will be present in the orderDetails
-        await sendSMTPMail({
-            userEmail: orderDetails.email, 
-            emailBody: generateShippingNotificationEmail({  
-                orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
-                refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
-                trackingLink: "https://www.nonorml.com/track-order/"
+            });    
+    
+            // send the product shipped mail with tracking details tracking mail and has info of processingRefundAmount 
+            // no need to check for the mail, it will be present in the orderDetails
+            await sendSMTPMail({
+                userEmail: orderDetails.email, 
+                emailBody: generateShippingNotificationEmail({  
+                    orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
+                    refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
+                    trackingLink: "https://www.nonorml.com/track-order/"
+                })
             })
-        })
+        } else {
+            throw { code: "INTERNAL_SERVER_ERROR", message: "Something went wrong"}
+        }
 
         return { status: TRPCResponseStatus.SUCCESS, message:"Shipped Successfully", data: ""};
 
@@ -1366,37 +1363,37 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
 /**
     * Update Shipment Status
 */
-export const updateShipment = async ({ctx, input} : TRPCRequestOptions<TUpdateShipmentSchema>) => {
-    const prisma = ctx.prisma;
-    input = input!;
-    try{
+// export const updateShipment = async ({ctx, input} : TRPCRequestOptions<TUpdateShipmentSchema>) => {
+//     const prisma = ctx.prisma;
+//     input = input!;
+//     try{
 
-        const delhiveryStatusToNoNRMLOrderStatusMap = {
-            "In Transit": prismaEnums.OrderStatus.SHIPPED,
-            "Dispatched": prismaEnums.OrderStatus.IN_TRANSIT,
-            "Delivered": prismaEnums.OrderStatus.DELIVERED
-        }
+//         const delhiveryStatusToNoNRMLOrderStatusMap = {
+//             "In Transit": prismaEnums.OrderStatus.SHIPPED,
+//             "Dispatched": prismaEnums.OrderStatus.IN_TRANSIT,
+//             "Delivered": prismaEnums.OrderStatus.DELIVERED
+//         }
 
-        if(input.shipmentStatus in delhiveryStatusToNoNRMLOrderStatusMap){
-            const orderDetails = await prisma.shipment.update({
-                where: {
-                    AWB: input.shipmentId
-                },
-                data: {
-                    order: {
-                        update: {
-                            orderStatus: delhiveryStatusToNoNRMLOrderStatusMap[input.shipmentStatus as keyof typeof delhiveryStatusToNoNRMLOrderStatusMap]
-                        }
-                    }
-                }
-            });    
-        }
+//         if(input.shipmentStatus in delhiveryStatusToNoNRMLOrderStatusMap){
+//             const orderDetails = await prisma.shipment.update({
+//                 where: {
+//                     AWB: input.awb
+//                 },
+//                 data: {
+//                     order: {
+//                         update: {
+//                             orderStatus: delhiveryStatusToNoNRMLOrderStatusMap[input.shipmentStatus as keyof typeof delhiveryStatusToNoNRMLOrderStatusMap]
+//                         }
+//                     }
+//                 }
+//             });    
+//         }
 
-        return { status: TRPCResponseStatus.SUCCESS, message:"Order Status Updated", data: `Non updateable status received: ${input.shipmentStatus}`};
+//         return { status: TRPCResponseStatus.SUCCESS, message:"Order Status Updated", data: `Non updateable status received: ${input.shipmentStatus}`};
 
-    } catch(error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) 
-            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
-        throw TRPCCustomError(error) 
-    }
-};
+//     } catch(error) {
+//         if (error instanceof Prisma.PrismaClientKnownRequestError) 
+//             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+//         throw TRPCCustomError(error) 
+//     }
+// };

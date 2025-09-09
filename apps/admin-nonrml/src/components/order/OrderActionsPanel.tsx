@@ -70,9 +70,9 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
       setIsShipping(true)
 
       const shiprocketOrder: ShiprocketTypes.OrderData = {
-        orderId: `ORD-${order.id}${order.idVarChar}`,
+        orderId: `${order.id}${order.idVarChar}`, // the ORD- is added shipping service
         orderDate: new Date(order.createdAt).toISOString(),
-        pickupLocation: "Primary",
+        pickupLocation: "work",
         billing: {
           customerName: order.address!.contactName!,
           address: order.address!.location!,
@@ -80,12 +80,13 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
           pincode: Number(order.address!.pincode!),
           state: order.address!.state,
           country: "India",
-          phone: Number(order.address!.contactNumber.replace(/\D/g, "").slice(-10))
+          phone: Number(order.address!.contactNumber.replace(/\D/g, "").slice(-10)),
+          email: order.email
         },
         shippingIsBilling: true,
         orderItems: order.orderProducts.map(item => ({
           name: item.productVariant.product.sku,
-          sku: item.productVariant.product.sku,
+          sku: item.productVariant.subSku,
           units: item.quantity,
           sellingPrice: item.price,
         })),
@@ -98,23 +99,29 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
         },
         weight
       }
+      console.log(order.email, shiprocketOrder)
 
       const response = await shipOrder(shiprocketOrder);
       // ShiprocketShipping.ShiprocketShipping.createOrder(shiprocketOrder)
       // here is response
 
-      if (response.data) {
-        alert(`Shipment Created! Order ID: ${response.orderId}`)
-        await onStatusChange("SHIPPED")
+      console.log(response)
+
+      if (response.status == TRPCResponseStatus.SUCCESS) {
+        console.log(response.data);
+        alert(`Shipment Created! Order ID: ${response}`);
+        // no need to change status as only the shiprocket order is created, the product isn't actually shipped
+        // await onStatusChange("SHIPPED"); 
       } else {
-        alert(`Failed to create shipment: ${response.error}`)
+        console.log(response)
+        alert(`Failed to create shipment: ${JSON.stringify(response)}`);
       }
     } catch (err) {
-      console.error("Error creating shipment:", err)
-      alert("Something went wrong while creating shipment.")
+      console.error("Error creating shipment:", err);
+      alert("Something went wrong while creating shipment.");
     } finally {
-      setIsShipping(false)
-      setIsShipDialogOpen(false)
+      setIsShipping(false);
+      setIsShipDialogOpen(false);
     }
   }
 
@@ -151,9 +158,9 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
                 <Button
                   className="text-black"
                   variant="secondary"
-                  disabled={isLoading || isShipping}
+                  disabled={isLoading || isShipping || (order.shipment?.shipmentOrderId ? true : false)}
                 >
-                  Ship Order
+                  {`${ order.shipment?.shipmentOrderId ? "Shipped" : "Ship Order"}`}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -163,41 +170,50 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
                     Please provide the package dimensions and weight before shipping.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <div className="flex flex-col gap-2 mt-2">
-                  <input
-                    type="number"
-                    placeholder="Length (cm)"
-                    value={length}
-                    onChange={(e) => setLength(Number(e.target.value))}
-                    className="border p-1 rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Breadth (cm)"
-                    value={breadth}
-                    onChange={(e) => setBreadth(Number(e.target.value))}
-                    className="border p-1 rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Height (cm)"
-                    value={height}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                    className="border p-1 rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Weight (kg)"
-                    value={weight}
-                    onChange={(e) => setWeight(Number(e.target.value))}
-                    className="border p-1 rounded"
-                  />
-                </div>
+                <label className="text-xs text-neutral-600">Length (cm)</label>
+                <input
+                  type="number"
+                  aria-label="Length in centimeters"
+                  min={0}
+                  value={length}
+                  onChange={(e) => setLength(Number(e.target.value))}
+                  className="border p-1 rounded"
+                />
+
+                <label className="text-xs text-neutral-600">Breadth (cm)</label>
+                <input
+                  type="number"
+                  aria-label="Breadth in centimeters"
+                  min={0}
+                  value={breadth}
+                  onChange={(e) => setBreadth(Number(e.target.value))}
+                  className="border p-1 rounded"
+                />
+
+                <label className="text-xs text-neutral-600">Height (cm)</label>
+                <input
+                  type="number"
+                  aria-label="Height in centimeters"
+                  min={0}
+                  value={height}
+                  onChange={(e) => setHeight(Number(e.target.value))}
+                  className="border p-1 rounded"
+                />
+
+                <label className="text-xs text-neutral-600">Weight (kg)</label>
+                <input
+                  type="number"
+                  aria-label="Weight in kilograms"
+                  min={0}
+                  value={weight}
+                  onChange={(e) => setWeight(Number(e.target.value))}
+                  className="border p-1 rounded"
+                />
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isShipping}>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleShipOrder}
-                    disabled={isShipping}
+                    disabled={isShipping || (order.shipment?.shipmentOrderId ? true : false)}
                   >
                     {isShipping ? 'Creating Shipment...' : 'Confirm & Ship'}
                   </AlertDialogAction>
@@ -219,7 +235,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
                 <Button
                   variant="destructive"
                   className="text-white"
-                  disabled={isLoading}
+                  disabled={isLoading || (order.shipment?.shipmentOrderId ? true : false)}
                 >
                   Cancel Accepted Order
                 </Button>

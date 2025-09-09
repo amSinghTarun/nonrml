@@ -94,6 +94,10 @@ const PaymentDetailsDialog = ({ payment } : {payment: Payments|null}) => {
                                 <p className="text-slate-600">₹{refund.bankRefundValue}</p>
                               </div>
                               <div>
+                                <p className="font-medium">Trigger</p>
+                                <p className="text-slate-600">{refund.trigger}</p>
+                              </div>
+                              <div>
                                 <p className="font-medium">Credit Note</p>
                                 <p className="text-slate-600">{refund.creditNoteId || '-'}</p>
                               </div>
