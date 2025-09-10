@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     // Fetch order details for security validation
     let orderDetails;
     try {
-      console.log(mappedStatus, awb, current_status, order_id)
+      console.log(mappedStatus, awb, ".",  current_status, ".", order_id, `OrderPrinted ${order_id}`)
       orderDetails = await fetchOrderDetails(order_id);
     } catch (error) {
       console.error(`Failed to fetch order details for order_id: ${order_id}`, error);
