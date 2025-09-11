@@ -140,7 +140,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
       )}
 
       {/* Add Entry Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="type" className="block text-sm font-medium">
@@ -237,7 +237,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
         <Button type="submit" className="flex item-center mt-4 bg-stone-700">
           Add Entry
         </Button>
-      </form>
+      </form> */}
 
       {/* Size Chart Table */}
       {sizeChart.length > 0 && (
