@@ -78,7 +78,7 @@ export const generateCreditNoteEmail = (options: CreditNoteData): string => {
                 <!-- View Account Button -->
                 <tr>
                     <td style="padding: 0 40px 60px; text-align: center;">
-                        <a href="https://www.nonorml.com/orders" style="display: inline-block; padding: 10px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: none;">View Account</a>
+                        <a href="https://www.nonrml.co.in/orders" style="display: inline-block; padding: 10px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: none;">View Account</a>
                     </td>
                 </tr>
                 

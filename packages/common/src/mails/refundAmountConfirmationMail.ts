@@ -106,8 +106,8 @@ export const generateRefundNotificationEmail = (options: RefundNotificationData)
                 <!-- Action Buttons -->
                 <tr>
                     <td style="padding: ${hasCreditNote ? '0' : '20px'} 40px 60px; text-align: center;">
-                        <a href="https://www.nonorml.com/orders/ORD-${escapeHtml(data.orderId)}${escapeHtml(data.orderIdVarChar)}" style="display: inline-block; padding: 10px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: none; margin-right: 10px;">View Order</a>
-                        <a href="https://www.nonorml.com" style="display: inline-block; padding: 10px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #000000;">Continue Shopping</a>
+                        <a href="https://www.nonrml.co.in/orders/ORD-${escapeHtml(data.orderId)}${escapeHtml(data.orderIdVarChar)}" style="display: inline-block; padding: 10px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: none; margin-right: 10px;">View Order</a>
+                        <a href="https://www.nonrml.co.in" style="display: inline-block; padding: 10px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #000000;">Continue Shopping</a>
                     </td>
                 </tr>
                 

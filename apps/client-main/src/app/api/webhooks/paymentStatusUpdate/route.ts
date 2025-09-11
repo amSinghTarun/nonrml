@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         const notUniqueRequest = await cacheServicesRedisClient().get(x_razorpay_event_id);
         if(notUniqueRequest)
             return NextResponse.json({ status: 200 })
-
+        
         // validate the request
         let rawBody = request.body;
         validateRzpWebhook(JSON.stringify(rawBody), signature || "");

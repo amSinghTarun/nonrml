@@ -77,11 +77,12 @@ export const uploadImage = async ({ctx, input}: TRPCRequestOptions<TUploadImageS
     input = input!;
     try{        
         const imageUploaded = await uploadToBucketFolder(
-            `home/${ctx.user?.id}:${Date.now()}`,
+            `home/${ctx.user?.id}:${Date.now()}`,  // should a home folder be created
             dataURLtoFile(input.image, `${Date.now()}`)
         );
         
         if (imageUploaded.error) {
+            console.log(imageUploaded.error)
             throw new TRPCError({ 
                 code: "UNPROCESSABLE_CONTENT", 
                 message: "Unable to upload image" 

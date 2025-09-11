@@ -1194,7 +1194,7 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
                 emailBody: generateShippingNotificationEmail({  
                     orderId: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
                     refundAmount: orderDetails.processingRefundAmount > 0 ? orderDetails.processingRefundAmount : 0 ,
-                    trackingLink: "https://www.nonorml.com/track-order/"
+                    trackingLink: "https://www.nonrml.co.in/track-order/"
                 })
             })
         } else {

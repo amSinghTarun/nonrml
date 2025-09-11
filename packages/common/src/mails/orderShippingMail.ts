@@ -52,9 +52,9 @@ export const generateShippingNotificationEmail = (options: ShippingNotificationO
                         
                         <!-- Track Order Button -->
                         <div style="margin: 25px 0;">
-                            <a href="www.nonorml.com/orders/${data.orderId}" style="display: inline-block; padding: 12px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s;">View your order</a>
+                            <a href="www.nonrml.co.in/orders/${data.orderId}" style="display: inline-block; padding: 12px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s;">View your order</a>
                             <span style="margin: 0 10px; color: #9ca3af;">or</span>
-                            <a href="www.nonorml.com" style="color: #000000; text-decoration: none; font-size: 12px; font-weight: 500;">Visit our store</a>
+                            <a href="www.nonrml.co.in" style="color: #000000; text-decoration: none; font-size: 12px; font-weight: 500;">Visit our store</a>
                         </div>
                     </td>
                 </tr>

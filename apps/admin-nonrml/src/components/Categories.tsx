@@ -64,9 +64,11 @@ export const CategoryHierarchyTable = ({ categories }: CategoryTableProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-stone-700 text-white">{
                 allSizeCharts.data?.data.map( sizeChart => (
-                  <DropdownMenuItem key={sizeChart.id} onClick={() => {addSizeChartToCategory.mutate({sizeChartId: sizeChart.id, productCategoryId: category.id})}}>{sizeChart.name}</DropdownMenuItem>  
+                  <>
+                    <DropdownMenuItem key={sizeChart.id} onClick={() => {addSizeChartToCategory.mutate({sizeChartId: sizeChart.id, productCategoryId: category.id})}}>{sizeChart.name}</DropdownMenuItem>  
+                    <DropdownMenuItem onClick={() => {addSizeChartToCategory.mutate({sizeChartId: -1, productCategoryId: category.id})}}>REMOVE</DropdownMenuItem>  
+                  </>
               ))}
-              <DropdownMenuItem onClick={() => {addSizeChartToCategory.mutate({sizeChartId: -1, productCategoryId: category.id})}}>REMOVE</DropdownMenuItem>  
               </DropdownMenuContent>
             </DropdownMenu>
           </TableCell>

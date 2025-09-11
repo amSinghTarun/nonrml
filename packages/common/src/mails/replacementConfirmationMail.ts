@@ -68,7 +68,7 @@ export const generateReplacementConfirmationEmail = (orderId: string): string =>
                         
                         <!-- Track Replacement Button -->
                         <div style="margin: 25px 0; text-align: center;">
-                            <a href="www.nonorml.com/exchanges/${escapeHtml(data.orderId)}" style="display: inline-block; padding: 12px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s;">Track Replacement Status</a>
+                            <a href="www.nonrml.co.in/exchanges/${escapeHtml(data.orderId)}" style="display: inline-block; padding: 12px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s;">Track Replacement Status</a>
                         </div>
                         
                         <!-- Info Box -->

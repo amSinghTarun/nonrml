@@ -2,7 +2,7 @@
 const nextConfig = {
     images: {
         remotePatterns: [
-            {hostname:"kgvmjizuinwaxkfkvidy.supabase.co"},
+            {hostname:"dnxioyhtsziptltctjfk.supabase.co"},
             {hostname:"images.unsplash.com"},
             {hostname:"aceternity.com"}
         ]
@@ -13,6 +13,7 @@ const nextConfig = {
         "@nonrml/cache",
         "@nonrml/common",
         "@nonrml/components",
+        "@nonrml/shipping",
         "@nonrml/shipping"
     ],
     env: {
@@ -21,7 +22,7 @@ const nextConfig = {
         MIN_QUANTITY_TO_ORDER: `1`,
         PROD_PORT: '8080',
         DAMAGE_PARCEL_RETURN_ALLOWED_TIME: 86400000,
-        RAZORPAY_KEY_ID: "rzp_test_RCfPP2NtvEnYs4"
+        RAZORPAY_KEY_ID: "rzp_live_RFojdMUaDJy9XM"
     }
 };
 

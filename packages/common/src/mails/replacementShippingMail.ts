@@ -17,8 +17,8 @@ export const generateReplacementShippingNotificationEmail = (options: Replacemen
     };
 
     const replacementPageUrl = data.replacementId 
-        ? `www.nonorml.com/replacements/${data.replacementId}` 
-        : `www.nonorml.com/replacements/${data.orderId}`;
+        ? `www.nonrml.co.in/replacements/${data.replacementId}` 
+        : `www.nonrml.co.in/replacements/${data.orderId}`;
 
     // Generate the complete HTML email
     return `
@@ -59,7 +59,7 @@ export const generateReplacementShippingNotificationEmail = (options: Replacemen
                         <div style="margin: 25px 0;">
                             <a href="${escapeHtml(replacementPageUrl)}" style="display: inline-block; padding: 12px 24px; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s;">View Replacement Status</a>
                             <span style="margin: 0 10px; color: #9ca3af;">or</span>
-                            <a href="www.nonorml.com" style="color: #000000; text-decoration: none; font-size: 12px; font-weight: 500;">Visit our store</a>
+                            <a href="www.nonrml.co.in" style="color: #000000; text-decoration: none; font-size: 12px; font-weight: 500;">Visit our store</a>
                         </div>
                     </td>
                 </tr>

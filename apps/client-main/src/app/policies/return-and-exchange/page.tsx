@@ -84,7 +84,7 @@ export default function ReturnExchangePolicy() {
             <h2 className="font-semibold mb-2">Customer Support</h2>
             <p>
               Any queries or concerns relating to the return and cancellation may be directed by you to our customer support team who can be contacted at 
-              <span className="cursor-pointer text-rose-400 ml-1">info@nonorml.com</span>
+              <span className="cursor-pointer text-rose-400 ml-1">info@nonrml.co.in</span>
             </p>
           </div>
         </div>
