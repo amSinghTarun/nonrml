@@ -28,42 +28,42 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
   const [sizeChart, setSizeChart] = useState<SizeChartFormValues[]>([]);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // const addSizeChart = trpc.viewer.sizeChart.addSizeChart.useMutation({
-  //   onSuccess: () => {
-  //     setSuccessMessage("Size chart entries successfully uploaded!");
-  //     // Clear the form
-  //     setSizeChart([]);
+  const addSizeChart = trpc.viewer.sizeChart.addSizeChart.useMutation({
+    onSuccess: () => {
+      setSuccessMessage("Size chart entries successfully uploaded!");
+      // Clear the form
+      setSizeChart([]);
       
-  //     // Either redirect or call onComplete callback
-  //     if (onComplete) {
-  //       setTimeout(() => {
-  //         onComplete();
-  //       }, 1500);
-  //     } else {
-  //       setTimeout(() => {
-  //         router.push("/sizeChart");
-  //       }, 1500);
-  //     }
-  //   }
-  // });
+      // Either redirect or call onComplete callback
+      if (onComplete) {
+        setTimeout(() => {
+          onComplete();
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          router.push("/sizeChart");
+        }, 1500);
+      }
+    }
+  });
 
-  // const {
-  //   handleSubmit,
-  //   control,
-  //   reset,
-  //   register,
-  //   formState: { errors },
-  //   setValue,
-  // } = useForm<SizeChartFormValues>({
-  //   resolver: zodResolver(sizeChartSchema),
-  //   defaultValues: {
-  //     name: "",
-  //     value: "",
-  //     type: parentType ? getNextTypeForParent(parentType) : "DISPLAY_NAME",
-  //     parentId: parentId,
-  //     sortOrder: 0,
-  //   },
-  // });
+  const {
+    handleSubmit,
+    control,
+    reset,
+    register,
+    formState: { errors },
+    setValue,
+  } = useForm<SizeChartFormValues>({
+    resolver: zodResolver(sizeChartSchema),
+    defaultValues: {
+      name: "",
+      value: "",
+      type: parentType ? getNextTypeForParent(parentType) : "DISPLAY_NAME",
+      parentId: parentId,
+      sortOrder: 0,
+    },
+  });
 
   // Function to determine the next type based on parent type
   function getNextTypeForParent(type: keyof typeof prismaEnums.SizeType): keyof typeof prismaEnums.SizeType {
@@ -73,57 +73,57 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
   }
 
   // Set initial values when props change
-  // React.useEffect(() => {
-  //   if (parentId) {
-  //     setValue("parentId", parentId);
-  //   }
+  React.useEffect(() => {
+    if (parentId) {
+      setValue("parentId", parentId);
+    }
     
-  //   if (parentType) {
-  //     setValue("type", getNextTypeForParent(parentType));
-  //   }
-  // }, [parentId, parentType, setValue]);
+    if (parentType) {
+      setValue("type", getNextTypeForParent(parentType));
+    }
+  }, [parentId, parentType, setValue]);
 
-  // const onSubmit = (data: SizeChartFormValues) => {
-  //   // Ensure parentId is correctly set
-  //   const formattedData = {
-  //     ...data,
-  //     parentId: data.parentId || parentId
-  //   };
+  const onSubmit = (data: SizeChartFormValues) => {
+    // Ensure parentId is correctly set
+    const formattedData = {
+      ...data,
+      parentId: data.parentId || parentId
+    };
     
-  //   setSizeChart((prev) => [...prev, formattedData]);
+    setSizeChart((prev) => [...prev, formattedData]);
     
-  //   reset({
-  //     ...data,
-  //     name: "",
-  //     value: "",
-  //     sortOrder: data.sortOrder + 1,
-  //   });
-  // };
+    reset({
+      ...data,
+      name: "",
+      value: "",
+      sortOrder: data.sortOrder + 1,
+    });
+  };
 
-  // const handleDelete = (index: number) => {
-  //   setSizeChart((prev) => prev.filter((_, i) => i !== index));
-  // };
+  const handleDelete = (index: number) => {
+    setSizeChart((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  // const handleSaveAll = async () => {
-  //   if (sizeChart.length === 0) return;
-  //   try {
-  //     await addSizeChart.mutateAsync(sizeChart);
-  //   } catch (error) {
-  //     console.error("Failed to save size chart entries:", error);
-  //   }
-  // };
+  const handleSaveAll = async () => {
+    if (sizeChart.length === 0) return;
+    try {
+      await addSizeChart.mutateAsync(sizeChart);
+    } catch (error) {
+      console.error("Failed to save size chart entries:", error);
+    }
+  };
 
   return (
     <div className="space-y-3 p-2">
       <div className="flex flex-row justify-between">
         <h1 className="text-lg font-bold">Size Chart Manager</h1>
-        {/* <Button 
+        <Button 
           onClick={handleSaveAll} 
           className="text-sm rounded-sm p-2 font-bold bg-stone-400 text-stone-800 hover:bg-stone-300"
           disabled={sizeChart.length === 0 || addSizeChart.isLoading}
         >
           {addSizeChart.isLoading ? "UPLOADING..." : "UPLOAD ALL"}
-        </Button> */}
+        </Button>
       </div>
 
       {successMessage && (
@@ -141,7 +141,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
       )}
 
       {/* Add Entry Form */}
-      {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="type" className="block text-sm font-medium">
@@ -238,10 +238,10 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
         <Button type="submit" className="flex item-center mt-4 bg-stone-700">
           Add Entry
         </Button>
-      </form> */}
+      </form>
 
       {/* Size Chart Table */}
-      {/* {sizeChart.length > 0 && (
+      {sizeChart.length > 0 && (
         <Table>
           <TableHeader>
             <TableRow>
@@ -274,7 +274,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
             ))}
           </TableBody>
         </Table>
-      )} */}
+      )}
     </div>
   );
 };
