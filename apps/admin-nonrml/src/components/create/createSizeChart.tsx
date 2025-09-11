@@ -91,6 +91,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
     };
     
     setSizeChart((prev) => [...prev, formattedData]);
+    
     reset({
       ...data,
       name: "",
@@ -114,7 +115,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
 
   return (
     <div className="space-y-3 p-2">
-      <div className="flex flex-row justify-between">
+      {/* <div className="flex flex-row justify-between">
         <h1 className="text-lg font-bold">Size Chart Manager</h1>
         <Button 
           onClick={handleSaveAll} 
@@ -123,24 +124,24 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
         >
           {addSizeChart.isLoading ? "UPLOADING..." : "UPLOAD ALL"}
         </Button>
-      </div>
+      </div> */}
 
-      {successMessage && (
+      {/* {successMessage && (
         <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-2 rounded">
           {successMessage}
         </div>
-      )}
+      )} */}
 
       {/* Parent info display */}
-      {parentId && parentName && (
+      {/* {parentId && parentName && (
         <div className="bg-stone-100 p-2 rounded mb-4">
           <p className="text-sm font-medium">Adding entries under: <span className="font-bold">{parentName}</span></p>
           {parentType && <p className="text-sm">Parent type: {parentType}</p>}
         </div>
-      )}
+      )} */}
 
       {/* Add Entry Form */}
-      {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="type" className="block text-sm font-medium">
@@ -237,7 +238,7 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
         <Button type="submit" className="flex item-center mt-4 bg-stone-700">
           Add Entry
         </Button>
-      </form> */}
+      </form>
 
       {/* Size Chart Table */}
       {sizeChart.length > 0 && (
