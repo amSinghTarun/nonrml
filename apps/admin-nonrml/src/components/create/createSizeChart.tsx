@@ -47,41 +47,41 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
   //   }
   // });
 
-  const {
-    handleSubmit,
-    control,
-    reset,
-    register,
-    formState: { errors },
-    setValue,
-  } = useForm<SizeChartFormValues>({
-    resolver: zodResolver(sizeChartSchema),
-    defaultValues: {
-      name: "",
-      value: "",
-      type: parentType ? getNextTypeForParent(parentType) : "DISPLAY_NAME",
-      parentId: parentId,
-      sortOrder: 0,
-    },
-  });
+  // const {
+  //   handleSubmit,
+  //   control,
+  //   reset,
+  //   register,
+  //   formState: { errors },
+  //   setValue,
+  // } = useForm<SizeChartFormValues>({
+  //   resolver: zodResolver(sizeChartSchema),
+  //   defaultValues: {
+  //     name: "",
+  //     value: "",
+  //     type: parentType ? getNextTypeForParent(parentType) : "DISPLAY_NAME",
+  //     parentId: parentId,
+  //     sortOrder: 0,
+  //   },
+  // });
 
   // Function to determine the next type based on parent type
-  function getNextTypeForParent(type: keyof typeof prismaEnums.SizeType): keyof typeof prismaEnums.SizeType {
-    if (type === "DISPLAY_NAME") return "MEASUREMENT_TYPE";
-    if (type === "MEASUREMENT_TYPE") return "SIZE_VALUE";
-    return "DISPLAY_NAME";
-  }
+  // function getNextTypeForParent(type: keyof typeof prismaEnums.SizeType): keyof typeof prismaEnums.SizeType {
+  //   if (type === "DISPLAY_NAME") return "MEASUREMENT_TYPE";
+  //   if (type === "MEASUREMENT_TYPE") return "SIZE_VALUE";
+  //   return "DISPLAY_NAME";
+  // }
 
   // Set initial values when props change
-  React.useEffect(() => {
-    if (parentId) {
-      setValue("parentId", parentId);
-    }
+  // React.useEffect(() => {
+  //   if (parentId) {
+  //     setValue("parentId", parentId);
+  //   }
     
-    if (parentType) {
-      setValue("type", getNextTypeForParent(parentType));
-    }
-  }, [parentId, parentType, setValue]);
+  //   if (parentType) {
+  //     setValue("type", getNextTypeForParent(parentType));
+  //   }
+  // }, [parentId, parentType, setValue]);
 
   // const onSubmit = (data: SizeChartFormValues) => {
   //   // Ensure parentId is correctly set
