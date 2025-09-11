@@ -23,6 +23,8 @@ export const getHomeImages = async ({ctx, input}: TRPCRequestOptions<{}>) => {
             BOTTOM: [],
             TOP_MD: "",
             TOP_LG: "",
+            TOP_2_MD: "",
+            TOP_2_LG: "",
             MIDDLE_LG: "",
             MIDDLE_MD: ""
         };

@@ -22,10 +22,10 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   const [error, setError] = useState<any>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);  // Changed to array
-  const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
+  const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "TOP_2_MD" | "TOP_2_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
   const [imageDetails, setImageDetails] = useState<{ 
     [imageId: number]: { 
-      currentType?: "TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM", 
+      currentType?: "TOP_MD" | "TOP_LG" | "TOP_2_MD" | "TOP_2_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM", 
       active?: boolean 
     } 
   }>({});
@@ -131,7 +131,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
     active 
   }: { 
     imageId: number, 
-    currentType?: "TOP_MD" | "TOP_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM", 
+    currentType?: "TOP_MD" | "TOP_LG" | "TOP_2_MD" | "TOP_2_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM", 
     active?: boolean 
   }) => {
     try {
@@ -208,6 +208,8 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
               >
                 <option value="TOP_MD">TOP_MD</option>
                 <option value="TOP_LG">TOP_LG</option>
+                <option value="TOP_MD">TOP_2_MD</option>
+                <option value="TOP_LG">TOP_2_LG</option>
                 <option value="MIDDLE_MD">MIDDLE_MD</option>
                 <option value="MIDDLE_LG">MIDDLE_LG</option>
                 <option value="BOTTOM">BOTTOM</option>
@@ -285,6 +287,8 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                     >
                       <option value="TOP_MD">TOP_MD</option>
                       <option value="TOP_LG">TOP_LG</option>
+                      <option value="TOP_MD">TOP_2_MD</option>
+                      <option value="TOP_LG">TOP_2_LG</option>
                       <option value="MIDDLE_MD">MIDDLE_MD</option>
                       <option value="MIDDLE_LG">MIDDLE_LG</option>
                       <option value="BOTTOM">BOTTOM</option>

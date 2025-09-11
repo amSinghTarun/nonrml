@@ -370,7 +370,7 @@ export const editCreditNote = async ({ctx, input}: TRPCRequestOptions<TEditCredi
         const updateData = {
             ...(input.value && { value: input.value}),
             ...(input.expiryDate && { expiryDate: input.expiryDate}),
-            ...(!isNaN(Number(input.remainingValue)) && { redeemed: input.remainingValue}),
+            ...(!isNaN(Number(input.remainingValue)) && { remainingValue: input.remainingValue}),
         }
 
         if(Object.keys(updateData).length == 0)

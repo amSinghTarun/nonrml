@@ -456,6 +456,8 @@ model DynamicConfig {
 enum HomeImageType {
   TOP_MD
   TOP_LG
+  TOP_2_MD
+  TOP_2_LG
   MIDDLE_MD
   MIDDLE_LG
   BOTTOM

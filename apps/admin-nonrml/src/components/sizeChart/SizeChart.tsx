@@ -57,7 +57,6 @@ export const SizeChartHierarchyTable = ({ sizeChartData }: SizeChartTableProps) 
           </DropdownMenuContent>
         </DropdownMenu>
 
-
           <TableCell className="font-medium">
             <div className="flex items-center" style={{ paddingLeft: `${level * 24}px` }}>
               {hasChildren && (

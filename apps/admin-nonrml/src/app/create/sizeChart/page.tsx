@@ -5,8 +5,8 @@ const SizeChartCreatePage = () => {
     return (
         <>
             <section className="flex flex-col w-screen h-screen  ">
-                <h1 className="bg-stone-700 text-white p-3">ADD NEW CATEGORY</h1>
-                <SizeChartForm />
+                <h1 className="bg-stone-700 text-white p-3">ADD NEW SIZE</h1>
+                {/* <SizeChartForm /> */}
             </section>
         </>
     )   
