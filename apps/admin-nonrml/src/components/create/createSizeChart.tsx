@@ -117,13 +117,13 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
     <div className="space-y-3 p-2">
       <div className="flex flex-row justify-between">
         <h1 className="text-lg font-bold">Size Chart Manager</h1>
-        <Button 
+        {/* <Button 
           onClick={handleSaveAll} 
           className="text-sm rounded-sm p-2 font-bold bg-stone-400 text-stone-800 hover:bg-stone-300"
           disabled={sizeChart.length === 0 || addSizeChart.isLoading}
         >
           {addSizeChart.isLoading ? "UPLOADING..." : "UPLOAD ALL"}
-        </Button>
+        </Button> */}
       </div>
 
       {successMessage && (
