@@ -28,24 +28,24 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
   const [sizeChart, setSizeChart] = useState<SizeChartFormValues[]>([]);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const addSizeChart = trpc.viewer.sizeChart.addSizeChart.useMutation({
-    onSuccess: () => {
-      setSuccessMessage("Size chart entries successfully uploaded!");
-      // Clear the form
-      setSizeChart([]);
+  // const addSizeChart = trpc.viewer.sizeChart.addSizeChart.useMutation({
+  //   onSuccess: () => {
+  //     setSuccessMessage("Size chart entries successfully uploaded!");
+  //     // Clear the form
+  //     setSizeChart([]);
       
-      // Either redirect or call onComplete callback
-      if (onComplete) {
-        setTimeout(() => {
-          onComplete();
-        }, 1500);
-      } else {
-        setTimeout(() => {
-          router.push("/sizeChart");
-        }, 1500);
-      }
-    }
-  });
+  //     // Either redirect or call onComplete callback
+  //     if (onComplete) {
+  //       setTimeout(() => {
+  //         onComplete();
+  //       }, 1500);
+  //     } else {
+  //       setTimeout(() => {
+  //         router.push("/sizeChart");
+  //       }, 1500);
+  //     }
+  //   }
+  // });
 
   const {
     handleSubmit,
@@ -83,35 +83,35 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
     }
   }, [parentId, parentType, setValue]);
 
-  const onSubmit = (data: SizeChartFormValues) => {
-    // Ensure parentId is correctly set
-    const formattedData = {
-      ...data,
-      parentId: data.parentId || parentId
-    };
+  // const onSubmit = (data: SizeChartFormValues) => {
+  //   // Ensure parentId is correctly set
+  //   const formattedData = {
+  //     ...data,
+  //     parentId: data.parentId || parentId
+  //   };
     
-    setSizeChart((prev) => [...prev, formattedData]);
+  //   setSizeChart((prev) => [...prev, formattedData]);
     
-    reset({
-      ...data,
-      name: "",
-      value: "",
-      sortOrder: data.sortOrder + 1,
-    });
-  };
+  //   reset({
+  //     ...data,
+  //     name: "",
+  //     value: "",
+  //     sortOrder: data.sortOrder + 1,
+  //   });
+  // };
 
-  const handleDelete = (index: number) => {
-    setSizeChart((prev) => prev.filter((_, i) => i !== index));
-  };
+  // const handleDelete = (index: number) => {
+  //   setSizeChart((prev) => prev.filter((_, i) => i !== index));
+  // };
 
-  const handleSaveAll = async () => {
-    if (sizeChart.length === 0) return;
-    try {
-      await addSizeChart.mutateAsync(sizeChart);
-    } catch (error) {
-      console.error("Failed to save size chart entries:", error);
-    }
-  };
+  // const handleSaveAll = async () => {
+  //   if (sizeChart.length === 0) return;
+  //   try {
+  //     await addSizeChart.mutateAsync(sizeChart);
+  //   } catch (error) {
+  //     console.error("Failed to save size chart entries:", error);
+  //   }
+  // };
 
   return (
     <div className="space-y-3 p-2">
@@ -124,9 +124,9 @@ export const SizeChartForm = ({ parentId, parentName, parentType, onComplete }: 
         >
           {addSizeChart.isLoading ? "UPLOADING..." : "UPLOAD ALL"}
         </Button>
-      </div> */}
+      </div>
 
-      {/* {successMessage && (
+      {successMessage && (
         <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-2 rounded">
           {successMessage}
         </div>
