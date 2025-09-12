@@ -52,8 +52,8 @@ export async function LandingPage() {
 
       <ResponsiveImage
         images={{
-          md: homeImages["TOP_MD"] as string,
-          lg: homeImages["TOP_LG"] as string
+          md: homeImages["TOP_2_MD"] as string,
+          lg: homeImages["TOP_2_LG"] as string
         }}
         alt="homeImage"
         className="w-screen h-screen z-30 relative"
