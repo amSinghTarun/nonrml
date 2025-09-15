@@ -208,8 +208,8 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
               >
                 <option value="TOP_MD">TOP_MD</option>
                 <option value="TOP_LG">TOP_LG</option>
-                <option value="TOP_MD">TOP_2_MD</option>
-                <option value="TOP_LG">TOP_2_LG</option>
+                <option value="TOP_2_MD">TOP_2_MD</option>
+                <option value="TOP_2_LG">TOP_2_LG</option>
                 <option value="MIDDLE_MD">MIDDLE_MD</option>
                 <option value="MIDDLE_LG">MIDDLE_LG</option>
                 <option value="BOTTOM">BOTTOM</option>
@@ -287,8 +287,8 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                     >
                       <option value="TOP_MD">TOP_MD</option>
                       <option value="TOP_LG">TOP_LG</option>
-                      <option value="TOP_MD">TOP_2_MD</option>
-                      <option value="TOP_LG">TOP_2_LG</option>
+                      <option value="TOP_2_MD">TOP_2_MD</option>
+                      <option value="TOP_2_LG">TOP_2_LG</option>
                       <option value="MIDDLE_MD">MIDDLE_MD</option>
                       <option value="MIDDLE_LG">MIDDLE_LG</option>
                       <option value="BOTTOM">BOTTOM</option>

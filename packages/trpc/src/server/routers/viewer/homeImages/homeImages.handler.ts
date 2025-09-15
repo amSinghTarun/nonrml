@@ -138,7 +138,7 @@ export const editImage = async ({ctx, input}: TRPCRequestOptions<TEditImageSchem
                     active: true
                 },
             });
-            if(bottomImagesCount >= 4){
+            if(bottomImagesCount > 5){
                 throw {code: "BAD_REQUEST", message: "AT MAX 4 IMAGES CAN BE MARKED AS BOTTOMß"}
             }
         };

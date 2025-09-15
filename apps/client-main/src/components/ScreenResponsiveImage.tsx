@@ -120,6 +120,7 @@ export const ResponsiveImageGallery = ({ images }: { images: string[]}) => {
   );
 };
 
+
 interface ResponsiveImageProps {
   images: {
     md: string;
@@ -142,7 +143,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   fill = false,
   priority = false,
   sizes = "100vw",
-  quality = 80
+  quality = 80,
 }) => {
   // Default to md image initially
   const [currentSrc, setCurrentSrc] = useState<string>(images.md);
@@ -151,9 +152,9 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   useEffect(() => {
     // Set isClient to true when component mounts
     setIsClient(true);
-    
+
     // Set initial image based on window width
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setCurrentSrc(window.innerWidth >= lgBreakpoint ? images.lg : images.md);
     }
 
@@ -167,11 +168,11 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     };
 
     // Add event listener
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Clean up event listener
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [images.md, images.lg, lgBreakpoint]);
 
@@ -181,7 +182,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
       <Image
         src={images.md}
         alt={alt}
-        className={className}
+        className={`object-cover object-center ${className}`}
         fill={fill}
         width={100}
         height={100}
@@ -196,7 +197,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     <Image
       src={currentSrc}
       alt={alt}
-      className={className}
+      className={`object-cover object-center ${className}`}
       width={100}
       fill={fill}
       height={100}
