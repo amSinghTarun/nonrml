@@ -31,7 +31,7 @@ export async function LandingPage() {
         lgBreakpoint={1024} // This is the default value, can be adjusted as needed
       />
 
-     <div className="fixed inset-0 z-20 flex items-center justify-center p-4">
+     {/* <div className="fixed inset-0 z-20 flex items-center justify-center p-4">
         <div className="w-full max-w-4xl h-3/4 max-h-[600px]">
           <iframe
             allowTransparency={true}
@@ -48,7 +48,7 @@ export async function LandingPage() {
             allowFullScreen
           />
         </div>
-      </div>
+      </div> */}
 
       <ResponsiveImage
         images={{
