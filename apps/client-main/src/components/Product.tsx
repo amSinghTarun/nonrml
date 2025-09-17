@@ -243,7 +243,7 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
               )}
             </div>
 
-            <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
+            <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs uppercase rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
               <div className="flex lg:flex-col lg:text-center lg:space-y-1">
                 <span className="font-normal lg:font-bold basis-1/3 ">
                   DESCRIPTION
@@ -253,16 +253,34 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
 
               <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
                 <span className="font-normal lg:font-bold basis-1/3">DETAILS</span>
-                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">{`${product.details}`}</div>
+                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+                    {product.details.map((detail, index) => (
+                      <p key={index} className="mb-1 last:mb-0">
+                        {detail}
+                      </p>
+                    ))}
+                </div>
               </div>
 
               <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
                 <span className="font-normal lg:font-bold basis-1/3 ">CARE</span>
-                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">{`${product.care}`}</div>
+                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+                  {product.care.map((detail, index) => (
+                    <p key={index} className="mb-1 last:mb-0">
+                      {detail}
+                    </p>
+                  ))}
+                </div>
               </div>
               <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
                 <span className="font-normal basis-1/3 lg:font-bold ">SHIPPING</span>
-                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">{`${product.shippingDetails}`}</div>
+                <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+                  {product.shippingDetails.map((detail, index) => (
+                    <p key={index} className="mb-1 last:mb-0">
+                      {detail}
+                    </p>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

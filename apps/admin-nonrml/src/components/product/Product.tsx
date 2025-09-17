@@ -92,7 +92,9 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try{
+            console.log("editproduc");
             if(editProduct){
+                console.log(values);
                 const updateData = {
                     ...(values.name && {name: values.name}),
                     ...(values.description && {description: values.description}),
@@ -209,6 +211,20 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                             ))
                         } </div>
                         { editProduct && <Button type="submit">Submit</Button> }
+
+                        {form.formState.errors && (
+                            <div style={{ color: 'red' }}>
+                                <p>Form has errors:</p>
+                                <ul>
+                                    {Object.keys(form.formState.errors).map(key => (
+                                        <li key={key}>
+                                            {key}: {form.formState.errors[key]?.message as string}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {/* } */}
                     </form>
                 </Form>
             </div>

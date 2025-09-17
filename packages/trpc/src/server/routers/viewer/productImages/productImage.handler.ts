@@ -26,8 +26,10 @@ export const addProductImage = async ({ctx, input}: TRPCRequestOptions<TAddProdu
     input = input!;
     try{
         const imageUplaoded = await uploadToBucketFolder(`PROD_IMAGE:${input.productSku}:${Date.now()}`, dataURLtoFile(input.image, `${input.productId}:${Date.now()}`), true);
+        
         if(imageUplaoded.error)
-            throw { code: "UNPROCESSABLE_CONTENT", message: "Unable to uplaod image"};
+            throw { code: "UNPROCESSABLE_CONTENT", message: JSON.stringify(imageUplaoded.error)};
+
         const {data: imageUrl} = await getPublicURLOfImage(imageUplaoded.data.path, true);
         console.log(imageUrl);
         const newProductImage = await prisma.productImage.create({

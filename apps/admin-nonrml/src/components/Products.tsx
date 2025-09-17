@@ -35,7 +35,6 @@ export const Products = ({products}: {products: Products}) => {
           <TableHead>Name</TableHead>
           <TableHead>Public</TableHead>
           <TableHead>Latest</TableHead>
-          {/* <TableHead>Exclusive</TableHead> */}
           <TableHead>Sold out</TableHead>
           <TableHead className="bg-orange-400 text-white cursor-pointer">Sku</TableHead>
           <TableHead>Avl count</TableHead>
