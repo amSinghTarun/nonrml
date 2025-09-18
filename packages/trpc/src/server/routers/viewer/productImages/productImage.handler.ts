@@ -1,8 +1,8 @@
 import { TRPCResponseStatus, TRPCAPIResponse } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
-import { TAddProductImageSchema, TDeleteProductImageSchema, TEditImagePriorityIndexImageSchema, TEditProductImageSchema } from "./productImage.schema";
+import { TAddProductImageSchema, TDeleteProductImageSchema, TEditImagePriorityIndexImageSchema, TEditProductImageSchema, TGetSignedUrlSchema } from "./productImage.schema";
 import { Prisma, prismaEnums } from "@nonrml/prisma";
-import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
+import { getPublicURLOfImage, getSignedUrl, uploadToBucketFolder } from "@nonrml/storage";
 import { dataURLtoFile } from "@nonrml/common";
 import { TRPCError } from "@trpc/server";
 import { TRPCClientError } from "@trpc/client";
@@ -21,16 +21,31 @@ Process:
     Make that logic different, i mean the logic of uplaoding to s3
 */
 
+export const getSignedImageUploadUrl = async ({ctx, input}: TRPCRequestOptions<TGetSignedUrlSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        const data = await getSignedUrl(input.imageName, true);
+        console.log("signedUrl", data)
+        return {status:TRPCResponseStatus.SUCCESS, message:"", data: {signedUrl: data.data.signedUrl, token: data.data.token, path: data.data.path}};
+    } catch(error) {
+        //console.log("\n\n Error in addProductImage ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};
+
 export const addProductImage = async ({ctx, input}: TRPCRequestOptions<TAddProductImageSchema>) => {
     const prisma = ctx.prisma;
     input = input!;
     try{
-        const imageUplaoded = await uploadToBucketFolder(`PROD_IMAGE:${input.productSku}:${Date.now()}`, dataURLtoFile(input.image, `${input.productId}:${Date.now()}`), true);
+        // const imageUplaoded = await uploadToBucketFolder(`PROD_IMAGE:${input.productSku}:${Date.now()}`, dataURLtoFile(input.image, `${input.productId}:${Date.now()}`), true);
         
-        if(imageUplaoded.error)
-            throw { code: "UNPROCESSABLE_CONTENT", message: JSON.stringify(imageUplaoded.error)};
+        // if(imageUplaoded.error)
+        //     throw { code: "UNPROCESSABLE_CONTENT", message: JSON.stringify(imageUplaoded.error)};
 
-        const {data: imageUrl} = await getPublicURLOfImage(imageUplaoded.data.path, true);
+        const {data: imageUrl} = await getPublicURLOfImage(input.imagePath, true);
         console.log(imageUrl);
         const newProductImage = await prisma.productImage.create({
             data: {
@@ -40,6 +55,7 @@ export const addProductImage = async ({ctx, input}: TRPCRequestOptions<TAddProdu
                 active: input.active
             }
         });
+        console.log(newProductImage)
         return {status:TRPCResponseStatus.SUCCESS, message:"", data: {}};
     } catch(error) {
         //console.log("\n\n Error in addProductImage ----------------");

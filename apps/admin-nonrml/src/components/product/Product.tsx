@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
 import { convertFileToDataURL } from "@nonrml/common"
+import { uploadToSignedURL } from "@nonrml/storage";
 
 type Product = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getAdminProduct"], unknown>;
 
@@ -70,6 +71,9 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
             imageUploadForm.reset();
         }
     });
+    
+    const getSignedImageUrl = trpc.viewer.productImages.getSignedImageUploadUrl.useMutation({});
+
     const updateProductDetails = trpc.viewer.product.editProduct.useMutation({
         onSuccess: () => {
             productDetails.refetch();
@@ -116,9 +120,19 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const onImageSubmit = async (values: z.infer<typeof productImageFormSchema>) => {
         try{
-            await addProductImage.mutateAsync({image: values.image, priorityIndex: values.priorityIndex,  active: values.active, productSku: product.sku, productId: product.id})
+            const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}`;
+            const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
+            const res = await fetch(signedUrlData.data.signedUrl, {
+                method: "PUT",
+                body: values.image,
+                headers: {
+                    "Content-Type": values.image.type,
+                },
+            })
+            console.log(res)
+            await addProductImage.mutateAsync({imagePath: signedUrlData.data.path, priorityIndex: values.priorityIndex,  active: values.active, productId: product.id});
         } catch(error) {
-            setError(error)
+            setError(error);
         }
     }
 
@@ -248,7 +262,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     // Create a custom onUpload handler for the FileUpload component
                                     const handleFileUpload = async (files: File[]) => {
                                         if (files.length > 0) {
-                                            field.onChange(await convertFileToDataURL(files[0]));
+                                            field.onChange(files[0]);
                                         }
                                     };
                                     

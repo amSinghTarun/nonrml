@@ -1,10 +1,16 @@
 
 import { z } from "zod";
 
+export const ZGetSignedUrlSchema = z.object({
+    imageName: z.string(),
+});
+export type TGetSignedUrlSchema = z.infer<typeof ZGetSignedUrlSchema>;
+
 export const ZAddProductImageSchema = z.object({
-    image: z.string(),
-    productSku: z.string(),
+    // image: z.string(),
+    // productSku: z.string(),
     productId: z.number(),
+    imagePath: z.string(),
     priorityIndex: z.number(),
     active: z.boolean()
 });
