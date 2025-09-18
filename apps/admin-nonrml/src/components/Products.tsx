@@ -32,9 +32,9 @@ export const Products = ({products}: {products: Products}) => {
       <TableHeader>
         <TableRow>
           <TableHead>Id</TableHead>
-          <TableHead>Name</TableHead>
           <TableHead>Public</TableHead>
-          <TableHead>Latest</TableHead>
+          <TableHead>latest</TableHead>
+          <TableHead>exclusive</TableHead>
           <TableHead>Sold out</TableHead>
           <TableHead className="bg-orange-400 text-white cursor-pointer">Sku</TableHead>
           <TableHead>Avl count</TableHead>
