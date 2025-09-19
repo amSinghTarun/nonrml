@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-        {hostname:"dnxioyhtsziptltctjfk.supabase.co"},
+        {hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME!},
         {hostname:"images.unsplash.com"},
         {hostname:"aceternity.com"}
     ]
