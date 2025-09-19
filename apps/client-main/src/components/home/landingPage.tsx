@@ -80,16 +80,6 @@ export async function LandingPage() {
                   imageAlt={product.name}
                   price={+product.price}
                 />
-                <ProductCardHome  
-                  key={product.sku}
-                  image={product.productImages[0]?.image}
-                  hoverImage={product.productImages[1]?.image}
-                  name={product.name}
-                  sku={product.sku}
-                  count={product._count.ProductVariants}
-                  imageAlt={product.name}
-                  price={+product.price}
-                />
               </>
             ))
           }
@@ -131,36 +121,6 @@ export async function LandingPage() {
           {
             products.popularProducts.map( product => ( 
               <>
-                <ProductCardHome  
-                  key={product.sku}
-                  image={product.productImages[0]?.image}
-                  hoverImage={product.productImages[1]?.image}
-                  name={product.name}
-                  sku={product.sku}
-                  count={product._count.ProductVariants}
-                  imageAlt={product.name}
-                  price={+product.price}
-                />
-                <ProductCardHome  
-                  key={product.sku}
-                  image={product.productImages[0]?.image}
-                  hoverImage={product.productImages[1]?.image}
-                  name={product.name}
-                  sku={product.sku}
-                  count={product._count.ProductVariants}
-                  imageAlt={product.name}
-                  price={+product.price}
-                />
-                <ProductCardHome  
-                  key={product.sku}
-                  image={product.productImages[0]?.image}
-                  hoverImage={product.productImages[1]?.image}
-                  name={product.name}
-                  sku={product.sku}
-                  count={product._count.ProductVariants}
-                  imageAlt={product.name}
-                  price={+product.price}
-                />
                 <ProductCardHome  
                   key={product.sku}
                   image={product.productImages[0]?.image}
