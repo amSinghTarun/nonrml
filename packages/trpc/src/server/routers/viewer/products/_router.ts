@@ -1,8 +1,8 @@
 import { adminProcedure, publicProtectedProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { addProduct, getProduct, getAdminProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts, editProduct, getAdminProducts, getRelatedProducts } from "./product.handler";
-import { ZAddProductSchema, ZGetProductSchema, ZGetProductVariantQuantitySchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema, ZGetHomeProductsSchema, ZEditProductSchema, ZGetRelatedProductsSchema } from "./product.schema";
+import { addProduct, getProduct, getAdminProduct, getProducts, getProductsSizes, verifyCheckoutProducts, getProductVariantQuantity, getHomeProducts, editProduct, getAdminProducts, getRelatedProducts, deleteProduct } from "./product.handler";
+import { ZAddProductSchema, ZGetProductSchema, ZGetProductVariantQuantitySchema, ZGetProductsSchema, ZGetProductsSizes, ZVerifyCheckoutProductsSchema, ZGetHomeProductsSchema, ZEditProductSchema, ZGetRelatedProductsSchema, ZDeleteProductSchema } from "./product.schema";
 
 export const productRouter = router({
     getProduct: publicProcedure
@@ -46,5 +46,9 @@ export const productRouter = router({
     editProduct : adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
         .input(ZEditProductSchema)
-        .mutation( async ({ctx, input}) => await editProduct({ctx, input}) )
+        .mutation( async ({ctx, input}) => await editProduct({ctx, input}) ),
+    deleteProduct : adminProcedure
+        .meta({ openAPI: {method: "POST", descrription: "Edit a product"}})
+        .input(ZDeleteProductSchema)
+        .mutation( async ({ctx, input}) => await deleteProduct({ctx, input}) )
 });

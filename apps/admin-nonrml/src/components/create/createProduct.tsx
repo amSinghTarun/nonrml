@@ -14,13 +14,14 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/app/_trpc/client";
 import { productCreateFormSchema } from "@/lib/formSchema/productFormSchema.zod";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export const CreateProduct = () => {
-
+    const router = useRouter();
+    
     const createProduct = trpc.viewer.product.addProduct.useMutation({
         onSuccess: (response) => {
-            redirect(`/products/${response.data.sku}`);
+            router.push(`/products/${response.data.sku}`);
         }
     });
 

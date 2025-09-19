@@ -81,6 +81,13 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
         }
     });
 
+    const deleteProduct = trpc.viewer.product.deleteProduct.useMutation({
+        onSuccess: () => {
+            productDetails.refetch();
+            form.reset({});
+        }
+    });
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema)
@@ -182,7 +189,15 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                         setError(error)
                     }
                 }} className="bg-stone-700 p-3 hover:bg-orange-100 text-orange-600 rounded-md text-xs">{product?.soldOut ? `IN STOCK` : `SELL OUT`}</Button>
-                <Button className="bg-stone-700 p-3 hover:bg-red-100 text-red-600 rounded-md text-xs">{`DELETE PRODUCT`}</Button>
+                <Button className="bg-stone-700 p-3 hover:bg-red-100 text-red-600 rounded-md text-xs" 
+                    onClick={ async () => {
+                        try{
+                            await deleteProduct.mutateAsync({productId: product.id})
+                        } catch(error){
+                            setError(error)
+                        }
+                    }}
+                >{`DELETE PRODUCT`}</Button>
                 <Button onClick={async () => {
                     try{
                         await updateProductDetails.mutateAsync({exclusive: !product.exclusive, productId: product.id});

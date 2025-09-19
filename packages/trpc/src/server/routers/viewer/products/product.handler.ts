@@ -9,7 +9,8 @@ import {
   TVerifyCheckoutProductsSchema,
   TGetProductVariantQuantitySchema,
   TGetHomeProductsSchema,
-  TGetRelatedProductsSchema
+  TGetRelatedProductsSchema,
+  TDeleteProductSchema
 } from "./product.schema";
 import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
@@ -894,7 +895,9 @@ export const editProduct = async ({
   const prisma = ctx.prisma;
   input = input!
   try {
-    console.log(input)
+    console.log(input);
+
+    
 
     const updateData = {
       ...(input.name && {name: input.name}),
@@ -955,32 +958,59 @@ Delete a record from the DB,
 Cascade is off so if any product id is being used in some inventory or anywhere else then it will
 result in error
 */
-// export const deleteProduct = async ({
-//   ctx,
-//   input,
-// }: TRPCRequestOptions<TDeleteProductSchema>) => {
-//   try {
-//     await prisma.products.delete({
-//       where: {
-//         id: input.productId,
-//       },
-//     });
-//     return {
-//       status: TRPCResponseStatus.SUCCESS,
-//       message: "Product deleted",
-//       data: {},
-//     };
-//   } catch (error) {
-//     //console.log("\n\n Error in deleteProductImage ----------------");
-//     if (error instanceof Prisma.PrismaClientKnownRequestError)
-//       error = {
-//         code: "BAD_REQUEST",
-//         message:
-//           error.code === "P2025"
-//             ? "Requested record does not exist"
-//             : error.message,
-//         cause: error.meta?.cause,
-//       };
-//     throw TRPCCustomError(error);
-//   }
-// };
+export const deleteProduct = async ({
+  ctx,
+  input,
+}: TRPCRequestOptions<TDeleteProductSchema>) => {
+  const prisma = ctx.prisma;
+  input = input!
+  try {
+    
+    const productVariants = await prisma.productVariants.findMany({
+      where: {
+        productId: input.productId
+      },
+      select: {
+        id: true
+      }
+    });
+
+    const variantIds: number[] = productVariants.map((variant) => variant.id);
+
+    const productVariantInOrderExist = await prisma.orderProducts.findFirst({
+      where: {
+        productVariantId: {
+          in: variantIds
+        }
+      }
+    });
+
+    if(productVariantInOrderExist && productVariantInOrderExist.id)
+      throw {code: "BAD_REQUEST", message: "Orders of the product exist"}
+
+    await prisma.products.delete({
+      where: {
+        id: input.productId,
+        public: false
+      },
+    });
+
+    return {
+      status: TRPCResponseStatus.SUCCESS,
+      message: "Product deleted",
+      data: {},
+    };
+  } catch (error) {
+    //console.log("\n\n Error in deleteProductImage ----------------");
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+      error = {
+        code: "BAD_REQUEST",
+        message:
+          error.code === "P2025"
+            ? "Requested record does not exist"
+            : error.message,
+        cause: error.meta?.cause,
+      };
+    throw TRPCCustomError(error);
+  }
+};
