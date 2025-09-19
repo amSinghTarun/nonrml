@@ -27,6 +27,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
-
-rzp_live_RFojdMUaDJy9XM
