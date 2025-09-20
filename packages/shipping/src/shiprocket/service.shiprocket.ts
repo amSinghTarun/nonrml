@@ -17,7 +17,7 @@ export class ShiprocketShipping {
       password: process.env.SHIPROCKET_PASSWORD,
     });
     const token = response.data.token;
-    const expiry = Date.now() + (9 * 24 * 60 * 60 * 1000); // 9 days in ms
+    const expiry = Date.now() + (9 * 24 * 60 * 60); // 9 days in ms
     await cacheServicesRedisClient().set(`ShiprocketToken`, token, {ex: expiry});
     return token;
   }
@@ -379,3 +379,7 @@ private static formatReturnOrderData( data: ShiprocketTypes.ShiprocketReturnOrde
   return formatted;
   }
 }
+
+
+singhtarun1128@gmail.com
+p5Z17zRSW%LvQ9KL
