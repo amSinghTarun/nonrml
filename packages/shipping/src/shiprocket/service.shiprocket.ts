@@ -35,7 +35,7 @@ export class ShiprocketShipping {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ShiprocketShipping.getShiptocketToken()}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           },
           timeout: 30000
         }
@@ -116,14 +116,14 @@ export class ShiprocketShipping {
     if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
 
     try {
-      console.log(this.baseUrl, ShiprocketShipping.getShiptocketToken());
+      console.log(this.baseUrl, await ShiprocketShipping.getShiptocketToken());
       const response = await axios.get(
         `${this.baseUrl}/v1/external/courier/serviceability/`,
         {
           params: queryParams,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ShiprocketShipping.getShiptocketToken()}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           }
         }
       );
@@ -164,7 +164,7 @@ export class ShiprocketShipping {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ShiprocketShipping.getShiptocketToken()}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           },
           timeout: 30000
         }
