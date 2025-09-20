@@ -100,6 +100,7 @@ export class ShiprocketShipping {
     if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
 
     try {
+      console.log(this.baseUrl, this.apiToken);
       const response = await axios.get(
         `${this.baseUrl}/v1/external/courier/serviceability/`,
         {
