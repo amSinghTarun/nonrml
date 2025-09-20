@@ -16,7 +16,7 @@ import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { customCacheJSONIncr } from "@nonrml/cache";
 const take = 10;
-import { cacheServicesRedisClient } from "@nonrml/cache"
+import { cacheServicesRedisClient } from "@nonrml/cache" 
 
 /*
  Get the product details and also sizes for all the variants available
