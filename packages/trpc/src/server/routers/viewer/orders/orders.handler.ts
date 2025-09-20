@@ -1086,6 +1086,17 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
         }
 
         // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
+        console.log(input.rzpOrderId);
+        const paymentDetails = await prisma.payments.findFirst({
+            where: {
+                rzpOrderId: input.rzpOrderId 
+            },
+            include: {
+                Orders: true
+            }
+        })
+        console.log(paymentDetails)
+
         const order = await prisma.payments.update({
             where: {
                 rzpOrderId: input.rzpOrderId
