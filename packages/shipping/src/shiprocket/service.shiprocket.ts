@@ -17,7 +17,7 @@ export class ShiprocketShipping {
       password: process.env.SHIPROCKET_PASSWORD,
     });
     const token = response.data.token;
-    const expiry = Date.now() + (9 * 24 * 60 * 60); // 9 days in ms
+    const expiry = 9 * 24 * 3600;
     await cacheServicesRedisClient().set(`ShiprocketToken`, token, {ex: expiry});
     return token;
   }
