@@ -45,7 +45,7 @@ const OrdersPage = () => {
     refetchOnMount: false,
   });
 
-  console.log(orders)
+  // console.log(orders)
 
   const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
