@@ -14,9 +14,13 @@ export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) =
         if (!contact) {
             throw new TRPCError({code: "BAD_REQUEST", message: "Contact number is required"})
         }
+        console.log(ctx, input)
 
         const rateLimitedIP = await ratelimitWithIP().limit(`${ctx.req.headers.get("x-forwarded-for")}`);
+        console.log("RATE LIMIT 1");
         const rateLimitedMobileNumber = await ratelimitWithMobileNumber().limit(`${contact}`);
+        console.log("RATE LIMIT 2");
+
         if( !rateLimitedIP.success || !rateLimitedMobileNumber.success)
             throw new Error("Too many request, try after sometime")
 
