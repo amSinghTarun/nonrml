@@ -28,6 +28,7 @@ const Signin = () => {
 
     const onMobileSubmit = async (e: FormEvent<HTMLFormElement>) => {
         try {
+            console.log("Entered the onMobileSubmit")
             e.preventDefault()
             setError(null) // Clear previous errors when a new request starts
             if(sendOTP.isLoading)
@@ -36,9 +37,11 @@ const Signin = () => {
                 setError("Mobile number should be 10 digits long");
                 return;
             }
+            console.log(mobileNumber)
             !otpSent && await sendOTP.mutateAsync({contactNumber: getFullMobileNumber()});
             setSendOtp(true);
         } catch (error: any) {
+            console.log(error)
             setError(error.message ? error.message : "Having some trouble, try after sometime")
         };
     };

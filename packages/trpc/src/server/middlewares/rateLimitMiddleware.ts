@@ -4,6 +4,7 @@ import { ratelimitWithIP, ratelimitWithMobileNumber } from "@nonrml/rate-limit"
 
 export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) => {
     try{
+        console.log("Entered the rateLimitLoginMiddleware ")
         if( !ctx.req ) {
             throw new TRPCError({code: "UNAUTHORIZED", message: "Try after sometime"})
         }
@@ -18,6 +19,9 @@ export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) =
         const rateLimitedMobileNumber = await ratelimitWithMobileNumber().limit(`${contact}`);
         if( !rateLimitedIP.success || !rateLimitedMobileNumber.success)
             throw new Error("Too many request, try after sometime")
+
+        console.log("Exited the rateLimitLoginMiddleware ")
+
         return next();
     } catch(error){
         throw error
