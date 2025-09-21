@@ -7,6 +7,7 @@ import { generateCreditNoteEmail, TRPCResponseStatus } from "@nonrml/common";
 import crypto from 'crypto';
 import { cacheServicesRedisClient } from "@nonrml/cache";
 import { sendSMTPMail } from "@nonrml/mailing";
+import { sendOTP } from "@nonrml/otp";
 
 export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditNoteSchema> ) => {
     const prisma = ctx.prisma;
@@ -48,6 +49,7 @@ export const getCreditNote = async ({ctx, input}: TRPCRequestOptions<TGetCreditN
 export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) => {
     const prisma = ctx.prisma;
     const userId = ctx.user?.id;
+    const contactNumber = ctx.user?.contactNumber
     input = input!;
     try{
         const attemptNumber : string|null = await cacheServicesRedisClient().get(`${userId}`);
@@ -64,7 +66,7 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
                 userId: userId
             }
         })
-        if(!creditNote)
+        if(!creditNote || !contactNumber)
             throw new TRPCError({code:"NOT_FOUND", message: "No Credit Notes On Your Name"});
         
 
@@ -72,6 +74,7 @@ export const sendCreditNoteOtp = async ({ctx, input}: TRPCRequestOptions<{}> ) =
         console.log("CREDIT NOTE OTP",otp);
         
         //send OTP
+        sendOTP(otp, contactNumber); 
 
         //after otp successs
         await cacheServicesRedisClient().incr(`${userId}`);

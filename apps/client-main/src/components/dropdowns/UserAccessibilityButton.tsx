@@ -1,8 +1,6 @@
 import { signOut } from "next-auth/react";
 import React from "react";
-import { useRecoilState } from "recoil";
 import { DropdownButton, DropdownMenu } from "../ui/dropdown";
-// import { appbarOpenUtil as appbarOpenUtilAtom } from "@/store/atoms";
 import { useSetAppbarUtilStore } from "@/store/atoms";
 
 export const UserAccessibilityDropdown = () => {
