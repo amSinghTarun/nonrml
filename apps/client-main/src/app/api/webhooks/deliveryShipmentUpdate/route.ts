@@ -1,4 +1,5 @@
 import { serverClient } from '@/app/_trpc/serverClient';
+import { ShiprocketShipping } from '@nonrml/shipping';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Helper function to validate webhook headers
@@ -45,7 +46,7 @@ const fetchOrderDetails = async (orderId: string) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SHIPROCKET_API_TOKEN}`
+        'Authorization': `Bearer ${await ShiprocketShipping.ShiprocketShipping.getShiptocketToken()}`
       }
     });
 

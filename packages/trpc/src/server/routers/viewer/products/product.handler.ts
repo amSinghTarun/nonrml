@@ -16,7 +16,7 @@ import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { customCacheJSONIncr } from "@nonrml/cache";
 const take = 10;
-import { cacheServicesRedisClient } from "@nonrml/cache"
+import { cacheServicesRedisClient } from "@nonrml/cache" 
 
 /*
  Get the product details and also sizes for all the variants available
@@ -536,7 +536,7 @@ export const getAdminProducts = async ({ ctx, input }: TRPCRequestOptions<TGetPr
 
     // if(!latestProducts || !latestProducts.length){
     let latestProducts = await prisma.products.findMany({
-      take: ( input.take ?? take) + 1,
+      // take: ( input.take ?? take) + 1,
       ...(input.cursor && {cursor: {id: input.cursor}}),
       where: {
         ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
@@ -581,10 +581,10 @@ export const getAdminProducts = async ({ ctx, input }: TRPCRequestOptions<TGetPr
     // }
     // console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
     let nextCursor: number | undefined = undefined;
-    if (latestProducts && latestProducts.length >= take) {
-      const nextItem = latestProducts.pop();
-      nextCursor = nextItem?.id;
-    }
+    // if (latestProducts && latestProducts.length >= take) {
+    //   const nextItem = latestProducts.pop();
+    //   nextCursor = nextItem?.id;
+    // }
 
     return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
   } catch (error) {
@@ -621,7 +621,7 @@ export const getHomeProducts = async ({
       ///cache here as ALL no FILTER products, it can be used in the all products page, for an hour or so
       latestProducts = await prisma.products.findMany({
         // skip: input.cursor == 1 ? 0 : 1,
-        take: take + 1,
+        take: 4,
         where: {
           public: true,
           latest: true
@@ -687,7 +687,7 @@ export const getHomeProducts = async ({
     if(input.popular){
       // cache this as popular products, can be cached for 1 hour or so, the popular products don't change but the product quantity can
       popularProducts = await prisma.products.findMany({
-        take: 4,
+        take: 8,
         where: {
           public: true,
           latest: false,

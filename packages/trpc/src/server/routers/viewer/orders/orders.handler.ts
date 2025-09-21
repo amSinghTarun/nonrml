@@ -1067,14 +1067,14 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     const prisma = ctx.prisma;
     input = input!
     try{
-        
+        console.log(input)
         let user = await prisma.user.findUnique({
             where: {
                 contactNumber: input.contactNumber
             }
         })
 
-        console.log("User", user)
+        console.log("User", user, input.rzpOrderId)
         if(!user){
             user = await prisma.user.create({
                 data:{
@@ -1086,6 +1086,19 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
         }
 
         // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
+        console.log("Input Razorpay Id", input.rzpOrderId);
+
+        const paymentDetails = await prisma.payments.findFirst({
+            where: {
+                rzpOrderId: input.rzpOrderId 
+            },
+            include: {
+                Orders: true
+            }
+        });
+
+        console.log(paymentDetails)
+
         const order = await prisma.payments.update({
             where: {
                 rzpOrderId: input.rzpOrderId

@@ -22,7 +22,7 @@ type Products = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getAdminPr
 export const Products = ({products}: {products: Products}) => {
 
   const router = useRouter();
-
+  console.log(products.data?.data.length)
   const manageVisibility = trpc.viewer.product.editProduct.useMutation();
   const allSizeCharts = trpc.viewer.sizeChart.getSizeChart.useQuery({type: "DISPLAY_NAME"});
   const addSizeChartToProduct = trpc.viewer.product.editProduct.useMutation();

@@ -1,10 +1,26 @@
 // packages/shipping/src/shiprocket.ts
 import axios from 'axios';
 import type * as ShiprocketTypes from "./type";
+import { cacheServicesRedisClient } from "@nonrml/cache"
 
 export class ShiprocketShipping {
   private static baseUrl = process.env.SHIPROCKET_API_URL;
-  private static apiToken = process.env.SHIPROCKET_API_TOKEN || "";
+
+  static async getShiptocketToken() {
+    const existingToken = await cacheServicesRedisClient().get("ShiprocketToken");
+    if(existingToken){
+      return existingToken;
+    }
+
+    const response = await axios.post( 'https://apiv2.shiprocket.in/v1/external/auth/login', {
+      email: process.env.SHIPROCKET_EMAIL,
+      password: process.env.SHIPROCKET_PASSWORD,
+    });
+    const token = response.data.token;
+    const expiry = 9 * 24 * 3600;
+    await cacheServicesRedisClient().set(`ShiprocketToken`, token, {ex: expiry});
+    return token;
+  }
 
   // ---------------- CREATE ORDER ----------------
   static async createOrder(
@@ -19,7 +35,7 @@ export class ShiprocketShipping {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiToken}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           },
           timeout: 30000
         }
@@ -100,13 +116,14 @@ export class ShiprocketShipping {
     if (params.qcCheck !== undefined) queryParams.qc_check = params.qcCheck;
 
     try {
+      console.log(this.baseUrl, await ShiprocketShipping.getShiptocketToken());
       const response = await axios.get(
         `${this.baseUrl}/v1/external/courier/serviceability/`,
         {
           params: queryParams,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiToken}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           }
         }
       );
@@ -147,7 +164,7 @@ export class ShiprocketShipping {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiToken}`
+            'Authorization': `Bearer ${await ShiprocketShipping.getShiptocketToken()}`
           },
           timeout: 30000
         }
