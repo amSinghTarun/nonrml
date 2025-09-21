@@ -1,14 +1,11 @@
 "use client"
 
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { usePathname } from 'next/navigation';
 import { useSetAppbarUtilStore } from "@/store/atoms";
 import { useStore } from 'zustand';
-import { LuShoppingBag } from "react-icons/lu";
-import { RiShoppingBag3Line } from "react-icons/ri";
 import { RiShoppingBag3Fill } from "react-icons/ri";
-
+import { RxCross2 } from "react-icons/rx"
 
 const CartButton = () => {
     const appbarUtil = useStore(useSetAppbarUtilStore, (state) => state.appbarUtil);
@@ -29,7 +26,7 @@ const CartButton = () => {
             onClick={handleOnClick}>
             {
                 appbarUtil == "CART" 
-                ? <RiShoppingBag3Line size={24} />
+                ? <RxCross2  size={24}/>
                 : <RiShoppingBag3Fill size={24} /> 
             }
         </div>
@@ -37,3 +34,4 @@ const CartButton = () => {
 }
 
 export default CartButton;
+// sx={{ width: 'auto', height: '90%', color:"black" }}
