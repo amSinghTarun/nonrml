@@ -3,7 +3,7 @@ import axios from "axios"
 import path from "path";
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/otp/.env", "FAST 2 SMS CONFIG");
+// loadEnv("../../packages/otp/.env", "FAST 2 SMS CONFIG");
 
 export const sendOTP = async (otp: number, phone: string) => {
     try{

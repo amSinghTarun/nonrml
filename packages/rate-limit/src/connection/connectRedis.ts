@@ -1,7 +1,7 @@
 import { Redis } from "@upstash/redis";
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/rate-limit/.env.local", "RATE-LIMIT");
+// loadEnv("../../packages/rate-limit/.env.local", "RATE-LIMIT");
 
 let redisConnection : any = null;
 

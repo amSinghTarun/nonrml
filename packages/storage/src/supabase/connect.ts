@@ -5,7 +5,7 @@ import { loadEnv } from '@nonrml/common';
 //     dotenv.config({path: path.resolve("../../packages/storage/.env.local")})
 // }
 
-loadEnv("../../packages/storage/.env.local", "INDEX SUPBASE")
+// loadEnv("../../packages/storage/.env.local", "INDEX SUPBASE")
 
 let supabaseClient : any = null;
 export const supabase = () => {
