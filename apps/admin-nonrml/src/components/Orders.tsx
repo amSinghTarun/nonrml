@@ -13,6 +13,7 @@ import { redirect } from "next/navigation"
 type Orders = UseTRPCQueryResult<RouterOutput["viewer"]["orders"]["getAllOrders"], unknown>
 
 export const Orders = ({orders}:{orders: Orders}) => {
+  console.log(orders)
   return (
     <Table>
       <TableHeader>

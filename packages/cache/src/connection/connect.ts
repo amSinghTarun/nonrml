@@ -1,7 +1,7 @@
 import { Redis } from "@upstash/redis"
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/cache/.env", "INDEX CACHE");
+// loadEnv("../../packages/cache/.env", "INDEX CACHE");
 
 let redisConnection : Redis | null = null;
 

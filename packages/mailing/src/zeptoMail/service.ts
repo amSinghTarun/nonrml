@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/mailing/.env", "INDEX CACHE");
+// loadEnv("../../packages/mailing/.env", "INDEX CACHE");
 
 export const sendSMTPMail = async ( { userEmail, emailBody} : { userEmail: string, emailBody: string }) => {
     var transport = nodemailer.createTransport({

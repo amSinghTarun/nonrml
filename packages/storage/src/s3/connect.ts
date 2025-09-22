@@ -1,7 +1,7 @@
 import S3 from "aws-sdk/clients/s3.js";
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/storage/.env.local", "STORAGE S# ENV LOAD");
+// loadEnv("../../packages/storage/.env.local", "STORAGE S# ENV LOAD");
 
 let s3Connection: S3 | null = null
 

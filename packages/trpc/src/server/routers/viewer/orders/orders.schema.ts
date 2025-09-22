@@ -90,7 +90,7 @@ export const ZGetAllOrdersSchema = z.object({
     userId: z.number().optional(),
     returns: z.boolean().optional(),
     orderStatus: z.enum(Object.keys(prismaEnums.OrderStatus) as [keyof typeof prismaEnums.OrderStatus]).optional()
-});
+}, {message: "The Input check is failing"});
 export type TGetAllOrdersSchema = z.infer<typeof ZGetAllOrdersSchema>;
 
 export const ZGetOrderSchema = z.object({

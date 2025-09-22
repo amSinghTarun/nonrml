@@ -6,7 +6,7 @@ import { prisma } from "@nonrml/prisma";
 import type { DefaultSession, NextAuthOptions } from "next-auth"
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/configs/.env.local", "CONFIG ENV LOAD");
+// loadEnv("../../packages/configs/.env.local", "CONFIG ENV LOAD");
 
 //  interface session extends Session {
 //     user: {

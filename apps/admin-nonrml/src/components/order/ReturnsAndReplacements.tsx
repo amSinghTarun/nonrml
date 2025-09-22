@@ -26,7 +26,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { prismaEnums } from "@nonrml/prisma";
+// import { prismaEnums } from "@nonrml/prisma";
+import {$Enums as prismaEnums } from "@prisma/client";
 
 const RETURN_STATUS = [
   "PENDING",

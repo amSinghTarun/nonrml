@@ -98,7 +98,7 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
             />
           )}
         </div>
-        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-xs bg-white/40 backdrop-blur-lg py-2 px-3 rounded-tl-md rounded-br-md">
+        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[10px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 rounded-tl-md rounded-br-md">
           <h1 className="font-bold">{name.toUpperCase()}</h1>
         </div>
       </Link>

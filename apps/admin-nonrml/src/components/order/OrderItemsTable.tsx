@@ -37,7 +37,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import Image from 'next/image'
 import { RouterInput, trpc } from '@/app/_trpc/client'
-import { prismaEnums, prismaTypes } from '@nonrml/prisma'
+import { prismaTypes } from '@nonrml/prisma'
+import {$Enums as prismaEnums } from "@prisma/client";
 
 interface OrderItemsTableProps {
   orderProducts: any[]

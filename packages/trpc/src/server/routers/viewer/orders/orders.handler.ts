@@ -757,16 +757,18 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
     const prisma = ctx.prisma;
     input = input!;
     try{
+        console.log("Entered the getAllOrders");
+        console.log("input", input)
         let whereCondition : any = {
             ...( input.orderStatus && { orderStatus : input.orderStatus }),
             ...( input.ordersDate && { createdAt: getDateRangeForQuery(input.ordersDate) }),
             ...( input.userId && { userId: input.userId} ),
             ...( input.orderId && { id: input.orderId} ),
-            // ...( input.returns && { })
         }
 
         const take = 30;
-
+        
+        console.log("Where conditions", whereCondition)
         const orders = await prisma.orders.findMany({
             take: input.page && take,
             skip: input.page && ( take * (input.page - 1) ),
@@ -792,6 +794,8 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
                 createdAt: "desc"
             }
         })
+
+        console.log("Exiting the get all order with ", orders.length, " Orders");
 
         return { 
             status: TRPCResponseStatus.SUCCESS, 

@@ -1,7 +1,7 @@
 import Razorpay from 'razorpay';
 import { loadEnv } from "@nonrml/common";
 
-loadEnv("../../packages/payment/.env.local", "INDEX PAYMENT");
+// loadEnv("../../packages/payment/.env.local", "INDEX PAYMENT");
 
 let rzpInstance: Razorpay | null = null;
 
