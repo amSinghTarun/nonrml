@@ -33,12 +33,12 @@ const OrdersPage = () => {
 
   console.log("ENTERNIG THE getAllOrders")
   const orders = trpc.viewer.orders.getAllOrders.useQuery({
-    page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
-    ordersDate: filters.date,
-    orderStatus: filters.status,
-    userId: userIdParam ? +userIdParam : undefined,
-    returns: returnParam ? true : undefined,
-    orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
+    // page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
+    // ordersDate: filters.date,
+    // orderStatus: filters.status,
+    // userId: userIdParam ? +userIdParam : undefined,
+    // returns: returnParam ? true : undefined,
+    // orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
   }, {
     staleTime: Infinity,
     cacheTime: Infinity,
