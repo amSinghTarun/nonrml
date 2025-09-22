@@ -83,8 +83,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const deleteProduct = trpc.viewer.product.deleteProduct.useMutation({
         onSuccess: () => {
-            productDetails.refetch();
-            form.reset({});
+            router.push("/products")
         }
     });
 

@@ -46,7 +46,7 @@ const OrdersPage = () => {
     refetchOnMount: false,
   });
   console.log("Done with the getAllOrders")
-  console.log(orders.data)
+  console.log(orders, orders.status)
 
   const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -112,7 +112,7 @@ const OrdersPage = () => {
         </div>
       </div>
 
-      <Orders orders={orders} />
+      {orders.status == "success" && <Orders orders={orders} />}
 
       {orders.isLoading && <div>Loading...</div>}
       {orders.error && <div>Error: {orders.error.message}</div>}
