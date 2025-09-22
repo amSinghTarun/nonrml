@@ -50,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 )}
             </div>
             <div className="items-center flex flex-col pt-1 pb-2 w-full">
-                <h1 className=" text-neutral-900 font-bold text-xs">{name.toUpperCase()}</h1>
+                <h1 className=" text-neutral-900 font-bold text-center text-xs">{name.toUpperCase()}</h1>
                 <p className="font-normal text-neutral-600 text-xs">{priceInCurrency}</p>
             </div>
         </Link>
@@ -98,7 +98,7 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
             />
           )}
         </div>
-        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[10px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 rounded-tl-md rounded-br-md">
+        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[10px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 px-2 rounded-tl-md rounded-br-md">
           <h1 className="font-bold">{name.toUpperCase()}</h1>
         </div>
       </Link>
