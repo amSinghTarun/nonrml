@@ -31,6 +31,7 @@ const OrdersPage = () => {
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
   const [page, setPage] = useState(1); // Track current page
 
+  console.log("ENTERNIG THE getAllOrders")
   const orders = trpc.viewer.orders.getAllOrders.useQuery({
     page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
     ordersDate: filters.date,
@@ -44,8 +45,8 @@ const OrdersPage = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
-
-  // console.log(orders)
+  console.log("Done with the getAllOrders")
+  console.log(orders.data)
 
   const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
