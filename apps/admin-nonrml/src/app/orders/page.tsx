@@ -107,7 +107,7 @@ const OrdersPage = () => {
         </div>
       </div>
 
-      {orders.status == "success" && <Orders orders={orders} />}
+      {/* {orders.status == "success" && <Orders orders={orders} />} */}
 
       {orders.isLoading && <div>Loading...</div>}
       {orders.error && <div>Error: {orders.error.message}</div>}
