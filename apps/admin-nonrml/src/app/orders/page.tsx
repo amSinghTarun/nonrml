@@ -79,7 +79,7 @@ const OrdersPage = () => {
       </h1>
 
       <div className="flex flex-row items-center justify-start p-5 bg-stone-700 flex-wrap gap-2">
-        <DatePicker onSelect={(date) => updateFilter('date', date)} />
+        {/* <DatePicker onSelect={(date) => updateFilter('date', date)} /> */}
         <OrderStatus onClick={(status) => updateFilter('status', status)} />
         <div className="flex space-x-2">
           <div className="flex bg-white rounded-md">
