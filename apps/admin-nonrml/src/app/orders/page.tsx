@@ -64,13 +64,13 @@ const OrdersPage = () => {
   //   }
   // };
 
-  // const handlePrevPage = () => {
-  //   if (page > 1) setPage(prev => prev - 1);
-  // };
+  const handlePrevPage = () => {
+    if (page > 1) setPage(prev => prev - 1);
+  };
 
-  // const handleNextPage = () => {
-  //   if (orders.data && orders.data.data.length > 0) setPage(prev => prev + 1);
-  // };
+  const handleNextPage = () => {
+    if (orders.data && orders.data.data.length > 0) setPage(prev => prev + 1);
+  };
 
   return (
     <section className="flex flex-col w-screen h-screen text-black">
@@ -114,7 +114,7 @@ const OrdersPage = () => {
       {orders.error && <div>Error: {orders.error.message}</div>}
 
       {/* Pagination */}
-      {/* <div className="flex justify-center items-center mt-4 gap-2">
+      <div className="flex justify-center items-center mt-4 gap-2">
         <Button onClick={handlePrevPage} disabled={page === 1} variant="secondary" className="flex items-center gap-1">
           <ChevronLeft size={16} /> Prev
         </Button>
@@ -122,7 +122,7 @@ const OrdersPage = () => {
         <Button onClick={handleNextPage} disabled={orders.data?.data.length === 0} variant="secondary" className="flex items-center gap-1">
           Next <ChevronRight size={16} />
         </Button>
-      </div> */}
+      </div>
     </section>
   );
 };
