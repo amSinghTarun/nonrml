@@ -8,11 +8,11 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { prismaTypes } from "@nonrml/prisma";
+
 
 interface FilterState {
   date?: Date;
-  status?: prismaTypes.OrderStatus;
+  status?: "PENDING" | "IN_TRANSIT" | "ACCEPTED" | "SHIPPED" | "DELIVERED" | "PAYMENT_FAILED" | "CANCELED" | "CANCELED_ADMIN";
   orderId: number;
   submittedOrderId: number;
 }
@@ -39,11 +39,6 @@ const OrdersPage = () => {
     userId: userIdParam ? +userIdParam : undefined,
     returns: returnParam ? true : undefined,
     orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
-  }, {
-    staleTime: Infinity,
-    cacheTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
   });
   console.log("Done with the getAllOrders")
   console.log(orders, orders.status, orders.data, orders.error)

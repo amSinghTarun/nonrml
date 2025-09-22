@@ -767,6 +767,7 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
         }
 
         const take = 30;
+        
         console.log("Where conditions", whereCondition)
         const orders = await prisma.orders.findMany({
             take: input.page && take,
