@@ -8,11 +8,12 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { prismaTypes } from '@nonrml/prisma';
 
 
 interface FilterState {
   date?: Date;
-  status?: "PENDING" | "IN_TRANSIT" | "ACCEPTED" | "SHIPPED" | "DELIVERED" | "PAYMENT_FAILED" | "CANCELED" | "CANCELED_ADMIN";
+  status?: prismaTypes.OrderStatus;
   orderId: number;
   submittedOrderId: number;
 }
@@ -32,14 +33,14 @@ const OrdersPage = () => {
   const [page, setPage] = useState(1); // Track current page
 
   console.log("ENTERNIG THE getAllOrders")
-  // const orders = trpc.viewer.orders.getAllOrders.useQuery({
-  //   page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
-  //   ordersDate: filters.date,
-  //   orderStatus: filters.status,
-  //   userId: userIdParam ? +userIdParam : undefined,
-  //   returns: returnParam ? true : undefined,
-  //   orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
-  // });
+  const orders = trpc.viewer.orders.getAllOrders.useQuery({
+    page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
+    ordersDate: filters.date,
+    orderStatus: filters.status,
+    userId: userIdParam ? +userIdParam : undefined,
+    returns: returnParam ? true : undefined,
+    orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
+  });
   console.log("Done with the getAllOrders")
   // console.log(orders, orders.status, orders.data, orders.error)
 
@@ -107,10 +108,10 @@ const OrdersPage = () => {
         </div>
       </div> */}
 
-      {/* {orders.status == "success" && <Orders orders={orders} />} */}
-{/* 
+      {orders.status == "success" && <Orders orders={orders} />}
+
       {orders.isLoading && <div>Loading...</div>}
-      {orders.error && <div>Error: {orders.error.message}</div>} */}
+      {orders.error && <div>Error: {orders.error.message}</div>}
 
       {/* Pagination */}
       {/* <div className="flex justify-center items-center mt-4 gap-2">
