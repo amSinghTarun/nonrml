@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { CreditCard, ArrowDown } from "lucide-react";
 import { RouterOutput } from '@/app/_trpc/client';
-import { prismaEnums } from '@nonrml/prisma';
+// import { prismaEnums } from '@nonrml/prisma';
+import { $Enums as prismaEnums } from "@prisma/client"
 
 type Payments = NonNullable<NonNullable<RouterOutput["viewer"]["orders"]["getOrder"]["data"]>["Payments"]>
 
