@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { prismaTypes, prismaEnums } from "@nonrml/prisma"; // ✅ safe import
+import { prismaTypes } from "@nonrml/prisma";
+import { OrderStatus } from "@prisma/client";
 
 interface FilterState {
   date?: Date;
@@ -89,11 +90,11 @@ const OrdersPage = () => {
             <SelectValue placeholder="Order status" />
           </SelectTrigger>
           <SelectContent>
-            {/* {Object.values(prismaEnums.OrderStatus).map((status) => (
+            { Object.values(OrderStatus).map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
               </SelectItem>
-            ))} */}
+            ))}
           </SelectContent>
         </Select>
 
