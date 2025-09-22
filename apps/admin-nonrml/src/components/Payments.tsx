@@ -36,6 +36,8 @@ import { Calendar as CalendarIcon, Download, Search, ChevronLeft, ChevronRight, 
 import { prismaTypes } from '@nonrml/prisma';
 import { RefundDetailsDialog } from './dialogs/RefundDetailsDialog';
 import { redirect } from 'next/navigation';
+import {$Enums as prismaEnums } from "@prisma/client";
+
 
 const PaymentsDashboard = () => {
   const initialFilters = {
@@ -180,7 +182,7 @@ const PaymentsDashboard = () => {
                   <TableCell>{payment.rzpPaymentId || '-'}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      payment.paymentStatus == "captured"
+                      payment.paymentStatus == prismaEnums.PaymentStatus.captured
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
