@@ -43,29 +43,29 @@ const OrdersPage = () => {
   console.log("Done with the getAllOrders")
   // console.log(orders, orders.status, orders.data, orders.error)
 
-  const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPage(1); // Reset page when filters change
-  };
+  // const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
+  //   setFilters(prev => ({ ...prev, [key]: value }));
+  //   setPage(1); // Reset page when filters change
+  // };
 
-  const clearFilters = () => {
-    setFilters(initialFilterState);
-    setPage(1);
-  };
+  // const clearFilters = () => {
+  //   setFilters(initialFilterState);
+  //   setPage(1);
+  // };
 
-  const handleSubmitOrderId = () => {
-    updateFilter('submittedOrderId', filters.orderId);
-  };
+  // const handleSubmitOrderId = () => {
+  //   updateFilter('submittedOrderId', filters.orderId);
+  // };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmitOrderId();
-    }
-  };
+  // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     handleSubmitOrderId();
+  //   }
+  // };
 
-  const handlePrevPage = () => {
-    if (page > 1) setPage(prev => prev - 1);
-  };
+  // const handlePrevPage = () => {
+  //   if (page > 1) setPage(prev => prev - 1);
+  // };
 
   // const handleNextPage = () => {
   //   if (orders.data && orders.data.data.length > 0) setPage(prev => prev + 1);
@@ -73,7 +73,7 @@ const OrdersPage = () => {
 
   return (
     <section className="flex flex-col w-screen h-screen text-black">
-      <h1 className="text-left p-5 bg-stone-700 font-bold text-white">
+      {/* <h1 className="text-left p-5 bg-stone-700 font-bold text-white">
         Orders {userIdParam && ` of user with Id ${userIdParam}`}
       </h1>
 
@@ -105,7 +105,7 @@ const OrdersPage = () => {
             Clear Filters
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {/* {orders.status == "success" && <Orders orders={orders} />} */}
 {/* 
