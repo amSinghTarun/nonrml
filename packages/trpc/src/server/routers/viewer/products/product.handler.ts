@@ -15,7 +15,7 @@ import {
 import { Prisma, prismaTypes } from "@nonrml/prisma";
 import { TRPCError } from "@trpc/server";
 import { customCacheJSONIncr } from "@nonrml/cache";
-const take = 10;
+const take = 13;
 import { cacheServicesRedisClient } from "@nonrml/cache" 
 
 /*
@@ -469,6 +469,7 @@ export const getRelatedProducts = async ({ctx, input}: TRPCRequestOptions<TGetRe
   input = input!
   try{
     const relatedProduct = await prisma.products.findMany({
+      take: 4,
       where: {
         categoryId : input.categoryId,
         soldOut: false,
