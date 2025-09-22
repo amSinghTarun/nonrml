@@ -33,12 +33,12 @@ const OrdersPage = () => {
 
   console.log("ENTERNIG THE getAllOrders")
   const orders = trpc.viewer.orders.getAllOrders.useQuery({
-    // page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
-    // ordersDate: filters.date,
-    // orderStatus: filters.status,
-    // userId: userIdParam ? +userIdParam : undefined,
-    // returns: returnParam ? true : undefined,
-    // orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
+    page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
+    ordersDate: filters.date,
+    orderStatus: filters.status,
+    userId: userIdParam ? +userIdParam : undefined,
+    returns: returnParam ? true : undefined,
+    orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
   }, {
     staleTime: Infinity,
     cacheTime: Infinity,
@@ -46,7 +46,7 @@ const OrdersPage = () => {
     refetchOnMount: false,
   });
   console.log("Done with the getAllOrders")
-  console.log(orders, orders.status)
+  console.log(orders, orders.status, orders.data, orders.error)
 
   const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
