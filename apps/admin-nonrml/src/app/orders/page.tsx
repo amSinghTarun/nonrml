@@ -2,14 +2,19 @@
 import { Orders } from "@/components/Orders";
 import { trpc } from '@/app/_trpc/client';
 import { DatePicker } from "@/components/ui/date-picker";
-import { OrderStatus } from "@/components/OrderStatus";
 import { useState } from "react";
 import { useSearchParams } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { prismaTypes } from '@nonrml/prisma';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { prismaTypes, prismaEnums } from "@nonrml/prisma"; // ✅ safe import
 
 interface FilterState {
   date?: Date;
@@ -30,9 +35,8 @@ const OrdersPage = () => {
   const returnParam = useSearchParams().get('returns');
 
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
-  const [page, setPage] = useState(1); // Track current page
+  const [page, setPage] = useState(1);
 
-  console.log("ENTERNIG THE getAllOrders")
   const orders = trpc.viewer.orders.getAllOrders.useQuery({
     page: (!filters.date && !filters.status && !filters.submittedOrderId) ? page : undefined,
     ordersDate: filters.date,
@@ -41,12 +45,10 @@ const OrdersPage = () => {
     returns: returnParam ? true : undefined,
     orderId: filters.submittedOrderId ? filters.submittedOrderId : undefined
   });
-  console.log("Done with the getAllOrders")
-  // console.log(orders, orders.status, orders.data, orders.error)
 
   const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setPage(1); // Reset page when filters change
+    setPage(1);
   };
 
   const clearFilters = () => {
@@ -80,7 +82,21 @@ const OrdersPage = () => {
 
       <div className="flex flex-row items-center justify-start p-5 bg-stone-700 flex-wrap gap-2">
         <DatePicker onSelect={(date) => updateFilter('date', date)} />
-        {/* <OrderStatus onClick={(status) => updateFilter('status', status)} /> */}
+
+        {/* ✅ Inline OrderStatus here */}
+        <Select onValueChange={(value) => updateFilter('status', value as prismaTypes.OrderStatus)}>
+          <SelectTrigger className="w-[180px] bg-white">
+            <SelectValue placeholder="Order status" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(prismaEnums.OrderStatus).map((status) => (
+              <SelectItem key={status} value={status}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <div className="flex space-x-2">
           <div className="flex bg-white rounded-md">
             <Input
@@ -92,7 +108,7 @@ const OrdersPage = () => {
             />
             <Button 
               onClick={handleSubmitOrderId}
-              variant={"secondary"}
+              variant="secondary"
               className="flex bg-white items-center gap-2 rounded-l-none"
             >
               <Search size={16} />
@@ -108,8 +124,7 @@ const OrdersPage = () => {
         </div>
       </div>
 
-      {orders.status == "success" && <Orders orders={orders} />}
-
+      {orders.status === "success" && <Orders orders={orders} />}
       {orders.isLoading && <div>Loading...</div>}
       {orders.error && <div>Error: {orders.error.message}</div>}
 
