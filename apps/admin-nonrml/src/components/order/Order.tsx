@@ -67,7 +67,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
       />} 
       {/* address edit */}
       
-      <OrderActionsPanel
+      {/* <OrderActionsPanel
         order={order}
         onStatusChange={handleStatusChange}
         onExtendReturnDate={extendReturnDate}
@@ -99,7 +99,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
             orderQuery.refetch()
           }}
         />
-      )}
+      )} */}
     </div>
   )
 }
