@@ -89,11 +89,11 @@ const OrdersPage = () => {
             <SelectValue placeholder="Order status" />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(prismaEnums.OrderStatus).map((status) => (
+            {/* {Object.values(prismaEnums.OrderStatus).map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
               </SelectItem>
-            ))}
+            ))} */}
           </SelectContent>
         </Select>
 
