@@ -81,15 +81,15 @@ const OrdersPage = () => {
       <div className="flex flex-row items-center justify-start p-5 bg-stone-700 flex-wrap gap-2">
         {/* <DatePicker onSelect={(date) => updateFilter('date', date)} />
         <OrderStatus onClick={(status) => updateFilter('status', status)} /> */}
-        {/* <div className="flex space-x-2">
+        <div className="flex space-x-2">
           <div className="flex bg-white rounded-md">
-            <Input
+            {/* <Input
               placeholder="Order ID"
               value={filters.orderId}
               onChange={(e) => updateFilter('orderId', +e.target.value)}
               onKeyDown={handleKeyPress}
               className="bg-white rounded-r-none border-0"
-            />
+            /> */}
             <Button 
               onClick={handleSubmitOrderId}
               variant={"secondary"}
@@ -105,7 +105,7 @@ const OrdersPage = () => {
           >
             Clear Filters
           </Button>
-        </div> */}
+        </div>
       </div>
 
       {orders.status == "success" && <Orders orders={orders} />}
