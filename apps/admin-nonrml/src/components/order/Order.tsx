@@ -58,16 +58,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
         isReimbursementPending={isReimbursementPending} 
       />
       
-      {/* { order?.address && <ShippingDetails 
+      { order?.address && <ShippingDetails 
         shipment={order.shipment}
         address={order.address}
         isEditable={!['SHIPPED', 'DELIVERED'].includes(order.orderStatus)}
         orderId={order.id}
         onAddressUpdated={() => orderQuery.refetch()}
-      />}  */}
+      />} 
       {/* address edit */}
       
-      {/* <OrderActionsPanel
+      <OrderActionsPanel
         order={order}
         onStatusChange={handleStatusChange}
         onExtendReturnDate={extendReturnDate}
@@ -99,7 +99,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderQuery }) => {
             orderQuery.refetch()
           }}
         />
-      )} */}
+      )}
     </div>
   )
 }
