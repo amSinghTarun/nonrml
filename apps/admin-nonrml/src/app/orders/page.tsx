@@ -83,13 +83,13 @@ const OrdersPage = () => {
         <OrderStatus onClick={(status) => updateFilter('status', status)} /> */}
         <div className="flex space-x-2">
           <div className="flex bg-white rounded-md">
-            {/* <Input
+            <Input
               placeholder="Order ID"
               value={filters.orderId}
               onChange={(e) => updateFilter('orderId', +e.target.value)}
               onKeyDown={handleKeyPress}
               className="bg-white rounded-r-none border-0"
-            /> */}
+            />
             <Button 
               onClick={handleSubmitOrderId}
               variant={"secondary"}
