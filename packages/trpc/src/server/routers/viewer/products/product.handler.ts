@@ -199,6 +199,7 @@ export const getAdminProduct = async ({
         visitedCount: true,
         name: true,
         description: true,
+        inspiration: true,
         price: true,
         id: true,
         colour: true,
