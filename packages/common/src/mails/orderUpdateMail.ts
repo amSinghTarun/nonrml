@@ -47,7 +47,7 @@ export const generateOrderCancellationEmail = (orderId: string, orderIdVarChar: 
                 <tr>
                     <td style="padding: 30px; text-align: center; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 1.6; background-color: #ffffff; border-top: 1px solid #000000;">
                         <p style="margin: 0 0 10px; color: #4a5568; font-weight: 400;">Questions about your order? Please contact our customer service team:</p>
-                        <p style="margin: 0;"><a href="mailto:support@nonrml.com" style="color: #000000; text-decoration: none; font-weight: 500;">support@nonrml.com</a></p>
+                        <p style="margin: 0;"><a href="mailto:${process.env.CLIENT_SUPPORT_MAIL}" style="color: #000000; text-decoration: none; font-weight: 500;">${process.env.CLIENT_SUPPORT_MAIL}</a></p>
                     </td>
                 </tr>
             </table>
@@ -100,7 +100,7 @@ export const generateOrderQuantityUpdateEmail = (orderId: string, orderIdVarChar
                 <tr>
                     <td style="padding: 30px; text-align: center; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 1.6; background-color: #ffffff; border-top: 1px solid #000000;">
                         <p style="margin: 0 0 10px; color: #4a5568; font-weight: 400;">Questions about your order? Please contact our customer service team:</p>
-                        <p style="margin: 0;"><a href="mailto:support@nonrml.com" style="color: #000000; text-decoration: none; font-weight: 500;">support@nonrml.com</a></p>
+                        <p style="margin: 0;"><a href="mailto:${process.env.CLIENT_SUPPORT_MAIL}" style="color: #000000; text-decoration: none; font-weight: 500;">${process.env.CLIENT_SUPPORT_MAIL}</a></p>
                     </td>
                 </tr>
             </table>

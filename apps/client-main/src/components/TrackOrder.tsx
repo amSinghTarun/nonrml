@@ -189,8 +189,8 @@ export const TrackOrder: React.FC<TrackOrderProps> = (trackOrderProps) => {
                         <div className="px-6 py-4 bg-neutral-50 rounded-b-lg">
                             <p className="text-xs text-neutral-500 text-center">
                                 For support, contact{' '}
-                                <a href="mailto:support@nonrml.com" className="text-neutral-800 underline">
-                                    support@nonrml.com
+                                <a href={`mailto:${process.env.CLIENT_SUPPORT_MAIL}`} className="text-neutral-800 underline">
+                                    {process.env.CLIENT_SUPPORT_MAIL}
                                 </a>
                             </p>
                         </div>

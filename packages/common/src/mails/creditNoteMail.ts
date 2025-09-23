@@ -87,7 +87,7 @@ export const generateCreditNoteEmail = (options: CreditNoteData): string => {
                     <td style="padding: 40px; text-align: center; border-top: 1px solid #f0f0f0;">
                         <p style="margin: 0 0 8px; font-size: 11px; color: #999999; font-weight: 300;">Questions?</p>
                         <p style="margin: 0;">
-                            <a href="mailto:support@nonrml.com" style="color: #000000; text-decoration: none; font-size: 11px; font-weight: 400;">support@nonrml.com</a>
+                            <a href="mailto:${process.env.CLIENT_SUPPORT_MAIL}" style="color: #000000; text-decoration: none; font-size: 11px; font-weight: 400;">${process.env.CLIENT_SUPPORT_MAIL}</a>
                         </p>
                     </td>
                 </tr>

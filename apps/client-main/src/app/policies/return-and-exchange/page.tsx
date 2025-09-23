@@ -50,7 +50,7 @@ export default function ReturnExchangePolicy() {
               </li>
               <li>9. The estimated delivery time for all exchange requests is between 7-10 business days.</li>
               <li>10. Please ensure the product(s) are returned in the same condition as when they were shipped. Returns in poor condition or with signs of wear will not be accepted, and the query will not be processed further.</li>
-              <li>11. If you encounter any further issues, please contact us via email at <span className="cursor-pointer text-rose-400">support@nonrml.com</span>, including your name and order ID. Our support team is available Monday to Saturday from 11:00 AM to 6:00 PM. All pending inquiries will be prioritized and resolved within 48 hours.</li>
+              <li>11. If you encounter any further issues, please contact us via email at <span className="cursor-pointer text-rose-400">`{process.env.CLIENT_SUPPORT_MAIL}`</span>, including your name and order ID. Our support team is available Monday to Saturday from 11:00 AM to 6:00 PM. All pending inquiries will be prioritized and resolved within 48 hours.</li>
             </ol>
           </div>
 

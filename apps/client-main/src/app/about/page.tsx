@@ -68,7 +68,7 @@ export default function OurStoryPage() {
             <p>
               This isn't just our story – it's yours too. Every person who chooses NONRML adds their own chapter to this journey. Want to be part of something extraordinary? Reach out to us at{' '}
               <span className="cursor-pointer text-rose-400">
-                info@nonrml.com
+                info@nonrml.co.in
               </span>
               {' '}and let's create something remarkable together.
             </p>

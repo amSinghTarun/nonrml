@@ -152,8 +152,8 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds})
                         <p>
                             A refund has been processed for this order.
                             For more details, please contact us at{' '}
-                            <a href="mailto:support@nonrml.com" className="text-neutral-800 underline">
-                                support@nonrml.com
+                            <a href={`mailto:${process.env.CLIENT_SUPPORT_MAIL}`} className="text-neutral-800 underline">
+                                {process.env.CLIENT_SUPPORT_MAIL}
                             </a>
                         </p>
                     </div>
