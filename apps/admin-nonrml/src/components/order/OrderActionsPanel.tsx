@@ -242,6 +242,12 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
+                  <AlertDialogDescription>
+                    NOTE: THE ADMIN HAS TO ADJUST THE QUANTITY BY HIMSELF AS BASE OR PRODUCT DEPENGING ON THE STATE OF ORDER
+                  </AlertDialogDescription>
+                  <AlertDialogDescription>
+                    NOTE: IF YOU HAVE USED THE REJECT QUANTITY LOGIC THEN DON'T USE THIS. INSTEAD MARK ALL THE QUANTITY AS REJECTED.
+                  </AlertDialogDescription>
                   <AlertDialogTitle>Select Refund Method</AlertDialogTitle>
                   <AlertDialogDescription>
                     Please choose how you would like to process the refund for this cancelled order.

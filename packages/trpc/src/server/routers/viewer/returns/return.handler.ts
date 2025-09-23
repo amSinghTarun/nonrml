@@ -82,7 +82,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
 
         // Check return time limit
         if (Date.now() > Number(orderProducts[0]!.order.returnAcceptanceDate!))
-            throw new TRPCError({ code: "FORBIDDEN", message: "Cannot return order after allotted time" });
+            throw new TRPCError({ code: "FORBIDDEN", message: "Cannot replace order after allotted time" });
 
         let imageUrls: string[] = [];
         let damageExplanation : null|string = null
@@ -123,7 +123,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
             if (!productToReturn || orderProduct.quantity < productToReturn.quantity) {
                 throw new TRPCError({ 
                     code: "FORBIDDEN", 
-                    message: "Please select appropriate quantity/product to return" 
+                    message: "Please select appropriate quantity/product to change" 
                 });
             }
 

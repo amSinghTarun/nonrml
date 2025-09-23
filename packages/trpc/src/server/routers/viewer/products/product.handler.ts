@@ -661,7 +661,7 @@ export const getHomeProducts = async ({
           { createdAt: "desc" }
         ]
       });
-      cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*5});
+      cacheServicesRedisClient().set("latestProducts", latestProducts, {ex: 60*10});
     }
 
     if(input.exclusive){

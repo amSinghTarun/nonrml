@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Edit2, Check, X } from 'lucide-react'
 import { prismaTypes } from '@nonrml/prisma'
-import { UseTRPCQueryResult } from '@trpc/react-query/shared'
 import { RouterOutput } from '@/app/_trpc/client'
 
 interface ShippingDetailsProps {

@@ -1,4 +1,4 @@
-import { generateOrderConfirmationEmail, generateOrderCancellationEmail, generateOrderQuantityUpdateEmail, TRPCResponseStatus, generateShippingNotificationEmail } from "@nonrml/common"
+import { generateOrderConfirmationEmail, generateOrderCancellationEmail, generateOrderQuantityUpdateEmail, TRPCResponseStatus, generateShippingNotificationEmail, generateCreditNoteEmail } from "@nonrml/common"
 import { acceptOrder, generateOrderId, getDateRangeForQuery, getOrderId, TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TCancelOrderSchema, TEditOrderSchema, TGetAllOrdersSchema, TGetOrderSchema, TGetUserOrderSchema, TInitiateOrderSchema, TTrackOrderSchema, TCheckOrderServicibilitySchema, TVerifyOrderSchema, TGetOrderReturnSchema, TCancelAcceptedOrderSchema, TShipOrderrSchema, TUpdateShipmentSchema} from "./orders.schema";
 import { Prisma, prismaEnums, prismaTypes } from "@nonrml/prisma";
@@ -767,7 +767,7 @@ export const getAllOrders = async ({ctx, input}: TRPCRequestOptions<TGetAllOrder
         }
 
         const take = 30;
-        
+
         console.log("Where conditions", whereCondition)
         const orders = await prisma.orders.findMany({
             take: input.page && take,
@@ -1362,12 +1362,12 @@ export const cancelAcceptedOrder = async ({ctx, input} : TRPCRequestOptions<TCan
         await prisma.$transaction(cancelQueries)
         
         //send accepted order cancel confirmation mail
-        if(orderDetails.email)
+        if(orderDetails.email){
             await sendSMTPMail({
                 userEmail: orderDetails.email,
                 emailBody: generateOrderCancellationEmail(`${orderDetails.id}`, orderDetails.idVarChar, "ACCEPTED_ORDER")
             })
-
+        }
         return { status: TRPCResponseStatus.SUCCESS, message:"Order cancelled", data: {}};
 
     } catch(error) {

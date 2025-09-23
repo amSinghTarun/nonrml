@@ -43,6 +43,8 @@ const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | "") => {
             return "FAILED";
         case "authorized":
             return "WAITING BANK APPROVAL";
+        case "refunded":
+            return "REFUNDED";
         default:
             return "PENDING";
     }
