@@ -32,9 +32,9 @@ const getOrderProgressMessage = (status: prismaTypes.OrderStatus, date?:number) 
         case "PAYMENT_FAILED":
             return `Payment failed`;
         case "CANCELED":
-            return `Order Canceled`;
+            return `Order cancelled`;
         case "CANCELED_ADMIN":
-            return `Order Canceled By The Team, And The refund has been processed for this order `;
+            return `Order cancelled By The Team, and the refund has been initiated`;
         default:
             return "Processing Confirmation";
     }
@@ -137,7 +137,7 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds})
                                         <p>{`${product.productVariant?.product.name.toUpperCase()} ( ${product.productVariant?.size} )`}</p>
                                         <p>{convertStringToINR(+product.price)}</p>
                                         <p>{`${product.quantity} Piece${product.quantity > 1 ? 's' : ""}`} </p>
-                                        { product.rejectedQuantity ? <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled. Also, Refund Initiated`}</p> : <></>}
+                                        { product.rejectedQuantity ? <p>{`${product.rejectedQuantity} Piece${product.rejectedQuantity > 1 ? 's' : ""} Cancelled. Refund Initiated`}</p> : <></>}
                                     </div>
                                 </div>
                             </div>

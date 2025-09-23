@@ -149,7 +149,7 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
                     width={0}
                     height={0}
                     sizes="100vw"
-                    className="w-full h-[550px] lg:h-auto object-cover"
+                    className="w-full h-auto sm:max-h-[600px] lg:max-h-none lg:h-auto object-cover"
                   />
                 </CarouselItem>
               ))}
