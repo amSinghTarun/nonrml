@@ -333,11 +333,18 @@ export const calculateRejectedQuantityRefundAmounts = async  (orderId: number, g
     if(!orderDetails)
         throw ({code: "BAD_REQUEST", message: "The order id is invalid"});
 
+    
     let rejectedQuantityTotal = 0;
+    let rejectedQuantity = 0;
+    let totalQuantity = 0
 
     for(let orderProduct of orderDetails.orderProducts){
+        
+        totalQuantity += orderProduct.quantity;
+        rejectedQuantity += orderProduct.rejectedQuantity?? 0;
+        
         if(orderProduct.rejectedQuantity && (orderProduct.rejectedQuantity > orderProduct.reimbursedQuantity)){
-
+            
             rejectedQuantityTotal += ( orderProduct.rejectedQuantity - orderProduct.reimbursedQuantity ) * Number( orderProduct.price )
 
             if(getUpdateQueries){
@@ -350,8 +357,24 @@ export const calculateRejectedQuantityRefundAmounts = async  (orderId: number, g
                     }
                 }))
             }
-
         }
+    }
+
+    // if all the quantities are rejected then it should mark the order as cancelled and payment as refunded
+    if( rejectedQuantity == totalQuantity ) {
+        updateOrderProductReimbursedQueries.push( prisma.orders.update({
+            where:{ 
+                id: orderId
+            },
+            data:{
+                orderStatus: "CANCELED_ADMIN",
+                Payments: {
+                    update: {
+                        paymentStatus: "refunded"
+                    }
+                }
+            }
+        }))
     }
 
     let orderOldTotal = Number(orderDetails.totalAmount);
