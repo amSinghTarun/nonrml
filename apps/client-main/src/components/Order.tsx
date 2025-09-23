@@ -34,7 +34,7 @@ const getOrderProgressMessage = (status: prismaTypes.OrderStatus, date?:number) 
         case "CANCELED":
             return `Order Canceled`;
         case "CANCELED_ADMIN":
-            return `Order Canceled`;
+            return `Order Canceled By The Team, And The refund has been processed for this order `;
         default:
             return "Processing Confirmation";
     }
@@ -46,6 +46,10 @@ const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | undefined) =>
             return "COMPLETE";
         case "failed":
             return "FAILED";
+        case "refunded":
+            return "REFUNDED";
+        case "authorized":
+            return "WAITING BANK APPROVAL";
         default:
             return "Pending";
     }
