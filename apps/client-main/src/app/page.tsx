@@ -34,11 +34,11 @@ const PageSkeleton = () => (
 
 export default async function Home() {
   // Preload data during build time / ISR
-  try {
-    await preloadHomepageData();
-  } catch (error) {
-    console.error('Error preloading homepage data:', error);
-  }
+  // try {
+  //   await preloadHomepageData();
+  // } catch (error) {
+  //   console.error('Error preloading homepage data:', error);
+  // }
 
   return (
     <>
