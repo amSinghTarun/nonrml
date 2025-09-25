@@ -42,7 +42,7 @@ export default async function Home() {
 
   return (
     <>
-      <PreconnectLinks />
+      {/* <PreconnectLinks /> */}
       <main className="flex min-h-screen pt-14 flex-col items-center overflow-y-scroll">
         <Suspense fallback={<PageSkeleton />}>
           <LandingPage />
