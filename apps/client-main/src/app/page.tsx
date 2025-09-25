@@ -1,22 +1,13 @@
-// app/page.tsx
+// app/page.tsx - Quick fix to stop build errors
 import { Suspense } from 'react';
 import { LandingPage } from "@/components/home/landingPage";
-// import { preloadHomepageData } from "@/app/actions/product.action";
 
-// Enable Incremental Static Regeneration
-export const revalidate = 300; // Revalidate every 5 minutes
+// ❌ Remove these lines that cause static generation during build
+// export const revalidate = 300;
+// export const dynamic = 'force-static';
 
-// Enable static generation
-export const dynamic = 'force-static';
-
-// Preconnect to external domains for faster resource loading
-const PreconnectLinks = () => (
-  <>
-    <link rel="preconnect" href="https://images.your-cdn.com" />
-    <link rel="dns-prefetch" href="https://api.your-domain.com" />
-    <link rel="preload" as="image" href="/images/logo.png" />
-  </>
-);
+// ✅ Add this to make it dynamic (no build-time generation)
+export const dynamic = 'force-dynamic';
 
 // Loading skeleton for the entire page
 const PageSkeleton = () => (
@@ -33,22 +24,12 @@ const PageSkeleton = () => (
 );
 
 export default async function Home() {
-  // Preload data during build time / ISR
-  // try {
-  //   await preloadHomepageData();
-  // } catch (error) {
-  //   console.error('Error preloading homepage data:', error);
-  // }
-
   return (
-    <>
-      {/* <PreconnectLinks /> */}
-      <main className="flex min-h-screen pt-14 flex-col items-center overflow-y-scroll">
-        <Suspense fallback={<PageSkeleton />}>
-          <LandingPage />
-        </Suspense>
-      </main>
-    </>
+    <main className="flex min-h-screen pt-14 flex-col items-center overflow-y-scroll">
+      <Suspense fallback={<PageSkeleton />}>
+        <LandingPage />
+      </Suspense>
+    </main>
   );
 }
 
