@@ -1,7 +1,7 @@
 // app/page.tsx
 import { Suspense } from 'react';
 import { LandingPage } from "@/components/home/landingPage";
-import { preloadHomepageData } from "@/app/actions/product.action";
+// import { preloadHomepageData } from "@/app/actions/product.action";
 
 // Enable Incremental Static Regeneration
 export const revalidate = 300; // Revalidate every 5 minutes
