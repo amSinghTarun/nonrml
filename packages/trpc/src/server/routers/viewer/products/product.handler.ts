@@ -370,8 +370,12 @@ The available/out of stock, can be checked through redis SKU cache
 export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProductsSchema>) => {
   const prisma = ctx.prisma;
   input = input!;
+  
+  // Define the page size
+  const pageSize = 12; // Adjust this as needed
+  
   try {
-    console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n PRODUCT start --------------------------------- ", input);
+    console.log("PRODUCT getProducts input:", input);
     
     type LatestProducts = {
       price: number;
@@ -380,27 +384,37 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       id: number;
       soldOut: boolean;
       public?: boolean,
-      // latest: boolean,
-      // sizeChartId: number | null,
-      // visitedCount: number,
-      // exclusive: boolean,
       productImages: {
           image: string;
       }[];
       _count: {
           ProductVariants: number;
       };
-      updatedAt:Date
-    }[] | null
+      updatedAt: Date
+    }[]
 
-    let latestProducts : LatestProducts = ( input.cursor == 1 ) ? await cacheServicesRedisClient().get("allClientProducts") : null;
-    console.log(await prisma.user.findMany())
-    if(!latestProducts || !latestProducts.length){
+    // Only use cache for the very first request (no cursor)
+    let latestProducts: LatestProducts | null = null;
+    
+    // Only check cache if it's the first page AND no cursor
+    if (!input.cursor && !input.categoryName) {
+      latestProducts = await cacheServicesRedisClient().get("allClientProducts");
+      console.log("Cache hit for first page:", !!latestProducts);
+    }
+
+    if (!latestProducts || !latestProducts.length) {
+      console.log("Fetching from database with cursor:", input.cursor);
+      
       latestProducts = await prisma.products.findMany({
-        take: ( input.take ?? take) + 1,
-        ...(input.cursor && {cursor: {id: input.cursor}}),
+        take: pageSize + 1, // Take one extra to determine if there's a next page
+        ...(input.cursor && {
+          cursor: { id: input.cursor },
+          skip: 1, // Skip the cursor record - this was missing!
+        }),
         where: {
-          ...( input.categoryName && {category: {displayName: input.categoryName.replace("_", " ")}} ),
+          ...(input.categoryName && {
+            category: { displayName: input.categoryName.replace("_", " ") }
+          }),
           public: true
         },
         select: {
@@ -409,20 +423,16 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           id: true,
           soldOut: true,
           public: true,
-          // exclusive: true,
           sku: true,
           updatedAt: true,
-          // latest: true,
-          // visitedCount: true,
-          // sizeChartId: true,
-          _count:{
+          _count: {
             select: {
               ProductVariants: {
                 where: {
                   inventory: {
                     OR: [
-                      {baseSkuInventory: { quantity: { gte: 1} }},
-                      {quantity: {gte: 1}}
+                      { baseSkuInventory: { quantity: { gte: 1 } } },
+                      { quantity: { gte: 1 } }
                     ]
                   }
                 },
@@ -440,18 +450,33 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           { createdAt: "desc" }
         ]
       });
-      latestProducts.length && cacheServicesRedisClient().set("allClientProducts", latestProducts, {ex: 60*5});
-      console.log(latestProducts, "PRODUCTs END ---------------------------------", "\n\n\n\n\n");
+
+      // Only cache the first page without category filter
+      if (!input.cursor && !input.categoryName && latestProducts.length) {
+        // Don't cache the extra item
+        const itemsToCache = latestProducts.slice(0, pageSize);
+        cacheServicesRedisClient().set("allClientProducts", itemsToCache, { ex: 60 * 5 });
+      }
     }
 
     let nextCursor: number | undefined = undefined;
-    if (latestProducts && latestProducts.length >= take) {
-      const nextItem = latestProducts.pop();
+    
+    // If we got more than the requested amount, there's a next page
+    if (latestProducts && latestProducts.length > pageSize) {
+      const nextItem = latestProducts.pop(); // Remove the extra item
       nextCursor = nextItem?.id;
     }
 
-    return { status: TRPCResponseStatus.SUCCESS, message: "", data: latestProducts, nextCursor: nextCursor };
+    console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}`);
+    
+    return { 
+      status: TRPCResponseStatus.SUCCESS, 
+      message: "", 
+      data: latestProducts || [], 
+      nextCursor: nextCursor 
+    };
   } catch (error) {
+    console.error("Error in getProducts:", error);
     if (error instanceof Prisma.PrismaClientKnownRequestError)
       error = {
         code: "BAD_REQUEST",
