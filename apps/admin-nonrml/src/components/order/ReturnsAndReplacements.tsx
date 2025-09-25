@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 // import { prismaEnums } from "@nonrml/prisma";
 import {$Enums as prismaEnums } from "@prisma/client";
+import { TRPCResponseStatus } from "@nonrml/common";
 
 const RETURN_STATUS = [
   "PENDING",
@@ -70,6 +71,8 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
     trpc.viewer.creditNotes.createCreditNote.useMutation();
   const editReplacementOrderMutation =
     trpc.viewer.replacement.editReplacementOrder.useMutation();
+  const shipOrderDetails = 
+    trpc.viewer.replacement.shipReplacementOrder.useMutation({});
 
   // UI state - shipping dialog (mimic OrderActionsPanel)
   const [isShipDialogOpen, setIsShipDialogOpen] = useState(false);
@@ -107,7 +110,7 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
     { rejectedQuantity: number; rejectReason: string }
   >>({});
 
-  // Credit note “extra amount”
+  // Credit note "extra amount"
   const [extraAmountMap, setExtraAmountMap] = useState<
     Record<number, number | undefined>
   >({});
@@ -158,11 +161,9 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
   // Return status dialog open
   const openStatusDialog = (ret: any, suggested?: ReturnStatus) => {
     setStatusTargetReturn(ret);
+    console.log(ret, suggested);
     setNextStatus(suggested || ret.returnStatus || "PENDING");
-    const initial: Record<
-      string,
-      { rejectedQuantity: number; rejectReason: string }
-    > = {};
+    const initial: Record< string, { rejectedQuantity: number; rejectReason: string } > = {};
     (ret.returnItems || []).forEach((ri: any) => {
       initial[String(ri.id)] = {
         rejectedQuantity: ri.rejectedQuantity ?? 0,
@@ -248,6 +249,9 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
   const handleShipReplacement = async () => {
     if (!shipContext) return;
     try {
+
+      console.log("Entering The Ship Replacement")
+
       setIsShipping(true);
 
       if (!order?.address) {
@@ -267,12 +271,10 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
         }
         const units = item.quantity || 1;
         subtotal += matched.price * units;
-
+        console.log(item, "Break 1", item.ReplacementItem.productVariant)
         return {
-          name:
-            item.productVariant?.product?.name,
-          sku:
-            item.productVariant?.product?.sku,
+          name: item.ReplacementItem.productVariant?.product?.name,
+          sku: item.ReplacementItem.productVariant?.subSku,
           units,
           sellingPrice: matched.price,
         };
@@ -281,7 +283,7 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
       const shiprocketOrder: ShiprocketTypes.OrderData = {
         orderId: `REPL-${shipContext.replacementOrderId}`,
         orderDate: new Date().toISOString(),
-        pickupLocation: "Primary",
+        pickupLocation: "warehouse",
         billing: {
           customerName: order.address.contactName,
           address: order.address.location,
@@ -302,13 +304,17 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
         weight,
       };
 
-      const response =
-        await ShiprocketShipping.ShiprocketShipping.createOrder(
-          shiprocketOrder
-        );
+      console.log("shiprocketOrder", shiprocketOrder)
 
-      if (response.success) {
-        alert(`Shipment Created! Order ID: ${response.orderId}`);
+      const replacementOrderShippedResponse = await shipOrderDetails.mutateAsync({
+        replacementOrderId: shipContext.replacementOrderId,
+        shiprocketOrderData: shiprocketOrder
+      })
+
+      // const response = await ShiprocketShipping.ShiprocketShipping.createOrder( shiprocketOrder );
+
+      if (replacementOrderShippedResponse.status == TRPCResponseStatus.SUCCESS) {
+        alert(`Shipment Created!`);
         // Optionally update replacement order status to SHIPPED
         // await editReplacementOrderMutation.mutateAsync({
         //   replacementId: shipContext.replacementOrderId,
@@ -317,7 +323,7 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
 
         onReturnUpdated?.();
       } else {
-        alert(`Failed to create shipment: ${response.error || "Unknown error"}`);
+        alert(`Failed to create shipment`);
       }
     } catch (err) {
       console.error("Error creating shipment:", err);
@@ -543,15 +549,10 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
                         size="sm"
                         onClick={() =>
                           openStatusDialog(
-                            ret,
-                            (statusOptionsFor(
-                              ret.returnStatus as ReturnStatus
-                            )[0] as ReturnStatus) ||
-                              (ret.returnStatus as ReturnStatus)
-                          )
+                            ret, (statusOptionsFor( ret.returnStatus as ReturnStatus )[0] as ReturnStatus) || (ret.returnStatus as ReturnStatus) )
                         }
                       >
-                        Change Status
+                        Change Return Status
                       </Button>
 
                       {/* Finalize Return & Initiate Replacement */}
@@ -762,34 +763,61 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
                             className="h-8 w-40"
                           />
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={createCreditNoteMutation.isLoading}
-                          onClick={async () => {
-                            try {
-                              await createCreditNoteMutation.mutateAsync({
-                                replacementOrderId: Number(
-                                  ret.ReplacementOrder!.id
-                                ),
-                                ...(extraAmount
-                                  ? { extraAmount: Number(extraAmount) }
-                                  : {}),
-                              } as any);
-                              alert("Credit note created.");
-                              onReturnUpdated?.();
-                            } catch (e: any) {
-                              alert(
-                                e?.message ||
-                                  "Failed to create credit note for replacement order."
-                              );
-                            }
-                          }}
-                        >
-                          {createCreditNoteMutation.isLoading
-                            ? "Creating Credit Note..."
-                            : "Create Credit Note"}
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={createCreditNoteMutation.isLoading}
+                            >
+                              {createCreditNoteMutation.isLoading
+                                ? "Creating Credit Note..."
+                                : "Create Credit Note"}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Create Credit Note</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to create a credit note for Replacement Order #{ret.ReplacementOrder.id}?
+                                {extraAmount > 0 && ` This includes an extra amount of ₹${extraAmount}.`}
+                                <br />
+                                <strong>This action cannot be undone.</strong>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={createCreditNoteMutation.isLoading}>
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={async () => {
+                                  try {
+                                    await createCreditNoteMutation.mutateAsync({
+                                      replacementOrderId: Number(
+                                        ret.ReplacementOrder!.id
+                                      ),
+                                      ...(extraAmount
+                                        ? { extraAmount: Number(extraAmount) }
+                                        : {}),
+                                    } as any);
+                                    alert("Credit note created.");
+                                    onReturnUpdated?.();
+                                  } catch (e: any) {
+                                    alert(
+                                      e?.message ||
+                                        "Failed to create credit note for replacement order."
+                                    );
+                                  }
+                                }}
+                                disabled={createCreditNoteMutation.isLoading}
+                              >
+                                {createCreditNoteMutation.isLoading
+                                  ? "Creating..."
+                                  : "Yes, Create Credit Note"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     )}
 
@@ -860,6 +888,183 @@ const ReturnsAndReplacements: React.FC<ReturnsAndReplacementsProps> = ({
               </Card>
             );
           })}
+
+          {/* Status Change Dialog - This was missing! */}
+          <AlertDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Change Return Status</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Update the return status and review items if needed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">New Status:</label>
+                  <select
+                    className="border rounded px-3 py-2 w-full mt-1"
+                    value={nextStatus}
+                    onChange={(e) => setNextStatus(e.target.value as ReturnStatus)}
+                  >
+                    {/* Show all return status options from prismaEnums */}
+                    {Object.values(prismaEnums.ReturnStatus).map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                        {status === statusTargetReturn?.returnStatus ? " (Current)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {nextStatus === "ASSESSED" && statusTargetReturn?.returnItems && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Review Items:</h4>
+                    {statusTargetReturn.returnItems.map((item: any) => (
+                      <div key={item.id} className="border rounded p-3 space-y-2">
+                        <div className="text-sm">Item ID: {item.id}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs text-gray-600">
+                              Rejected Quantity:
+                            </label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={item.quantity || 0}
+                              value={reviewData[String(item.id)]?.rejectedQuantity || 0}
+                              onChange={(e) =>
+                                setReviewData((prev) => ({
+                                  ...prev,
+                                  [String(item.id)]: {
+                                    ...prev[String(item.id)],
+                                    rejectedQuantity: Number(e.target.value),
+                                  },
+                                }))
+                              }
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-600">
+                              Reject Reason:
+                            </label>
+                            <Input
+                              type="text"
+                              value={reviewData[String(item.id)]?.rejectReason || ""}
+                              onChange={(e) =>
+                                setReviewData((prev) => ({
+                                  ...prev,
+                                  [String(item.id)]: {
+                                    ...prev[String(item.id)],
+                                    rejectReason: e.target.value,
+                                  },
+                                }))
+                              }
+                              className="h-8"
+                              placeholder="Reason for rejection"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={editReturnMutation.isLoading}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={submitStatusChange}
+                  disabled={editReturnMutation.isLoading}
+                >
+                  {editReturnMutation.isLoading ? "Updating..." : "Update Status"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Finalize Dialog - This was also missing! */}
+          <AlertDialog open={finalizeDialogOpen} onOpenChange={setFinalizeDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Finalize Return & Initiate Replacement</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Review and finalize the return items before creating replacement.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <div className="space-y-4">
+                {finalizeTargetReturn?.returnItems && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Review Items:</h4>
+                    {finalizeTargetReturn.returnItems.map((item: any) => (
+                      <div key={item.id} className="border rounded p-3 space-y-2">
+                        <div className="text-sm">Item ID: {item.id}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs text-gray-600">
+                              Rejected Quantity:
+                            </label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={item.quantity || 0}
+                              value={finalizeReviewData[String(item.id)]?.rejectedQuantity || 0}
+                              onChange={(e) =>
+                                setFinalizeReviewData((prev) => ({
+                                  ...prev,
+                                  [String(item.id)]: {
+                                    ...prev[String(item.id)],
+                                    rejectedQuantity: Number(e.target.value),
+                                  },
+                                }))
+                              }
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-600">
+                              Reject Reason:
+                            </label>
+                            <Input
+                              type="text"
+                              value={finalizeReviewData[String(item.id)]?.rejectReason || ""}
+                              onChange={(e) =>
+                                setFinalizeReviewData((prev) => ({
+                                  ...prev,
+                                  [String(item.id)]: {
+                                    ...prev[String(item.id)],
+                                    rejectReason: e.target.value,
+                                  },
+                                }))
+                              }
+                              className="h-8"
+                              placeholder="Reason for rejection"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={finalizeReplacementMutation.isLoading}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={submitFinalize}
+                  disabled={finalizeReplacementMutation.isLoading}
+                >
+                  {finalizeReplacementMutation.isLoading ? "Finalizing..." : "Finalize"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

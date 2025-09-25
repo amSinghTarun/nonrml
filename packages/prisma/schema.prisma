@@ -542,6 +542,8 @@ enum PaymentStatus {
 enum ReplacementOrderStatus {
   PENDING
   PROCESSING
+  IN_TRANSIT
+  CANCELLED
   SHIPPED
   DELIVERED
   ASSESSED

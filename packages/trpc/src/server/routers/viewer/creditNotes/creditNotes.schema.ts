@@ -8,7 +8,7 @@ export const ZAddCreditNoteSchema = z.object({
     value: z.number().optional(),
     replacementOrderId: z.number().optional(),
     extraAmount: z.number().optional()
-}).refine( values => values.userId && (!values.email || !values.value), { message: "Value and Email both are needed"} );
+});
 export type TAddCreditNoteSchema = z.infer<typeof ZAddCreditNoteSchema>;
 
 export const ZEditCreditNoteSchema = z.object({

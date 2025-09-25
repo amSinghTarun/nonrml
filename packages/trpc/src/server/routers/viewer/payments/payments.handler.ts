@@ -539,8 +539,10 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
             }
         })
 
+        console.log(replaceQuantity)
+
         // if no replacement quantity is avl then the order should be assessed
-        !replaceQuantity && prisma.replacementOrder.update({
+        !replaceQuantity && await prisma.replacementOrder.update({
             where: {
                 id: input.replacementOrderId
             },
@@ -568,7 +570,7 @@ export const issueReturnReplacementBankRefund = async ({ctx, input}: TRPCRequest
                 })
             });
 
-            return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementOrderDetails.return.order.email ? "Sucessful" : "User email not present"};
+        return { status: TRPCResponseStatus.SUCCESS, message:"", data: replacementOrderDetails.return.order.email ? "Sucessful" : "User email not present"};
 
 
     } catch(error) {

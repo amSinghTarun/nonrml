@@ -1,4 +1,5 @@
 import { prisma, prismaEnums } from "@nonrml/prisma";
+import { ShiprocketTypes } from "@nonrml/shipping";
 import { z } from "zod";
 
 export const ZGetReplacementOrderSchema = z.object({
@@ -39,6 +40,7 @@ export const ZUpdateNonReplaceQuantitySchema =  z.object({
 export type TUpdateNonReplaceQuantitySchema = z.infer<typeof ZUpdateNonReplaceQuantitySchema>;
 
 export const ZShipReplacementSchema =  z.object({
-    replcaementOrderId : z.number(),
+    replacementOrderId: z.number(),
+    shiprocketOrderData: ShiprocketTypes.ZOrderData
 });
 export type TShipReplacementSchema = z.infer<typeof ZShipReplacementSchema>;

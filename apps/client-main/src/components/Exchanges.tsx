@@ -44,20 +44,20 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                                     <p className="">Return Received On</p>
                                     <p>{order.return.returnReceiveDate.toDateString()}</p>
                                 </div> : <></>}
-                                {order.shipment?.shipmentOrderId && order.status != "DELIVERED" && (
+                                {order.shipment?.AWB && order.status != "DELIVERED" && (
                                     <div className="flex justify-end mt-1">
                                         <Link 
-                                            href={``} 
+                                            href={`https://shiprocket.co//tracking/${order.shipment.AWB}`} 
                                             className="text-xs text-neutral-600 underline"
                                         >
                                             Track Replacement 
                                         </Link>
                                     </div>
                                 )}
-                                {order.return.shipment?.shipmentOrderId && !order.return.returnReceiveDate && (
+                                {order.return.shipment?.AWB && !order.return.returnReceiveDate && (
                                     <div className="flex justify-end mt-1">
                                         <Link 
-                                            href={``} 
+                                            href={`https://shiprocket.co//tracking/${order.return.shipment.AWB}`} 
                                             className="text-xs text-neutral-600 underline"
                                         >
                                             Track Return 
@@ -103,14 +103,14 @@ export const Exchanges : React.FC<ExchangesProps> = ({ className, exchangeOrders
                                 ))}
                             </div>
                             {/* Refund Banner */}
-                            {refund >= 0 && (
+                            {refund > 0 && (
                                 <div className="flex items-center gap-2 p-3 bg-neutral-100 rounded-md text-[10px] text-neutral-600">
                                     <Info className="w-4 h-4 flex-shrink-0" />
                                     <p>
                                         A refund has been processed for this order.
                                         For more details, please contact us at{' '}
                                         <a href={`mailto:${process.env.CLIENT_SUPPORT_MAIL}`} className="text-neutral-800 underline">
-                                            {process.env.CLIENT_SUPPORT_MAIL}
+                                            {`${process.env.CLIENT_SUPPORT_MAIL}`}
                                         </a>
                                     </p>
                                 </div>

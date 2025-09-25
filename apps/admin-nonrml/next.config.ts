@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
     "@nonrml/common",
     "@nonrml/components"
   ],
+  env: {
+    CLIENT_SUPPORT_MAIL: process.env.NEXT_PUBLIC_CLIENT_SUPPORT_MAIL
+  }
 };
 
 export default nextConfig;

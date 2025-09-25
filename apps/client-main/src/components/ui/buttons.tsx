@@ -75,6 +75,7 @@ interface sizeButtonProps {
 
 export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, price, sku, quantity, variantId, selectedSize, name, image, setSelectedSize, setQuantity, productId}) => {
     if(quantity <= 0){
+        console.log("should be dash")
         return (    
             <GeneralButton display={display} onClick={()=>{}} className={`flex-1 bg-white justify-center flex rounded-md cursor-no-drop py-3 font-normal hover:bg-white hover:text-neutral-800 text-neutral-800 line-through`}/>
         )

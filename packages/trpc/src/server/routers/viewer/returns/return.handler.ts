@@ -217,50 +217,53 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
 
         // create the return shipment
         // store the shipment details in the shipment table.
-        const dimension : {length: number, breadth: number, height: number, weight: number} = JSON.parse(orderProducts[0]!.order.shipment!.dimensions)
-        const company_warehouse_address = await prisma.address.findFirst({where: {type: "COMPANY_WAREHOURSE"}})
-        let subTotal = 0;
-        await ShiprocketShipping.ShiprocketShipping.createReturnOrder({
-            order_id: `RTN-${returnOrder.returnOrderCreated.id}`,
-            order_date: new Date().toISOString(),
-            payment_method: "Prepaid",
-            ...dimension,
-             // pickup (required fields)
-            pickup_customer_name: orderProducts[0]!.order.address!.contactName,
-            pickup_address: orderProducts[0]!.order.address!.location,
-            pickup_city: orderProducts[0]!.order.address!.city,
-            pickup_state: orderProducts[0]!.order.address!.state,
-            pickup_country: "INDIA",
-            pickup_pincode: Number(orderProducts[0]!.order.address!.pincode),
-            pickup_email: orderProducts[0]!.order.email,
-            pickup_phone: orderProducts[0]!.order.address!.contactNumber.replace(/\D/g, "").slice(-10),
+        if(orderProducts[0]!.order.shipment){
+            const dimension : {length: number, breadth: number, height: number, weight: number} = JSON.parse(orderProducts[0]!.order.shipment!.dimensions)
+            const company_warehouse_address = await prisma.address.findFirst({where: {type: "COMPANY_WAREHOURSE"}})
+            let subTotal = 0;
+            const shippingReturnDetails = await ShiprocketShipping.ShiprocketShipping.createReturnOrder({
+                order_id: `RTN-${returnOrder.returnOrderCreated.id}`,
+                order_date: new Date().toISOString(),
+                payment_method: "Prepaid",
+                ...dimension,
+                 // pickup (required fields)
+                pickup_customer_name: orderProducts[0]!.order.address!.contactName,
+                pickup_address: orderProducts[0]!.order.address!.location,
+                pickup_city: orderProducts[0]!.order.address!.city,
+                pickup_state: orderProducts[0]!.order.address!.state,
+                pickup_country: "INDIA",
+                pickup_pincode: Number(orderProducts[0]!.order.address!.pincode),
+                pickup_email: orderProducts[0]!.order.email,
+                pickup_phone: orderProducts[0]!.order.address!.contactNumber.replace(/\D/g, "").slice(-10),
+    
+                // shipping (required fields) - Address of company warehouse
+                shipping_customer_name: company_warehouse_address!.contactName,
+                shipping_address: company_warehouse_address!.location,
+                shipping_city: company_warehouse_address!.city,
+                shipping_state: company_warehouse_address!.state,
+                shipping_country: "INDIA",
+                shipping_pincode: Number(company_warehouse_address!.pincode),
+                shipping_phone: company_warehouse_address!.contactNumber.replace(/\D/g, "").slice(-10),
+    
+                // order items
+                order_items: orderProducts.map(item => {
+                    const { quantity } = returnItemsData.find( returnItem => returnItem.orderProductId == item.id)!
+                    subTotal += item.price * quantity
+                    return {
+                        name: item.productVariant.product.sku,
+                        sku: item.productVariant.subSku,
+                        units: quantity,
+                        selling_price: item.price,
+                        qc_product_image: item.productVariant.product.productImages[0]?.image,
+                        qc_product_name: item.productVariant.product.sku,
+                        qc_enable: true,
+                    } 
+                }),
+                sub_total: subTotal,
+            })
+            console.log(shippingReturnDetails)
+        }
 
-            // shipping (required fields) - Address of company warehouse
-            shipping_customer_name: company_warehouse_address!.contactName,
-            shipping_address: company_warehouse_address!.location,
-            shipping_city: company_warehouse_address!.city,
-            shipping_state: company_warehouse_address!.state,
-            shipping_country: "INDIA",
-            shipping_pincode: Number(company_warehouse_address!.pincode),
-            shipping_phone: company_warehouse_address!.contactNumber.replace(/\D/g, "").slice(-10),
-
-            // order items
-            order_items: orderProducts.map(item => {
-                const { quantity } = returnItemsData.find( returnItem => returnItem.orderProductId == item.id)!
-                subTotal += item.price * quantity
-                return {
-                    name: item.productVariant.product.sku,
-                    sku: item.productVariant.subSku,
-                    units: quantity,
-                    selling_price: item.price,
-                    qc_product_image: item.productVariant.product.productImages[0]?.image,
-                    qc_product_name: item.productVariant.product.sku,
-                    qc_enable: true,
-                } 
-            }),
-            sub_total: subTotal,
-
-        })
 
         return { 
             status: TRPCResponseStatus.SUCCESS, 
@@ -694,6 +697,13 @@ export const editReturn = async ({ctx, input} : TRPCRequestOptions<TEditReturnSc
             },
             data: {
                 returnStatus: input.returnStatus,
+                ...((input.returnStatus == "CANCELLED_ADMIN" || input.returnStatus == "CANCELLED") 
+                    && {ReplacementOrder: {
+                        update: {
+                            status: "CANCELLED"
+                        }
+                    }}
+                ),
                 ...( input.returnStatus == "RECEIVED" && { returnReceiveDate: new Date() })
             }
         });

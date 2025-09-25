@@ -20,6 +20,8 @@ export function useReturnManagement() {
       utils.viewer.orders.getOrder.invalidate()
     }
   })
+
+  const shipOrderDetails = trpc.viewer.orders.shipOrder.useMutation();
   
   const updateReturnMutation = trpc.viewer.return.editReturn.useMutation({
     onSuccess: () => {
