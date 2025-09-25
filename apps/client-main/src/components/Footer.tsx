@@ -13,8 +13,8 @@ export const Footer = ({className} : {className?: string}) => {
                 <a className="h-full w-full lg:justify-center hover:underline cursor-pointer items-center flex" href="/about">OUR STORY</a>
             </div>
             <div className="flex flex-1 flex-row p-3 justify-around w-full border-t-2 border-neutral-800  font-light">
-                <a className="lg:justify-center hover:underline cursor-pointer items-center flex">INSTAGRAM</a>
-                <a className="lg:justify-center hover:underline cursor-pointer items-center flex">FACEBOOK</a>
+                <a href="https://www.instagram.com/nonrml.in" className="lg:justify-center hover:underline cursor-pointer items-center flex">INSTAGRAM</a>
+                {/* <a className="lg:justify-center hover:underline cursor-pointer items-center flex">FACEBOOK</a> */}
             </div>
         </div>
     )

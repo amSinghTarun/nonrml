@@ -7,9 +7,9 @@ export const generateProductSchema = () => {
         "url": "https://yourbrand.com",
         "logo": "https://yourbrand.com/images/logo.png",
         "sameAs": [
-          "https://instagram.com/yourbrand",
-          "https://facebook.com/yourbrand",
-          "https://pinterest.com/yourbrand"
+          "https://www.instagram.com/nonrml.in",
+          // "https://facebook.com/yourbrand",
+          // "https://pinterest.com/yourbrand"
         ],
         "contactPoint": {
           "@type": "ContactPoint",
