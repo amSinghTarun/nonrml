@@ -2,7 +2,7 @@ import { logoSrc, escapeHtml } from "./helper";
 
 export interface ReplacementShippingNotificationData {
     orderId: string;
-    waybillNumber: string;
+    // waybillNumber: string;
     trackingLink: string;
     replacementId?: string;
 }
@@ -11,7 +11,7 @@ export const generateReplacementShippingNotificationEmail = (options: Replacemen
     
     const data: ReplacementShippingNotificationData = {
         orderId: options.orderId,
-        waybillNumber: options.waybillNumber,
+        // waybillNumber: options.waybillNumber,
         trackingLink: options.trackingLink,
         replacementId: options.replacementId
     };
@@ -69,16 +69,6 @@ export const generateReplacementShippingNotificationEmail = (options: Replacemen
                     <td style="padding: 0 30px 30px;">
                         <div style="border-radius: 8px; padding: 25px; border: 1px solid #000000;">
                             <h3 style="margin: 0 0 20px; font-size: 14px; font-weight: 600; color: #1a1a1a; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;">Tracking Information</h3>
-                            
-                            <!-- Tracking Info -->
-                            <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                    <div>
-                                        <p style="margin: 0 0 5px; font-size: 12px; color: #6b7280; font-weight: 500;">Waybill Number</p>
-                                        <p style="margin: 0; font-size: 14px; color: #1a1a1a; font-weight: 700; font-family: monospace;">${escapeHtml(data.waybillNumber)}</p>
-                                    </div>
-                                </div>
-                            </div>
                             
                             <!-- Tracking Link Box -->
                             <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">

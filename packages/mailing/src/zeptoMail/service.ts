@@ -14,7 +14,7 @@ export const sendSMTPMail = async ( { userEmail, emailBody} : { userEmail: strin
     });
 
     var mailOptions = {
-        from: process.env.CLIENT_MAIL,
+        from: process.env.CLIENT_SUPPORT_MAIL,
         to: userEmail,
         subject: 'Order Confirmed',
         html: emailBody,

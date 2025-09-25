@@ -27,8 +27,8 @@ export class ShiprocketShipping {
     data: ShiprocketTypes.OrderData
   ): Promise<ShiprocketTypes.OrderResponse> {
     try {
+      console.log("Shiprocket formatted data");
       const formattedData = this.formatOrderData(data);
-
       const response = await axios.post(
         `${this.baseUrl}/v1/external/orders/create/adhoc`,
         formattedData,

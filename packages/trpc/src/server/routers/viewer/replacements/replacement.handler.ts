@@ -1,9 +1,10 @@
-import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile, generateReplacementShippingNotificationEmail } from "@nonrml/common";
+import { TRPCResponseStatus, TRPCAPIResponse, dataURLtoFile, generateReplacementShippingNotificationEmail, generateShippingNotificationEmail } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { TInitReplacementOrderSchema, TGetReplacementOrderSchema, TUpdateNonReplaceQuantitySchema, TEditReplacementOrderSchema, TShipReplacementSchema } from "./replacement.schema";
-import { Prisma } from "@nonrml/prisma";
+import { Prisma, prismaEnums } from "@nonrml/prisma";
 import { cacheServicesRedisClient } from "@nonrml/cache";
 import { sendSMTPMail } from "@nonrml/mailing";
+import { ShiprocketShipping } from "@nonrml/shipping";
 
 
 export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGetReplacementOrderSchema>)   => {
@@ -88,8 +89,9 @@ export const getReplacementOrders = async ({ctx, input}: TRPCRequestOptions<TGet
 
         const bankRefunds = await prisma.refundTransactions.count({
             where: {
+                trigger: "replacement",
                 Payments: {
-                    orderId: input.orderId
+                    orderId: input.orderId,
                 },
                 bankRefundValue: {
                     gte: 1
@@ -225,7 +227,6 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
             console.log("In the finalize method loop", returnItem);
             // A way to figure out the processed deeds
             if(returnItem.status == "PENDING"){
-
                 // prepare query to update the return item rejected quantity and reason and status
                 updateQueries.push(
                     prisma.returnItem.update({
@@ -235,11 +236,10 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                         data: {
                             ...(input.reviewData[returnItem.id] && {rejectedQuantity: input.reviewData[returnItem.id]?.rejectedQuantity}),
                             ...(input.reviewData[returnItem.id] && {rejectReason: input.reviewData[returnItem.id]?.rejectReason}),
-                            status: "CONFIRMED"
+                            status: prismaEnums.ReturnItemStatus.CONFIRMED
                         }
                     })
                 )
-
 
                 // prepare query to update the returned product variant inventory with returned accepted quantity ( not rejected )
                 if( (returnItem.quantity - (input.reviewData[returnItem.id]?.rejectedQuantity || 0)) > 0 ){
@@ -270,8 +270,7 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
 
                 // it's only for calc, no actual use case, how many left after lesseing from product variant for base inventory
                 let quantityRequiredAfterInventoryUsed = Math.max(replacableQuantity - returnItem.ReplacementItem?.productVariant.inventory?.quantity!, 0);
-                let baseInventoryLeft = Math.max(returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! - quantityRequiredAfterInventoryUsed, 0);
-
+                let baseInventoryLeft = Math.max((returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! || 0) - (quantityRequiredAfterInventoryUsed || 0), 0);
 
                 updateQueries.push(
                     // this is to decrement the quantity from the replaced size
@@ -281,25 +280,25 @@ export const finaliseReturnAndMarkReplacementOrder = async ({ctx, input}: TRPCRe
                         },
                         data: {
                             quantity: productVariantLeft,
-                            baseSkuInventory: { update: { quantity: baseInventoryLeft }}
+                            ...(returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory && {baseSkuInventory: { update: { quantity: baseInventoryLeft }}})
                         }
                     })
                 )
 
                 // prepare query to update non-replacable quantity, return - rejected - avl > 0 ? return - rejected - avl : 0.
-                console.log(Math.max(( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) - ( returnItem.ReplacementItem?.productVariant.inventory?.quantity! + returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! ), 0 ))
+                console.log(Math.max(( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) - ( (returnItem.ReplacementItem?.productVariant.inventory?.quantity! || 0) + (returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! || 0) ), 0 ))
                 updateQueries.push(
                     prisma.replacementItem.update({
                         where: {
                             id: returnItem.ReplacementItem?.id
                         },
                         data: {
-                            nonReplacableQuantity: Math.max(( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) - ( returnItem.ReplacementItem?.productVariant.inventory?.quantity! + returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! ), 0 )
+                            nonReplacableQuantity: Math.max(( returnItem.quantity - ( input.reviewData[returnItem.id]?.rejectedQuantity || 0) ) - ( (returnItem.ReplacementItem?.productVariant.inventory?.quantity! || 0) + (returnItem.ReplacementItem?.productVariant.inventory?.baseSkuInventory?.quantity! || 0) ), 0 )
                         }
                     })
                 )
                 console.log("Going in treansactions", updateQueries)
-                await prisma.$transaction(updateQueries);
+                await prisma.$transaction(updateQueries, {timeout: 10000});
                 await cacheServicesRedisClient().del(`productVariantQuantity_${returnItem.orderProduct.productVariant.productId}`)
                 console.log("Out of treansactions")
             }
@@ -332,27 +331,58 @@ export const shipReplacementOrder = async ({ctx, input}: TRPCRequestOptions<TShi
     input = input!;
     try{
 
-        const orderDetail = await prisma.replacementOrder.findUnique({
-            where: {
-                id: input.replcaementOrderId
-            },
-            select: {
-                id: true,
-                order: {
-                    select: {
-                        email: true
-                    }
-                }
-            }
-        })
+        console.log("shipReplacementOrder")
 
-        // send confirmation mail
-        if(orderDetail?.order.email){
-            sendSMTPMail({
-                userEmail: orderDetail?.order.email,
-                emailBody: generateReplacementShippingNotificationEmail({orderId: `${orderDetail.id}`, waybillNumber: "hadfiuheu", trackingLink: "https://www.delhivery.com/tracking"})
+        const response = await ShiprocketShipping.ShiprocketShipping.createOrder(input.shiprocketOrderData)
+        console.log(response)
+
+        if(response.orderId){
+           const repalcementOrderDetails =  await prisma.replacementOrder.update({
+                where: {
+                    id: input.replacementOrderId
+                },
+                data: {
+                    shipment: {
+                        create: {
+                            shipmentOrderId: `${response.orderId}`,
+                            shipmentId: `${response.shipmentId}`,
+                            shipmentServiceName: "Shiprocket",
+                            dimensions: JSON.stringify({
+                                "weight": input.shiprocketOrderData.weight,
+                                "length": input.shiprocketOrderData.dimensions.length,
+                                "height": input.shiprocketOrderData.dimensions.height,
+                                "breadth": input.shiprocketOrderData.dimensions.breadth 
+                            })
+                        }
+                    }
+                },
+                select: {
+                    order: {
+                        select: {
+                            email: true,
+                            id: true,
+                            idVarChar: true
+                        }
+                    },
+                    id: true
+                }
+            });    
+    
+            // send the product shipped mail with tracking details tracking mail and has info of processingRefundAmount 
+            // no need to check for the mail, it will be present in the orderDetails
+            await sendSMTPMail({
+                userEmail: repalcementOrderDetails.order.email, 
+                emailBody: generateReplacementShippingNotificationEmail({  
+                    orderId: `ORD-${repalcementOrderDetails.order.id}${repalcementOrderDetails.order.idVarChar}`,
+                    replacementId: `REPL-${repalcementOrderDetails.id}`,
+                    trackingLink: `https://www.nonrml.co.in/exchanges/${repalcementOrderDetails.id}`
+                })
             })
+        } else {
+            throw { code: "INTERNAL_SERVER_ERROR", message: "Something went wrong"}
         }
+
+        return { status: TRPCResponseStatus.SUCCESS, message:"Shipped Successfully", data: ""};
 
     } catch(error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError)

@@ -72,7 +72,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
       const shiprocketOrder: ShiprocketTypes.OrderData = {
         orderId: `${order.id}${order.idVarChar}`, // the ORD- is added shipping service
         orderDate: new Date(order.createdAt).toISOString(),
-        pickupLocation: "work",
+        pickupLocation: "warehouse",
         billing: {
           customerName: order.address!.contactName!,
           address: order.address!.location!,

@@ -66,7 +66,7 @@ export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderI
     });
 
     let products = orderDetails?.orderProducts.map((product => ({sku: product.productVariant.product.sku, size: product.productVariant.size, image: product.productVariant.product.productImages[0]!.image, price: product.productVariant.product.price, quantity: product.quantity })))
-    
+    console.log("Up until all good")
     const emailHTML = generateOrderConfirmationEmail({
         customerName: orderDetails?.address?.contactName!,
         customerNumber: orderDetails?.user?.contactNumber!,
@@ -85,7 +85,7 @@ export const sendOrderConfMail = async ({ctx, input}: TRPCRequestOptions<{orderI
         },
         paymentMethod: orderDetails?.Payments?.paymentMethod!,
     });
-    
+    console.log("Email HTML READY")
     // let creditNoteMailData = {
     //     creditNoteId: "CN-bfew8ccsdkjbc",
     //     originalOrderNumber: "ORD-324hbc3c",
@@ -196,7 +196,36 @@ export const updateShipmentStatus = async ({ ctx, input } : TRPCRequestOptions<T
     input = input!;
     try{
 
-    //   update the shipping details here
+        const orderTypeAndDetails = await prisma.shipment.findFirst({
+            where: {
+                shipmentOrderId: input.orderId
+            },
+            select: {
+                id: true,
+                AWB: true,
+                order: true,
+                ReplacementOrder: true,
+                return: true
+            }
+        });
+
+        if(!orderTypeAndDetails){
+            throw { code: "NOT_FOUND", message: "No shipment details with ShipmentOrderId" + input.orderId}
+        }
+
+        let shipmentStatus = orderTypeAndDetails.return?.id && input.shipmentStatus == "DELIVERED" ? "RECEIVED" : input.shipmentStatus
+        // Add in transit in Replacement order status
+        await prisma.shipment.update({
+            where: {
+                id: orderTypeAndDetails.id
+            },
+            data: {
+                ...(!orderTypeAndDetails.AWB && {AWB: input.awb}),
+                ...(orderTypeAndDetails.order && { order: {update: {orderStatus: shipmentStatus as prismaTypes.OrderStatus}}}),
+                ...(orderTypeAndDetails.return && { return: {update: {returnStatus: shipmentStatus as prismaTypes.ReturnStatus}}}),
+                ...(orderTypeAndDetails.ReplacementOrder && { ReplacementOrder: {update: {status: shipmentStatus as prismaTypes.ReplacementOrderStatus}}})
+            }
+        })
 
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: "updateShipmentStatus"};
 
@@ -835,7 +864,13 @@ export const getOrderReturnDetails = async( {ctx, input}: TRPCRequestOptions<TGe
                                 nonReplacableQuantity: true,
                                 productVariant: {
                                     select: {
-                                        size: true
+                                        size: true,
+                                        subSku: true,
+                                        product: {
+                                            select: {
+                                                name: true,
+                                            }
+                                        }
                                     }
                                 }
                             }

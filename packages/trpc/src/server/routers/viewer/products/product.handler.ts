@@ -904,7 +904,7 @@ export const editProduct = async ({
     const updateData = {
       ...(input.name && {name: input.name}),
       ...(input.description && {description: input.description}),
-      ...(input.inspiration && {description: input.inspiration}),
+      ...(input.inspiration && {inspiration: input.inspiration}),
       ...(!isNaN(Number(input.price)) && {price: input.price}),
       ...(!isNaN(Number(input.categoryId)) && {categoryId: input.categoryId}),
       ...(input.colour && {colour: input.colour}),

@@ -150,22 +150,24 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
                             className={`relative justify-between flex flex-col text-xs p-1`}
                         >
                             <div className="flex w-full flex-row">
-                                <Image src={`${product.productVariant?.product.productImages[0].image}`} alt="product image" className="h-28 w-auto object-cover rounded-md" width={10} height={10} sizes="100vw"/>
+                                <Image src={`${product.productVariant?.product.productImages[0].image}`} alt="product image" className="h-28 w-auto object-cover rounded-md hover:cursor-pointer" width={10} height={10} sizes="100vw"
+                                    onClick={()=>{productExchangeSizes && (product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0)) > 0) && setSelectedProducts({...selectedProducts, [product.id]: {quantity: 1}})}}
+                                />
                                 {
+                                    (product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0) + (product.rejectedQuantity ?? 0)) > 0) && (
                                     selectedProducts[product.id] ?
-                                        <button 
-                                            className="absolute cursor-pointer top-2 left-2"
-                                        ><Checkbox defaultChecked color="default" className="text-white border-0 p-0 rounded-none" onClick={() => { removeSelectedProduct(product.id) }}/></button>
+                                        <button className="absolute cursor-pointer top-2 left-2">
+                                            <Checkbox defaultChecked color="error" className=" border-0 p-0 rounded-none" onClick={() => { removeSelectedProduct(product.id) }}/>    
+                                        </button>
                                      :
-                                        <button 
-                                        className="absolute cursor-pointer top-2 left-2"
-                                        disabled={product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0)) ? false : true}
+                                        <button className="absolute cursor-pointer top-2 left-2"
+                                            disabled={product.quantity - ((product.returnQuantity ?? 0) + (product.replacementQuantity ?? 0)) ? false : true}
                                         > { 
                                             productExchangeSizes 
-                                            ? <Checkbox className="text-white p-0 m-0 rounded-full hover:none" onClick={()=>setSelectedProducts({...selectedProducts, [product.id]: {quantity: 1}})} />
-                                            : <Box sx={{ display: 'flex' }}> <CircularProgress size={20} className="text-white" /> </Box>
+                                            ? <Checkbox color="warning" className="p-0 m-0 border-red-400 rounded-full hover:none" onClick={()=> setSelectedProducts({...selectedProducts, [product.id]: {quantity: 1}})} />
+                                            : <Box sx={{ display: 'flex' }} > <CircularProgress size={20} className="text-white" /> </Box>
                                         } </button>
-                                }
+                                )}
                                 <div className="flex flex-col text-xs flex-grow space-y-3 pl-3 text-neutral-500">
                                     <p>{product.productVariant?.product.name.toUpperCase()}</p>
                                     <div className="flex flex-row justify-between">
@@ -183,21 +185,38 @@ export const MakeExchange : React.FC<ExchangeProps> = ({products, orderId, retur
                             </div>
                             { selectedProducts[product.id] &&
                                 <div className="flex flex-col w-full space-y-2 mt-2">
-                                    <div className="flex flex-row gap-3 w-full">
-                                        {productExchangeSizes![product.productVariant.productId].map((productVariants, idx) => (
-                                            productVariants.size != product.productVariant.size ? <GeneralButtonTransparent 
-                                                display={productVariants.size} 
-                                                onClick={()=>{ handleSizeChange(productVariants.variantId, product.id) }}
-                                                className={`" flex w-full py-3 hover:shadow-md border-0 hover:text-neutral-800" ${(selectedProducts[product.id].exchangeVariant == productVariants.variantId) && "font-semibold text-neutral-800" }`}
-                                            /> : <></>
-                                        ))} 
-                                    </div>
-                                    {/* <div className="flex flex-col lg:flex-row lg:gap-x-4 w-full space-y-4 lg:space-y-0">
-                                        <FileUpload buttonClass="border border-neutral-200 text-neutral-400 bg-white hover:bg-white hover:text-neutral-700 " onFileDelete={deleteUploadedImage} onChange={handleImageUpload} orderProductId={product.id} /> 
-                                        <Textarea className="text-xs border border-neutral-200 placeholder:text-neutral-400" onChange={(e)=>{handleReasonUpload(e.target.value, product.id)}} placeholder="Explain Your Issue In More Than 15 Words" /> 
-                                    </div> */}
+                                    {/* Check if there are other sizes available for exchange */}
+                                    {(() => {
+                                        const availableExchangeSizes = productExchangeSizes![product.productVariant.productId].filter(
+                                            productVariants => productVariants.size !== product.productVariant.size
+                                        );
+                                        
+                                        return availableExchangeSizes.length > 0 ? (
+                                            // Show available sizes for exchange
+                                            <div className="flex flex-row gap-3 w-full">
+                                                {availableExchangeSizes.map((productVariants, idx) => (
+                                                    <GeneralButtonTransparent 
+                                                        key={idx}
+                                                        display={productVariants.size} 
+                                                        onClick={() => { handleSizeChange(productVariants.variantId, product.id) }}
+                                                        className={`flex w-full py-3 hover:shadow-md border-0 hover:text-neutral-800 ${(selectedProducts[product.id].exchangeVariant == productVariants.variantId) && "font-semibold text-neutral-800"}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            // Show message when no other sizes are available
+                                            <div className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-md">
+                                                <p className="text-xs text-neutral-600 text-center mb-1">
+                                                    <span className="font-semibold">Size {product.productVariant.size}</span> was the only size available for this product.
+                                                </p>
+                                                <p className="text-xs text-neutral-500 text-center">
+                                                    No other sizes available for exchange.
+                                                </p>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
-                            } 
+                            }
                             {error[product.id] && <div key={product.id} className="text-xs text-red-600 pl-5">{error[product.id]}</div>}
                         </div> 
                     )
