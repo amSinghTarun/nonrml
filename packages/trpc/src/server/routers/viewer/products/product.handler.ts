@@ -456,8 +456,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
 
     // Cache only the first pageSize items without extra item
     if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
-      const itemsToCache = latestProducts.slice(0, pageSize);
-      cacheServicesRedisClient().set("allClientProducts", itemsToCache, { ex: 60 * 5 });
+      cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
     }
 
     console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
