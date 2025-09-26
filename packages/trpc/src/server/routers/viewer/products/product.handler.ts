@@ -371,45 +371,29 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
   const prisma = ctx.prisma;
   input = input!;
   
-  // Define the page size
-  const pageSize = 12; // Adjust this as needed
+  const pageSize = 12;
   
   try {
     console.log("PRODUCT getProducts input:", input);
     
-    type LatestProducts = {
-      price: number;
-      sku: string;
-      name: string;
-      id: number;
-      soldOut: boolean;
-      public?: boolean,
-      productImages: {
-          image: string;
-      }[];
-      _count: {
-          ProductVariants: number;
-      };
-      updatedAt: Date
-    }[]
-
-    // Only use cache for the very first request (no cursor)
-    let latestProducts: LatestProducts | null = null;
+    let latestProducts: any[] | null = null;
+    let fromCache = false;
     
-    // Only check cache if it's the first page AND no cursor
+    // Only use cache for the very first request (no cursor)
     if (!input.cursor && !input.categoryName) {
       latestProducts = await cacheServicesRedisClient().get("allClientProducts");
-      console.log("Cache hit for first page:", !!latestProducts);
+      fromCache = !!latestProducts;
+      console.log("Cache hit for first page:", fromCache);
     }
 
     if (!latestProducts || !latestProducts.length) {
       console.log("Fetching from database with cursor:", input.cursor);
       
       latestProducts = await prisma.products.findMany({
-        take: pageSize + 1, // Take one extra to determine if there's a next page
+        take: pageSize + 1,
         ...(input.cursor && {
           cursor: { id: input.cursor },
-          // skip: 1, // Skip the cursor record - this was missing!
+          // Remove skip: 1 based on your analysis
         }),
         where: {
           ...(input.categoryName && {
@@ -447,28 +431,36 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
           }
         },
         orderBy: [
-          { createdAt: "desc" }
+          { id: "desc" }
         ]
       });
+    }
 
-      // Only cache the first page without category filter
-      if (!input.cursor && !input.categoryName && latestProducts.length) {
-        // Don't cache the extra item
-        const itemsToCache = latestProducts.slice(0, pageSize);
-        cacheServicesRedisClient().set("allClientProducts", itemsToCache, { ex: 60 * 5 });
+    let nextCursor: number | undefined = undefined;
+    
+    if (fromCache) {
+      // CACHE LOGIC: Different handling for cached data
+      if (latestProducts && latestProducts.length > pageSize) {
+        // Cache contained more than pageSize, so there are more products
+        latestProducts = latestProducts.slice(0, pageSize); // Take first pageSize items
+        nextCursor = latestProducts[latestProducts.length - 1]?.id; // Set cursor to last item
+      }
+      // If cache has <= pageSize items, no nextCursor (no more products)
+    } else {
+      // DATABASE LOGIC: Normal pagination logic
+      if (latestProducts && latestProducts.length > pageSize) {
+        const nextItem = latestProducts.pop(); // Remove the extra item
+        nextCursor = nextItem?.id;
       }
     }
 
-    console.log(input.cursor, latestProducts.length)
-    let nextCursor: number | undefined = undefined;
-    
-    // If we got more than the requested amount, there's a next page
-    if (latestProducts && latestProducts.length > pageSize) {
-      const nextItem = latestProducts.pop(); // Remove the extra item
-      nextCursor = nextItem?.id;
+    // Cache only the first pageSize items without extra item
+    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
+      const itemsToCache = latestProducts.slice(0, pageSize);
+      cacheServicesRedisClient().set("allClientProducts", itemsToCache, { ex: 60 * 5 });
     }
 
-    console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}`);
+    console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
     
     return { 
       status: TRPCResponseStatus.SUCCESS, 
