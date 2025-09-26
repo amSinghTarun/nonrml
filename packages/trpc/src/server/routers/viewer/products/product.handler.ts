@@ -437,11 +437,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     }
 
     let nextCursor: number | undefined = undefined;
-    
-        // Cache only the first pageSize items without extra item
-    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
-      cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
-    }
+    let productsToReturn = latestProducts;
 
     if (fromCache) {
       // CACHE LOGIC: Different handling for cached data
@@ -454,9 +450,14 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     } else {
       // DATABASE LOGIC: Normal pagination logic
       if (latestProducts && latestProducts.length > pageSize) {
-        const nextItem = latestProducts.pop(); // Remove the extra item
-        nextCursor = nextItem?.id;
+        productsToReturn = latestProducts.slice(0, pageSize);
+        nextCursor = latestProducts[pageSize]?.id; 
       }
+    }
+
+    // Cache only the first pageSize items without extra item
+    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
+      cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
     }
 
     console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
@@ -464,7 +465,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     return { 
       status: TRPCResponseStatus.SUCCESS, 
       message: "", 
-      data: latestProducts || [], 
+      data: productsToReturn || [], 
       nextCursor: nextCursor 
     };
   } catch (error) {
