@@ -112,7 +112,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                     ...(!isNaN(Number(values.price)) && {price: +values.price!}),
                     ...(values.colour && {colour: values.colour}),
                     ...(values.care && {care: values.care.split(",")}),
-                    ...(values.shippingDetails && {care: values.shippingDetails.split(",")}),
+                    ...(values.shippingDetails && {shippingDetails: values.shippingDetails.split(",")}),
                     ...(values.details && {details: values.details.split(",")}),
                     ...(!isNaN(Number(values.categoryId)) && {categoryId: +values.categoryId!}),
                     ...(values.tags && {tags: values.tags.split(",")})
