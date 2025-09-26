@@ -376,24 +376,23 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
   try {
     console.log("PRODUCT getProducts input:", input);
     
-    let latestProducts: any[] | null = null;
+    let queryResult: any[] | null = null;
     let fromCache = false;
     
-    // Only use cache for the very first request (no cursor)
+    // Only use cache for the very first request (no cursor, no category)
     if (!input.cursor && !input.categoryName) {
-      latestProducts = await cacheServicesRedisClient().get("allClientProducts");
-      fromCache = !!latestProducts;
+      queryResult = await cacheServicesRedisClient().get("allClientProducts");
+      fromCache = !!queryResult;
       console.log("Cache hit for first page:", fromCache);
     }
 
-    if (!latestProducts || !latestProducts.length) {
+    if (!queryResult || !queryResult.length) {
       console.log("Fetching from database with cursor:", input.cursor);
       
-      latestProducts = await prisma.products.findMany({
-        take: pageSize + (input.cursor ? 0 : 1),
+      queryResult = await prisma.products.findMany({
+        take: pageSize + 1, // Always take +1 to detect next page
         ...(input.cursor && {
           cursor: { id: input.cursor },
-          // Remove skip: 1 based on your analysis
         }),
         where: {
           ...(input.categoryName && {
@@ -436,36 +435,32 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       });
     }
 
+    // Pagination logic - same for cache and database
     let nextCursor: number | undefined = undefined;
-    let productsToReturn = latestProducts;
+    let productsToReturn: any[];
 
-    if (fromCache) {
-      // CACHE LOGIC: Different handling for cached data
-      if (latestProducts && latestProducts.length > pageSize) {
-        // Cache contained more than pageSize, so there are more products
-        latestProducts = latestProducts.slice(0, pageSize); // Take first pageSize items
-        nextCursor = latestProducts[latestProducts.length - 1]?.id; // Set cursor to last item
-      }
-      // If cache has <= pageSize items, no nextCursor (no more products)
+    if (queryResult && queryResult.length > pageSize) {
+      // More products exist
+      productsToReturn = queryResult.slice(0, pageSize);
+      nextCursor = queryResult[pageSize]?.id; // First item of next page
     } else {
-      // DATABASE LOGIC: Normal pagination logic
-      if (latestProducts && latestProducts.length > pageSize) {
-        productsToReturn = latestProducts.slice(0, pageSize);
-        nextCursor = latestProducts[pageSize]?.id; 
-      }
+      // No more products
+      productsToReturn = queryResult || [];
+      nextCursor = undefined;
     }
 
-    // Cache only the first pageSize items without extra item
-    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length && !fromCache) {
-      cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
+    // Cache ALL products on first request (if no category filter)
+    if (!input.cursor && !input.categoryName && !fromCache && queryResult.length) {
+      // For small datasets, cache the complete query result
+      cacheServicesRedisClient().set("allClientProducts", queryResult, { ex: 60 * 5 });
     }
 
-    console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
+    console.log(`Returning ${productsToReturn.length} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
     
     return { 
       status: TRPCResponseStatus.SUCCESS, 
       message: "", 
-      data: productsToReturn || [], 
+      data: productsToReturn, 
       nextCursor: nextCursor 
     };
   } catch (error) {
