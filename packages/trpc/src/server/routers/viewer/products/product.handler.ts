@@ -409,7 +409,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
         take: pageSize + 1, // Take one extra to determine if there's a next page
         ...(input.cursor && {
           cursor: { id: input.cursor },
-          skip: 1, // Skip the cursor record - this was missing!
+          // skip: 1, // Skip the cursor record - this was missing!
         }),
         where: {
           ...(input.categoryName && {
@@ -459,6 +459,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       }
     }
 
+    console.log(input.cursor, latestProducts.length)
     let nextCursor: number | undefined = undefined;
     
     // If we got more than the requested amount, there's a next page

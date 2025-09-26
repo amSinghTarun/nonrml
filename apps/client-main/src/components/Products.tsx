@@ -147,17 +147,6 @@ const Products: React.FC<ProductsProps> = ({
           )}
         </div>
       )}
-
-      {/* End indicator */}
-      {!nextCursor && products.length > 0 && (
-        <div className="text-center py-8 text-gray-500 text-sm border-t border-gray-200">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="h-px bg-gray-300 flex-1"></div>
-            <span>You've seen all {products.length} products</span>
-            <div className="h-px bg-gray-300 flex-1"></div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
