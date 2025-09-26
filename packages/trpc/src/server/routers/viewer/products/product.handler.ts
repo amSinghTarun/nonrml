@@ -438,6 +438,11 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
 
     let nextCursor: number | undefined = undefined;
     
+        // Cache only the first pageSize items without extra item
+    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
+      cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
+    }
+
     if (fromCache) {
       // CACHE LOGIC: Different handling for cached data
       if (latestProducts && latestProducts.length > pageSize) {
@@ -452,12 +457,6 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
         const nextItem = latestProducts.pop(); // Remove the extra item
         nextCursor = nextItem?.id;
       }
-    }
-
-    // Cache only the first pageSize items without extra item
-    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
-      const itemsToCache = latestProducts.slice(0, pageSize);
-      cacheServicesRedisClient().set("allClientProducts", itemsToCache, { ex: 60 * 5 });
     }
 
     console.log(`Returning ${latestProducts?.length || 0} products, nextCursor: ${nextCursor}, fromCache: ${fromCache}`);
