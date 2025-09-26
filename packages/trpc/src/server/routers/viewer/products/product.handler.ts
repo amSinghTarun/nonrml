@@ -390,7 +390,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       console.log("Fetching from database with cursor:", input.cursor);
       
       latestProducts = await prisma.products.findMany({
-        take: pageSize + 1,
+        take: pageSize + (input.cursor ? 0 : 1),
         ...(input.cursor && {
           cursor: { id: input.cursor },
           // Remove skip: 1 based on your analysis
@@ -456,7 +456,7 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
     }
 
     // Cache only the first pageSize items without extra item
-    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length) {
+    if (!input.cursor && !input.categoryName && !fromCache && latestProducts.length && !fromCache) {
       cacheServicesRedisClient().set("allClientProducts", latestProducts, { ex: 60 * 5 });
     }
 
