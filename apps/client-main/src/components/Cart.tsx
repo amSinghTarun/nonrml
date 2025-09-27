@@ -20,28 +20,21 @@ export const CartMenu = () => {
   let cartTotal = useRef(0);
   const updateCartQuantity = trpc.viewer.product.getProductVariantQuantity.useMutation();
   
-  // Block background scroll when cart is open
+  // Better scroll blocking without position fixed
   useEffect(() => {
     if (appbarUtil === "CART") {
-      // Save current scroll position
-      const scrollY = window.scrollY;
+      // Save original overflow
+      const originalOverflow = document.body.style.overflow;
+      const originalHeight = document.body.style.height;
       
-      // Block scroll
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      // Block scroll without changing position
       document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
       
       // Cleanup function
       return () => {
-        // Restore scroll
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
-        
-        // Restore scroll position
-        window.scrollTo(0, scrollY);
+        document.body.style.overflow = originalOverflow;
+        document.body.style.height = originalHeight;
       };
     }
   }, [appbarUtil]);
@@ -62,26 +55,17 @@ export const CartMenu = () => {
   const handleOnDelete = (variantId: number) => (variantId in cartItems) && removeCartProduct(variantId)
   const handleCheckoutRedirect = () => router.push("/checkout")
 
-  // Prevent background scroll when touching blur area
-  const handleBackgroundTouch = (e: React.TouchEvent) => {
-    e.preventDefault();
-  };
-
-  const handleBackgroundWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-  };
-
   return (
     <>  
-    {/* Background blur overlay - blocks all scroll events */}
+    {/* Background blur overlay */}
     <div 
-      className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden"
-      onTouchMove={handleBackgroundTouch}
-      onWheel={handleBackgroundWheel}
+      className="fixed inset-0 z-40 backdrop-blur-sm bg-white/10 overflow-hidden"
       style={{ touchAction: 'none' }}
-    ></div>
+    />
     
+    {/* Modal container - REMOVE translate-y-full from here */}
     <section className="fixed flex flex-col w-screen justify-end items-center z-40 h-full">
+      {/* Apply animation only to the article content */}
       <article className="text-neutral-800 bg-white/20 backdrop-blur-3xl overscroll-none shadow-sm shadow-neutral-500 flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
         {
           Object.keys(cartItems).length == 0 ?

@@ -18,25 +18,15 @@ const Signin = () => {
     // Block background scroll when signin modal is visible
     useEffect(() => {
         if (isVisible) {
-            // Save current scroll position
-            const scrollY = window.scrollY;
+            const originalOverflow = document.body.style.overflow;
+            const originalHeight = document.body.style.height;
             
-            // Block scroll
-            document.body.style.position = 'fixed';
-            document.body.style.top = `-${scrollY}px`;
-            document.body.style.width = '100%';
             document.body.style.overflow = 'hidden';
+            document.body.style.height = '100vh';
             
-            // Cleanup function
             return () => {
-                // Restore scroll
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.width = '';
-                document.body.style.overflow = '';
-                
-                // Restore scroll position
-                window.scrollTo(0, scrollY);
+                document.body.style.overflow = originalOverflow;
+                document.body.style.height = originalHeight;
             };
         }
     }, [isVisible]);
@@ -118,26 +108,17 @@ const Signin = () => {
         setMobileNumber("");
     };
 
-    // Prevent background scroll when touching blur area
-    const handleBackgroundTouch = (e: React.TouchEvent) => {
-        e.preventDefault();
-    };
-
-    const handleBackgroundWheel = (e: React.WheelEvent) => {
-        e.preventDefault();
-    };
-
     return (
         <>
-        {/* Background blur overlay - blocks all scroll events */}
+        {/* Background blur overlay */}
         <div 
-            className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none"
-            onTouchMove={handleBackgroundTouch}
-            onWheel={handleBackgroundWheel}
+            className="fixed inset-0 z-40 backdrop-blur-sm bg-white/10 overflow-hidden"
             style={{ touchAction: 'none' }}
-        ></div>
+        />
         
-        <div className="fixed flex flex-col w-screen justify-center items-center z-40 h-full">
+        {/* Centered modal container - NO translate classes here */}
+        <div className="fixed inset-0 z-40 flex flex-col justify-center items-center">
+            {/* Apply any entrance animation to this div */}
             <div className="backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center overflow-hidden">
                 <div className="flex flex-1 flex-col mb-4">
                     <div className='text-left text-2xl text-black font-bold mb-1 '>
