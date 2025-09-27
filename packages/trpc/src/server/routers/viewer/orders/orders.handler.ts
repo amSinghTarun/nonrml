@@ -1106,46 +1106,56 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     const prisma = ctx.prisma;
     input = input!
     try{
-        console.log(input)
-        let user = await prisma.user.findUnique({
+        const user = await prisma.user.upsert({
             where: {
                 contactNumber: input.contactNumber
-            }
-        })
-
-        console.log("User", user, input.rzpOrderId)
-        if(!user){
-            user = await prisma.user.create({
-                data:{
-                    contactNumber: input.contactNumber,
-                    role: prismaEnums.UserPermissionRoles.USER,
-                },
-            });            
-            console.log("User Created", user);
-        }
-
-        console.log("Input Razorpay Id", input.rzpOrderId);
-        
-        // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
-        const paymentDetails = await prisma.payments.update({
-            where: {
-                rzpOrderId: input.rzpOrderId
             },
-            data: {
-                Orders: {
-                    update: {
-                        userId: user.id,
-                        email: input.email
+            update: {}, // No updates needed if user exists
+            create: {
+                contactNumber: input.contactNumber,
+                role: prismaEnums.UserPermissionRoles.USER,
+            }
+        });
+        
+        console.log("User ID:", user.id);
+
+        // 2. Combine payment update and order products count in a transaction
+        const [paymentDetails, orderProductsCount] = await prisma.$transaction([
+            prisma.payments.update({
+                where: {
+                    rzpOrderId: input.rzpOrderId
+                },
+                data: {
+                    Orders: {
+                        update: {
+                            userId: user.id,
+                            email: input.email
+                        }
                     }
+                },
+                select: {
+                    orderId: true // Only select what we need
                 }
+            }),
+            prisma.orderProducts.count({
+                where: {
+                    // We'll use the orderId from the payment update
+                    orderId: undefined // Will be set below
+                }
+            })
+        ]);
+
+        // 3. Fix the count query to use the correct orderId
+        const actualOrderProductsCount = await prisma.orderProducts.aggregate({
+            where: {
+                orderId: paymentDetails.orderId
+            },
+            _sum : {
+                quantity: true
             }
         });
 
-        const orderProductsCount = await prisma.orderProducts.count({
-            where: {
-                orderId: paymentDetails.orderId
-            }
-        })
+        console.log("Order products count:", actualOrderProductsCount._sum.quantity);
 
         let shippingAddressesDetails = <any>[]
 
@@ -1157,7 +1167,7 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
                 state_code: address.state_code,
                 country: address.country,
                 "serviceable": deliveryDetails.serviceable,
-                "cod": orderProductsCount > 1 ? false : deliveryDetails.cod, 
+                "cod": Number(actualOrderProductsCount._sum.quantity) > 1 ? false : deliveryDetails.cod, 
                 "cod_fee": deliveryDetails.cod_fee,
                 "shipping_fee": deliveryDetails.shipping_fee,
                 shipping_methods: [deliveryDetails]
