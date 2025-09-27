@@ -1147,6 +1147,8 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             }
         })
 
+        console.log(orderProductsCount)
+
         let shippingAddressesDetails = <any>[]
 
         for( let address of input.addresses ){
