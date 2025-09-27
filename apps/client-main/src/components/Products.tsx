@@ -54,7 +54,7 @@ const Products: React.FC<ProductsProps> = ({
       console.log('🔄 Loading more products...');
       
       const response = await trpcUtils.viewer.product.getProducts.fetch({
-        categoryName: categoryName ?? undefined,
+        categoryName: categoryName ? categoryName.replace("-", "_") : undefined,
         cursor: nextCursor
       });
 
