@@ -436,6 +436,8 @@ export const getProducts = async ({ ctx, input }: TRPCRequestOptions<TGetProduct
       });
     }
 
+    console.log(queryResult)
+
     // Pagination logic - same for cache and database
     let nextCursor: number | undefined = undefined;
     let productsToReturn: any[];
