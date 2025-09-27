@@ -1124,21 +1124,10 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             console.log("User Created", user);
         }
 
-        // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
         console.log("Input Razorpay Id", input.rzpOrderId);
-
-        const paymentDetails = await prisma.payments.findFirst({
-            where: {
-                rzpOrderId: input.rzpOrderId 
-            },
-            include: {
-                Orders: true
-            }
-        });
-
-        console.log(paymentDetails)
-
-        const order = await prisma.payments.update({
+        
+        // it is updated everytime, so that if someone come back from address and change phone number then we can have the correct number and email
+        const paymentDetails = await prisma.payments.update({
             where: {
                 rzpOrderId: input.rzpOrderId
             },
@@ -1152,7 +1141,11 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
             }
         });
 
-        console.log("order", order)
+        const orderProductsCount = await prisma.orderProducts.count({
+            where: {
+                orderId: paymentDetails.orderId
+            }
+        })
 
         let shippingAddressesDetails = <any>[]
 
@@ -1164,7 +1157,7 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
                 state_code: address.state_code,
                 country: address.country,
                 "serviceable": deliveryDetails.serviceable,
-                "cod": deliveryDetails.cod, 
+                "cod": orderProductsCount > 1 ? false : deliveryDetails.cod, 
                 "cod_fee": deliveryDetails.cod_fee,
                 "shipping_fee": deliveryDetails.shipping_fee,
                 shipping_methods: [deliveryDetails]
