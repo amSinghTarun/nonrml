@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useRef, useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { trpc } from '@/app/_trpc/client';
 import { Form, FormInputField, FormSubmitButton } from './ui/form';
@@ -10,9 +10,36 @@ const Signin = () => {
     const [mobileNumber, setMobileNumber] = useState("");
     const [error, setError] = useState<string | null>(null)
     const [otp, setOtp] = useState("");
+    const [isVisible, setIsVisible] = useState(true); // Track if signin modal is visible
 
     const sendOTP = trpc.viewer.auth.sendOTP.useMutation();
     const verifyOTP = trpc.viewer.auth.verifyOTP.useMutation();
+
+    // Block background scroll when signin modal is visible
+    useEffect(() => {
+        if (isVisible) {
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            
+            // Block scroll
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+            
+            // Cleanup function
+            return () => {
+                // Restore scroll
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                document.body.style.overflow = '';
+                
+                // Restore scroll position
+                window.scrollTo(0, scrollY);
+            };
+        }
+    }, [isVisible]);
 
     // Get full mobile number with country code for API calls
     const getFullMobileNumber = () => {
@@ -91,13 +118,28 @@ const Signin = () => {
         setMobileNumber("");
     };
 
+    // Prevent background scroll when touching blur area
+    const handleBackgroundTouch = (e: React.TouchEvent) => {
+        e.preventDefault();
+    };
+
+    const handleBackgroundWheel = (e: React.WheelEvent) => {
+        e.preventDefault();
+    };
+
     return (
         <>
-        {/* this is required to make backdrop work as on direct parent children the children backdrop blue doesn't apply */}
-        <div className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none "></div>
+        {/* Background blur overlay - blocks all scroll events */}
+        <div 
+            className="fixed z-40 backdrop-blur-sm bg-white/10 h-full w-full overflow-hidden overscroll-none"
+            onTouchMove={handleBackgroundTouch}
+            onWheel={handleBackgroundWheel}
+            style={{ touchAction: 'none' }}
+        ></div>
+        
         <div className="fixed flex flex-col w-screen justify-center items-center z-40 h-full">
-            <div className=" backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center">
-                <div className = " flex flex-1 flex-col mb-4">
+            <div className="backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center overflow-hidden">
+                <div className="flex flex-1 flex-col mb-4">
                     <div className='text-left text-2xl text-black font-bold mb-1 '>
                         WELCOME BACK!
                     </div>
@@ -105,7 +147,7 @@ const Signin = () => {
                         Login for a better personalised experience
                     </div>
                 </div>
-                <div > {
+                <div className="overflow-y-auto max-h-96"> {
                     <Form onSubmit={otpSent ? onOTPSubmit : onMobileSubmit} >
                         <div className="flex flex-row">
                             {!otpSent ? (
