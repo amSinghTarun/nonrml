@@ -1106,56 +1106,61 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
     const prisma = ctx.prisma;
     input = input!
     try{
-        const user = await prisma.user.upsert({
-            where: {
-                contactNumber: input.contactNumber
-            },
-            update: {}, // No updates needed if user exists
-            create: {
-                contactNumber: input.contactNumber,
-                role: prismaEnums.UserPermissionRoles.USER,
-            }
-        });
-        
-        console.log("User ID:", user.id);
 
-        // 2. Combine payment update and order products count in a transaction
-        const [paymentDetails, orderProductsCount] = await prisma.$transaction([
-            prisma.payments.update({
-                where: {
-                    rzpOrderId: input.rzpOrderId
-                },
+        const [orderDetails, productCount] = await prisma.$transaction(async (tx) => {
+            // First, upsert the user
+            // const user = await tx.user.upsert({
+            //     where: { contactNumber: input.contactNumber },
+            //     update: {},
+            //     create: {
+            //         contactNumber: input.contactNumber,
+            //         role: prismaEnums.UserPermissionRoles.USER,
+            //     }
+            // });
+
+            // Then update payment/order with the user ID
+            const orderDetails = await tx.payments.update({
+                where: { rzpOrderId: input.rzpOrderId },
                 data: {
                     Orders: {
                         update: {
-                            userId: user.id,
-                            email: input.email
+                            email: input.email,
+                            user: {
+                                connectOrCreate: {
+                                    where: { contactNumber: input.contactNumber },
+                                    create: {
+                                        contactNumber: input.contactNumber,
+                                        role: prismaEnums.UserPermissionRoles.USER,
+                                    }
+                                }
+                            }
+    
                         }
                     }
-                },
-                select: {
-                    orderId: true // Only select what we need
                 }
-            }),
-            prisma.orderProducts.count({
-                where: {
-                    // We'll use the orderId from the payment update
-                    orderId: undefined // Will be set below
-                }
-            })
-        ]);
+            });
 
-        // 3. Fix the count query to use the correct orderId
-        const actualOrderProductsCount = await prisma.orderProducts.aggregate({
-            where: {
-                orderId: paymentDetails.orderId
-            },
-            _sum : {
-                quantity: true
-            }
+            // Get order products count in the same transaction
+            const productCount = await tx.orderProducts.aggregate({
+                where: { orderId: orderDetails.orderId },
+                _sum: { quantity: true }
+            });
+
+            return [ orderDetails, productCount ];
         });
+            
 
-        console.log("Order products count:", actualOrderProductsCount._sum.quantity);
+
+        // const actualOrderProductsCount = await prisma.orderProducts.aggregate({
+        //     where: {
+        //         orderId: orderDetails.orderId
+        //     },
+        //     _sum : {
+        //         quantity: true
+        //     }
+        // });
+
+        console.log("Order products count:", productCount._sum.quantity);
 
         let shippingAddressesDetails = <any>[]
 
@@ -1167,7 +1172,7 @@ export const checkOrderServicibility = async ({ctx, input}: TRPCRequestOptions<T
                 state_code: address.state_code,
                 country: address.country,
                 "serviceable": deliveryDetails.serviceable,
-                "cod": Number(actualOrderProductsCount._sum.quantity) > 1 ? false : deliveryDetails.cod, 
+                "cod": Number(productCount._sum.quantity) > 1 ? false : deliveryDetails.cod, 
                 "cod_fee": deliveryDetails.cod_fee,
                 "shipping_fee": deliveryDetails.shipping_fee,
                 shipping_methods: [deliveryDetails]
