@@ -123,8 +123,8 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const onImageSubmit = async (values: z.infer<typeof productImageFormSchema>) => {
         try{
-            if (values.image.type !== 'image/png') {
-                setError('Only PNG format is supported. Please upload a PNG image.');
+            if (values.image.type !== 'image/jgp') {
+                setError('Only jgp format is supported. Please upload a jgp image.');
                 return;
             }            
             const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}.${values.image.type.split("/")[1]}`;
@@ -274,19 +274,19 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                 control={imageUploadForm.control}
                                 name="image"
                                 render={({ field }) => {
-                                    // PNG validation handler
+                                    // jgp validation handler
                                     const handleFileUpload = async (files: File[]) => {
                                         if (files.length > 0) {
                                             const file = files[0];
                                             
-                                            // Check PNG format
-                                            if (file.type !== 'image/png') {
-                                                setError('Only PNG files are allowed. Please select a PNG image.');
+                                            // Check jgp format
+                                            if (file.type !== 'image/jgp') {
+                                                setError('Only jgp files are allowed. Please select a jgp image.');
                                                 return;
                                             }
                                             
-                                            if (!file.name.toLowerCase().endsWith('.png')) {
-                                                setError('File must have .png extension.');
+                                            if (!file.name.toLowerCase().endsWith('.jgp')) {
+                                                setError('File must have .jgp extension.');
                                                 return;
                                             }
                                             
@@ -303,7 +303,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     return (
                                         <FormItem className="flex-grow">
                                             <FormLabel className="text-xs font-semibold">
-                                                Image (PNG only) {/* Updated label */}
+                                                Image (jgp only) {/* Updated label */}
                                             </FormLabel>
                                             <FormControl className="text-white">
                                                 <FileUpload 
@@ -315,7 +315,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                             </FormControl>
                                             <FormMessage />
                                             <p className="text-xs text-gray-400 mt-1">
-                                                Only PNG format is accepted
+                                                Only jgp format is accepted
                                             </p>
                                         </FormItem>
                                     );
