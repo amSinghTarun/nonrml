@@ -26,7 +26,7 @@ export default function OurStoryPage() {
           <div>
             <h2 className="font-semibold mb-2">The Beginning</h2>
             <p>
-              Late one night in a cramped Mumbai studio, surrounded by sketches and prototypes, we realized something profound. Every design we admired, every piece that caught our eye, had one thing in common – they all dared to be different. They broke rules. They rejected normal.
+              Late one night in a cramped studio, surrounded by sketches and prototypes, we realized something profound. Every design we admired, every piece that caught our eye, had one thing in common – they all dared to be different. They broke rules. They rejected normal.
             </p>
           </div>
           <div>

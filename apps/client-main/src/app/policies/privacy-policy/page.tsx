@@ -69,7 +69,7 @@ export default function PrivacyPolicy() {
             <p>
               You can request access, correction, or deletion of your personal information at any time by contacting us at{' '}
               <span className="cursor-pointer text-rose-400">
-                info@nonrml.co.in
+                support@nonrml.co.in
               </span>.
             </p>
           </div>
