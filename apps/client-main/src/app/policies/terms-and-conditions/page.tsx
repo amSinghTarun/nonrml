@@ -22,7 +22,7 @@ export default function TermsAndConditions() {
           <div>
             <h2 className="font-semibold mb-2">1. Introduction</h2>
             <p>
-              Welcome to www.nonrml.com ("Website"). This website is operated by NoNrml. Throughout the site, the terms "we," "us," and "our" refer to NoNrml. By accessing or using our Website, you agree to comply with and be bound by the following terms and conditions ("Terms"). Please read them carefully before using our Website.
+              Welcome to www.nonrml.co.in ("Website"). This website is operated by NoNrml. Throughout the site, the terms "we," "us," and "our" refer to NoNrml. By accessing or using our Website, you agree to comply with and be bound by the following terms and conditions ("Terms"). Please read them carefully before using our Website.
             </p>
           </div>
 
@@ -47,7 +47,8 @@ export default function TermsAndConditions() {
             <h2 className="font-semibold mb-2">4. Product Information</h2>
             <ul className="space-y-2">
               <li>• We make every effort to display the colours and details of our products as accurately as possible. However, we cannot guarantee that the colours and details will appear perfectly due to differences in display devices.</li>
-              <li>• If you spot a detail in the product design that wasn't visible in the website photos, know that it's an intentional part of our unique craftsmanship—because true art lies in the details.</li>
+              <li>• If you notice a design detail in your product that wasn't clearly visible in the website photos, please understand that it is a deliberate part of our unique craftsmanship. Our pieces are created with artistic intent, and often, the finer details only reveal themselves up close—this is not a defect and should not be treated as one.</li>
+              <li>• Similarly, if any detail on the website appears missing or something extra appears in the physical product, it is a part of our creative process and not considered a flaw.</li>
               <li>• We reserve the right to limit the quantities of products or services we offer. All product descriptions and pricing are subject to change without prior notice.</li>
             </ul>
           </div>
@@ -56,19 +57,12 @@ export default function TermsAndConditions() {
             <h2 className="font-semibold mb-2">5. Orders and Payments</h2>
             <ul className="space-y-2">
               <li>• When placing an order on our Website, you agree to provide accurate and up-to-date purchase and account details.</li>
-              <li>• All payments must be made at the time of purchase, and payments are non-refundable unless otherwise indicated.</li>
-              <li>• All prepaid orders are automatically confirmed once payment is received. However, for orders placed with the Cash on Delivery (COD) option, we may reach out to you for confirmation before processing your order.</li>
-              <li>• Our inventory is updated once the payment is successfully completed. In the rare situation where two customers simultaneously attempt to purchase the last remaining item, and both proceed with the payment process, the order of the customer whose payment is processed first will be fulfilled.</li>
-              <li>• You will receive an automatic confirmation email once your order has been successfully placed. If you do not see the order confirmation in your inbox within a few minutes, please check your spam or junk email folder.</li>
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="font-semibold mb-2">5. Orders Cancellation</h2>
-            <ul className="space-y-2">
-              <li>• Cancellation of orders are only permitted on COD orders which will be possible if and till the order has not been accepted</li> 
-              <li>• All prepaid orders are final. We do not offer any cancellations and refunds. Any refunds are issued in the form of gift cards equivalent to the selling/MRP amount, which can be used within 6 (six) months. gift cards are non-refundable; and are only redeemable at our offline and online store. Shipping charges are non-refundable.</li>
               <li>• We reserve the right to reject any order at our discretion. If we need to modify or cancel your order, we will inform you via a different medium using the contact details provided by you.</li>
+              <li>• All payments must be made at the time of purchase, and payments are non-refundable unless otherwise indicated.</li>
+              <li>• All prepaid orders are automatically confirmed once the payment is successfully received — no further action is needed from your end.</li>
+              <li>• For Cash on Delivery (COD) orders, we may contact you for confirmation before processing your order. However, we do not call every COD customer. Confirmation calls are generally made only for new or random customers to ensure order authenticity. Regular or returning customers may not receive a confirmation call, and their COD orders may be processed directly. This step ensures that all details are accurate and verified to avoid any issues.</li>
+              <li>• Our inventory is updated once the payment is successfully completed. In the rare situation where two customers simultaneously attempt to purchase the last remaining item, and both proceed with the payment process, the order of the customer whose payment is processed first will be fulfilled. Unfortunately, for the other customer, even if their payment is successful, the product will be out of stock. In such cases, we will cancel the order and initiate a full refund for the payment made.</li>
+              <li>• You will receive an automatic confirmation email once your order has been successfully placed. If you do not see the order confirmation in your inbox within a few minutes, please check your spam or junk email folder.</li>
             </ul>
           </div>
 
