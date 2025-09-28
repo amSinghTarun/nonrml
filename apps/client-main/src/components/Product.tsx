@@ -330,9 +330,9 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
               <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
                 {formattedPrice}
               </span>
-              <span className="text-neutral-500 text-xs text-center lg:text-md font-normal flex flex-col">
+              {/* <span className="text-neutral-500 text-xs text-center lg:text-md font-normal flex flex-col">
                 {product.inspiration}
-              </span>
+              </span> */}
             </div>
 
             {/* Size selection buttons */}
