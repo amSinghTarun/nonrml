@@ -57,17 +57,38 @@ const ImageGallerySkeleton = () => (
 // Separate components for better code splitting
 const HeroSection = ({ homeImages }: { homeImages: any }) => (
   <>
-    <ResponsiveImage
-      images={{
-        md: homeImages["TOP_MD"] as string,
-        lg: homeImages["TOP_LG"] as string
-      }}
-      alt="homeImage"
-      className="w-screen h-screen fixed"
-      sizes="100vw"
-      priority={true}
-      lgBreakpoint={1024}
-    />
+    {/* Container for TOP_MD image with symbol overlay */}
+    <div className="w-screen h-screen fixed">
+      <ResponsiveImage
+        images={{
+          md: homeImages["TOP_MD"] as string,
+          lg: homeImages["TOP_LG"] as string
+        }}
+        alt="homeImage"
+        className="w-screen h-screen"
+        sizes="100vw"
+        priority={true}
+        lgBreakpoint={1024}
+      />
+      
+      {/* Symbol Overlay - positioned above the TOP_MD/TOP_LG image */}
+      <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+        <div className="relative pointer-events-auto">
+          
+          {/* Main content container - static */}
+          <div className="relative backdrop-blur-xl bg-white/10 rounded-full p-6 md:p-8 lg:p-12 border border-white/10">
+            <Image
+              src={symbol}
+              alt="NoNRML Symbol"
+              width={80}
+              height={80}
+              className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
+              priority={true}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
 
     <ResponsiveImage
       images={{
@@ -80,6 +101,7 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
       priority={true}
       lgBreakpoint={1024}
     />
+    
     <div className="h-screen overscroll-auto bg-transparent w-full" />
   </>
 );
@@ -175,26 +197,12 @@ export async function LandingPage() {
         </Suspense>
       </div>
 
-      {/* Middle Image Section with Symbol Overlay */}
+      {/* Middle Image Section */}
       <div className="z-30 relative flex flex-col lg:flex-col">
         <ResponsiveProductImage 
           imageLg={homeImages.MIDDLE_LG as string} 
           imageMd={homeImages.MIDDLE_MD as string} 
         />
-        
-        {/* Symbol Overlay - positioned above the image */}
-        <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
-          <div className="backdrop-blur-xl bg-white/10 rounded-full p-6 md:p-8 lg:p-12 border border-white/20 pointer-events-auto">
-            <Image
-              src={symbol}
-              alt="NoNRML Symbol"
-              width={80}
-              height={80}
-              className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
-              priority={false}
-            />
-          </div>
-        </div>
       </div>
 
       {/* More Products Section */}
