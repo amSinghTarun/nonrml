@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
  
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -18,8 +17,6 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UseTRPCQueryResult } from "@trpc/react-query/shared"
-import { convertFileToDataURL } from "@nonrml/common"
-import { uploadToSignedURL } from "@nonrml/storage";
 
 type Product = UseTRPCQueryResult<RouterOutput["viewer"]["product"]["getAdminProduct"], unknown>;
 
@@ -126,7 +123,11 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const onImageSubmit = async (values: z.infer<typeof productImageFormSchema>) => {
         try{
-            const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}`;
+            if (values.image.type !== 'image/png') {
+                setError('Only PNG format is supported. Please upload a PNG image.');
+                return;
+            }            
+            const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}.${values.image.type.split("/")[1]}`;
             const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
             const res = await fetch(signedUrlData.data.signedUrl, {
                 method: "PUT",
@@ -273,21 +274,37 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                 control={imageUploadForm.control}
                                 name="image"
                                 render={({ field }) => {
-                                    // Create a custom onUpload handler for the FileUpload component
+                                    // PNG validation handler
                                     const handleFileUpload = async (files: File[]) => {
                                         if (files.length > 0) {
-                                            field.onChange(files[0]);
+                                            const file = files[0];
+                                            
+                                            // Check PNG format
+                                            if (file.type !== 'image/png') {
+                                                setError('Only PNG files are allowed. Please select a PNG image.');
+                                                return;
+                                            }
+                                            
+                                            if (!file.name.toLowerCase().endsWith('.png')) {
+                                                setError('File must have .png extension.');
+                                                return;
+                                            }
+                                            
+                                            // Clear errors and set file
+                                            setError(null);
+                                            field.onChange(file);
                                         }
                                     };
                                     
-                                    // Create a custom onFileDelete handler
                                     const handleFileDelete = (index: number) => {
                                         field.onChange(undefined);
                                     };
                                     
                                     return (
                                         <FormItem className="flex-grow">
-                                            <FormLabel className="text-xs font-semibold">Image</FormLabel>
+                                            <FormLabel className="text-xs font-semibold">
+                                                Image (PNG only) {/* Updated label */}
+                                            </FormLabel>
                                             <FormControl className="text-white">
                                                 <FileUpload 
                                                     onUpload={handleFileUpload}
@@ -297,6 +314,9 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                                 />
                                             </FormControl>
                                             <FormMessage />
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                Only PNG format is accepted
+                                            </p>
                                         </FormItem>
                                     );
                                 }}
