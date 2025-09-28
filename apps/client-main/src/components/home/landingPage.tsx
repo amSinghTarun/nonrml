@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
+import logo from "@/images/logo.png";
 import symbol from "@/images/SYMBOL.png"; // Add this import
 import { getHomepageProducts, getHomePagesImages } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
@@ -176,24 +177,22 @@ export async function LandingPage() {
 
       {/* Middle Image Section with Symbol Overlay */}
       <div className="z-30 relative flex flex-col lg:flex-col">
-        <div className="relative">
-          <ResponsiveProductImage 
-            imageLg={homeImages.MIDDLE_LG as string} 
-            imageMd={homeImages.MIDDLE_MD as string} 
-          />
-          
-          {/* Symbol Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="backdrop-blur-xl bg-white/10 rounded-full p-6 md:p-8 lg:p-12">
-              <Image
-                src={symbol}
-                alt="NoNRML Symbol"
-                width={80}
-                height={80}
-                className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
-                priority={false}
-              />
-            </div>
+        <ResponsiveProductImage 
+          imageLg={homeImages.MIDDLE_LG as string} 
+          imageMd={homeImages.MIDDLE_MD as string} 
+        />
+        
+        {/* Symbol Overlay - positioned above the image */}
+        <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+          <div className="backdrop-blur-xl bg-white/10 rounded-full p-6 md:p-8 lg:p-12 border border-white/20 pointer-events-auto">
+            <Image
+              src={symbol}
+              alt="NoNRML Symbol"
+              width={80}
+              height={80}
+              className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
+              priority={false}
+            />
           </div>
         </div>
       </div>
