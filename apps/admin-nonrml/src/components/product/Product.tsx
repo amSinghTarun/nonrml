@@ -123,21 +123,22 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
 
     const onImageSubmit = async (values: z.infer<typeof productImageFormSchema>) => {
         try{
-            if (values.image.type !== 'image/jgp') {
-                setError('Only jgp format is supported. Please upload a jgp image.');
-                return;
+            if (values.image.type == 'image/jpg' || values.image.type == 'image/jpeg') {
+                const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}.${values.image.type.split("/")[1]}`;
+                const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
+                const res = await fetch(signedUrlData.data.signedUrl, {
+                    method: "PUT",
+                    body: values.image,
+                    headers: {
+                        "Content-Type": values.image.type,
+                    },
+                })
+                console.log(res)
+                await addProductImage.mutateAsync({imagePath: signedUrlData.data.path, priorityIndex: values.priorityIndex,  active: values.active, productId: product.id});
+                return
             }            
-            const imageName = `PROD_IMAGE:${product.sku}:${Date.now()}.${values.image.type.split("/")[1]}`;
-            const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
-            const res = await fetch(signedUrlData.data.signedUrl, {
-                method: "PUT",
-                body: values.image,
-                headers: {
-                    "Content-Type": values.image.type,
-                },
-            })
-            console.log(res)
-            await addProductImage.mutateAsync({imagePath: signedUrlData.data.path, priorityIndex: values.priorityIndex,  active: values.active, productId: product.id});
+            setError('Only jpg format is supported. Please upload a jpg image.');
+            return;
         } catch(error) {
             setError(error);
         }
@@ -274,25 +275,21 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                 control={imageUploadForm.control}
                                 name="image"
                                 render={({ field }) => {
-                                    // jgp validation handler
+                                    // jpg validation handler
                                     const handleFileUpload = async (files: File[]) => {
                                         if (files.length > 0) {
                                             const file = files[0];
-                                            
-                                            // Check jgp format
-                                            if (file.type !== 'image/jgp') {
-                                                setError('Only jgp files are allowed. Please select a jgp image.');
+                                            console.log(file.type)
+                                            // Check jpg format
+                                            if (file.type == 'image/jpg' || file.type == 'image/jpeg') {
+                                                // Clear errors and set file
+                                                setError(null);
+                                                field.onChange(file);
                                                 return;
                                             }
+                                            setError('Only jpg files are allowed. Please select a jpg image.');
+                                            return;
                                             
-                                            if (!file.name.toLowerCase().endsWith('.jgp')) {
-                                                setError('File must have .jgp extension.');
-                                                return;
-                                            }
-                                            
-                                            // Clear errors and set file
-                                            setError(null);
-                                            field.onChange(file);
                                         }
                                     };
                                     
@@ -303,7 +300,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                     return (
                                         <FormItem className="flex-grow">
                                             <FormLabel className="text-xs font-semibold">
-                                                Image (jgp only) {/* Updated label */}
+                                                Image (jpg only) {/* Updated label */}
                                             </FormLabel>
                                             <FormControl className="text-white">
                                                 <FileUpload 
@@ -315,7 +312,7 @@ export const Product = ({productDetails}: {productDetails: Product}) => {
                                             </FormControl>
                                             <FormMessage />
                                             <p className="text-xs text-gray-400 mt-1">
-                                                Only jgp format is accepted
+                                                Only jpg format is accepted
                                             </p>
                                         </FormItem>
                                     );
