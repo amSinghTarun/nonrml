@@ -57,7 +57,7 @@ export const initiateReturn = async ({ctx, input}: TRPCRequestOptions<TInitiateR
                         product: {
                             select: {
                                 productImages: {
-                                    where: { active: true, priorityIndex: 0 },
+                                    where: { priorityIndex: 99 },
                                     select: {
                                         image: true
                                     }
