@@ -10,14 +10,14 @@ import { LandingPage } from "@/components/home/landingPage";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  metadataBase: new URL('https://www.nonrml.com'), // Add your actual domain
+  metadataBase: new URL('https://www.nonrml.co.in'), // Add your actual domain
   title: 'NoNRML ( pronounced "No Normal")',
   description: 'NoNRML is a premium streetwear brancd in India. Shop the latest unisex expressive styles from this premium Homegrown streetwear brand for a bold, raw, meaningful and trend-setting look',
   keywords: ['streetwear', 'fashion', 'clothing', 'NoNRML', 'drops', 'limited edition'],
   openGraph: {
-    title: 'NoNRML - Expressive Streetwear',
+    title: 'NoNRML ( pronounced "No Normal")',
     description: 'NoNRML is a premium streetwear brancd in India. Shop the latest unisex expressive styles from this premium Homegrown streetwear brand for a bold, raw, meaningful and trend-setting look',
-    url: 'https://www.nonrml.com',
+    url: 'https://www.nonrml.co.in',
     siteName: 'NoNRML',
     images: [{
       url: '/og-image.jpg', // Create this
