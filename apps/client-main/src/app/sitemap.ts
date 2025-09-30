@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 import { serverClient } from "@/app/_trpc/serverClient";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nonrml.co.in';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nonrml.co.in';
   const trpcClient = await serverClient();
   
   // 1. Static Routes - all public content pages
