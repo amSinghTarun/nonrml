@@ -10,33 +10,42 @@ import { LandingPage } from "@/components/home/landingPage";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  metadataBase: new URL('https://www.nonrml.co.in'), // Add your actual domain
-  title: 'NoNRML ( pronounced "No Normal")',
-  description: 'NoNRML is a premium streetwear brancd in India. Shop the latest unisex expressive styles from this premium Homegrown streetwear brand for a bold, raw, meaningful and trend-setting look',
-  keywords: ['streetwear', 'fashion', 'clothing', 'NoNRML', 'drops', 'limited edition'],
+  title: 'NoNRML - Premium Indian Streetwear | Expressive Unisex Fashion',
+  description: 'NoNRML (pronounced "No Normal") is India\'s leading premium streetwear brand. Shop the latest unisex expressive styles including oversized tees, premium shirts, and denim for a bold, raw, meaningful and trend-setting look. New drops weekly.',
+  keywords: ['streetwear India', 'premium streetwear', 'unisex fashion', 'oversized tees', 'NoNRML', 'limited edition drops', 'Indian streetwear brand', 'expressive clothing', 'homegrown fashion', 'streetwear online India', 'bold fashion', 'trendsetting apparel'],
   openGraph: {
-    title: 'NoNRML ( pronounced "No Normal")',
-    description: 'NoNRML is a premium streetwear brancd in India. Shop the latest unisex expressive styles from this premium Homegrown streetwear brand for a bold, raw, meaningful and trend-setting look',
+    title: 'NoNRML - Premium Indian Streetwear | Expressive Unisex Fashion',
+    description: 'Shop the latest unisex expressive styles from India\'s premium homegrown streetwear brand. Bold, raw, meaningful fashion with weekly drops.',
     url: 'https://www.nonrml.co.in',
     siteName: 'NoNRML',
     images: [{
-      url: '/og-image.jpg', // Create this
+      url: '/og-image.jpg',
       width: 1200,
       height: 630,
-      alt: 'NoNRML Streetwear',
+      alt: 'NoNRML Premium Streetwear Collection',
     }],
     type: 'website',
-    locale: 'en_US',
+    locale: 'en_IN',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NoNRML - Expressive Streetwear',
-    description: 'Shop limited-edition streetwear drops.',
+    title: 'NoNRML - Premium Indian Streetwear',
+    description: 'Shop limited-edition streetwear drops. Bold, expressive unisex fashion from India\'s homegrown premium brand.',
     images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://www.nonrml.co.in',
   },
 };
 

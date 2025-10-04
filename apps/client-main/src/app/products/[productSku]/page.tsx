@@ -10,9 +10,9 @@ export async function generateMetadata({ params }: Props) {
   const productSKU = (await params).productSku;
   return {
     // Basic metadata fields
-    title: `${productSKU.replaceAll("_", " ").toUpperCase()} - Premiun Unisex Streetwear ${data.product.category.displayName?.replaceAll("_", " ")} - NoNRML`,  // Browser tab title, search engine title
+    title: `${productSKU.replaceAll("-", " ").toUpperCase()} - Premiun Unisex Streetwear ${data.product.category.displayName?.replaceAll("_", " ")} - NoNRML`,  // Browser tab title, search engine title
     description: `Buy Premium Unisex Streetwear Oversize ${productSKU.replaceAll("_", " ").toUpperCase()} ${data.product.category.displayName?.replaceAll("_", " ")} online from NoNRML `,  // Meta description for SEO
-    keywords: [`premium ${productSKU.replaceAll("_", " ").toUpperCase()}`, `${productSKU.replaceAll("_", " ").toUpperCase()}`, `oversize ${productSKU.replaceAll("_", " ").toUpperCase()}`, "Streetwear", `streetwear ${productSKU.replaceAll("_", " ").toUpperCase()}`, `unisex ${productSKU.replaceAll("_", " ").toUpperCase()}`],
+    keywords: [`premium ${productSKU.replaceAll("-", " ").toUpperCase()}`, `${productSKU.replaceAll("-", " ").toUpperCase()}`, `oversize ${productSKU.replaceAll("-", " ").toUpperCase()}`, "Streetwear", `streetwear ${productSKU.replaceAll("-", " ").toUpperCase()}`, `unisex ${productSKU.replaceAll("-", " ").toUpperCase()}`],
     robots: `index, follow`,
     // OpenGraph metadata (for social sharing - Facebook, LinkedIn, etc.)
     openGraph: {

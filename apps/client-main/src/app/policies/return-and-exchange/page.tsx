@@ -3,11 +3,29 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  // Basic metadata fields
-  title: `Return And Exchange - NoNRML`,  // Browser tab title, search engine title
-  description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
-  keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
-  robots: 'index, follow',
+  title: 'Return & Exchange Policy - NoNRML | Refund & Exchange Terms',
+  description: 'NoNRML offers a 5-day exchange window from delivery. Learn about our return and exchange policy, credit notes, refund process, and terms for damaged products. Shop with confidence.',
+  keywords: ['NoNRML returns', 'exchange policy', 'refund policy', 'return process', 'credit note', 'damaged product return', 'exchange terms India', 'streetwear returns', '5 day exchange'],
+  openGraph: {
+    title: 'Return & Exchange Policy - NoNRML',
+    description: '5-day exchange window. Learn about our refund and exchange process for NoNRML products.',
+    url: 'https://www.nonrml.co.in/policies/return-and-exchange',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'NoNRML',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Return & Exchange Policy - NoNRML',
+    description: '5-day exchange window and refund terms.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://www.nonrml.co.in/policies/return-and-exchange',
+  },
 }
 
 export default function ReturnExchangePolicy() {

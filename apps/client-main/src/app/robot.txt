@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nonrml.co.in';
-  
+
   return {
     rules: [
       {
@@ -16,8 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           '/collections',
           '/collections/*',
           '/products/*',
-          '/policies',
-          '/returns',
+          '/policies/*',
           '/track-order',
         ],
         // Disallow private, admin, and system areas
@@ -33,11 +32,46 @@ export default function robots(): MetadataRoute.Robots {
           '/lib/',
           '/admin/',
           '/_next/',
-          '/global-error.tsx',
-          '/loading.tsx',
-          '/not-found.tsx',
-          '/provider.tsx'
         ]
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: [
+          '/',
+          '/about',
+          '/contact-us',
+          '/collections',
+          '/collections/*',
+          '/products/*',
+          '/policies/*',
+          '/track-order',
+        ],
+        disallow: [
+          '/api/',
+          '/checkout/',
+          '/orders/',
+          '/creditNote/',
+          '/exchanges/',
+        ],
+        crawlDelay: 0,
+      },
+      {
+        userAgent: ['Applebot', 'Bingbot'],
+        allow: [
+          '/',
+          '/about',
+          '/contact-us',
+          '/collections',
+          '/collections/*',
+          '/products/*',
+          '/policies/*',
+          '/track-order',
+        ],
+        disallow: [
+          '/api/',
+          '/checkout/',
+          '/orders/',
+        ],
       }
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

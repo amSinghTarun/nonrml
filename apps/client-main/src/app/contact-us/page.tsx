@@ -2,11 +2,29 @@ import React from "react";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  // Basic metadata fields
-  title: `Contact us - NoNRML`,  // Browser tab title, search engine title
-  description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
-  keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
-  robots: 'index, follow',
+  title: 'Contact Us - NoNRML | Customer Support & Inquiries',
+  description: 'Get in touch with NoNRML for product information, order queries, customer support, or general inquiries. We\'re here to help with your streetwear shopping experience. Email us at info@nonrml.co.in',
+  keywords: ['contact NoNRML', 'customer support', 'NoNRML customer service', 'product inquiries', 'order help', 'streetwear support India', 'NoNRML email', 'fashion brand contact'],
+  openGraph: {
+    title: 'Contact NoNRML - Customer Support & Inquiries',
+    description: 'Get in touch with NoNRML for product information, order queries, or customer support. We\'re here to help!',
+    url: 'https://www.nonrml.co.in/contact-us',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'NoNRML',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Contact NoNRML',
+    description: 'Get in touch for product info, orders, or support.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://www.nonrml.co.in/contact-us',
+  },
 }
 
 const ContactUsPage = () => {
