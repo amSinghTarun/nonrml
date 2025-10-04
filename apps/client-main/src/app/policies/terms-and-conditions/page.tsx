@@ -3,11 +3,29 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  // Basic metadata fields
-  title: `Terms And Condition - NoNRML`,  // Browser tab title, search engine title
-  description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
-  keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
-  robots: 'index, follow',
+  title: 'Terms & Conditions - NoNRML | Website Usage & Purchase Terms',
+  description: 'Read NoNRML\'s terms and conditions for website usage, product purchases, shipping, payments, and intellectual property. Understand your rights and responsibilities when shopping with us.',
+  keywords: ['NoNRML terms', 'terms and conditions', 'purchase terms', 'website terms', 'shipping policy', 'payment terms', 'legal terms India', 'ecommerce terms'],
+  openGraph: {
+    title: 'Terms & Conditions - NoNRML',
+    description: 'Terms and conditions for using NoNRML website and purchasing products.',
+    url: 'https://www.nonrml.co.in/policies/terms-and-conditions',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'NoNRML',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms & Conditions - NoNRML',
+    description: 'Terms for using NoNRML and purchasing products.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://www.nonrml.co.in/policies/terms-and-conditions',
+  },
 }
 
 export default function TermsAndConditions() {

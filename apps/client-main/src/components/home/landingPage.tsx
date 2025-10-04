@@ -7,6 +7,7 @@ import symbol from "@/images/SYMBOL.png"; // Add this import
 import { getHomepageProducts, getHomePagesImages } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import { ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage } from "../ScreenResponsiveImage";
+import { WhyNoNRML } from "./WhyNoNRML";
 
 // Lazy load non-critical components
 const Footer = dynamic(() => import('../Footer').then(mod => ({ default: mod.Footer })), {
@@ -213,6 +214,12 @@ export async function LandingPage() {
         <Suspense fallback={<ImageGallerySkeleton />}>
           <ResponsiveImageGallery images={homeImages.BOTTOM as string[]} />
         </Suspense>
+
+        {/* Minimal Expandable Why NoNRML Section */}
+        <div className="z-30 relative">
+          <WhyNoNRML />
+        </div>
+
         <Suspense fallback={<FooterSkeleton />}>
           <Footer className="z-30 relative text-white bg-black/45 backdrop-blur-md border-none" />
         </Suspense>

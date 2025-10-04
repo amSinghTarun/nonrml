@@ -24,30 +24,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/contact-us`,
       lastModified: new Date().toISOString(),
       changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/shipping`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'monthly',
       priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/returns`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/policies`,
-      lastModified: new Date().toISOString(), 
-      changeFrequency: 'yearly',
-      priority: 0.5,
     },
     {
       url: `${baseUrl}/track-order`,
       lastModified: new Date().toISOString(),
       changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/policies/privacy-policy`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/policies/terms-and-conditions`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/policies/return-and-exchange`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'yearly',
       priority: 0.6,
     },
   ];

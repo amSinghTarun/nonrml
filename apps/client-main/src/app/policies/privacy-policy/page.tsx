@@ -3,11 +3,29 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  // Basic metadata fields
-  title: `Privacy Policy - NoNRML`,  // Browser tab title, search engine title
-  description: `Buy Premium Unisex Streetwear T-shirts, Shirts and Jeans online from NoNRML `,  // Meta description for SEO
-  keywords: ["premium T-shirts, Shirts and Jeans", "premium", "oversize T-shirts, Shirts and Jeans", "Streetwear", "streetwear ", "unisex"],
-  robots: 'index, follow',
+  title: 'Privacy Policy - NoNRML | Data Protection & Privacy',
+  description: 'Read NoNRML\'s privacy policy to understand how we collect, use, and protect your personal information. Learn about data security, cookies, and your privacy rights when shopping with us.',
+  keywords: ['NoNRML privacy policy', 'data protection', 'privacy rights', 'personal information security', 'cookie policy', 'data privacy India', 'customer data protection'],
+  openGraph: {
+    title: 'Privacy Policy - NoNRML',
+    description: 'Understanding how NoNRML protects your personal information and privacy rights.',
+    url: 'https://www.nonrml.co.in/policies/privacy-policy',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'NoNRML',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy - NoNRML',
+    description: 'How we protect your personal information and privacy.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://www.nonrml.co.in/policies/privacy-policy',
+  },
 }
 
 export default function PrivacyPolicy() {
