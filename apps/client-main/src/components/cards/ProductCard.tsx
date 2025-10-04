@@ -81,7 +81,7 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
           <Image 
             src={image} 
             alt={imageAlt} 
-            className={`object-cover rounded-md w-auto h-[100%] transition-opacity duration-300 ${isHovering && hoverImage ? 'opacity-0' : 'opacity-100'}`} 
+            className={`object-cover w-auto h-[100%] transition-opacity duration-300 ${isHovering && hoverImage ? 'opacity-0' : 'opacity-100'}`} 
             width={2000}
             height={1000}
           />
@@ -91,14 +91,14 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
             <Image 
               src={hoverImage} 
               alt={`${imageAlt} alternate view`} 
-              className={`object-cover rounded-md w-auto h-[100%] transition-opacity duration-300 absolute top-0 left-0 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
+              className={`object-cover w-auto h-[100%] transition-opacity duration-300 absolute top-0 left-0 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
               width={2000}
               height={1000}
               priority
             />
           )}
         </div>
-        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[9px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 px-1 rounded-tl-md rounded-br-md">
+        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[9px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 px-1 rounded-tl-md">
           <h1 className="font-bold">{name.toUpperCase()}</h1>
         </div>
       </Link>

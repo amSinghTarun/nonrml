@@ -69,28 +69,20 @@ export const ResponsiveImageGallery = ({ images }: { images: string[]}) => {
     setCurrentImageIndex(index);
   };
   
-  // Mobile view carousel
+  // Mobile view carousel with horizontal scroll
   const renderCarousel = () => (
     <div className="relative">
-      <div className="overflow-hidden">
-        <Image 
-          src={images[currentImageIndex]}
-          alt={images[currentImageIndex] || "Product Image"}
-          className="object-cover w-full h-full transition-opacity duration-1000"
-          width={400}
-          height={400}
-        />
-      </div>
-      
-      {/* Dots navigation */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleDotClick(index)}
-            className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-red-500' : 'bg-white'}`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
+      <div className="flex overflow-x-auto gap-2 scroll-smooth snap-x snap-mandatory">
+        {images.map((image, index) => (
+          <div key={index} className="flex-shrink-0 w-[85vw] snap-center">
+            <Image
+              src={image}
+              alt={image || "Product Image"}
+              className="object-cover w-full h-full"
+              width={400}
+              height={400}
+            />
+          </div>
         ))}
       </div>
     </div>
