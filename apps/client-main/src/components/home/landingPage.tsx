@@ -76,13 +76,13 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
         <div className="relative pointer-events-auto">
           
           {/* Main content container - static */}
-          <div className="relative backdrop-blur-xl bg-white/10 rounded-full p-6 md:p-8 lg:p-12 border border-white/10">
+          <div className="relative backdrop-blur-xl bg-white/10 rounded-full p-8 lg:p-12 border border-white/10 shadow-lg shadow-black">
             <Image
               src={symbol}
               alt="NoNRML Symbol"
               width={80}
               height={80}
-              className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
+              className="w-20 h-20 lg:w-28 lg:h-28 object-contain "
               priority={true}
             />
           </div>
@@ -109,7 +109,7 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
 const LatestProductsSection = ({ products }: { products: any }) => (
   <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-black/20 pt-3 space-y-3 pb-1">
     <div className="flex flex-row w-full align-baseline">
-      <h1 className="font-bold text-xs flex flex-grow pl-3 text-black">LATEST DROP</h1>
+      <h1 className="font-bold text-xs flex flex-grow pl-3 text-white">LATEST DROP</h1>
     </div>
     <Suspense fallback={<ProductsSkeleton />}>
       <div className="flex flex-row flex-wrap w-full h-full px-1">
