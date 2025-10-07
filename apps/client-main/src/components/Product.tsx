@@ -133,7 +133,7 @@ const ProductImageCarousel = React.memo(({
       <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-1 right-0"} `}>
         <GeneralButtonTransparent
           display="Size Chart"
-          className="p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-white border-2 w-fit text-[10px] md:text-xs"
+          className="p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-white border-[0.5px] w-fit text-[10px] md:text-xs"
           onClick={onSizeChartClick}
         />
       </div>
