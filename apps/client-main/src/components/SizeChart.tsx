@@ -31,13 +31,21 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
   }, [isOpen, onClose]);
 
   // Get all unique sizes across all measurement types
+  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   let allSizes = chartData.isSuccess ? Array.from(
     new Set(
-      chartData.data?.data.measurements.flatMap(measurement => 
+      chartData.data?.data.measurements.flatMap(measurement =>
         measurement.sizeValues.map(sv => sv.size)
       )
     )
-  ).sort() : [];
+  ).sort((a, b) => {
+    const indexA = sizeOrder.indexOf(a);
+    const indexB = sizeOrder.indexOf(b);
+    // If size not in order array, push to end
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  }) : [];
   
   // Create a lookup function to find value for a specific measurement and size
   const getMeasurementValue = (measurementName: string, size: string) => {

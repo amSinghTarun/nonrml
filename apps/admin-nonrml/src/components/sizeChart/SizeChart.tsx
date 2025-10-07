@@ -88,6 +88,7 @@ export const SizeChartHierarchyTable = ({ sizeChartData }: SizeChartTableProps) 
   const organizeHierarchy = (entries: SizeChartEntry[]): SizeChartEntry[] => {
     const entryMap = new Map<number, SizeChartEntry>();
     const rootEntries: SizeChartEntry[] = [];
+    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
     // Map all entries by ID
     entries?.forEach((entry) => {
@@ -107,6 +108,23 @@ export const SizeChartHierarchyTable = ({ sizeChartData }: SizeChartTableProps) 
         }
       }
     });
+
+    // Sort children by size order
+    const sortChildren = (entry: SizeChartEntry) => {
+      if (entry.children && entry.children.length > 0) {
+        entry.children.sort((a, b) => {
+          const indexA = sizeOrder.indexOf(a.name);
+          const indexB = sizeOrder.indexOf(b.name);
+          // If size not in order array, push to end
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+        entry.children.forEach(sortChildren);
+      }
+    };
+
+    rootEntries.forEach(sortChildren);
 
     return rootEntries;
   };
