@@ -122,16 +122,32 @@ export const getProductSizeChart = async ({ctx, input}: TRPCRequestOptions<TGetP
             });
 
             if (!sizeChartData) return null;
-    
+
+            const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
             sizeChart = {
                 chartName: sizeChartData.name,
-                measurements: sizeChartData.other_SizeChart.map(measurementType => ({
-                    name: measurementType.name,
-                    sizeValues: measurementType.other_SizeChart.map(sizeValue => ({
+                measurements: sizeChartData.other_SizeChart.map(measurementType => {
+                    const sizeValues = measurementType.other_SizeChart.map(sizeValue => ({
                         size: sizeValue.name,
                         value: sizeValue.value || ''
-                    }))
-                }))
+                    }));
+
+                    // Sort by size order
+                    sizeValues.sort((a, b) => {
+                        const indexA = sizeOrder.indexOf(a.size);
+                        const indexB = sizeOrder.indexOf(b.size);
+                        // If size not in order array, push to end
+                        if (indexA === -1) return 1;
+                        if (indexB === -1) return -1;
+                        return indexA - indexB;
+                    });
+
+                    return {
+                        name: measurementType.name,
+                        sizeValues
+                    };
+                })
             };
 
             cacheServicesRedisClient().set(`categorySizeChart_${input.sizeChartCategoryNameId}`, sizeChart, {ex: 60*60*5});
