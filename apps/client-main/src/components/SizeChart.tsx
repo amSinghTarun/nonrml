@@ -30,22 +30,45 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
     };
   }, [isOpen, onClose]);
 
-  // Get all unique sizes across all measurement types
-  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  let allSizes = chartData.isSuccess ? Array.from(
-    new Set(
-      chartData.data?.data.measurements.flatMap(measurement =>
-        measurement.sizeValues.map(sv => sv.size)
+  // Custom sort function for clothing sizes
+  const sortSizes = (sizes: string[]) => {
+    const sizeOrder: { [key: string]: number } = {
+      'XS': 1,
+      'S': 2,
+      'M': 3,
+      'L': 4,
+      'XL': 5,
+      'XXL': 6,
+      '2XL': 6,
+      'XXXL': 7,
+      '3XL': 7,
+    };
+
+    return sizes.sort((a, b) => {
+      // Get order values, default to 999 if not found (for custom sizes)
+      const orderA = sizeOrder[a.toUpperCase()] || 999;
+      const orderB = sizeOrder[b.toUpperCase()] || 999;
+      
+      // If both sizes are in our predefined order, use that
+      if (orderA !== 999 && orderB !== 999) {
+        return orderA - orderB;
+      }
+      
+      // Otherwise, fall back to alphabetical
+      return a.localeCompare(b);
+    });
+  };
+
+  // Get all unique sizes across all measurement types and sort them properly
+  let allSizes = chartData.isSuccess ? sortSizes(
+    Array.from(
+      new Set(
+        chartData.data?.data.measurements.flatMap(measurement => 
+          measurement.sizeValues.map(sv => sv.size)
+        )
       )
     )
-  ).sort((a, b) => {
-    const indexA = sizeOrder.indexOf(a);
-    const indexB = sizeOrder.indexOf(b);
-    // If size not in order array, push to end
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  }) : [];
+  ) : [];
   
   // Create a lookup function to find value for a specific measurement and size
   const getMeasurementValue = (measurementName: string, size: string) => {
