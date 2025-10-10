@@ -11,7 +11,7 @@ interface TrackOrderProps {
 
 interface TrackingData {
     orderId: string;
-    waybillNumber: string;
+    AWB?: string;
     trackingLink: string;
     orderStatus: string;
 }
@@ -56,8 +56,8 @@ export const TrackOrder: React.FC<TrackOrderProps> = (trackOrderProps) => {
             if(trackData) {
                 setTrackingData({
                     orderId: `ORD-${trackData.data.id}${trackData.data.idVarChar}`,
-                    waybillNumber: "dsfdefds",
-                    trackingLink: "https://www.delhivery.com/tracking",
+                    ...(trackData.data.shipment?.AWB && {AWB: trackData.data.shipment?.AWB}),
+                    trackingLink: trackData.data.shipment?.AWB ? `https://shiprocket.co/tracking/${trackData.data.shipment?.AWB}` : `https://my.shiprocket.in/#/login`,
                     orderStatus: trackData.data.orderStatus
                 });
                 setShowModal(true);
@@ -163,10 +163,10 @@ export const TrackOrder: React.FC<TrackOrderProps> = (trackOrderProps) => {
                             </div>
                             
                             {/* Waybill Number */}
-                            {trackingData.waybillNumber && (
+                            {trackingData.AWB && (
                                 <div>
-                                    <p className="text-xs text-neutral-500">Waybill Number</p>
-                                    <p className="font-semibold text-neutral-800">{trackingData.waybillNumber}</p>
+                                    <p className="text-xs text-neutral-500">AWB</p>
+                                    <p className="font-semibold text-neutral-800">{trackingData.AWB}</p>
                                 </div>
                             )}
                             
