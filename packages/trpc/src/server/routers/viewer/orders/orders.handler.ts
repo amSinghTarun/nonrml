@@ -336,9 +336,9 @@ export const getUserOrder = async ({ctx, input}: TRPCRequestOptions<TGetUserOrde
             if(rzpOrderData && rzpOrderData.customer_details && rzpOrderData.customer_details.contact){
                 let contactNumber = `${rzpOrderData.customer_details.contact}`
                 let addressDetails = {
-                    contactName: rzpOrderData.customer_details.shipping_address.name || rzpOrderData.customer_details.name,
+                    contactName: rzpOrderData.customer_details.shipping_address.name || rzpOrderData.customer_details.name || "No Name",
                     contactNumber: rzpOrderData.customer_details.shipping_address.contact || contactNumber,
-                    location: rzpOrderData.customer_details.shipping_address.line1?.trim() + ", " + rzpOrderData.customer_details.shipping_address.line2?.trim(),
+                    location: rzpOrderData.customer_details.shipping_address.line1?.trim() + ", " + rzpOrderData.customer_details.shipping_address.line2?.trim()  || "No Address",
                     city: rzpOrderData.customer_details.shipping_address.city ?? 0,
                     state: rzpOrderData.customer_details.shipping_address.state ?? 0,
                     pincode: rzpOrderData.customer_details.shipping_address.zipcode ?? 0
@@ -1231,6 +1231,7 @@ export const shipOrder = async ({ctx, input}: TRPCRequestOptions<TShipOrderrSche
                     id: input.orderId
                 },
                 data: {
+                    orderStatus: "SHIPPED",
                     shipment: {
                         create: {
                             shipmentOrderId: `${response.orderId}`,

@@ -68,8 +68,9 @@ export const generateShippingNotificationEmail = (options: ShippingNotificationO
                             <!-- Tracking Link Box -->
                             <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
                                 <h4 style="margin: 0 0 10px; font-size: 12px; font-weight: 600; color: #0ea5e9; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;">📦 Track Your Package</h4>
-                                <p style="margin: 0 0 15px; font-size: 12px; color: #0369a1; font-weight: 400;">Click the link below to get real-time updates on your shipment</p>
-                                <a href="${escapeHtml(data.trackingLink!)}" style="display: inline-block; padding: 10px 20px; background-color: #0ea5e9; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;">Track Package</a>
+                                <p style="margin: 0 0 15px; font-size: 12px; color: #0369a1; font-weight: 400;">Click the links below to get real-time updates on your shipment</p>
+                                <a href="${escapeHtml(data.trackingLink!)}" style="display: inline-block; padding: 10px 20px; background-color: #0ea5e9; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; margin: 0 5px;">Track on NoNRML</a>
+                                <a href="${escapeHtml("https://my.shiprocket.in/#/login")}" style="display: inline-block; padding: 10px 20px; background-color: #10b981; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; border-radius: 6px; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; margin: 0 5px;">Track on Shiprocket</a>
                             </div>
                         </div>
                     </td>
