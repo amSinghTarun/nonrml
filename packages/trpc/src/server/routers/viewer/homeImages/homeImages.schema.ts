@@ -31,3 +31,14 @@ export type TGetSKUDetailsSchema = z.infer<typeof ZGetSKUDetailsSchema>;
 
 export const ZGetInventoryItemsSchema = z.object({ });
 export type TGetInventoryItemsSchema = z.infer<typeof ZGetInventoryItemsSchema>;
+
+export const ZGetSignedUrlSchema = z.object({
+    imageName: z.string(),
+});
+export type TGetSignedUrlSchema = z.infer<typeof ZGetSignedUrlSchema>;
+
+export const ZAddHomeImageSchema = z.object({
+    imagePath: z.string(),
+    legacyType: z.enum(Object.keys(prismaEnums.HomeImageType) as [keyof typeof prismaEnums.HomeImageType])
+});
+export type TAddProductImageSchema = z.infer<typeof ZAddHomeImageSchema>;

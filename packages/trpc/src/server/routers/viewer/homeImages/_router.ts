@@ -1,9 +1,8 @@
-
 import { adminProcedure } from "../../../procedures/authedProcedure";
 import { publicProcedure } from "../../../procedures/publicProcedure";
 import { router } from "../../../trpc";
-import { uploadImage, getHomeImagesAdmin, deleteImage, editImage, getHomeImages } from "./homeImages.handler";
-import { ZUploadImageSchema, ZDeleteImageSchema, ZEditImageSchema } from "./homeImages.schema";
+import { uploadImage, getHomeImagesAdmin, deleteImage, editImage, getHomeImages, addHomeImage, getSignedImageUploadUrl } from "./homeImages.handler";
+import { ZUploadImageSchema, ZDeleteImageSchema, ZEditImageSchema, ZAddHomeImageSchema, ZGetSignedUrlSchema } from "./homeImages.schema";
 
 export const HomeImagesRouter = router({
     getHomeImages: publicProcedure
@@ -23,5 +22,13 @@ export const HomeImagesRouter = router({
     deleteImage: adminProcedure
         .meta({ openAPI: {method: "POST", descrription: "Delete a item from the inventory"}})
         .input(ZDeleteImageSchema)
-        .mutation( async ({ctx, input}) => await deleteImage({ctx, input}))
+        .mutation( async ({ctx, input}) => await deleteImage({ctx, input})),
+    getSignedImageUploadUrl: publicProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
+        .input(ZGetSignedUrlSchema)
+        .mutation( async ({ctx, input}) => await getSignedImageUploadUrl({ctx, input})),
+    addHomeImage: publicProcedure
+        .meta({ openAPI: {method: "GET", descrription: "Get the whole inventory"}})
+        .input(ZAddHomeImageSchema)
+        .mutation( async ({ctx, input}) => await addHomeImage({ctx, input})),
 })

@@ -3,13 +3,10 @@ import { TDeleteImageSchema, TEditImageSchema, TUploadImageSchema } from "./home
 import { dataURLtoFile, TRPCResponseStatus } from "@nonrml/common";
 import { TRPCCustomError, TRPCRequestOptions } from "../helper";
 import { cacheServicesRedisClient } from "@nonrml/cache";
-import { getPublicURLOfImage, uploadToBucketFolder } from "@nonrml/storage";
+import { getPublicURLOfImage, getSignedUrl, uploadToBucketFolder } from "@nonrml/storage";
 import { TRPCError } from "@trpc/server";
+import { TAddProductImageSchema, TGetSignedUrlSchema} from "./homeImages.schema";
 
-
-/*
-    Get the 
-*/
 export const getHomeImages = async ({ctx, input}: TRPCRequestOptions<{}>) => {
     const prisma = ctx.prisma;
     try{
@@ -50,10 +47,7 @@ export const getHomeImages = async ({ctx, input}: TRPCRequestOptions<{}>) => {
     } 
 
 }
-/*
-    Get the images.
-    Cursor based pagination.
-*/
+
 export const getHomeImagesAdmin = async ({ctx, input}: TRPCRequestOptions<{}>)  => {
     const prisma = ctx.prisma;;
     try{
@@ -71,9 +65,44 @@ export const getHomeImagesAdmin = async ({ctx, input}: TRPCRequestOptions<{}>)  
     }
 }
 
-/*
-    Add item to Images
-*/
+export const getSignedImageUploadUrl = async ({ctx, input}: TRPCRequestOptions<TGetSignedUrlSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        const data = await getSignedUrl(input.imageName, true);
+        console.log("signedUrl", data)
+        return {status:TRPCResponseStatus.SUCCESS, message:"", data: {signedUrl: data.data.signedUrl, token: data.data.token, path: data.data.path}};
+    } catch(error) {
+        //console.log("\n\n Error in addProductImage ----------------");
+        if (error instanceof Prisma.PrismaClientKnownRequestError) 
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};
+
+export const addHomeImage = async ({ctx, input}: TRPCRequestOptions<TAddProductImageSchema>) => {
+    const prisma = ctx.prisma;
+    input = input!;
+    try{
+        const {data: imageUrl} = await getPublicURLOfImage(input.imagePath, true);
+        console.log(imageUrl);
+        const newHomeImage = await prisma.homePageImages.create({
+            data: {
+                imageUrl: imageUrl.publicUrl,
+                legacyType: input.legacyType,
+                currentType: input.legacyType,
+                active: false
+            }
+        });
+        console.log(newHomeImage);
+        return {status:TRPCResponseStatus.SUCCESS, message:"", data: newHomeImage};
+    } catch(error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError)
+            error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
+        throw TRPCCustomError(error);
+    }
+};
+
 export const uploadImage = async ({ctx, input}: TRPCRequestOptions<TUploadImageSchema>)  => {
     const prisma = ctx?.prisma!
     input = input!;
