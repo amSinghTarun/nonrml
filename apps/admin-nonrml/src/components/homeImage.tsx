@@ -63,26 +63,61 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   };
 
   // Handle image upload
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setError(null);
+  // const handleUpload = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     setError(null);
       
-      if (uploadedFiles.length === 0) {
-        throw new Error("Image is a required prop");
-      }
+  //     if (uploadedFiles.length === 0) {
+  //       throw new Error("Image is a required prop");
+  //     }
       
-      // Use the first file from the uploaded files array
-      const fileToUpload = uploadedFiles[0];
+  //     // Use the first file from the uploaded files array
+  //     const fileToUpload = uploadedFiles[0];
       
-      await createImage.mutateAsync({
-        image: await convertFileToDataURL(fileToUpload),
-        legacyType,
-      });
-    } catch (error) {
-      setError(error);
+  //     await createImage.mutateAsync({
+  //       image: await convertFileToDataURL(fileToUpload),
+  //       legacyType,
+  //     });
+  //   } catch (error) {
+  //     setError(error);
+  //   }
+  // };
+
+  const addHomeImage = trpc.viewer.homeImages.addHomeImage.useMutation({
+    onSuccess: () => {
+      setUploadedFiles([]);  // Reset to empty array
+      setLegacyType("TOP_MD");
+      setShowUploadForm(false);
+      images.refetch()
     }
-  };
+  });
+
+  const getSignedImageUrl = trpc.viewer.productImages.getSignedImageUploadUrl.useMutation({});
+
+  const handleUpload = async () => {
+    try{
+      const fileToUpload = uploadedFiles[0];
+        if (fileToUpload.type == 'image/jpg' || fileToUpload.type == 'image/jpeg') {
+            const imageName = `home/${fileToUpload.type.split("/")[1]}:${Date.now()}`;
+            const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
+            const res = await fetch(signedUrlData.data.signedUrl, {
+                method: "PUT",
+                body: fileToUpload,
+                headers: {
+                    "Content-Type": fileToUpload.type,
+                },
+            })
+            console.log(res)
+            await addHomeImage.mutateAsync({imagePath: signedUrlData.data.path, legacyType: legacyType});
+            return;
+        }            
+        setError('Only jpg format is supported. Please upload a jpg image.');
+        return;
+    } catch(error) {
+        setError(error);
+    }
+}
 
   // Delete image
   const handleDelete = async (imageId: number, active: boolean) => {
