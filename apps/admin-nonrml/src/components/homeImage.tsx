@@ -12,7 +12,6 @@ import {
 import { Trash2, Edit, Check, X } from "lucide-react";
 import { FileUpload } from "@nonrml/components";
 import Image from "next/image";
-import { convertFileToDataURL } from "@nonrml/common";
 import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 
 type HomePageImagesData = UseTRPCQueryResult<RouterOutput["viewer"]["homeImages"]["getHomeImagesAdmin"], unknown>;
@@ -21,7 +20,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   const [editingImage, setEditingImage] = useState<number | null>(null);
   const [error, setError] = useState<any>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);  // Changed to array
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [legacyType, setLegacyType] = useState<"TOP_MD" | "TOP_LG" | "TOP_2_MD" | "TOP_2_LG" | "MIDDLE_MD" | "MIDDLE_LG" | "BOTTOM">("TOP_MD");
   const [imageDetails, setImageDetails] = useState<{ 
     [imageId: number]: { 
@@ -31,97 +30,105 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
   }>({});
 
   // tRPC mutations
-  const createImage = trpc.viewer.homeImages.uploadImage.useMutation({
-    onSuccess: () => {
-      setUploadedFiles([]);  // Reset to empty array
-      setLegacyType("TOP_MD");
-      setShowUploadForm(false);
-      images.refetch()
-    }
-  });
   const updateImage = trpc.viewer.homeImages.editImage.useMutation({
     onSuccess: () => {
       setEditingImage(null);
-      images.refetch()
+      images.refetch();
     }
   });
+  
   const deleteImage = trpc.viewer.homeImages.deleteImage.useMutation({
     onSuccess: () => {
-      images.refetch()
+      images.refetch();
     }
   });
-
-  // Handle file uploads from FileUpload component
-  const handleFileUpload = (files: File[]) => {
-    setUploadedFiles(files);
-  };
-
-  // Handle file deletion from FileUpload component
-  const handleFileDelete = (index: number) => {
-    // The FileUpload component handles the file removal internally
-    // and calls onUpload with the updated files array
-  };
-
-  // Handle image upload
-  // const handleUpload = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   try {
-  //     setError(null);
-      
-  //     if (uploadedFiles.length === 0) {
-  //       throw new Error("Image is a required prop");
-  //     }
-      
-  //     // Use the first file from the uploaded files array
-  //     const fileToUpload = uploadedFiles[0];
-      
-  //     await createImage.mutateAsync({
-  //       image: await convertFileToDataURL(fileToUpload),
-  //       legacyType,
-  //     });
-  //   } catch (error) {
-  //     setError(error);
-  //   }
-  // };
 
   const addHomeImage = trpc.viewer.homeImages.addHomeImage.useMutation({
     onSuccess: () => {
-      setUploadedFiles([]);  // Reset to empty array
+      setUploadedFiles([]);
       setLegacyType("TOP_MD");
       setShowUploadForm(false);
-      images.refetch()
+      images.refetch();
     }
   });
 
   const getSignedImageUrl = trpc.viewer.productImages.getSignedImageUploadUrl.useMutation({});
 
-  const handleUpload = async () => {
-    try{
-      const fileToUpload = uploadedFiles[0];
-        if (fileToUpload.type == 'image/jpg' || fileToUpload.type == 'image/jpeg') {
-            const imageName = `home/${fileToUpload.type.split("/")[1]}:${Date.now()}`;
-            const signedUrlData = await getSignedImageUrl.mutateAsync({imageName: imageName});
-            const res = await fetch(signedUrlData.data.signedUrl, {
-                method: "PUT",
-                body: fileToUpload,
-                headers: {
-                    "Content-Type": fileToUpload.type,
-                },
-            })
-            console.log(res)
-            await addHomeImage.mutateAsync({imagePath: signedUrlData.data.path, legacyType: legacyType});
-            return;
-        }            
-        setError('Only jpg format is supported. Please upload a jpg image.');
+  // Handle file uploads from FileUpload component
+  const handleFileUpload = (files: File[]) => {
+    setUploadedFiles(files);
+    setError(null); // Clear any previous errors
+  };
+
+  // Handle file deletion from FileUpload component
+  const handleFileDelete = (index: number) => {
+    setUploadedFiles([]);
+  };
+
+  // Handle image upload
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setError(null);
+      
+      // Validate file exists
+      if (!uploadedFiles || uploadedFiles.length === 0) {
+        setError('Please select an image to upload');
         return;
-    } catch(error) {
-        setError(error);
+      }
+      
+      const fileToUpload = uploadedFiles[0];
+      console.log(fileToUpload);
+      
+      // Validate file type
+      if (fileToUpload.type !== 'image/jpg' && fileToUpload.type !== 'image/jpeg') {
+        setError('Only JPG/JPEG format is supported. Please upload a jpg image.');
+        return;
+      }
+      
+      // Generate proper image name with correct file extension format
+      const imageName = `home/${Date.now()}.${fileToUpload.type.split("/")[1]}`;
+      
+      // Get signed URL from backend
+      const signedUrlData = await getSignedImageUrl.mutateAsync({ imageName });
+      
+      // Upload to S3
+      const uploadResponse = await fetch(signedUrlData.data.signedUrl, {
+        method: "PUT",
+        body: fileToUpload,
+        headers: {
+          "Content-Type": fileToUpload.type,
+        },
+      });
+      
+      // Check if S3 upload was successful
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload image to S3: ${uploadResponse.statusText}`);
+      }
+      
+      
+      // Save image metadata to database
+      await addHomeImage.mutateAsync({
+        imagePath: signedUrlData.data.path,
+        legacyType: legacyType
+      });
+      
+      console.log('Image metadata saved successfully');
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      setError(error);
     }
-}
+  };
 
   // Delete image
   const handleDelete = async (imageId: number, active: boolean) => {
-    if(active) {setError("Cannot delete an active image"); return};
+    if (active) {
+      setError("Cannot delete an active image");
+      return;
+    }
+    
     if (!confirm('Are you sure you want to delete this image?')) return;
     
     try {
@@ -198,18 +205,23 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
         <h1 className="text-2xl font-bold">Home Page Images</h1>
         <button
           onClick={() => setShowUploadForm(!showUploadForm)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          disabled={createImage.isLoading}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50"
+          disabled={addHomeImage.isLoading}
         >
           {showUploadForm ? "Cancel Upload" : "Upload New Image"}
         </button>
       </div>
 
       {error && (
-        <div className="absolute z-40 backdrop-blur-sm w-full h-full justify-center p-5">
-          <div className="relative bg-red-600 bg-opacity-70 text-white rounded-xl p-3 justify-center">
-            <button onClick={() => setError(null)} className="absolute text-black top-1 right-1">X</button>
-            <span>{`${error}`}</span>
+        <div className="absolute z-40 backdrop-blur-sm w-full h-full justify-center p-5 top-0 left-0">
+          <div className="relative bg-red-600 bg-opacity-90 text-white rounded-xl p-4 max-w-md mx-auto mt-20">
+            <button 
+              onClick={() => setError(null)} 
+              className="absolute text-white hover:text-gray-200 top-2 right-2 text-xl font-bold"
+            >
+              ×
+            </button>
+            <p className="pr-6">{`${error}`}</p>
           </div>
         </div>
       )}
@@ -220,26 +232,29 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
           <h2 className="text-lg font-semibold mb-4">Upload New Image</h2>
           <form onSubmit={handleUpload} className="space-y-4">
             <div className="mt-4">
-              <label className="block mb-1">Upload Image:</label>
+              <label className="block mb-1 font-medium">Upload Image (JPG only):</label>
               <FileUpload 
                 onUpload={handleFileUpload}
                 onFileDelete={handleFileDelete}
                 buttonClass="bg-blue-600 hover:bg-blue-700"
-                maxFiles={1}  // Limit to 1 file since we only process one image
+                maxFiles={1}
               />
               {uploadedFiles.length > 0 && (
                 <p className="text-sm text-green-600 mt-2">
-                  File selected: {uploadedFiles[0].name}
+                  ✓ File selected: {uploadedFiles[0].name}
                 </p>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Only JPG/JPEG format is accepted
+              </p>
             </div>
             
             <div className="mt-4">
-              <label className="block mb-1">Legacy Type:</label>
+              <label className="block mb-1 font-medium">Legacy Type:</label>
               <select
                 value={legacyType}
                 onChange={(e) => setLegacyType(e.target.value as any)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
               >
                 <option value="TOP_MD">TOP_MD</option>
                 <option value="TOP_LG">TOP_LG</option>
@@ -253,13 +268,14 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                 The current type will be automatically set to the same value
               </p>
             </div>
+            
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-                disabled={createImage.isLoading || uploadedFiles.length === 0}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={addHomeImage.isLoading || getSignedImageUrl.isLoading || uploadedFiles.length === 0}
               >
-                {createImage.isLoading ? "Uploading..." : "Upload Image"}
+                {addHomeImage.isLoading || getSignedImageUrl.isLoading ? "Uploading..." : "Upload Image"}
               </button>
             </div>
           </form>
@@ -292,7 +308,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
             images.data?.data.map((image) => (
               <TableRow key={image.id}>
                 <TableCell>
-                  { (updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating" : image.id }
+                  {(updateImage.isLoading && updateImage.variables?.id === image.id) ? "Updating..." : image.id}
                 </TableCell>
                 <TableCell>
                   {image.imageUrl ? (
@@ -359,7 +375,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                     <>
                       <button
                         onClick={() => updateHomeImage(image.id)}
-                        className="p-2 bg-green-600 rounded-md hover:bg-green-500"
+                        className="p-2 bg-green-600 rounded-md hover:bg-green-500 disabled:opacity-50"
                         disabled={updateImage.isLoading}
                       >
                         <Check size={16} />
@@ -381,7 +397,7 @@ export const HomePageImagesManager = ({ images }: { images: HomePageImagesData }
                       </button>
                       <button
                         onClick={() => handleDelete(image.id, image.active)}
-                        className="p-2 bg-red-600 rounded-md hover:bg-red-500"
+                        className="p-2 bg-red-600 rounded-md hover:bg-red-500 disabled:opacity-50"
                         disabled={deleteImage.isLoading && deleteImage.variables?.id === image.id}
                       >
                         {deleteImage.isLoading && deleteImage.variables?.id === image.id ? "..." : <Trash2 size={16} />}
