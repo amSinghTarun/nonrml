@@ -90,7 +90,7 @@ const OrderActionsPanel: React.FC<OrderActionsPanelProps> = ({
           units: item.quantity,
           sellingPrice: item.price,
         })),
-        paymentMethod: order.Payments?.paymentMethod === "COD" ? "COD" : "Prepaid",
+        paymentMethod: order.Payments?.paymentMethod?.toUpperCase() === "COD" ? "COD" : "Prepaid",
         subTotal: order.totalAmount,
         dimensions: {
           length,
