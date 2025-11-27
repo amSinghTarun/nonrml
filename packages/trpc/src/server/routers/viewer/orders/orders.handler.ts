@@ -467,6 +467,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
                 Orders: {
                     include: {
                         creditNote: true,
+                        email: true,
                     }
                 }
             }
@@ -538,8 +539,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
                     id: orderDetails.orderId
                 },
                 data: {
-                    // userId: user.id,
-                    // ...( addressId && { addressId: addressId} ),
+                    ...((rzpPaymentData.email && orderDetails.Orders.email == "") && { email: rzpPaymentData.email }),
                     Payments: {
                         update: {
                             paymentStatus: rzpPaymentData.status,
