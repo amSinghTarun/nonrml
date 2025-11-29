@@ -458,28 +458,32 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
 
         console.log(input)
         
-        const orderDetails = await prisma.payments.findUnique({
+        const paymentDetails = await prisma.payments.findUnique({
             where: {
                 rzpOrderId: input.razorpayOrderId,
                 // Orders: { userId: userId }
             },
             select: {
+                rzpOrderId: true,
                 Orders: {
                     select: {
                         creditNote: true,
+                        creditUtilised: true,
                         email: true,
+                        id: true,
+                        idVarChar: true,
                     }
                 }
             }
         })
 
-        if(!orderDetails || !orderDetails.Orders || !orderDetails.orderId)
+        if(!paymentDetails || !paymentDetails.Orders || !paymentDetails.Orders.id)
             throw new TRPCError({code: "BAD_REQUEST", message: "Order not found"});
 
         console.log(process.env.RAZORPAY_KEY_SECRET);
 
         const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-            .update(orderDetails.rzpOrderId + "|" + input.razorpayPaymentId)
+            .update(paymentDetails.rzpOrderId + "|" + input.razorpayPaymentId)
             .digest('hex');
         if (generated_signature != input.razorpaySignature) 
             throw new TRPCError({code: "BAD_REQUEST", message: "Payment signature verification failed"});
@@ -536,10 +540,10 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         await prisma.$transaction( async prisma => {
             await prisma.orders.update({
                 where: {
-                    id: orderDetails.orderId
+                    id: paymentDetails.Orders.id
                 },
                 data: {
-                    ...((rzpPaymentData.email && orderDetails.Orders.email == "") && { email: rzpPaymentData.email }),
+                    ...((rzpPaymentData.email && paymentDetails.Orders.email == "") && { email: rzpPaymentData.email }),
                     Payments: {
                         update: {
                             paymentStatus: rzpPaymentData.status,
@@ -552,20 +556,20 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
             });
     
             //console.log(Number(orderDetails.totalAmount) < orderDetails.creditUtilised!);
-            orderDetails.Orders.creditNote && (
+            paymentDetails.Orders.creditNote && (
                 await prisma.creditNotesPartialUseTransactions.create({
                     data : {
-                        creditNoteId: orderDetails.Orders.creditNote.id,
-                        orderId: orderDetails.Orders.id,
-                        valueUtilised: orderDetails.Orders.creditUtilised!
+                        creditNoteId: paymentDetails.Orders.creditNote.id,
+                        orderId: paymentDetails.Orders.id,
+                        valueUtilised: paymentDetails.Orders.creditUtilised!
                     }
                 }) ,
                 await prisma.creditNotes.update({
                     where:{
-                        id: orderDetails.Orders.creditNote.id
+                        id: paymentDetails.Orders.creditNote.id
                     },
                     data : {
-                        remainingValue: orderDetails.Orders.creditNote.remainingValue - orderDetails.Orders.creditUtilised!
+                        remainingValue: paymentDetails.Orders.creditNote.remainingValue - paymentDetails.Orders.creditUtilised!
                     }
                 })
             )
@@ -575,7 +579,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         //     await acceptOrder(orderDetails.Orders.id);
         // }
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: `ORD-${orderDetails.orderId}${orderDetails.Orders.idVarChar}`}};
+        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: `ORD-${paymentDetails.Orders.idVarChar}${paymentDetails.Orders.id}`}};
     }catch(error){  
         //console.log("\n\n Error in verifyOrder ----------------");
         // if(error.message == "ERROR_ACCEPTING_ORDER"){
