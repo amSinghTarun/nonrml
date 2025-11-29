@@ -463,9 +463,9 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
                 rzpOrderId: input.razorpayOrderId,
                 // Orders: { userId: userId }
             },
-            include: {
+            select: {
                 Orders: {
-                    include: {
+                    select: {
                         creditNote: true,
                         email: true,
                     }
