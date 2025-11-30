@@ -111,6 +111,8 @@ export async function POST(request: NextRequest) {
 
     const { awb, current_status, order_id } = body;
 
+    let NoNRMLOrderId = order_id.split("-")[1].slice(0, -6);
+
     // Map Shiprocket status to our system status
     const mappedStatus = mapShiprocketStatus(current_status);
     
@@ -129,10 +131,10 @@ export async function POST(request: NextRequest) {
     // Fetch order details for security validation
     let orderDetails;
     try {
-      console.log(mappedStatus, awb, ".",  current_status, ".", order_id, `OrderPrinted ${order_id}`)
-      orderDetails = await fetchOrderDetails(order_id);
+      console.log(mappedStatus, awb, ".",  current_status, ".", NoNRMLOrderId, `OrderPrinted ${NoNRMLOrderId}`)
+      orderDetails = await fetchOrderDetails(NoNRMLOrderId);
     } catch (error) {
-      console.error(`Failed to fetch order details for order_id: ${order_id}`, error);
+      console.error(`Failed to fetch order details for NoNRMLOrderId: ${NoNRMLOrderId}`, error);
       return NextResponse.json(
         {
           success: false,
@@ -148,14 +150,14 @@ export async function POST(request: NextRequest) {
       awb: awb,
       originalStatus: current_status,
       mappedStatus: mappedStatus,
-      orderId: order_id,
+      orderId: NoNRMLOrderId,
       orderValidated: !!orderDetails
     });
 
     // Process the shipment status update
     const webhookResponse = await (await serverClient()).viewer.orders.updateShipmentStatus({ 
       awb: awb,
-      orderId: order_id,
+      orderId: NoNRMLOrderId,
       shipmentStatus: mappedStatus 
     });
 
