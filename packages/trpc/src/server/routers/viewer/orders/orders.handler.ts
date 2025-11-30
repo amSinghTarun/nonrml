@@ -213,7 +213,8 @@ export const updateShipmentStatus = async ({ ctx, input } : TRPCRequestOptions<T
             throw { code: "NOT_FOUND", message: "No shipment details with ShipmentOrderId" + input.orderId}
         }
 
-        let shipmentStatus = orderTypeAndDetails.return?.id && input.shipmentStatus == "DELIVERED" ? "RECEIVED" : input.shipmentStatus
+        let shipmentStatus = orderTypeAndDetails.return?.id && input.shipmentStatus == "DELIVERED" ? "RECEIVED" : input.shipmentStatus;
+        
         // Add in transit in Replacement order status
         await prisma.shipment.update({
             where: {
@@ -225,12 +226,14 @@ export const updateShipmentStatus = async ({ ctx, input } : TRPCRequestOptions<T
                 ...(orderTypeAndDetails.return && { return: {update: {returnStatus: shipmentStatus as prismaTypes.ReturnStatus}}}),
                 ...(orderTypeAndDetails.ReplacementOrder && { ReplacementOrder: {update: {status: shipmentStatus as prismaTypes.ReplacementOrderStatus}}})
             }
-        })
+        });
+
+        console.log("Shipment status updated successfully", orderTypeAndDetails.id);
 
         return {status: TRPCResponseStatus.SUCCESS, message: "", data: "updateShipmentStatus"};
 
     } catch(error){
-        // console.log("\n\n Error in getUserOrders ----------------");
+        console.log("\n\n Error in updateShipmentStatus ----------------", error);
         if (error instanceof Prisma.PrismaClientKnownRequestError) 
             error = { code:"BAD_REQUEST", message: error.code === "P2025"? "Requested record does not exist" : error.message, cause: error.meta?.cause };
         throw TRPCCustomError(error) 
