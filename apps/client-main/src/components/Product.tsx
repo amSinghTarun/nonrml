@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { trpc } from "@/app/_trpc/client";
+import { trackViewContent, trackAddToCart } from "@/lib/metaPixel";
 
 // Lazy load heavy components that aren't immediately visible
 const SizeChart = lazy(() => import("./SizeChart").then(module => ({ default: module.SizeChart })));
@@ -238,6 +239,16 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
   const router = useRouter();
   const sizeSKU = useRef<number>();
 
+  // Track ViewContent event on product page view
+  useEffect(() => {
+    trackViewContent({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      category: product.category?.displayName ?? undefined,
+    });
+  }, [product.id, product.name, product.price, product.category?.displayName]);
+
   // Memoize expensive calculations
   const sortedSizes = useMemo(() => {
     const arr = Object.values(sizeData);
@@ -279,7 +290,17 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
     };
     setCartItems(cartItem);
     setAppbarUtil("CART");
-  }, [cartItems, selectedSize, sizeData, setCartItems, setAppbarUtil, toast]);
+
+    // Track AddToCart event for Meta Pixel
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      quantity: 1,
+      sizeId: variantId,
+      sizeName: selectedSize[variantId]?.size,
+    });
+  }, [cartItems, selectedSize, sizeData, setCartItems, setAppbarUtil, toast, product.id, product.name, product.price]);
 
   const handleBuyNow = useCallback(() => {
     if (!sizeSKU.current) return;
