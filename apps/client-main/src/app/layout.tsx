@@ -6,6 +6,7 @@ import { Providers } from "./provider";
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/Footer";
 import { NavbarStateControlProvider } from "@/providers/navbarStateControlProvider";
+import { MetaPixelProvider } from "@/providers/metaPixelProvider";
 import { Ubuntu,  Albert_Sans } from "next/font/google";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -74,9 +75,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${appFont.className} min-h-screen `}>
-        {/* Facebook Pixel */}
+        {/* Meta (Facebook) Pixel */}
         <Script
-          id="facebook-pixel"
+          id="meta-pixel"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
@@ -88,7 +89,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${process.env.NEXT_PUBLIC_FB_PIXEL_ID}');
+              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
               fbq('track', 'PageView');
             `,
           }}
@@ -98,11 +99,12 @@ export default function RootLayout({
             height="1" 
             width="1" 
             style={{ display: 'none' }}
-            src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_FB_PIXEL_ID}&ev=PageView&noscript=1`}
+            src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
             alt=""
           />
         </noscript>
         <Providers>
+          <MetaPixelProvider />
           <Appbar/>
           <NavbarStateControlProvider />
           {children}

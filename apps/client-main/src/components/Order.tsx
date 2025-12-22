@@ -2,7 +2,7 @@
 import { cn } from "@nonrml/common";
 import { RouterOutput } from "@/app/_trpc/client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MakeReturn } from "./MakeReturn";
 import { MakeExchange } from "./MakeExchange";
 import React from "react";
@@ -12,6 +12,8 @@ import { toast } from "@/hooks/use-toast";
 import { prismaTypes } from "@nonrml/prisma";
 import { convertStringToINR } from "@/lib/utils";
 import { Info } from "lucide-react";
+import { trackPurchase } from "@/lib/metaPixel";
+import { useCartItemStore } from "@/store/atoms";
 
 type OrderDetails = RouterOutput["viewer"]["orders"]["getUserOrder"]["data"]["orderDetails"];
 
@@ -57,10 +59,38 @@ const getOrderPaymentStatus = (status: prismaTypes.PaymentStatus | undefined) =>
 
 export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds}) => {
     const [showReturnReplace, setShowReturnReplace] = useState<"RETURN"|"EXCHANGE"|"ORIGINAL">("ORIGINAL");
+    const purchaseTracked = useRef(false);
+    const resetCart = useCartItemStore((state) => state.reset);
 
     console.log((Number(orderDetails?.deliveryDate) + Number(process.env.DAMAGE_PARCEL_RETURN_ALLOWED_TIME!)))
 
     const router = useRouter();
+
+    // Track Purchase event for Meta Pixel on successful order
+    useEffect(() => {
+        // Only track once per order page visit
+        if (purchaseTracked.current) return;
+        
+        // Only track if payment was successful (captured status)
+        if (orderDetails?.Payments?.paymentStatus !== "captured") return;
+        
+        purchaseTracked.current = true;
+        
+        // Fire Purchase event
+        trackPurchase({
+            id: `ORD-${orderDetails.id}${orderDetails.idVarChar}`,
+            totalAmount: Number(orderDetails.totalAmount) - (orderDetails.creditUtilised || 0),
+            items: orderDetails.orderProducts.map((product) => ({
+                productId: product.id,
+                quantity: product.quantity,
+                price: Number(product.price),
+                sizeName: product.productVariant?.size,
+            })),
+        });
+
+        // Clear the cart after successful purchase
+        resetCart();
+    }, [orderDetails, resetCart]);
 
     return (
         <div className={cn("h-full w-full p-4 lg:p-20", className)}>
