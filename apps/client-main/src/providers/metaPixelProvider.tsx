@@ -23,6 +23,7 @@ export const MetaPixelProvider = () => {
   const hasFired = useRef(false);
   const cartCheckInterval = useRef<NodeJS.Timeout | null>(null);
   const lastCartCheck = useRef<number>(0);
+  const previousPath = useRef<string | null>(null);
 
   // Track if user is on an order confirmation page (purchase completed)
   useEffect(() => {
@@ -137,9 +138,7 @@ export const MetaPixelProvider = () => {
   }, []);
 
   // Track navigation away from cart/checkout pages
-  useEffect(() => {
-    const previousPath = useRef(pathname);
-    
+  useEffect(() => {    
     // If user navigates away from cart/checkout pages, check for abandonment
     if (previousPath.current) {
       const wasOnCartPage = previousPath.current.includes("/cart") || 
