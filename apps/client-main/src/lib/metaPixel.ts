@@ -39,12 +39,39 @@ export const trackMetaEvent = (
   event: string,
   payload?: Record<string, any>
 ) => {
-  if (typeof window !== "undefined" && window.fbq) {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ Meta Pixel: window is undefined. Event not tracked:", event);
+    return;
+  }
+
+  if (!window.fbq) {
+    console.warn("⚠️ Meta Pixel (fbq) not available. Event not tracked:", event, payload);
+    console.warn("💡 Make sure NEXT_PUBLIC_META_PIXEL_ID is set and the pixel script has loaded.");
+    return;
+  }
+
+  try {
     if (event === "custom") {
       window.fbq("trackCustom", payload?.name, payload?.data);
+      // Debug logging
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔵 Meta Pixel Custom Event:", payload?.name, payload?.data);
+      } else {
+        // Log in production for debugging (can be removed later)
+        console.log("🔵 Meta Pixel Custom Event tracked:", payload?.name);
+      }
     } else {
       window.fbq("track", event, payload);
+      // Debug logging
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔵 Meta Pixel Event:", event, payload);
+      } else {
+        // Log in production for debugging (can be removed later)
+        console.log("🔵 Meta Pixel Event tracked:", event);
+      }
     }
+  } catch (error) {
+    console.error("❌ Error tracking Meta Pixel event:", error, { event, payload });
   }
 };
 
@@ -78,16 +105,23 @@ export const trackAddToCart = (product: {
   sizeId?: number | string;
   sizeName?: string;
 }) => {
-  trackMetaEvent("AddToCart", {
+  const payload: Record<string, any> = {
     content_ids: [String(product.id)],
     content_name: product.name,
     content_type: "product",
     value: product.price * (product.quantity || 1),
     currency: "INR",
-    // Custom attributes for better analytics
-    size_id: product.sizeId ? String(product.sizeId) : undefined,
-    size_name: product.sizeName,
-  });
+  };
+
+  // Only add size fields if they exist
+  if (product.sizeId) {
+    payload.size_id = String(product.sizeId);
+  }
+  if (product.sizeName) {
+    payload.size_name = product.sizeName;
+  }
+
+  trackMetaEvent("AddToCart", payload);
 };
 
 /**
@@ -117,18 +151,42 @@ export const trackPurchase = (order: {
 
 /**
  * Tracks AbandonedCart custom event
+ * 
+ * Meta Pixel custom events should be sent with standard event parameters
+ * for better tracking and reporting in Events Manager.
  */
 export const trackAbandonedCart = (cart: {
   total: number;
   itemCount: number;
 }) => {
-  trackMetaEvent("custom", {
-    name: "AbandonedCart",
-    data: {
-      value: cart.total,
-      currency: "INR",
-      num_items: cart.itemCount,
-    },
-  });
+  // Use trackCustom for custom events, but include standard parameters
+  if (typeof window !== "undefined" && window.fbq) {
+    try {
+      window.fbq("trackCustom", "AbandonedCart", {
+        value: cart.total,
+        currency: "INR",
+        content_type: "product",
+        num_items: cart.itemCount,
+      });
+      
+      // Debug logging
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔵 Meta Pixel AbandonedCart Event:", {
+          value: cart.total,
+          currency: "INR",
+          num_items: cart.itemCount,
+        });
+      } else {
+        console.log("🔵 Meta Pixel AbandonedCart Event tracked:", {
+          total: cart.total,
+          itemCount: cart.itemCount,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error tracking AbandonedCart event:", error, { cart });
+    }
+  } else {
+    console.warn("⚠️ Meta Pixel (fbq) not available. AbandonedCart event not tracked:", cart);
+  }
 };
 
