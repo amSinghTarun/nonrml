@@ -292,13 +292,14 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
     setAppbarUtil("CART");
 
     // Track AddToCart event for Meta Pixel
+    const sizeInfo = selectedSize[variantId] || sizeData[variantId];
     trackAddToCart({
       id: product.id,
       name: product.name,
       price: Number(product.price),
       quantity: 1,
       sizeId: variantId,
-      sizeName: selectedSize[variantId]?.size,
+      sizeName: sizeInfo?.size || sizeData[variantId]?.size,
     });
   }, [cartItems, selectedSize, sizeData, setCartItems, setAppbarUtil, toast, product.id, product.name, product.price]);
 
