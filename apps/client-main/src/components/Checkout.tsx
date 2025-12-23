@@ -10,6 +10,7 @@ import { useBuyNowItemsStore, useCartItemStore, useSetAppbarUtilStore } from "@/
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { displayRazorpay } from "@/lib/payment";
+import { trackPurchase } from "@/lib/metaPixel";
 import { useToast } from "@/hooks/use-toast";
 import QuantityChangeDialog from "./dialog/QuantityChangeDialog";
 import { GeneralButton, GeneralButtonTransparent } from "./ui/buttons";
@@ -28,6 +29,7 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     const { buyNowItems, setBuyNowItems } = useBuyNowItemsStore()
     const { cartItems, setCartItems } = useCartItemStore();
     const orderProducts = !buyOption ? cartItems : buyNowItems;
+    const orderProductsRef = useRef(orderProducts);
     const initiateOrder = trpc.viewer.orders.initiateOrder.useMutation();
     const { appbarUtil, setAppbarUtil } = useSetAppbarUtilStore();
     const { status: loginStatus } = useSession();
@@ -44,6 +46,11 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     
     const [totalAmount, setTotalAmount] = useState(0);
 
+    // Keep a snapshot of order products for purchase tracking
+    useEffect(() => {
+      orderProductsRef.current = orderProducts;
+    }, [orderProducts]);
+
     useEffect(() => {
       // Calculate total amount
       let newTotal = 0;
@@ -56,6 +63,27 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
     const updatePaymentStatus = trpc.viewer.payment.updateFailedPaymentStatus.useMutation();
     const verifyOrder = trpc.viewer.orders.verifyOrder.useMutation({
       onSuccess: ( response ) => {
+        try {
+          const productsSnapshot = orderProductsRef.current || {};
+          const items = Object.values(productsSnapshot).map((item: any) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+          }));
+
+          // Final amount after any credit note
+          const finalAmount = couponValue?.orderValue ?? totalAmount;
+
+          // Fire Purchase event at the moment payment + verification succeed
+          trackPurchase({
+            id: response.data.orderId,
+            totalAmount: finalAmount,
+            items,
+          });
+        } catch (e) {
+          console.error("❌ Failed to track Purchase event from checkout:", e);
+        }
+
         router.replace(`/orders/${response.data.orderId}`);
       },
       onError: () => {
