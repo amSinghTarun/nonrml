@@ -151,18 +151,42 @@ export const trackPurchase = (order: {
 
 /**
  * Tracks AbandonedCart custom event
+ * 
+ * Meta Pixel custom events should be sent with standard event parameters
+ * for better tracking and reporting in Events Manager.
  */
 export const trackAbandonedCart = (cart: {
   total: number;
   itemCount: number;
 }) => {
-  trackMetaEvent("custom", {
-    name: "AbandonedCart",
-    data: {
-      value: cart.total,
-      currency: "INR",
-      num_items: cart.itemCount,
-    },
-  });
+  // Use trackCustom for custom events, but include standard parameters
+  if (typeof window !== "undefined" && window.fbq) {
+    try {
+      window.fbq("trackCustom", "AbandonedCart", {
+        value: cart.total,
+        currency: "INR",
+        content_type: "product",
+        num_items: cart.itemCount,
+      });
+      
+      // Debug logging
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔵 Meta Pixel AbandonedCart Event:", {
+          value: cart.total,
+          currency: "INR",
+          num_items: cart.itemCount,
+        });
+      } else {
+        console.log("🔵 Meta Pixel AbandonedCart Event tracked:", {
+          total: cart.total,
+          itemCount: cart.itemCount,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error tracking AbandonedCart event:", error, { cart });
+    }
+  } else {
+    console.warn("⚠️ Meta Pixel (fbq) not available. AbandonedCart event not tracked:", cart);
+  }
 };
 
