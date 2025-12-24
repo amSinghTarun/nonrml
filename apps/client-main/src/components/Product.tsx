@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/app/lib/breakpoint";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { trpc } from "@/app/_trpc/client";
-import { trackViewContent, trackAddToCart } from "@/lib/metaPixel";
+import { trackViewContent } from "@/lib/metaPixel";
 
 // Lazy load heavy components that aren't immediately visible
 const SizeChart = lazy(() => import("./SizeChart").then(module => ({ default: module.SizeChart })));
@@ -290,17 +290,6 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
     };
     setCartItems(cartItem);
     setAppbarUtil("CART");
-
-    // Track AddToCart event for Meta Pixel
-    const sizeInfo = selectedSize[variantId] || sizeData[variantId];
-    trackAddToCart({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      quantity: 1,
-      sizeId: variantId,
-      sizeName: sizeInfo?.size || sizeData[variantId]?.size,
-    });
   }, [cartItems, selectedSize, sizeData, setCartItems, setAppbarUtil, toast, product.id, product.name, product.price]);
 
   const handleBuyNow = useCallback(() => {
