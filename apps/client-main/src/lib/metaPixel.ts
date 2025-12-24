@@ -2,7 +2,7 @@
  * Meta (Facebook) Pixel Event Tracking Helper
  * 
  * This module provides a reusable function to track events via Meta Pixel.
- * Supports standard events (PageView, ViewContent, AddToCart, Purchase, etc.)
+ * Supports standard events (PageView, ViewContent, Purchase, etc.)
  * and custom events (AbandonedCart, etc.)
  */
 
@@ -16,7 +16,7 @@ declare global {
 /**
  * Tracks a Meta Pixel event
  * 
- * @param event - The event name (e.g., "ViewContent", "AddToCart", "Purchase") or "custom" for custom events
+ * @param event - The event name (e.g., "ViewContent", "Purchase") or "custom" for custom events
  * @param payload - Event data. For standard events: { content_ids, content_name, value, currency, etc. }
  *                  For custom events: { name: "EventName", data: { ...eventData } }
  * 
@@ -92,36 +92,6 @@ export const trackViewContent = (product: {
     value: product.price,
     currency: "INR",
   });
-};
-
-/**
- * Tracks AddToCart event
- */
-export const trackAddToCart = (product: {
-  id: number | string;
-  name: string;
-  price: number;
-  quantity?: number;
-  sizeId?: number | string;
-  sizeName?: string;
-}) => {
-  const payload: Record<string, any> = {
-    content_ids: [String(product.id)],
-    content_name: product.name,
-    content_type: "product",
-    value: product.price * (product.quantity || 1),
-    currency: "INR",
-  };
-
-  // Only add size fields if they exist
-  if (product.sizeId) {
-    payload.size_id = String(product.sizeId);
-  }
-  if (product.sizeName) {
-    payload.size_name = product.sizeName;
-  }
-
-  trackMetaEvent("AddToCart", payload);
 };
 
 /**
