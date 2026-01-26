@@ -582,7 +582,7 @@ export const verifyOrder = async ({ctx, input}: TRPCRequestOptions<TVerifyOrderS
         //     await acceptOrder(orderDetails.Orders.id);
         // }
 
-        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: `ORD-${paymentDetails.Orders.idVarChar}${paymentDetails.Orders.id}`}};
+        return {status: TRPCResponseStatus.SUCCESS, message: "Payment verified", data: {orderId: `ORD-${paymentDetails.Orders.id}${paymentDetails.Orders.idVarChar}`}};
     }catch(error){  
         //console.log("\n\n Error in verifyOrder ----------------");
         // if(error.message == "ERROR_ACCEPTING_ORDER"){
