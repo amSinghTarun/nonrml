@@ -331,7 +331,7 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
           onSizeChartClick={handleSizeChartOpen}
         />
 
-        <div className="lg:overflow-y-auto flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
+        <div className="flex flex-1 lg:pb-20 py-1 px-1 xl:justify-center">
           <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
             {/* Product info section */}
             <div className="flex flex-col pl-1 text-center space-y-2">
