@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'About NoNRML - Our Story | Premium Indian Streetwear',
     description: 'Discover how NoNRML became India\'s premium streetwear brand celebrating individuality and bold fashion. Join the movement that dares to be different.',
-    url: 'https://www.nonrml.co.in/about',
+    url: 'https://www.nonrml.com/about',
     type: 'website',
     locale: 'en_IN',
     siteName: 'NoNRML',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in/about',
+    canonical: 'https://www.nonrml.com/about',
   },
 }
 

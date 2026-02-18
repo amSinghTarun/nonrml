@@ -375,7 +375,7 @@ export const shipReplacementOrder = async ({ctx, input}: TRPCRequestOptions<TShi
                 emailBody: generateReplacementShippingNotificationEmail({  
                     orderId: `ORD-${repalcementOrderDetails.order.id}${repalcementOrderDetails.order.idVarChar}`,
                     replacementId: `REPL-${repalcementOrderDetails.id}`,
-                    trackingLink: `https://www.nonrml.co.in/exchanges/${repalcementOrderDetails.id}`
+                    trackingLink: `https://www.nonrml.com/exchanges/${repalcementOrderDetails.id}`
                 })
             })
         } else {

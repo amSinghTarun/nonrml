@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Track Your Order - NoNRML',
     description: 'Track your NoNRML order status and delivery in real-time. Get updates on your premium streetwear shipment.',
-    url: 'https://www.nonrml.co.in/track-order',
+    url: 'https://www.nonrml.com/track-order',
     type: 'website',
     locale: 'en_IN',
     siteName: 'NoNRML',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in/track-order',
+    canonical: 'https://www.nonrml.com/track-order',
   },
 }
 

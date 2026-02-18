@@ -20,6 +20,6 @@ export default function robots(): MetadataRoute.Robots {
         '/_next/',
       ],
     },
-    sitemap: 'https://www.nonrml.co.in/sitemap.xml',
+    sitemap: 'https://www.nonrml.com/sitemap.xml',
   };
 }

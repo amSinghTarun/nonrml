@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Return & Exchange Policy - NoNRML',
     description: '5-day exchange window. Learn about our refund and exchange process for NoNRML products.',
-    url: 'https://www.nonrml.co.in/policies/return-and-exchange',
+    url: 'https://www.nonrml.com/policies/return-and-exchange',
     type: 'website',
     locale: 'en_IN',
     siteName: 'NoNRML',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in/policies/return-and-exchange',
+    canonical: 'https://www.nonrml.com/policies/return-and-exchange',
   },
 }
 
@@ -64,7 +64,7 @@ export default function ReturnExchangePolicy() {
               
               <li>9. Please ensure the product(s) are returned in the same condition as when they were shipped. Returns in poor condition or with signs of wear will not be accepted, and the query will not be processed further.</li>
               
-              <li>10. If you encounter any further issues, please contact us via email at <span className="cursor-pointer text-rose-400">support@nonrml.co.in</span> including your name and order ID. Our support team is available Monday to Saturday from 11:00 AM to 6:00 PM. All pending inquiries will be prioritized and resolved within 48 hours.</li>
+              <li>10. If you encounter any further issues, please contact us via email at <span className="cursor-pointer text-rose-400">support@nonrml.com</span> including your name and order ID. Our support team is available Monday to Saturday from 11:00 AM to 6:00 PM. All pending inquiries will be prioritized and resolved within 48 hours.</li>
             </ol>
           </div>
 
@@ -130,7 +130,7 @@ export default function ReturnExchangePolicy() {
               Any queries or concerns relating to the return and cancellation may be directed by you to our customer support team who can be contacted at-
             </p>
             <p className="mt-2">
-              Write to us at <span className="cursor-pointer text-rose-400">support@nonrml.co.in</span>
+              Write to us at <span className="cursor-pointer text-rose-400">support@nonrml.com</span>
             </p>
           </div>
         </div>
