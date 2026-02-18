@@ -14,7 +14,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 const appFont = Albert_Sans({subsets: ["latin"], weight:["200", "300", "400", "500", "600", "700", "800", "900"]});
  
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nonrml.co.in'),
+  metadataBase: new URL('https://www.nonrml.com'),
   title: {
     default: 'NoNRML - Premium Streetwear Brand in India | Unisex Fashion',
     template: '%s | NoNRML'
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://www.nonrml.co.in',
+    url: 'https://www.nonrml.com',
     siteName: 'NoNRML',
     title: 'NoNRML - Premium Streetwear Brand in India',
     description: 'Shop bold, expressive unisex streetwear from India\'s premium homegrown brand NoNRML. Limited edition drops and trend-setting styles.',

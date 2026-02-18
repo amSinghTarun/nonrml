@@ -16,7 +16,7 @@ export const metadata = {
   openGraph: {
     title: 'NoNRML - Premium Indian Streetwear | Expressive Unisex Fashion',
     description: 'Shop the latest unisex expressive styles from India\'s premium homegrown streetwear brand. Bold, raw, meaningful fashion with weekly drops.',
-    url: 'https://www.nonrml.co.in',
+    url: 'https://www.nonrml.com',
     siteName: 'NoNRML',
     images: [{
       url: '/og-image.jpg',
@@ -45,7 +45,7 @@ export const metadata = {
     },
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in',
+    canonical: 'https://www.nonrml.com',
   },
 };
 

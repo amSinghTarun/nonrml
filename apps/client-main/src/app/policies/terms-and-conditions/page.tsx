@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terms & Conditions - NoNRML',
     description: 'Terms and conditions for using NoNRML website and purchasing products.',
-    url: 'https://www.nonrml.co.in/policies/terms-and-conditions',
+    url: 'https://www.nonrml.com/policies/terms-and-conditions',
     type: 'website',
     locale: 'en_IN',
     siteName: 'NoNRML',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in/policies/terms-and-conditions',
+    canonical: 'https://www.nonrml.com/policies/terms-and-conditions',
   },
 }
 
@@ -40,7 +40,7 @@ export default function TermsAndConditions() {
           <div>
             <h2 className="font-semibold mb-2">1. Introduction</h2>
             <p>
-              Welcome to www.nonrml.co.in ("Website"). This website is operated by NoNrml. Throughout the site, the terms "we," "us," and "our" refer to NoNrml. By accessing or using our Website, you agree to comply with and be bound by the following terms and conditions ("Terms"). Please read them carefully before using our Website.
+              Welcome to www.nonrml.com ("Website"). This website is operated by NoNrml. Throughout the site, the terms "we," "us," and "our" refer to NoNrml. By accessing or using our Website, you agree to comply with and be bound by the following terms and conditions ("Terms"). Please read them carefully before using our Website.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Shipping Times</h2>
+            <h2 className="font-semibold mb-2">Shipping Policy</h2>
             <ul className="space-y-2">
               <li>• Orders are typically processed within 1-2 business days.</li>
               <li>• Standard shipping times may vary depending on your location, but generally range from 5-7 business days.</li>

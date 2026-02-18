@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Shop All Products - NoNRML Premium Streetwear',
         description: 'Browse the complete collection of premium unisex streetwear. Oversized tees, shirts, denim & limited drops.',
-        url: 'https://www.nonrml.co.in/collections',
+        url: 'https://www.nonrml.com/collections',
         type: 'website',
         locale: 'en_IN',
         siteName: 'NoNRML',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
         follow: true,
     },
     alternates: {
-        canonical: 'https://www.nonrml.co.in/collections',
+        canonical: 'https://www.nonrml.com/collections',
     },
 }
 

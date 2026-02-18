@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacy Policy - NoNRML',
     description: 'Understanding how NoNRML protects your personal information and privacy rights.',
-    url: 'https://www.nonrml.co.in/policies/privacy-policy',
+    url: 'https://www.nonrml.com/policies/privacy-policy',
     type: 'website',
     locale: 'en_IN',
     siteName: 'NoNRML',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.nonrml.co.in/policies/privacy-policy',
+    canonical: 'https://www.nonrml.com/policies/privacy-policy',
   },
 }
 
@@ -87,7 +87,7 @@ export default function PrivacyPolicy() {
             <p>
               You can request access, correction, or deletion of your personal information at any time by contacting us at{' '}
               <span className="cursor-pointer text-rose-400">
-                support@nonrml.co.in
+                support@nonrml.com
               </span>.
             </p>
           </div>
