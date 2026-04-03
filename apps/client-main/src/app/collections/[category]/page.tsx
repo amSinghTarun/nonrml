@@ -22,7 +22,7 @@ const StorePage = async ({ params }: Props) => {
     const { data: products, nextCursor } = await (await serverClient()).viewer.product.getProducts({categoryName: category.replace("-", "_"), cursor: undefined});
     console.log(nextCursor);
     return (
-        <section className="pt-14 z-30 flex-col min-h-screen h-auto w-screen flex bg-white mb-60 lg:mb-24">
+        <section className="pt-14 z-30 flex-col min-h-screen h-auto w-screen flex bg-white mb-[500px] lg:mb-[220px]">
             <Products categoryName={category} products={products} nextCursor={nextCursor}></Products>
         </section>
     )

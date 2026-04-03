@@ -30,22 +30,22 @@ export const metadata: Metadata = {
 
 export default function TermsAndConditions() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-64">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-[500px] lg:mb-[220px]">
       <article className="w-[90%] max-w-4xl flex flex-col">
-        <h1 className="flex text-black justify-center text-lg font-bold mb-10">
+        <h1 className="flex text-black justify-center text-sm font-bold tracking-[0.3em] uppercase mb-10">
           TERMS & CONDITIONS
         </h1>
         
         <div className="text-xs space-y-8 text-black">
           <div>
-            <h2 className="font-semibold mb-2">1. Introduction</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">1. Introduction</h2>
             <p>
               Welcome to www.nonrml.com ("Website"). This website is operated by NoNrml. Throughout the site, the terms "we," "us," and "our" refer to NoNrml. By accessing or using our Website, you agree to comply with and be bound by the following terms and conditions ("Terms"). Please read them carefully before using our Website.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">2. Use of the Website</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">2. Use of the Website</h2>
             <ul className="space-y-2">
               <li>• You must be at least 14 years of age to use this website. By accessing and using this website, you represent that you are at least 14 years old.</li>
               <li>• You agree to use this Website solely for lawful purposes and in a manner that does not infringe the rights of or restrict the use of this website by others.</li>
@@ -54,7 +54,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">3. Intellectual Property</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">3. Intellectual Property</h2>
             <ul className="space-y-2">
               <li>• All content on this website, including but not limited to text, graphics, logos, images, and software, is the exclusive property of NoNrml and is protected by intellectual property laws.</li>
               <li>• You are not permitted to reproduce, distribute, or create derivative works from any content on this Website without explicit written consent from us.</li>
@@ -62,7 +62,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">4. Product Information</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">4. Product Information</h2>
             <ul className="space-y-2">
               <li>• We make every effort to display the colours and details of our products as accurately as possible. However, we cannot guarantee that the colours and details will appear perfectly due to differences in display devices.</li>
               <li>• If you notice a design detail in your product that wasn't clearly visible in the website photos, please understand that it is a deliberate part of our unique craftsmanship. Our pieces are created with artistic intent, and often, the finer details only reveal themselves up close—this is not a defect and should not be treated as one.</li>
@@ -72,7 +72,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">5. Orders and Payments</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">5. Orders and Payments</h2>
             <ul className="space-y-2">
               <li>• When placing an order on our Website, you agree to provide accurate and up-to-date purchase and account details.</li>
               <li>• We reserve the right to reject any order at our discretion. If we need to modify or cancel your order, we will inform you via a different medium using the contact details provided by you.</li>
@@ -85,7 +85,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">6. Shipping and Delivery</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">6. Shipping and Delivery</h2>
             <ul className="space-y-2">
               <li>• Shipping costs and delivery times may vary depending on your location and the shipping, payment option you select.</li>
               <li>• While we take every measure to ensure your order is dispatched promptly, we cannot be held responsible for any delays or damages that may occur during the shipping process. Once the package is handed over to the courier, it is subject to their handling and timelines.</li>
@@ -93,7 +93,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">7. Returns and Refunds</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">7. Returns and Refunds</h2>
             <ul className="space-y-2">
               <li>• Please review our Return & Exchange Policy mentioned below in the Return, Exchange section.</li>
               <li>• All sales are final unless otherwise mentioned in our Return Policy.</li>
@@ -101,7 +101,7 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">8. Limitation of Liability</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">8. Limitation of Liability</h2>
             <ul className="space-y-2">
               <li>• NoNrml will not be held liable for any damage resulting from your use of this website or the products purchased through the Website.</li>
               <li>• In no case will our liability exceed the amount you paid for the product.</li>
@@ -109,21 +109,21 @@ export default function TermsAndConditions() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">9. Changes to Terms</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">9. Changes to Terms</h2>
             <p>
               We reserve the right to update or modify these Terms at any time without prior notice. Your continued use of the Website after any changes are posted constitutes your acceptance of the revised Terms.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">10. Governing Law</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">10. Governing Law</h2>
             <p>
               These Terms, along with any agreements through which we provide services, will be governed by and construed in accordance with the laws of India.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Shipping Policy</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">Shipping Policy</h2>
             <ul className="space-y-2">
               <li>• Orders are typically processed within 1-2 business days.</li>
               <li>• Standard shipping times may vary depending on your location, but generally range from 5-7 business days.</li>

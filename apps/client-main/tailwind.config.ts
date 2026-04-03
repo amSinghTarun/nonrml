@@ -38,8 +38,12 @@ const config: Config = {
   		},
   		keyframes: {
 			slideUp: {
-				'0%': { transform: 'translateY(100%)' },
-				'100%': { transform: 'translateY(0)' }
+				'0%': { transform: 'translateY(100%)', opacity: '0' },
+				'100%': { transform: 'translateY(0)', opacity: '1' }
+			},
+			slideDown: {
+				'0%': { transform: 'translateY(-20px)', opacity: '0' },
+				'100%': { transform: 'translateY(0)', opacity: '1' }
 			},
 			slideText: {
 				'0%': { transform: 'translateY(0%)', opacity: '1' },

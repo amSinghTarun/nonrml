@@ -16,7 +16,7 @@ interface generalButtonProps {
 
 export const GeneralButton : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('rounded-md hover:bg-neutral-900 justify-center hover:underline text-xs p-2 text-white bg-neutral-800', className)} onClick={onClick}>
+        <button className={cn('rounded-md hover:bg-neutral-900 justify-center text-[10px] tracking-[0.15em] uppercase p-2 text-white bg-neutral-800', className)} onClick={onClick}>
             {display}
         </button>
     )
@@ -30,7 +30,7 @@ interface generalButtonTransparentProps {
 
 export const GeneralButtonTransparent : React.FC<generalButtonProps> = ({display, onClick, className}) => {
     return (
-        <button className={cn('border bg-white rounded-sm justify-center border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-white', className)} onClick={onClick}>
+        <button className={cn('border bg-white rounded-sm justify-center border-neutral-200 text-neutral-400 hover:text-neutral-700 hover:bg-white text-[10px] tracking-[0.15em] uppercase', className)} onClick={onClick}>
             {display}
         </button>
     )
@@ -42,7 +42,7 @@ interface SidebarButtonProps extends LinkProps {
 
 export const SidebarButton: React.FC<SidebarButtonProps> = ({ display, ...props}) => {
     return (
-        <Link {...props} className="cursor-pointer flex justify-center flex-1 rounded-md p-3 black-white hover:bg-black hover:text-white hover:items-start">
+        <Link {...props} className="cursor-pointer flex justify-center flex-1 rounded-md p-3 text-[10px] tracking-[0.15em] uppercase black-white hover:bg-black hover:text-white hover:items-start">
             {display}
         </Link>
     )
@@ -76,14 +76,14 @@ interface sizeButtonProps {
 export const SizeButton : React.FC<sizeButtonProps> = ({sizeCount, display, price, sku, quantity, variantId, selectedSize, name, image, setSelectedSize, setQuantity, productId}) => {
     if(quantity <= 0){
         console.log("should be dash")
-        return (    
+        return (
             <GeneralButton display={display} onClick={()=>{}} className={`flex-1 bg-white justify-center flex rounded-md cursor-no-drop py-3 font-normal hover:bg-white hover:text-neutral-800 text-neutral-800 line-through`}/>
         )
     }
     return (
-        variantId == selectedSize.current 
-        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`flex-1 justify-center flex font-bold text-neutral-800 bg-white rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md hover:no-underline`} />         
-    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={`flex-1 bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:no-underline hover:text-neutral-800`}/>
+        variantId == selectedSize.current
+        ? <GeneralButton display={display} onClick={()=> setSelectedSize({[variantId] : {productId: productId, productSku: sku, price: price, size: display, quantity: quantity, productName:name, productImage:image}})} className={`flex-1 justify-center flex font-bold text-neutral-800 bg-white rounded-md py-3 hover:bg-white hover:text-neutral-800 hover:shadow-black/15 hover:shadow-md`} />
+    : <GeneralButton display={display} onClick={()=> {setQuantity(1); selectedSize.current = variantId; setSelectedSize({[variantId] : {productId: productId, price: price, productSku: sku, size: display, quantity: quantity, productName:name, productImage:image}})}} className={`flex-1 bg-white justify-center flex rounded-md py-3 hover:shadow-md hover:bg-white text-neutral-700 hover:text-neutral-800`}/>
     )
 }
 
@@ -93,10 +93,10 @@ interface productPageActionButtonProps {
     className?: string
 }
 export const ProductPageActionButton : React.FC<productPageActionButtonProps> = ({ display, onClick, className}) => (
-    <div 
-        className={cn("bg-white text-neutral-800 hover:bg-neutral-800 hover:text-white basis-1/2 flex justify-center p-3 cursor-pointer rounded-md shadow-none", className)}
+    <div
+        className={cn("bg-white text-neutral-800 hover:bg-neutral-800 hover:text-white basis-1/2 flex justify-center p-3 cursor-pointer rounded-md shadow-none text-[10px] tracking-[0.15em] uppercase font-bold", className)}
         onClick={onClick}
-    >{display}</div> 
+    >{display}</div>
 )
 
 
@@ -129,14 +129,14 @@ export const QuantitySelectButton : React.FC<quantitySelectButtonProps> = ({sele
     return (
         <div className={cn(`flex basis-1/2 ${"bg-white bg-opacity-80 text-neutral-800" } p-3 rounded-md`, className)}>
             <div className="flex flex-row flex-1 justify-evenly rounded-md">
-            {   
-                updatingQuantity 
-                ? 
-                    <div className="flex items-center justify-center flex-grow font-bold"> ...</div>
+            {
+                updatingQuantity
+                ?
+                    <div className="flex items-center justify-center flex-grow font-bold tracking-wider"> ...</div>
                 :
                 <>
                     <button type="button" onClick={handleDecrease} className="flex items-center basis-1/3 justify-center cursor-pointer"> <IconMinus size={'12px'} /> </button>
-                    <div className="flex items-center justify-center flex-grow font-normal text-neutral-600"> {selectedQuantity} </div>
+                    <div className="flex items-center justify-center flex-grow font-normal tracking-wider text-neutral-600"> {selectedQuantity} </div>
                     <button type="button" onClick={handleIncrease} className="flex items-center basis-1/3 justify-center cursor-pointer text-sm"> <IconPlus size={'12px'} /> </button>
                 </>
             }

@@ -27,7 +27,7 @@ export default function Error({
   return (
     <main className="min-h-screen grid place-items-center bg-[#0b0b0b] text-white">
       <div className="text-center space-y-4">
-        <h1 className="text-3xl font-semibold">Something went wrong</h1>
+        <h1 className="text-sm font-bold tracking-[0.3em] uppercase">Something Went Wrong</h1>
         <p className="text-white/70">
           Our team has been notified. Please try again. SOORRRYYY :(
         </p>

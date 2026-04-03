@@ -87,17 +87,17 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
       >
         
         {chartData.isLoading ? (
-          <p className='text-xs text-neutral-600 text-center py-8'>Loading The Size Chart For You...</p>
+          <p className='text-[10px] tracking-[0.2em] text-neutral-600 text-center py-8'>LOADING THE SIZE CHART FOR YOU...</p>
         ) : (
           <>
-            <h2 className="text-sm text-center font-semibold mb-4 mt-2">{chartData.data?.data.chartName}</h2>
+            <h2 className="text-[10px] text-center font-bold tracking-[0.3em] uppercase mb-4 mt-2">{chartData.data?.data.chartName}</h2>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-xs">
+              <table className="w-full border-collapse text-[10px] tracking-wider">
                 <thead>
                   <tr>
-                    <th className="p-2 text-center border font-normal border-white/10">Size</th>
+                    <th className="p-2 text-center border font-bold tracking-[0.2em] uppercase border-white/10 text-black/70">Size</th>
                     {chartData.data?.data.measurements.map((measurement) => (
-                      <th key={measurement.name} className="p-3 text-center border font-normal border-white/10">
+                      <th key={measurement.name} className="p-3 text-center border font-bold tracking-[0.2em] uppercase border-white/10 text-black/70">
                         {measurement.name.charAt(0) + measurement.name.slice(1).toLowerCase()}
                       </th>
                     ))}
@@ -106,9 +106,9 @@ export const SizeChart = ({ isOpen, onClose, sizeChartCategoryNameId } : { isOpe
                 <tbody>
                   {allSizes.map((size, index) => (
                     <tr key={size}>
-                      <td className="p-2 border border-white/10 text-center">{size}</td>
+                      <td className="p-2 border border-white/10 text-center font-bold tracking-[0.15em] text-black/70">{size}</td>
                       {chartData.data?.data.measurements.map((measurement) => (
-                        <td key={`${size}-${measurement.name}`} className="p-3 border border-white/10 font-bold text-center">
+                        <td key={`${size}-${measurement.name}`} className="p-3 border border-white/10 font-normal text-center text-black/60 tracking-wider">
                           {getMeasurementValue(measurement.name, size)}
                         </td>
                       ))}

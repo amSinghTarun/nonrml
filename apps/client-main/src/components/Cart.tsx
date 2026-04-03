@@ -66,12 +66,12 @@ export const CartMenu = () => {
     {/* Modal container - REMOVE translate-y-full from here */}
     <section className="fixed flex flex-col w-screen justify-end items-center z-40 h-full">
       {/* Apply animation only to the article content */}
-      <article className="text-neutral-800 bg-white/20 backdrop-blur-3xl overscroll-none shadow-sm shadow-neutral-500 flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.1s_ease-out_forwards]">
+      <article className="text-neutral-800 bg-white/20 backdrop-blur-3xl overscroll-none shadow-sm shadow-neutral-500 flex flex-col h-[60%] w-[90%] lg:w-[50%] lg:h-[70%] rounded-t-md translate-y-full animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards]">
         {
           Object.keys(cartItems).length == 0 ?
             <div className="flex flex-col p-3 justify-center w-full h-full">
               <div className="flex flex-col justify-center items-center space-y-3 w-full">
-                <div className="font-bold text-xs">YOUR CART IS EMPTY</div>
+                <div className="font-bold text-[10px] tracking-[0.3em]">YOUR CART IS EMPTY</div>
                 <GeneralButton 
                   className="flex bg-neutral-800 items-center justify-center rounded-md p-5 text-white text-xs font-normal" 
                   display='CONTINUE SHOPPING'
@@ -104,10 +104,10 @@ export const CartMenu = () => {
                       onClick={() => router.push(`/products/${cartItems[+variantId].productSku.toLowerCase()}`)}
                     ></Image>
                     {/* details part - column */}
-                    <div className="flex text-xs text-neutral-800 flex-col flex-1 space-y-1">
-                      <div className="font-normal ">{cartItems[+variantId].productName.toUpperCase()}</div>
-                      <div className="font-normal text-neutral-800">{convertStringToINR(cartItems[+variantId].price)}</div>
-                      <div className="font-normal text-neutral-800">Size: {cartItems[+variantId].size}</div>
+                    <div className="flex text-[11px] text-neutral-800 flex-col flex-1 space-y-1 tracking-wide">
+                      <div className="font-bold tracking-[0.1em]">{cartItems[+variantId].productName.toUpperCase()}</div>
+                      <div className="font-normal text-black/70">{convertStringToINR(cartItems[+variantId].price)}</div>
+                      <div className="font-normal text-black/70 tracking-wider">Size: {cartItems[+variantId].size}</div>
                       <div className="flex flex-1 flex-row justify-between text-xs pr-3">
                         <QuantitySelectButton 
                           className="p-1 bg-white/10 text-neutral-600 rounded-sm font-bold" 
@@ -128,13 +128,13 @@ export const CartMenu = () => {
               }
             </div>
             {/* the total part of cart page */}
-            <div className="font-normal text-xs flex flex-row justify-between pt-2 space-x-1">
+            <div className="font-normal text-xs flex flex-row justify-between items-center pt-3 px-3 space-x-3">
               <div className="flex flex-col basis-1/2">
-                <span className="text-xs text-black/50">TOTAL:</span>
-                <div className="text-base text-neutral-800 font-bold"> {convertStringToINR(cartTotal.current)} </div> 
+                <span className="text-[10px] tracking-[0.2em] text-black/70 font-bold">TOTAL</span>
+                <div className="text-sm text-neutral-800 font-bold tracking-wider"> {convertStringToINR(cartTotal.current)} </div>
               </div>
               <div className="basis-1/2">
-                <GeneralButton className=" h-full w-full font-normal" display="CHECKOUT" onClick={ handleCheckoutRedirect }/>
+                <GeneralButton className="w-full py-4 font-bold" display="CHECKOUT" onClick={ handleCheckoutRedirect }/>
               </div>
             </div>
           </div>

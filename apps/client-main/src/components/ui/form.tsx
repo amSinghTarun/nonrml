@@ -16,11 +16,11 @@ export const Form : React.FC<FormProps> = ({ children, className, ...props }) =>
 };
 
 interface FormField extends InputHTMLAttributes<HTMLInputElement> {
-   className?: string 
+   className?: string
 };
 export const FormInputField : React.FC<FormField> = ({className, ...props}) => {
     return (
-        <input className={cn("text-neutral-800 flex flex-wrap break-all justify-start text-start rounded-md p-3 outline-none placeholder:text-neutral-600 read-only", className)} {...props}/>
+        <input className={cn("text-neutral-800 text-xs tracking-wider flex flex-wrap break-all justify-start text-start rounded-md p-3 outline-none placeholder:text-neutral-400 placeholder:tracking-wider placeholder:text-[10px] read-only", className)} {...props}/>
     )
 };
 
@@ -31,9 +31,9 @@ interface FormSubmitButton extends ButtonHTMLAttributes<HTMLButtonElement>{
 export const FormSubmitButton : React.FC<FormSubmitButton> = ({label, className, ...props}) => {
     const { pending } = useFormStatus();
     return (
-        <button 
-            disabled={pending} 
-            className={cn(' w-full text-white rounded-md', className)}
+        <button
+            disabled={pending}
+            className={cn('w-full text-white rounded-md text-[10px] tracking-[0.2em] uppercase font-bold', className)}
             {...props}
         >
             {pending ? "SAVING..." : label }

@@ -47,13 +47,13 @@ const SimilarProductsSkeleton = () => (
 const ProductDetails = React.memo(({ product }: { product: any }) => (
   <div className="flex-col text-neutral-700 flex text-[11px] md:text-xs uppercase rounded-md divide-y divide-neutral-200 space-y-4 px-3 py-4 shadow-neutral-100 shadow lg:shadow-none">
     <div className="flex lg:flex-col lg:text-center lg:space-y-1">
-      <span className="font-normal lg:font-bold basis-1/3">DESCRIPTION</span>
-      <div className="basis-2/3 font-light text-neutral-500 lg:px-2">{product.description}</div>
+      <span className="font-bold tracking-[0.2em] basis-1/3 text-neutral-800">DESCRIPTION</span>
+      <div className="basis-2/3 font-normal tracking-wider text-neutral-500 lg:px-2 normal-case">{product.description}</div>
     </div>
 
     <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-      <span className="font-normal lg:font-bold basis-1/3">DETAILS</span>
-      <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+      <span className="font-bold tracking-[0.2em] basis-1/3 text-neutral-800">DETAILS</span>
+      <div className="basis-2/3 font-normal tracking-wider text-neutral-500 lg:px-2 normal-case">
         {product.details.map((detail: string, index: number) => (
           <p key={index} className="mb-1 last:mb-0">{detail}</p>
         ))}
@@ -61,8 +61,8 @@ const ProductDetails = React.memo(({ product }: { product: any }) => (
     </div>
 
     <div className="flex pt-2 lg:flex-col lg:text-center lg:space-y-1">
-      <span className="font-normal lg:font-bold basis-1/3">CARE</span>
-      <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+      <span className="font-bold tracking-[0.2em] basis-1/3 text-neutral-800">CARE</span>
+      <div className="basis-2/3 font-normal tracking-wider text-neutral-500 lg:px-2 normal-case">
         {product.care.map((detail: string, index: number) => (
           <p key={index} className="mb-1 last:mb-0">{detail}</p>
         ))}
@@ -70,8 +70,8 @@ const ProductDetails = React.memo(({ product }: { product: any }) => (
     </div>
 
     <div className="flex pt-2 justify-center lg:flex-col lg:text-center lg:space-y-1">
-      <span className="font-normal basis-1/3 lg:font-bold">SHIPPING</span>
-      <div className="basis-2/3 font-light text-neutral-500 lg:px-2">
+      <span className="font-bold tracking-[0.2em] basis-1/3 text-neutral-800">SHIPPING</span>
+      <div className="basis-2/3 font-normal tracking-wider text-neutral-500 lg:px-2 normal-case">
         {product.shippingDetails.map((detail: string, index: number) => (
           <p key={index} className="mb-1 last:mb-0">{detail}</p>
         ))}
@@ -134,7 +134,7 @@ const ProductImageCarousel = React.memo(({
       <div className={`absolute right-1 bottom-1 ${isScreenLg && "top-1 right-0"} `}>
         <GeneralButtonTransparent
           display="Size Chart"
-          className="p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-white border-[0.5px] w-fit text-[10px] md:text-xs"
+          className="p-2 px-3 rounded-full bg-white/35 text-black backdrop-blur-lg border-white border-[0.5px] w-fit text-[9px] tracking-[0.15em]"
           onClick={onSizeChartClick}
         />
       </div>
@@ -180,8 +180,8 @@ const RelatedProductsSection = React.memo(({ productId, categoryId }: { productI
         <>
           {!isLoading && relatedProducts?.data && relatedProducts.data.length > 0 ? (
             <>
-              <h2 className="text-left text-neutral-800 text-xs md:text-lg font-bold mb-3 px-2">
-                YOU MAY ALSO LIKE
+              <h2 className="text-left text-neutral-800 text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase mb-4 px-3">
+                You May Also Like
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-1">
                 {relatedProducts.data.map((product) => (
@@ -200,8 +200,8 @@ const RelatedProductsSection = React.memo(({ productId, categoryId }: { productI
             </>
           ) : isLoading ? (
             <>
-              <h2 className="text-left text-neutral-800 text-xs md:text-lg font-bold mb-3 px-2">
-                YOU MAY ALSO LIKE
+              <h2 className="text-left text-neutral-800 text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase mb-4 px-3">
+                You May Also Like
               </h2>
               <SimilarProductsSkeleton />
             </>
@@ -335,10 +335,10 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
           <div className="space-y-4 flex-col w-full 2xl:w-5/6 content-end">
             {/* Product info section */}
             <div className="flex flex-col pl-1 text-center space-y-2">
-              <span className="text-neutral-800 flex flex-col text-sm lg:text-lg font-bold">
+              <span className="text-neutral-800 flex flex-col text-xs lg:text-sm font-bold tracking-[0.2em]">
                 {product.name.toUpperCase()}
               </span>
-              <span className="text-neutral-700 text-xs lg:text-md font-normal flex flex-col">
+              <span className="text-neutral-500 text-[11px] lg:text-xs font-normal tracking-wider flex flex-col">
                 {formattedPrice}
               </span>
               {/* <span className="text-neutral-500 text-xs text-center lg:text-md font-normal flex flex-col">
@@ -347,7 +347,7 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
             </div>
 
             {/* Size selection buttons */}
-            <div className="flex flex-row text-xs gap-2">
+            <div className="flex flex-row text-[10px] tracking-[0.1em] gap-2">
               {sortedSizes.map(({ size, variantId, quantity }, index) => (
                 <SizeButton
                   key={index} // Better key for React reconciliation
@@ -368,7 +368,7 @@ const Product: React.FC<ProductProps> = ({ product, sizeData }) => {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-row text-xs w-full gap-2">
+            <div className="flex flex-row text-[10px] tracking-[0.1em] w-full gap-2">
               {buyNow ? (
                 <div className="flex flex-col w-full space-y-2">
                   <div className="flex flex-row w-full space-x-2">

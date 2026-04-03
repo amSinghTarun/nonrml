@@ -30,9 +30,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicy() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-64">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-[500px] lg:mb-[220px]">
       <article className="w-[90%] max-w-4xl flex flex-col">
-        <h1 className="flex text-black justify-center font-bold text-lg mb-10">
+        <h1 className="flex text-black justify-center font-bold text-sm tracking-[0.3em] uppercase mb-10">
           PRIVACY POLICY
         </h1>
         
@@ -44,14 +44,14 @@ export default function PrivacyPolicy() {
 
         <div className="text-xs space-y-8 text-black">
           <div>
-            <h2 className="font-semibold mb-2">1. Information We Collect</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">1. Information We Collect</h2>
             <p>
               We collect personal information when you interact with our website, including your name, email address, shipping address, payment information, and any other details necessary to complete a purchase or inquiry.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">2. How We Use Your Information</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">2. How We Use Your Information</h2>
             <p className="mb-2">We use your personal information to:</p>
             <ul className="space-y-2">
               <li>• Process your orders and manage shipping.</li>
@@ -62,28 +62,28 @@ export default function PrivacyPolicy() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">3. Data Security</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">3. Data Security</h2>
             <p>
               We take the security of your information seriously. All transactions are processed through secure platforms, and your payment details are encrypted to ensure your privacy.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">4. Sharing Your Information</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">4. Sharing Your Information</h2>
             <p>
               We do not sell, trade, or rent your personal data to third parties. However, we may share it with trusted third-party service providers (such as shipping companies and payment gateways) to ensure smooth operations.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">5. Cookies & Tracking</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">5. Cookies & Tracking</h2>
             <p>
               We use cookies to improve your browsing experience and gather analytical data about site traffic. You can adjust your browser settings to refuse cookies if preferred.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">6. Your Rights</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">6. Your Rights</h2>
             <p>
               You can request access, correction, or deletion of your personal information at any time by contacting us at{' '}
               <span className="cursor-pointer text-rose-400">

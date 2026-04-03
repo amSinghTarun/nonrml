@@ -67,13 +67,13 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds})
             { showReturnReplace == "EXCHANGE" &&  <MakeExchange returnAcceptanceDate={Number(orderDetails.returnAcceptanceDate)} products={orderDetails!.orderProducts!} orderId={orderDetails!.id} backToOrderDetails={()=>{setShowReturnReplace("ORIGINAL")}}/>}
             { showReturnReplace == "ORIGINAL" && <div className="space-y-7 lg:space-y-10 h-full">
                 
-                <div className="text-sm text-start lg:text-base font-bold">
+                <div className="text-xs text-start font-bold tracking-[0.2em]">
                     <p> {`ORD-${orderDetails?.id}${orderDetails.idVarChar}`} </p>
                 </div>
                 
                 <div className="space-y-7 lg:space-y-0 flex flex-col lg:flex-row justify-between">
 
-                    <div className="flex text-xs lg:w-1/3 flex-col justify-center space-y-1 text-neutral-500">
+                    <div className="flex text-[11px] tracking-wide lg:w-1/3 flex-col justify-center space-y-1 text-neutral-500">
                         <div className="flex justify-between">
                             <p> Purchase On </p>
                             <p> {orderDetails?.createdAt.toDateString()} </p>
@@ -160,16 +160,16 @@ export const Order : React.FC<OrderProps> = ({orderDetails, className, refunds})
 
                 <div className="flex flex-col lg:flex-row space-y-7 lg:space-y-0 justify-between">
 
-                    <div className=" flex flex-col basis-1/2 text-xs text-neutral-500 space-y-1">
-                        <p className="text-neutral-400"> SHIPPING ADDRESS </p>
+                    <div className="flex flex-col basis-1/2 text-[11px] tracking-wide text-neutral-500 space-y-1">
+                        <p className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 mb-1"> SHIPPING ADDRESS </p>
                         <p >{orderDetails?.address?.contactName.toLocaleUpperCase()}</p>
                         <p >{orderDetails?.address?.location}, {orderDetails?.address?.pincode}</p>
                         <p >{orderDetails?.address?.city.toUpperCase()} {orderDetails?.address?.state.toUpperCase()}</p>
                         <p>{orderDetails?.address?.contactNumber}</p>
                     </div>    
 
-                    <div className="flex text-xs lg:basis-1/3 flex-col space-y-1 text-neutral-500">
-                        <p className="text-neutral-400"> SUMMARY </p>
+                    <div className="flex text-[11px] tracking-wide lg:basis-1/3 flex-col space-y-1 text-neutral-500">
+                        <p className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 mb-1"> SUMMARY </p>
                         <div className="flex justify-between">
                             <p>{`${orderDetails.productCount} Item${orderDetails.productCount>1 ? 's' : ""}`} </p>
                             <p> {convertStringToINR(+orderDetails?.totalAmount!)} </p>

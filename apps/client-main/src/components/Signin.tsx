@@ -119,12 +119,12 @@ const Signin = () => {
         {/* Centered modal container - NO translate classes here */}
         <div className="fixed inset-0 z-40 flex flex-col justify-center items-center">
             {/* Apply any entrance animation to this div */}
-            <div className="backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-neutral-800 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center overflow-hidden">
+            <div className="backdrop-blur-3xl rounded-md shadow-sm p-4 shadow-black/30 flex flex-col w-[80%] md:w-[60%] xl:w-[40%] lg:w-[40%] justify-center overflow-hidden animate-[slideDown_0.4s_cubic-bezier(0.16,1,0.3,1)]">
                 <div className="flex flex-1 flex-col mb-4">
-                    <div className='text-left text-2xl text-black font-bold mb-1 '>
+                    <div className='text-left text-sm text-black font-bold tracking-[0.3em] mb-1'>
                         WELCOME BACK!
                     </div>
-                    <div className='text-left text-xs text-black font-light'>
+                    <div className='text-left text-[10px] text-black/40 font-normal tracking-[0.15em]'>
                         Login for a better personalised experience
                     </div>
                 </div>
@@ -133,11 +133,11 @@ const Signin = () => {
                         <div className="flex flex-row">
                             {!otpSent ? (
                                 <div className="relative w-full">
-                                    <div className="absolute border-r border-neutral-800 px-3 top-1/2 transform -translate-y-1/2 text-sm text-black font-medium pointer-events-none">
+                                    <div className="absolute border-r border-black/20 px-3 top-1/2 transform -translate-y-1/2 text-xs text-black/70 font-bold tracking-wider pointer-events-none">
                                         +91
                                     </div>
                                     <FormInputField
-                                        className="text-center text-sm placeholder:text-xs placeholder:text-neutral-500 text-black bg-white/20 backdrop-blur-3xl w-full pl-12"
+                                        className="text-center text-sm placeholder:text-xs placeholder:text-black/30 text-black/80 bg-white/20 backdrop-blur-3xl w-full pl-12"
                                         required 
                                         value={mobileNumber} 
                                         type="string" 
@@ -149,11 +149,11 @@ const Signin = () => {
                             ) : (
                                 <>
                                     <div className="basis-4/5 w-full relative">
-                                        <div className="absolute px-3 border-r border-neutral-800 top-1/2 transform -translate-y-1/2 text-sm text-black font-medium pointer-events-none">
+                                        <div className="absolute px-3 border-r border-black/20 top-1/2 transform -translate-y-1/2 text-xs text-black/70 font-bold tracking-wider pointer-events-none">
                                             +91
                                         </div>
                                         <FormInputField
-                                            className="text-center text-sm placeholder:text-xs placeholder:text-neutral-500 text-black bg-white/20 backdrop-blur-3xl rounded-r-none w-full pl-12"
+                                            className="text-center text-sm placeholder:text-xs placeholder:text-black/30 text-black/80 bg-white/20 backdrop-blur-3xl rounded-r-none w-full pl-12"
                                             required 
                                             value={mobileNumber} 
                                             type="string" 
@@ -164,7 +164,7 @@ const Signin = () => {
                                     </div>
                                     <button 
                                         type="button" 
-                                        className='p-2 basis-1/5 text-xs rounded-r-md text-neutral-600 border-l bg-white/20 backdrop-blur-3xl border-neutral-400 hover:bg-neutral-800 hover:text-white' 
+                                        className='p-2 basis-1/5 text-[10px] tracking-[0.1em] font-bold rounded-r-md text-black/50 border-l bg-white/20 backdrop-blur-3xl border-black/20 hover:bg-black/80 hover:text-white' 
                                         onClick={handleChangeNumber}
                                     > 
                                         CHANGE
@@ -177,7 +177,7 @@ const Signin = () => {
                             <>
                                 <div className='flex flex-row rounded-md mt-3'>
                                     <FormInputField 
-                                        className="w-full basis-4/5 text-center text-sm placeholder:text-xs placeholder:text-neutral-500 text-black bg-white/20 backdrop-blur-3xl rounded-r-none"
+                                        className="w-full basis-4/5 text-center text-sm placeholder:text-xs placeholder:text-black/30 text-black/80 bg-white/20 backdrop-blur-3xl rounded-r-none"
                                         type="string" 
                                         value={otp} 
                                         required
@@ -187,7 +187,7 @@ const Signin = () => {
                                     />
                                     <button 
                                         type='button' 
-                                        className='basis-1/5 hover:bg-neutral-800 rounded-r-md border-neutral-400 text-neutral-600 border-l bg-white/20 text-center cursor-pointer text-xs p-2 hover:text-white' 
+                                        className='basis-1/5 hover:bg-black/80 rounded-r-md border-black/20 text-black/50 border-l bg-white/20 text-center cursor-pointer text-[10px] tracking-[0.1em] font-bold p-2 hover:text-white' 
                                         onClick={onOtpResend}
                                         disabled={sendOTP.isLoading}
                                     >
@@ -198,13 +198,13 @@ const Signin = () => {
                         )}
                         
                         {error && (
-                            <p className="text-red-500 text-xs pl-3 mt-2">{error}</p>
+                            <p className="text-red-500/70 text-[10px] tracking-wider pl-3 mt-2">{error}</p>
                         )}
                         
                         <FormSubmitButton 
                             type='submit'
                             label={otpSent ? (verifyOTP.isLoading ? "VERIFYING..." : "VERIFY OTP") : (sendOTP.isLoading ? "SENDING..." : "SEND OTP")}
-                            className="w-full p-5 text-xs font-bold bg-neutral-800 hover:underline hover:text-white hover:bg-neutral-900 rounded-md mt-4"
+                            className="w-full p-5 text-[10px] tracking-[0.2em] font-bold bg-black/80 hover:bg-black rounded-md mt-4"
                         />
                     </Form>
                 }</div>

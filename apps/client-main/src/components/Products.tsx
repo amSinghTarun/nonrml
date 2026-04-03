@@ -94,7 +94,7 @@ const Products: React.FC<ProductsProps> = ({
   return (
     <div className="flex flex-col h-max">
       {/* Header */}
-      <h1 className="flex mt-4 text-md lg:text-xl font-extrabold pl-4 pb-4 text-gray-700">
+      <h1 className="flex mt-4 text-xs sm:text-sm font-bold tracking-[0.3em] uppercase pl-4 pb-4 text-neutral-800">
         {formattedCategoryName}
       </h1>
       

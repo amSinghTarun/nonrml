@@ -39,7 +39,7 @@ const StorePage = async () => {
     const { data: products, nextCursor } = await (await serverClient()).viewer.product.getProducts({cursor: undefined});
 
     return (
-        <section className="pt-14 z-30 flex-col min-h-screen h-auto w-screen flex bg-white mb-60 lg:mb-24">
+        <section className="pt-14 z-30 flex-col min-h-screen h-auto w-screen flex bg-white mb-[500px] lg:mb-[220px]">
             <Products products={products} nextCursor={nextCursor}></Products>
         </section>
     )
