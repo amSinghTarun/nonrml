@@ -36,9 +36,9 @@ export const metadata: Metadata = {
 
 export default function OurStoryPage() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-64">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-[500px] lg:mb-[220px]">
       <article className="w-[90%] max-w-4xl flex flex-col">
-        <h1 className="flex text-black justify-center font-bold text-lg mb-10">
+        <h1 className="flex text-black justify-center font-bold text-sm tracking-[0.3em] uppercase mb-10">
           ABOUT NoNRML
         </h1>
 
@@ -73,7 +73,7 @@ export default function OurStoryPage() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-3">What We Stand For</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-3">What We Stand For</h2>
             <ul className="space-y-2">
               <li><strong>Expressive design:</strong> Bold, conversation-starting graphics and typography that turn outfits into statements.</li>
               <li><strong>Premium quality:</strong> Durable fabrics, clean stitching, and comfort-first fits (oversized, relaxed, and gender-neutral).</li>
@@ -83,28 +83,28 @@ export default function OurStoryPage() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-3">Design Language</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-3">Design Language</h2>
             <p>
               Every NoNRML piece is built to be worn loud and lived in. Expect original artwork, strong color stories, and limited-edition drops that won't restock—so your wardrobe stays unique. Our collections balance premium streetwear aesthetics with practical details: reinforced seams, soft-hand prints, and breathable, all-season cotton blends.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-3">Fit & Fabric</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-3">Fit & Fabric</h2>
             <p className="mb-2"><strong>Fabrics:</strong> Midweight and heavyweight cotton, brushed fleece, and breathable jersey for Indian weather.</p>
             <p className="mb-2"><strong>Fits:</strong> Oversized and relaxed silhouettes with accurate size charts for all body types.</p>
             <p><strong>Care:</strong> Fade-resistant prints and pre-shrunk materials to keep your pieces looking fresh longer.</p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-3">Ethos & Sustainability</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-3">Ethos & Sustainability</h2>
             <p>
               We produce in controlled quantities to reduce waste, prioritize long-lasting construction over fast fashion, and partner with local vendors to support Indian manufacturing. Because premium streetwear should feel as good as it looks.
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-3">Who We Create For</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-3">Who We Create For</h2>
             <p>
               NoNRML is for people who refuse to be average—creatives, founders, athletes, and culture shifters who write their own rules. If you're redefining what "normal" means, you're already one of us.
             </p>

@@ -165,8 +165,8 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
                 <QuantityChangeDialog open={quantityChange} cancelPurchase={() => { router.back() }} continuePurchase={() => { setQuantityChange(false) }} /> {/* ; setAction("ORDER") */}
                 <div className="w-[100%] h-[100%] flex flex-col text-neutral-800">
                     { <article className="flex flex-row justify-between px-3 py-2 space-x-1 items-center ">
-                        <div className=" cursor-pointer text-xs font-bold">
-                            <span className={`${"font-bold"}`} >{`ORDER SUMMARY`}</span>
+                        <div className="cursor-pointer text-[10px] font-bold tracking-[0.25em]">
+                            <span>{`ORDER SUMMARY`}</span>
                         </div>
                     </article>}
 
@@ -222,8 +222,8 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
                     </article>
                 }
                 <article className="flex flex-row justify-between px-3 py-3 space-x-1 items-center">
-                    <div className=" cursor-pointer text-xs hover:font-bold text-neutral-600">
-                        <span className={`${"font-bold"}`}>{`HAVE A COUPON CODE?`}</span>
+                    <div className="cursor-pointer text-[10px] tracking-[0.15em] hover:font-bold text-neutral-600">
+                        <span className="font-bold">{`HAVE A COUPON CODE?`}</span>
                     </div>
                     {
                         couponValue ? 
@@ -246,8 +246,8 @@ export const Checkout = ({className, buyOption }: CheckoutProp) => {
 
                 <article className="text-sm flex flex-row justify-between px-2 pt-4 pb-2 space-x-1">
                     <div className="flex flex-col basis-1/2 justify-start">
-                        <span className="text-xs text-neutral-500">TOTAL:</span>
-                        <span className="text-lg font-bold">{convertStringToINR(couponValue?.orderValue ?? totalAmount)}</span>
+                        <span className="text-[10px] tracking-[0.2em] text-neutral-400">TOTAL</span>
+                        <span className="text-sm font-bold tracking-wider">{convertStringToINR(couponValue?.orderValue ?? totalAmount)}</span>
                     </div>
                     <div className=" w-fit h-full">
                         <GeneralButton className=" p-2 px-6 h-full w-full" display={ initiateOrder.isLoading ? "PROCESSING..." : "PAY NOW"} onClick={handlePayment} />

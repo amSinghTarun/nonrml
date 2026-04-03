@@ -1,25 +1,18 @@
 import React, { Suspense } from "react";
 import dynamic from 'next/dynamic';
-import Image from "next/image";
 import Link from "next/link";
-import logo from "@/images/logo.png";
-import symbol from "@/images/SYMBOL.png"; // Add this import
 import { getHomepageProducts, getHomePagesImages } from "@/app/actions/product.action";
 import { ProductCardHome } from "@/components/cards/ProductCard";
-import { ResponsiveProductImage, ResponsiveImageGallery, ResponsiveImage } from "../ScreenResponsiveImage";
+import { ResponsiveProductImage, ResponsiveImage } from "../ScreenResponsiveImage";
 import { WhyNoNRML } from "./WhyNoNRML";
+
+const ScrollManifesto = dynamic(() => import('./ScrollManifesto'), {
+  loading: () => <div className="h-[200px] bg-white" />
+});
 
 // Lazy load non-critical components
 const Footer = dynamic(() => import('../Footer').then(mod => ({ default: mod.Footer })), {
   loading: () => <FooterSkeleton />
-});
-
-const TickerText = dynamic(() => import('./TicketText').then(mod => ({ default: mod.TickerText })), {
-  loading: () => <TickerSkeleton />
-});
-
-const NoNRMLFaceCard = dynamic(() => import('./Facecard'), {
-  loading: () => <FaceCardSkeleton />
 });
 
 // Skeleton Components
@@ -39,22 +32,6 @@ const FooterSkeleton = () => (
   <div className="h-32 bg-gray-200 animate-pulse" />
 );
 
-const TickerSkeleton = () => (
-  <div className="h-8 bg-gray-200 animate-pulse w-full" />
-);
-
-const FaceCardSkeleton = () => (
-  <div className="w-full h-64 bg-gray-200 animate-pulse" />
-);
-
-const ImageGallerySkeleton = () => (
-  <div className="grid grid-cols-2 gap-4 p-4">
-    {Array.from({ length: 4 }).map((_, i) => (
-      <div key={i} className="aspect-square bg-gray-200 animate-pulse rounded" />
-    ))}
-  </div>
-);
-
 // Separate components for better code splitting
 const HeroSection = ({ homeImages }: { homeImages: any }) => (
   <>
@@ -72,23 +49,7 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
         lgBreakpoint={1024}
       />
       
-      {/* Symbol Overlay - positioned above the TOP_MD/TOP_LG image */}
-      <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
-        <div className="relative pointer-events-auto">
-          
-          {/* Main content container - static */}
-          <div className="relative backdrop-blur-xl bg-white/10 rounded-full p-8 lg:p-12 border border-white/10 shadow-lg shadow-black">
-            <Image
-              src={symbol}
-              alt="NoNRML Symbol"
-              width={80}
-              height={80}
-              className="w-20 h-20 lg:w-28 lg:h-28 object-contain "
-              priority={true}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Animated Symbol Overlay */}
     </div>
 
     <ResponsiveImage
@@ -110,7 +71,7 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
 const LatestProductsSection = ({ products }: { products: any }) => (
   <div className="z-30 relative w-full flex flex-1 flex-col backdrop-blur-xl bg-black/20 pt-3 space-y-3 pb-1">
     <div className="flex flex-row w-full align-baseline">
-      <h1 className="font-bold text-xs flex flex-grow pl-3 text-white">LATEST DROP</h1>
+      <h1 className="text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase text-white pl-3">Latest Drop</h1>
     </div>
     <Suspense fallback={<ProductsSkeleton />}>
       <div className="flex flex-row flex-wrap w-full h-full px-1">
@@ -133,14 +94,14 @@ const LatestProductsSection = ({ products }: { products: any }) => (
 
 const MoreProductsSection = ({ products }: { products: any }) => (
   <div className="z-30 relative w-full flex flex-1 flex-col bg-white pt-5 space-y-5 px-1">
-    <div className="flex flex-row w-full align-baseline">
-      <h1 className="font-bold text-xs flex flex-grow pl-3 text-black">MORE FROM NoNRML</h1>
-      <Link 
-        href="/collections" 
-        className="text-xs content-center border-neutral-200 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm px-2 mr-2"
+    <div className="flex flex-row w-full items-center justify-between px-3">
+      <h1 className="text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase text-neutral-900">More from NoNRML</h1>
+      <Link
+        href="/collections"
+        className="text-[9px] tracking-[0.2em] uppercase text-neutral-400 hover:text-neutral-900 transition-colors duration-300"
         prefetch={false}
       >
-        DISCOVER MORE
+        Discover More
       </Link>
     </div>
     <Suspense fallback={<ProductsSkeleton />}>
@@ -159,15 +120,6 @@ const MoreProductsSection = ({ products }: { products: any }) => (
         ))}
       </div>
     </Suspense>
-    <div className="flex z-30 relative pb-7 md:pb-8 flex-col items-center justify-center w-full h-full">
-      <Link 
-        href="/collections" 
-        className="text-xs content-center w-fit border-neutral-300 border font-normal text-neutral-400 hover:text-neutral-800 rounded-sm p-3"
-        prefetch={false}
-      >
-        DISCOVER MORE
-      </Link>
-    </div>
   </div>
 );
 
@@ -191,39 +143,35 @@ export async function LandingPage() {
       {/* Latest Products Section */}
       <LatestProductsSection products={products} />
 
-      {/* Ticker Text - Lazy loaded */}
-      <div className="flex z-30 relative bg-black justify-center w-full h-full text-center text-sm sm:text-base md:text-xl">
-        <Suspense fallback={<TickerSkeleton />}>
-          <TickerText />
-        </Suspense>
-      </div>
+      {/* Scroll Manifesto */}
+      <ScrollManifesto />
 
       {/* Middle Image Section */}
-      <div className="z-30 relative flex flex-col lg:flex-col">
-        <ResponsiveProductImage 
-          imageLg={homeImages.MIDDLE_LG as string} 
-          imageMd={homeImages.MIDDLE_MD as string} 
-        />
+      <div className="z-30 relative bg-white p-2">
+        <div className="rounded-xl overflow-hidden">
+          <ResponsiveProductImage
+            imageLg={homeImages.MIDDLE_LG as string}
+            imageMd={homeImages.MIDDLE_MD as string}
+          />
+        </div>
       </div>
 
       {/* More Products Section */}
       <MoreProductsSection products={products} />
 
-      {/* Bottom Gallery and Footer - Lazy loaded */}
-      <div>
-        <Suspense fallback={<ImageGallerySkeleton />}>
-          <ResponsiveImageGallery images={homeImages.BOTTOM as string[]} />
-        </Suspense>
 
+      {/* Bottom section */}
+      <div className="z-30 relative">
         {/* Minimal Expandable Why NoNRML Section */}
         <div className="z-30 relative">
           <WhyNoNRML />
         </div>
 
-        <Suspense fallback={<FooterSkeleton />}>
-          <Footer className="z-30 relative text-white bg-black/45 backdrop-blur-md border-none" />
-        </Suspense>
+        {/* Footer — inline, scrolls with page */}
+        <div className="z-30 relative">
+          <Footer className="relative z-30 bg-black/40 backdrop-blur-xl" />
+        </div>
       </div>
-    </div> 
+    </div>
   );
 }

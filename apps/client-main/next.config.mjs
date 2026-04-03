@@ -2,7 +2,7 @@
 const nextConfig = {
     images: {
         remotePatterns: [
-            {hostname:process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME},
+            ...(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME ? [{hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME}] : []),
             {hostname:"images.unsplash.com"},
             {hostname:"aceternity.com"}
         ]
@@ -21,7 +21,7 @@ const nextConfig = {
         MAX_QUANTITY_TO_ORDER : `11`,
         MIN_QUANTITY_TO_ORDER: `1`,
         PROD_PORT: '8080',
-        DAMAGE_PARCEL_RETURN_ALLOWED_TIME: 86400000,
+        DAMAGE_PARCEL_RETURN_ALLOWED_TIME: `86400000`,
         RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         CLIENT_SUPPORT_MAIL: process.env.NEXT_PUBLIC_CLIENT_SUPPORT_MAIL
     }

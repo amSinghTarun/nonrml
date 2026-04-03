@@ -9,7 +9,7 @@ interface DropdownMenuProps {
 
 const DropdownMenu : React.FC<DropdownMenuProps> = ({ children }) => {
     return ( 
-        <nav className="fixed flex flex-col mt-14 z-40 left-7 backdrop-blur-3xl  rounded-b-3xl space-y-2 p-2 text-sm">
+        <nav className="fixed flex flex-col mt-14 z-40 left-7 backdrop-blur-3xl rounded-b-3xl space-y-2 p-2 text-sm animate-[slideDown_0.3s_cubic-bezier(0.16,1,0.3,1)]">
             {children}
         </nav>
     );
@@ -24,7 +24,7 @@ interface DropdownButtonProps {
 const DropdownButton: React.FC<DropdownButtonProps> = ( inputs => {
     if (inputs.href) {
         return (
-          <Link href={inputs.href} className="cursor-pointer z-40 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black">
+          <Link href={inputs.href} className="cursor-pointer z-40 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black text-[10px] tracking-[0.15em] uppercase font-bold">
             {inputs.display}
           </Link>
         );
@@ -33,7 +33,7 @@ const DropdownButton: React.FC<DropdownButtonProps> = ( inputs => {
     return (
         <div
             onClick={inputs.onClick}
-            className="cursor-pointer z-30 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black"
+            className="cursor-pointer z-30 items-center flex justify-center flex-1 rounded-xl p-3 bg-black text-white hover:bg-white hover:text-black text-[10px] tracking-[0.15em] uppercase font-bold"
         >
             {inputs.display}
         </div>

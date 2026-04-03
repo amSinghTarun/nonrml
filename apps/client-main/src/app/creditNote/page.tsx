@@ -14,7 +14,7 @@ const CreditNotePage = async () => {
     
     return (
         <>
-            <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-64 lg:mb-32">
+            <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-[500px] lg:mb-[220px]">
                 <CreditNote className="h-[80%] w-[90%] xl:w-[50%]" ></CreditNote> 
             </section>
         </>

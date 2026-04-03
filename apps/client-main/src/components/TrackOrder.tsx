@@ -86,7 +86,7 @@ export const TrackOrder: React.FC<TrackOrderProps> = (trackOrderProps) => {
     return (
         <>
             <div className={cn("w-[90%] text-neutral-800 flex flex-col text-center text-xs", trackOrderProps.className)}>
-                <h1 className="flex justify-center text-neutral-800 font-bold place-items-end basis-1/3 text-xl mb-1">
+                <h1 className="flex justify-center text-neutral-800 font-bold tracking-[0.3em] text-sm mb-1">
                     TRACK ORDER
                 </h1>
                 <p className="mb-10 sm:text-xs text-[10px] text-neutral-500">Enter The Mobile Used In Shipping Address Of Respective Order</p>
@@ -137,7 +137,7 @@ export const TrackOrder: React.FC<TrackOrderProps> = (trackOrderProps) => {
                     <div className="relative bg-white rounded-sm shadow-xl max-w-md w-[90%] mx-4 animate-in fade-in zoom-in duration-200">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b">
-                            <h2 className="text-lg font-bold text-neutral-800">Order Tracking Details</h2>
+                            <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-neutral-800">Order Tracking Details</h2>
                             <button
                                 onClick={closeModal}
                                 className="p-1 rounded-full hover:bg-neutral-100 transition-colors"

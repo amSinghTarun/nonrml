@@ -67,7 +67,7 @@ export const CreditNote : React.FC<CreditNoteProps> = (creditNoteProps) => {
     return (
         <div className={cn("h-[80%] w-[90%] flex flex-col items-center", creditNoteProps.className)}>
             {showCredits && <CreditNoteOTPVerification closeHandler={() => setShowCredits(false)}></CreditNoteOTPVerification> }
-            <h1 className={`flex text-neutral-800 font-bold justify-center text-sm mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-xl"}`}>
+            <h1 className={`flex text-neutral-800 font-bold tracking-[0.3em] justify-center text-xs mb-1 ${!creditNoteDetails && "place-items-end basis-1/3 text-sm"}`}>
                 CREDIT NOTE
             </h1>
             { !creditNoteDetails && <p className="mb-10 text-neutral-500 text-[10px] sm:text-xs">Enter The Mobile Number Linked To The Credit Note Owner.</p> }

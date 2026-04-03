@@ -42,7 +42,7 @@ export default function CreditNoteOTPVerification({closeHandler}:{closeHandler: 
           <p className='text-xs text-neutral-600 text-center py-8'>Verifying OTP...</p>
         ) : !isVerified ? (
           <>
-            <h2 className="text-sm text-center font-semibold mb-4 mt-2">OTP Verification</h2>
+            <h2 className="text-[10px] text-center font-bold tracking-[0.3em] uppercase mb-4 mt-2">OTP Verification</h2>
             <div className="flex flex-col items-center space-y-4">
               <input 
                 type="text" 
@@ -60,7 +60,7 @@ export default function CreditNoteOTPVerification({closeHandler}:{closeHandler: 
           </>
         ) : (
           <>
-            <h2 className="text-sm text-center font-semibold mb-4 mt-2">Credit Notes</h2>
+            <h2 className="text-[10px] text-center font-bold tracking-[0.3em] uppercase mb-4 mt-2">Credit Notes</h2>
             <div className='flex-grow overflow-auto'>
               <table className="w-full text-xs">
                 <tbody>

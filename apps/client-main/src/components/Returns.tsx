@@ -16,7 +16,7 @@ export const Returns : React.FC<ReturnProps> = ({ className, returnOrders }) => 
     console.log(returnOrders)
     return (
         <div className={cn("h-screen w-full p-2 pb-6 flex flex-col lg:flex-row", className)}>
-            <h1 className="flex lg:flex-col text-base text-neutral-700 lg:basis-5/12 font-bold p-1 lg:justify-center lg:text-center">Return Orders</h1>
+            <h1 className="flex lg:flex-col text-xs text-neutral-700 lg:basis-5/12 font-bold tracking-[0.3em] uppercase p-1 lg:justify-center lg:text-center">Return Orders</h1>
             <div className="space-y-7 lg:space-y-10 p-2 lg:p-4 flex flex-1 flex-col overflow-y-scroll overscroll-auto scrollbar-hide">
             {
                 returnOrders.map( (order, index) => { 

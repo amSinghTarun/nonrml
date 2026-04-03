@@ -50,8 +50,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 )}
             </div>
             <div className="items-center flex flex-col pt-1 pb-2 w-full">
-                <h1 className=" text-neutral-900 font-bold text-center text-xs">{name.toUpperCase()}</h1>
-                <p className="font-normal text-neutral-600 text-xs">{priceInCurrency}</p>
+                <h1 className="text-neutral-900 font-bold text-center text-[10px] tracking-[0.12em]">{name.toUpperCase()}</h1>
+                <p className="font-normal text-neutral-500 text-[10px] tracking-wider">{priceInCurrency}</p>
             </div>
         </Link>
     );
@@ -81,7 +81,7 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
           <Image 
             src={image} 
             alt={imageAlt} 
-            className={`object-cover w-auto h-[100%] transition-opacity duration-300 ${isHovering && hoverImage ? 'opacity-0' : 'opacity-100'}`} 
+            className={`object-cover w-auto h-[100%] transition-opacity duration-700 ease-in-out ${isHovering && hoverImage ? 'opacity-0' : 'opacity-100'}`}
             width={2000}
             height={1000}
           />
@@ -91,15 +91,15 @@ export const ProductCardHome: React.FC<ProductCardProps> = ({
             <Image 
               src={hoverImage} 
               alt={`${imageAlt} alternate view`} 
-              className={`object-cover w-auto h-[100%] transition-opacity duration-300 absolute top-0 left-0 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
+              className={`object-cover w-auto h-[100%] transition-opacity duration-700 ease-in-out absolute top-0 left-0 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
               width={2000}
               height={1000}
               priority
             />
           )}
         </div>
-        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[9px] sm:text-xs bg-white/40 backdrop-blur-lg py-2 px-1 rounded-tl-md">
-          <h1 className="font-bold">{name.toUpperCase()}</h1>
+        <div className="text-black absolute right-1 bottom-0 items-center flex flex-col text-[8px] sm:text-[10px] bg-white/40 backdrop-blur-lg py-2 px-2 rounded-tl-md">
+          <h1 className="font-bold tracking-[0.15em]">{name.toUpperCase()}</h1>
         </div>
       </Link>
     );

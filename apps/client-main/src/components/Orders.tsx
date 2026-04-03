@@ -122,11 +122,11 @@ export const Orders : React.FC<OrdersProps> = ({className})  => {
                                 <article key={index} className="relative h-auto w-full p-2 rounded-md text-sm hover:shadow-sm hover:shadow-neutral-200 transition-all duration-200 ">
                                     <Link className="font-normal flex flex-col lg:text-sm cursor-pointer flex-1" href={`/orders/ORD-${order.id}${order.idVarChar}`}>
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-bold">{`ORD-${order.id}${order.idVarChar}`}</span>
-                                            <span className="text-xs text-neutral-500">{order.createdAt.toDateString()}</span>
+                                            <span className="text-[11px] font-bold tracking-[0.15em]">{`ORD-${order.id}${order.idVarChar}`}</span>
+                                            <span className="text-[10px] text-neutral-400 tracking-wider">{order.createdAt.toDateString()}</span>
                                         </div>
-                                        
-                                        <div className="flex flex-col space-y-1 text-xs lg:text-sm">
+
+                                        <div className="flex flex-col space-y-1 text-[11px] tracking-wide">
                                             {/* Order Status */}
                                             <div className="flex justify-between items-center text-neutral-500">
                                                 <span>Order Status</span>

@@ -30,9 +30,9 @@ export const metadata: Metadata = {
 
 export default function ReturnExchangePolicy() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 mb-64 pb-10">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 mb-[500px] lg:mb-[220px] pb-10">
       <article className="w-[90%] max-w-4xl flex flex-col">
-        <h1 className="flex text-black justify-center text-lg font-bold mb-10">
+        <h1 className="flex text-black justify-center text-sm font-bold tracking-[0.3em] uppercase mb-10">
           REFUND & EXCHANGE POLICY
         </h1>
         
@@ -44,7 +44,7 @@ export default function ReturnExchangePolicy() {
 
         <div className="text-xs space-y-8 text-black">
           <div>
-            <h2 className="font-semibold mb-2">Return/Exchange Instructions</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">Return/Exchange Instructions</h2>
             <ol className="space-y-4">
               <li>1. We offer an exchange window of 5 days from the date of delivery. Please note that we currently do not provide returns, only exchanges are available. Returns will only be accepted in the case of damaged products, and such requests must be raised within 24 hours of delivery. To process a return for a damaged item, an unboxing video is mandatory. The video must clearly show the full unboxing process, including all product details, to verify the damage.</li>
               
@@ -69,7 +69,7 @@ export default function ReturnExchangePolicy() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Exchange and Return Policy – Based on Stock Availability</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">Exchange and Return Policy – Based on Stock Availability</h2>
             <p className="mb-4">
               Exchange or return is subject to stock availability. If the requested size or item is unavailable, you will have the option to receive either:
             </p>
@@ -79,7 +79,7 @@ export default function ReturnExchangePolicy() {
             </ul>
 
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">Credit Note Terms:</h3>
+              <h3 className="font-bold text-[10px] tracking-[0.2em] uppercase text-neutral-800 mb-2">Credit Note Terms:</h3>
               <ul className="space-y-2">
                 <li>• The credit note will be valid for 6 months from the date of issuance.</li>
                 <li>• You can use it either immediately or for a future purchase.</li>
@@ -91,7 +91,7 @@ export default function ReturnExchangePolicy() {
             </div>
 
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">Transferable Credit Note:</h3>
+              <h3 className="font-bold text-[10px] tracking-[0.2em] uppercase text-neutral-800 mb-2">Transferable Credit Note:</h3>
               <p>
                 The credit note is not limited to the original purchaser. You are free to share it with a friend or family member, who may redeem it on our website during their purchase.
               </p>
@@ -99,7 +99,7 @@ export default function ReturnExchangePolicy() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Terms & Conditions</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">Terms & Conditions</h2>
             <p className="mb-4">You may initiate the request of an exchange of a product if:</p>
             <ul className="space-y-2 mb-6">
               <li>• Product does not fit</li>
@@ -125,7 +125,7 @@ export default function ReturnExchangePolicy() {
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Customer Support</h2>
+            <h2 className="font-bold text-[10px] tracking-[0.25em] uppercase text-neutral-900 mb-2">Customer Support</h2>
             <p>
               Any queries or concerns relating to the return and cancellation may be directed by you to our customer support team who can be contacted at-
             </p>

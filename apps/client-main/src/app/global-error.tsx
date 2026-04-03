@@ -29,7 +29,7 @@ export default function GlobalError({
       <body>
         <main className="min-h-screen grid place-items-center bg-black text-white">
           <div className="text-center space-y-3">
-            <h1 className="text-3xl font-semibold">We hit a snag</h1>
+            <h1 className="text-sm font-bold tracking-[0.3em] uppercase">We Hit A Snag</h1>
             <p className="text-white/70">Please try again. SORRRYYYY :(</p>
             <div className="space-x-3">
               <button
