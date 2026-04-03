@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function TermsAndConditions() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-[500px] lg:mb-[220px]">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 pb-10 mb-[335px] lg:mb-[172px]">
       <article className="w-[90%] max-w-4xl flex flex-col">
         <h1 className="flex text-black justify-center text-sm font-bold tracking-[0.3em] uppercase mb-10">
           TERMS & CONDITIONS

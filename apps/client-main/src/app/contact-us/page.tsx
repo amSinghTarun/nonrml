@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 const ContactUsPage = () => {
     const mail = "info@nonrml.com";
     return (
-        <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-[500px] lg:mb-[220px]">
+        <section className=" flex h-screen w-screen flex-row text-black justify-center items-center bg-white mb-[335px] lg:mb-[172px]">
             <article className="h-[80%] w-[90%] flex flex-col text-center">
                 <h1 className="flex text-black justify-center place-items-end basis-1/3 text-sm font-bold tracking-[0.3em] uppercase">
                     CONTACT US !
