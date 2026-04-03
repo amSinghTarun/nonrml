@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 const TrackOrderPage = async () => {
     return (
         <>
-            <section className=" flex h-screen w-screen flex-row text-black justify-center items-center mb-[500px] bg-white lg:mb-[220px]">
+            <section className=" flex h-screen w-screen flex-row text-black justify-center items-center mb-[335px] bg-white lg:mb-[172px]">
                 <TrackOrder className="h-[80%] w-[90%] xl:w-[50%]" ></TrackOrder> 
             </section>
         </>
