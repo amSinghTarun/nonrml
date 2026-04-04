@@ -59,7 +59,7 @@ const HeroSection = ({ homeImages }: { homeImages: any }) => (
         lg: homeImages["TOP_2_LG"] as string
       }}
       alt="homeImage"
-      className="w-screen h-screen-stable z-30 relative"
+      className="w-screen h-screen-safe z-30 relative"
       sizes="100vw"
       priority={true}
       lgBreakpoint={1024}
