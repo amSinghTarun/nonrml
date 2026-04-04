@@ -37,7 +37,7 @@ const FooterSkeleton = () => (
 const HeroSection = ({ homeImages }: { homeImages: any }) => (
   <>
     {/* Container for TOP_MD image with symbol overlay */}
-    <div className="w-screen h-[115svh] sm:h-screen-stable fixed overflow-hidden">
+    <div className="w-screen h-[120svh] sm:h-screen-stable fixed overflow-hidden">
       <ResponsiveImage
         images={{
           md: homeImages["TOP_MD"] as string,
