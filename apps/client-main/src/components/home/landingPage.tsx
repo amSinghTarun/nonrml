@@ -37,14 +37,14 @@ const FooterSkeleton = () => (
 const HeroSection = ({ homeImages }: { homeImages: any }) => (
   <>
     {/* Container for TOP_MD image with symbol overlay */}
-    <div className="w-screen h-screen-stable fixed overflow-hidden">
+    <div className="w-screen h-[115svh] sm:h-screen-stable fixed overflow-hidden">
       <ResponsiveImage
         images={{
           md: homeImages["TOP_MD"] as string,
           lg: homeImages["TOP_LG"] as string
         }}
         alt="homeImage"
-        className="w-screen h-screen-safe"
+        className="w-screen h-full"
         sizes="100vw"
         priority={true}
         lgBreakpoint={1024}

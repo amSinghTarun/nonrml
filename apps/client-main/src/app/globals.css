@@ -29,20 +29,6 @@
     height: calc(var(--vh, 1vh) * 100); /* JS-locked value, highest priority */
     overflow: hidden;
   }
-  /* Taller than stable to cover the gap when mobile chrome hides */
-  .h-screen-safe {
-    height: 100vh;
-    height: 100svh;
-    height: calc(var(--vh, 1vh) * 130);
-    overflow: hidden;
-  }
-  @media (min-width: 640px) {
-    .h-screen-safe {
-      height: 100vh;
-      height: 100svh;
-      height: calc(var(--vh, 1vh) * 100);
-    }
-  }
   .min-h-screen-stable {
     min-height: 100vh;
     min-height: 100svh;
