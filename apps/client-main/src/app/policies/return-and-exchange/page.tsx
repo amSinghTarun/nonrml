@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function ReturnExchangePolicy() {
   return (
-    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 mb-[335px] lg:mb-[172px] pb-10">
+    <section className="flex min-h-screen w-screen flex-row text-black justify-center items-start bg-white pt-20 mb-[335px] lg:mb-[235px] pb-10">
       <article className="w-[90%] max-w-4xl flex flex-col">
         <h1 className="flex text-black justify-center text-sm font-bold tracking-[0.3em] uppercase mb-10">
           REFUND & EXCHANGE POLICY
