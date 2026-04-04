@@ -7,9 +7,11 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-        {hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME!},
-        {hostname:"images.unsplash.com"},
-        {hostname:"aceternity.com"}
+        ...(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME
+          ? [{ protocol: "https" as const, hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME }]
+          : []),
+        { protocol: "https" as const, hostname: "images.unsplash.com" },
+        { protocol: "https" as const, hostname: "aceternity.com" },
     ]
   },
   transpilePackages: [

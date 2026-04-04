@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
  
 export default async function NotFound() {
   return (
-    <div className=" flex h-screen w-screen flex-col space-y-4 justify-center items-center bg-white mb-[335px] lg:mb-[172px]">
+    <div className=" flex h-screen w-screen flex-col space-y-4 justify-center items-center bg-white mb-[335px] lg:mb-[235px]">
       <h2 className='text-neutral-700 text-xs font-bold tracking-[0.3em] uppercase'>Page Not Found</h2>
         <GeneralButtonTransparent 
             display="ENTER STORE" 

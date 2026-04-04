@@ -17,7 +17,7 @@ const ReturnOrders = async ({params}: {params: Promise<{orderId: string}>}) => {
     const userReturns = await (await serverClient()).viewer.return.getReturnOrders({orderId: +(await params).orderId}) ;
 
     return (
-        <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-scroll flex bg-white mb-[335px] lg:mb-[172px]">
+        <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-scroll flex bg-white mb-[335px] lg:mb-[235px]">
             <Returns returnOrders={userReturns.data}/> 
         </section>
     )
