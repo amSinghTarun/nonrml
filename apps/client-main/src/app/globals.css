@@ -20,6 +20,16 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Stable viewport height — doesn't shift when mobile browser chrome shows/hides */
+  .h-screen-stable {
+    height: 100vh;
+    height: 100svh;
+  }
+  .min-h-screen-stable {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
 }
 
 @layer base {
