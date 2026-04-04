@@ -5,6 +5,7 @@ import { getHomepageProducts, getHomePagesImages } from "@/app/actions/product.a
 import { ProductCardHome } from "@/components/cards/ProductCard";
 import { ResponsiveProductImage, ResponsiveImage } from "../ScreenResponsiveImage";
 import { WhyNoNRML } from "./WhyNoNRML";
+import StableViewport from "./StableViewport";
 
 const ScrollManifesto = dynamic(() => import('./ScrollManifesto'), {
   loading: () => <div className="h-[200px] bg-white" />
@@ -137,6 +138,9 @@ export async function LandingPage() {
 
   return (
     <div className="w-screen h-full">
+      {/* Lock viewport height on mount to prevent mobile chrome resize jumps */}
+      <StableViewport />
+
       {/* Hero Section - Above the fold, load immediately */}
       <HeroSection homeImages={homeImages} />
 

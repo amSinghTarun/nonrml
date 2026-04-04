@@ -21,14 +21,18 @@
     text-wrap: balance;
   }
 
-  /* Stable viewport height — doesn't shift when mobile browser chrome shows/hides */
+  /* Stable viewport height — doesn't shift when mobile browser chrome shows/hides.
+     Uses JS-set --vh custom property (locked on mount), with 100svh and 100vh as fallbacks. */
   .h-screen-stable {
-    height: 100vh;
-    height: 100svh;
+    height: 100vh; /* fallback */
+    height: 100svh; /* modern fallback */
+    height: calc(var(--vh, 1vh) * 100); /* JS-locked value, highest priority */
+    overflow: hidden; /* prevent content from causing reflow */
   }
   .min-h-screen-stable {
     min-height: 100vh;
     min-height: 100svh;
+    min-height: calc(var(--vh, 1vh) * 100);
   }
 }
 
