@@ -34,10 +34,7 @@
     height: 100vh;
     height: 100svh;
     height: calc(var(--vh, 1vh) * 120);
-    width: 120vw;
-    margin-left: -10vw;
     overflow: hidden;
-    object-fit: cover;
   }
   .min-h-screen-stable {
     min-height: 100vh;
