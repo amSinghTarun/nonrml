@@ -27,7 +27,14 @@
     height: 100vh; /* fallback */
     height: 100svh; /* modern fallback */
     height: calc(var(--vh, 1vh) * 100); /* JS-locked value, highest priority */
-    overflow: hidden; /* prevent content from causing reflow */
+    overflow: hidden;
+  }
+  /* Slightly taller than stable to cover the gap when mobile chrome hides */
+  .h-screen-safe {
+    height: 100vh;
+    height: 100svh;
+    height: calc(var(--vh, 1vh) * 105);
+    overflow: hidden;
   }
   .min-h-screen-stable {
     min-height: 100vh;
