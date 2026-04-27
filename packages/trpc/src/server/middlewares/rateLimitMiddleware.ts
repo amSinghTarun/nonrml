@@ -9,7 +9,7 @@ export const rateLimitLoginMiddleware = middleware( async ({ctx, input, next}) =
             throw new TRPCError({code: "UNAUTHORIZED", message: "Try after sometime"})
         }
         
-        let contact = typeof input === 'object' && input && 'contactNumber' in input ? input.contactNumber : ctx.user?.contactNumber;
+        let contact = typeof input === 'object' && input && 'contactNumber' in input ? input.contactNumber : undefined;
 
         if (!contact) {
             throw new TRPCError({code: "BAD_REQUEST", message: "Contact number is required"})
