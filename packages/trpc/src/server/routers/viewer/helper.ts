@@ -13,7 +13,7 @@ import { sendSMTPMail } from "@nonrml/mailing";
 export const SALT_SIZE = 8;
 
 export type TRPCRequestOptions<T> = {
-    ctx: TRPCContext,
+    ctx: TRPCContext & { user?: prismaTypes.User },
     input?: T
 }
 

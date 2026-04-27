@@ -11,9 +11,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "compilerOptions": {
-    "module": "ESNext"
-  },
   "description": "",
   "dependencies": {
     "@nonrml/cache": "workspace:*",

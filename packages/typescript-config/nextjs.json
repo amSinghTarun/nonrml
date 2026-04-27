@@ -8,6 +8,9 @@
     "moduleResolution": "Bundler",
     "allowJs": true,
     "jsx": "preserve",
+    "declaration": false,
+    "declarationMap": false,
+    "noUncheckedIndexedAccess": false,
     "noEmit": true
   }
 }
