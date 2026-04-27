@@ -9,9 +9,9 @@ export const customCacheJSONIncr = async ({key, path, value=1}: {key: string, pa
             await cacheServicesRedisClient().json.set(key, "$", {[path]: value});
             return;
         }
-        const result = await cacheServicesRedisClient().json.numincrby( key, `$.${path}`, value );
+        const result = await cacheServicesRedisClient().json.numincrby( key, `$['${path}']`, value );
         if( result[0] == null ){
-            await cacheServicesRedisClient().json.set(key, `$.${path}`, value);
+            await cacheServicesRedisClient().json.set(key, `$['${path}']`, value);
         }
     } catch(error) {
         console.log("Error in customCacheJSONIncr:", error);
