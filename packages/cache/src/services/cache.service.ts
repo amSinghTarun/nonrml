@@ -10,7 +10,7 @@ export const customCacheJSONIncr = async ({key, path, value=1}: {key: string, pa
             return;
         }
         const result = await cacheServicesRedisClient().json.numincrby( key, `$.${path}`, value );
-        if( result[0] === null ){
+        if( result[0] == null ){
             await cacheServicesRedisClient().json.set(key, `$.${path}`, value);
         }
     } catch(error) {
