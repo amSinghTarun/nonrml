@@ -1,12 +1,17 @@
 import { serverClient } from "@/app/_trpc/serverClient";
 import Product from "@/components/Product";
+import { cache } from "react";
+
+const getProductData = cache(async (productSku: string) => {
+  return (await serverClient()).viewer.product.getProduct({ productSku });
+});
 
 type Props = {
-    params: Promise<{ productSku: string }> 
+    params: Promise<{ productSku: string }>
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
+  const { data } = await getProductData((await params).productSku);
   const productSKU = (await params).productSku;
   return {
     // Basic metadata fields
@@ -35,7 +40,7 @@ export async function generateMetadata({ params }: Props) {
 
 const ProductPage = async ({ params }: Props)=> {
 
-  const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
+  const { data } = await getProductData((await params).productSku);
 
   return (
       <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-full flex bg-white mb-[335px] lg:mb-[220px]">
