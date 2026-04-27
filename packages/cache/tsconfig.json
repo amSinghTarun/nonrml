@@ -1,5 +1,5 @@
 {
-    "extends": "@nonrml/typescript-config/react-library.json",
+    "extends": "@nonrml/typescript-config/base.json",
     "compilerOptions": {
         "outDir": "./dist",
         "rootDir": "./src"

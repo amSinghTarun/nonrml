@@ -1,22 +1,20 @@
-import {  session } from "@nonrml/configs";
+import { session } from "@nonrml/configs";
 import { prisma, prismaTypes } from "@nonrml/prisma";
-
 
 type Context = {
   prisma: typeof prisma,
-  session?: session | null,
-  user?: prismaTypes.User
+  session: session | null,
   req?: Request,
-  res?:Response
+  res?: Response
 };
 
-export const createContext = ({session, req, res}: {session:session|null, req?: Request, res?:Response}): Context => {
+export const createContext = ({session, req, res}: {session: session | null, req?: Request, res?: Response}): Context => {
   return {
     prisma,
-    session: session,
-    req: req,
-    res: res
+    session,
+    req,
+    res
   }
 };
 
-export type TRPCContext = Awaited<ReturnType<typeof createContext>>
+export type TRPCContext = ReturnType<typeof createContext>;
