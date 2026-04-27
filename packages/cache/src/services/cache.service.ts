@@ -4,12 +4,11 @@ export const cacheServicesRedisClient = () => connectToRedis()!;
 
 export const customCacheJSONIncr = async ({key, path, value=1}: {key: string, path:string|number, value?:number} ) => {
     try{
-        console.log((await cacheServicesRedisClient().json.get("VISITED")))
-        const incrasedValue = await cacheServicesRedisClient().json.numincrby( key, `$.${path}`, value );
-        !incrasedValue.length && cacheServicesRedisClient().json.set(key, `$.${path}`, value );
+        const result = await cacheServicesRedisClient().json.numincrby( key, `$.${path}`, value );
+        if( result[0] === null ){
+            await cacheServicesRedisClient().json.set(key, `$.${path}`, value);
+        }
     } catch(error) {
-        if( !(await cacheServicesRedisClient().json.get("VISITED")) )
-            cacheServicesRedisClient().json.set("VISITED", "$", {[path]: value});
-        console.log("\n\n\n\n\n ***** ERROR IN CACHE_SERVICEs", error);
+        await cacheServicesRedisClient().json.set(key, "$", {[path]: value});
     }
 }
