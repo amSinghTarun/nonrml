@@ -4,9 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 
 
 export async function GET(req: NextRequest) {
+    console.log("Cron triggered");
     // Verify cron authorization
     const authHeader = req.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        console.log("Unauthorized");
         return new Response('Unauthorized', { status: 401 });
     }
     
@@ -23,6 +25,8 @@ export async function GET(req: NextRequest) {
       .select('value')
       .eq('key', 'prod_edge_function_url')
       .single();
+    
+    console.log("Config:", config);
 
     if (error || !config?.value) {
       throw new Error('Failed to fetch function URL from config');
@@ -41,9 +45,11 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
     
     if (!response.ok) {
+      console.log("Failed to execute edge function", data);
       throw new Error(data.message || 'Failed to execute edge function');
     }
 
+    console.log("Edge function executed successfully");
     return new Response("Edge function executed successfully", {
         status: 200
     })

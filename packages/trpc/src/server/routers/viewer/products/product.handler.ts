@@ -31,7 +31,7 @@ export const getProduct = async ({
     console.log("\n\n\n\n\n GET PRODUCTS");
     
     //cache tpo track number of visit on a product
-    customCacheJSONIncr({ key: "VISITED", path: input.productSku });
+    customCacheJSONIncr({ key: "VISITED", path: input.productSku.toUpperCase() });
     
     type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"|"colour"> & {
       productImages: {
