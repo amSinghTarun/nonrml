@@ -4,22 +4,21 @@ import { createClient } from '@supabase/supabase-js';
 
 
 export async function GET(req: NextRequest) {
-    console.log("Cron triggered");
-    // Verify cron authorization
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        console.log("Unauthorized", authHeader);
-        console.log("CRON_SECRET", process.env.CRON_SECRET);
-        return new Response('Unauthorized', { status: 401 });
-    }
-    
-    try {
+  console.log("Cron triggered");
+  const authHeader = req.headers.get('authorization');
+  
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      console.log("Unauthorized");
+      return new Response('Unauthorized', { status: 401 });
+  }
+  
+  try {
 
-      const supabase = createClient(
-        process.env.SUPABASE_PROJECT_URL!,
-        process.env.ANON_PUBLIC_KEY! // Use service key for server-side operations
-      );
-      
+    const supabase = createClient(
+      process.env.SUPABASE_PROJECT_URL!,
+      process.env.ANON_PUBLIC_KEY! // Use service key for server-side operations
+    );
+    
     // Get the latest function URL from database
     const { data: config, error } = await supabase
       .from('cdynamicCnfig')
@@ -53,9 +52,10 @@ export async function GET(req: NextRequest) {
     console.log("Edge function executed successfully");
     return new Response("Edge function executed successfully", {
         status: 200
-    })
+    })  
   } catch (error) {
     console.error('Error triggering Supabase edge function:', error);
+    console.log("Error triggering Supabase edge function:", error);
     return new Response('INTERNAL_SERVER_ERROR', {
         status: 500
     });
