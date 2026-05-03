@@ -29,5 +29,4 @@ jobs:
         run: |
           supabase link --project-ref $PROJECT_ID
           supabase db pull
-          supabase migration up --dry-run
           supabase db push --dry-run
