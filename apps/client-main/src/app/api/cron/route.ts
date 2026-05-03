@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     
     // Get the latest function URL from database
     const { data: config, error } = await supabase
-      .from('dynamicConfig')
+      .from('DynamicConfig')
       .select('value')
       .eq('key', 'prod_edge_function_url')
       .single();
