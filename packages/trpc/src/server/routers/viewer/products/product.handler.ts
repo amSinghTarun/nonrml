@@ -29,10 +29,7 @@ export const getProduct = async ({
   input = input!
   try {
     console.log("\n\n\n\n\n GET PRODUCTS");
-    
-    //cache tpo track number of visit on a product
-    customCacheJSONIncr({ key: "VISITED", path: input.productSku.toUpperCase() });
-    
+        
     type ProductType = Omit<prismaTypes.Products, "createdAt"|"exclusive"|"updatedAt"|"tags"|"colour"> & {
       productImages: {
         image: string;
@@ -158,6 +155,9 @@ export const getProduct = async ({
     // });
 
     console.log("\n\n\n\n\n -----END");
+
+    //cache tpo track number of visit on a product
+    customCacheJSONIncr({ key: "VISITED", path: +product.id });
 
     return {
       status: TRPCResponseStatus.SUCCESS,
