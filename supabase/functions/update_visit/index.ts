@@ -1,4 +1,4 @@
-import { Redis } from "https://deno.land/x/upstash_redis@v1.34.0/mod.ts";
+import { Redis } from 'https://esm.sh/@upstash/redis'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 Deno.serve( async (_req) => {
