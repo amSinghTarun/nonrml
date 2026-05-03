@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 export async function GET(req: NextRequest) {
   console.log("Cron triggered");
   const authHeader = req.headers.get('authorization');
-  
+
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       console.log("Unauthorized");
       return new Response('Unauthorized', { status: 401 });
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     
     // Get the latest function URL from database
     const { data: config, error } = await supabase
-      .from('cdynamicCnfig')
+      .from('dynamicConfig')
       .select('value')
       .eq('key', 'prod_edge_function_url')
       .single();
