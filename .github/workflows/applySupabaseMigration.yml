@@ -26,4 +26,4 @@ jobs:
           version: latest
 
       - name: Apply Supabase Migration
-        run: supabase db push --project-ref $PROJECT_ID --debug --dry-run
+        run: supabase db push --dry-run
