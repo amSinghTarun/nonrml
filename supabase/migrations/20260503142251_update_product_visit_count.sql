@@ -2,7 +2,7 @@ create or replace function update_product_visited_counts(products_counts JSONB)
 returns VOID 
 language plpgsql
 as $$
-BEGIN
+begin
     update "Products" p
     set "visitedCount" = p."visitedCount" + (pc.value)::int
     from jsonb_each_text(products_counts) AS pc(key, value)
