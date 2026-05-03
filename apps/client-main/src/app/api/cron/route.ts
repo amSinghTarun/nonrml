@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     console.log("Config:", config);
 
     if (error || !config?.value) {
+      console.log(error)
       throw new Error('Failed to fetch function URL from config');
     }
 
