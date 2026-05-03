@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_product_visited_counts(products_counts JSONB)
+CREATE OR REPLACE FUNCTION update_product_visited_count(products_counts JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 AS $$
