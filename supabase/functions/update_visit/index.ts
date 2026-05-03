@@ -27,22 +27,22 @@ Deno.serve( async (_req) => {
             return new Response(JSON.stringify({ status: "success" }), { status: 200 })
         }
 
-        // Create CASE statement for bulk increment
-        const caseSQL = Object.entries(productsCounts)
-            .map(([id, count]) => `WHEN id = ${+id} THEN "visitedCount" + ${count}`)
-            .join(' ');
+        // // Create CASE statement for bulk increment
+        // const caseSQL = Object.entries(productsCounts)
+        //     .map(([id, count]) => `WHEN id = ${+id} THEN "visitedCount" + ${count}`)
+        //     .join(' ');
 
-        const idList = Object.keys(productsCounts).map(id => +id).join(',');
+        // const idList = Object.keys(productsCounts).map(id => +id).join(',');
 
-        const rawQuery = `
-            UPDATE "Products" 
-            SET "visitedCount" = CASE ${caseSQL} ELSE "visitedCount" END
-            WHERE id IN (${idList});
-        `;
+        // const rawQuery = `
+        //     UPDATE "Products" 
+        //     SET "visitedCount" = CASE ${caseSQL} ELSE "visitedCount" END
+        //     WHERE id IN (${idList});
+        // `;
 
-        console.log(rawQuery)
+        // console.log(rawQuery)
         try{
-            const result = await supabaseClient.$executeRawUnsafe(rawQuery);
+            const result = await supabaseClient.rpc("update_product_visited_counts", productsCounts);
             if(result)
                 await redis.json.set("VISITED", "$", {});
         } catch(error){
