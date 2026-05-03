@@ -28,5 +28,4 @@ jobs:
       - name: Apply Supabase Migration
         run: |
           supabase link --project-ref $PROJECT_ID
-          supabase db pull
-          supabase db push --dry-run
+          supabase migration up --dry-run
