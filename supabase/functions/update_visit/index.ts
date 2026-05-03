@@ -4,6 +4,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 Deno.serve( async (_req) => {
     console.log("Running daily task to update the product visit count ...");
     try{
+        console.log("Deploying supbase edge function to update the product visit count ...");
         // Create a Supabase client with the Auth context of the logged in user.
         const supabaseClient = createClient(
             // Supabase API URL - env var exported by default.
