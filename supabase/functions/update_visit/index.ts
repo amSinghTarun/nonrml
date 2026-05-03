@@ -42,7 +42,7 @@ Deno.serve( async (_req) => {
 
         // console.log(rawQuery)
         try{
-            const {data, error} = await supabaseClient.rpc("update_product_visited_count", productsCounts);
+            const {data, error} = await supabaseClient.rpc("update_product_visited_count", { products_counts: productsCounts });
             console.log(data, error);
             if(data)
                 await redis.json.set("VISITED", "$", {});
