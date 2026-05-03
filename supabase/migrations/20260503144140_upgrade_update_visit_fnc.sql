@@ -5,20 +5,21 @@ AS $$
 DECLARE
     result JSONB;
 BEGIN
+    WITH updated AS (
+        UPDATE "Products"
+        SET "visitedCount" = "visitedCount" + (pc.value)::int
+        FROM jsonb_each_text(products_counts) AS pc(key, value)
+        WHERE "Products".id = (pc.key)::int
+        RETURNING "Products".id, "Products"."visitedCount"
+    )
     SELECT jsonb_agg(
         jsonb_build_object(
-            'id', p.id,
-            'visitedCount', p."visitedCount"
+            'id', id,
+            'visitedCount', "visitedCount"
         )
     )
     INTO result
-    FROM (
-        UPDATE "Products" p
-        SET "visitedCount" = p."visitedCount" + (pc.value)::int
-        FROM jsonb_each_text(products_counts) AS pc(key, value)
-        WHERE p.id = (pc.key)::int
-        RETURNING p.id, p."visitedCount"
-    ) p;
+    FROM updated;
 
     RETURN result;
 END;
