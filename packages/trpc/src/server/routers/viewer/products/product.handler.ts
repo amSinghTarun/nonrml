@@ -17,6 +17,7 @@ import { TRPCError } from "@trpc/server";
 import { customCacheJSONIncr } from "@nonrml/cache";
 const take = 13;
 import { cacheServicesRedisClient } from "@nonrml/cache" 
+import { addProductImage } from "../productImages/productImage.handler";
 
 /*
  Get the product details and also sizes for all the variants available
@@ -948,12 +949,14 @@ export const editProduct = async ({
         throw { code: "NOT_FOUND", message: "No category for the selected category id" };
     }
 
-    await prisma.products.update({
+    const product = await prisma.products.update({
       where: {
         id: input.productId,
       },
       data: updateData,
     });
+
+    cacheServicesRedisClient().del(...["popularProducts", "exclusiveProducts", "latestProducts", "allClientProducts", `product_${product.sku}`]);
 
     return { status: TRPCResponseStatus.SUCCESS, message: "", data: {} };
   } catch (error) {
