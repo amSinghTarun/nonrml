@@ -11,24 +11,25 @@ export const getHomepageProducts = async () => {
 
     let latestProducts    : HomeProductsType["latestProducts"]    | null = await cacheServicesRedisClient().get("latestProducts");
     let popularProducts   : HomeProductsType["popularProducts"]   | null = await cacheServicesRedisClient().get("popularProducts");
-    let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await cacheServicesRedisClient().get("exclusiveProducts");
+    // let exculsiveProducts : HomeProductsType["exclusiveProducts"] | null = await cacheServicesRedisClient().get("exclusiveProducts");
     
     console.log("latestProducts", latestProducts?.length)
 
-    if( !latestProducts || !popularProducts || !exculsiveProducts ){
+    if( !latestProducts || !popularProducts ){
 
         let { data } = await (await serverClient()).viewer.product.getHomeProducts({
             latest: latestProducts ? false : true,
-            exclusive: exculsiveProducts ? false : true,
+            exclusive: false,
             popular: popularProducts ? false : true
         });
     
         latestProducts = latestProducts ?? data.latestProducts;
-        exculsiveProducts = exculsiveProducts ?? data.exclusiveProducts
+        // exculsiveProducts = exculsiveProducts ?? data.exclusiveProducts
         popularProducts = popularProducts ?? data.popularProducts
     }
 
-    return { latestProducts: latestProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
+    return { latestProducts: latestProducts!, popularProducts: popularProducts! };
+    // return { latestProducts: latestProducts!, popularProducts: popularProducts!, exculsiveProducts: exculsiveProducts! };
 }
 
 export const getHomePagesImages = async () => {
