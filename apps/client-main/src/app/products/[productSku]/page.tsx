@@ -43,7 +43,7 @@ const ProductPage = async ({ params }: Props)=> {
   const { data } = await (await serverClient()).viewer.product.getProduct({productSku: (await params).productSku});
 
   return (
-      <section className="mt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-y-scroll overscroll-none flex bg-white mb-64 lg:mb-32 scrollbar-hide">
+      <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-y-scroll overscroll-none flex bg-white mb-64 lg:mb-32 scrollbar-hide">
           <Product product={data.product} sizeData={data.sizeData} ></Product> 
       </section>
   )
