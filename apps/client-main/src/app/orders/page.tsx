@@ -17,7 +17,7 @@ const OrdersPage = () => {
 
     return (
         <>
-            <section className="pt-14 pb-5 z-30 scrollbar-hide flex flex-row min-h-screen h-auto w-screen overflow-y-scroll overscroll-none bg-white text-black justify-center mb-[335px] lg:mb-[235px]">
+            <section className="pt-14 pb-5 z-30 flex-col min-h-screen h-auto w-screen overflow-y-scroll overscroll-none flex bg-white mb-64 lg:mb-32 scrollbar-hide">
                 <Orders/>
             </section>
         </>
